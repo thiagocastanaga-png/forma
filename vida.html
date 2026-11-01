@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vida diaria | Forma</title>
+<meta name="description" content="La base de Forma: organizá tu día, sumá hábitos, dormí mejor y encontrá calma y energía. Para gente común.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Inter:wght@400;600&family=Montserrat:wght@800&family=Pacifico&family=Playfair+Display:ital,wght@1,900&family=Space+Mono:wght@700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="dark">
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="./" aria-label="Forma, inicio">forma<span class="dot"></span></a>
+      <nav class="nav" aria-label="Principal">
+        <a href="organiza">Organizá tu día</a>
+        <a href="vida">Vida diaria</a>
+        <a href="secciones">Secciones</a>
+        <a href="app">App</a>
+        <a class="btn btn-accent btn-sm" href="organiza">Probar gratis</a>
+      </nav>
+    </div>
+  </header>
+  <section class="hero" style="padding-bottom:88px">
+    <div class="wrap">
+      <div class="eyebrow">La base de Forma</div>
+      <h1>Forma para el día a día</h1>
+      <p class="lead muted">Para gente común que quiere ordenar su día, sumar hábitos y dormir mejor. Sin exigencias de rendimiento: simple, realista y a tu ritmo.</p>
+      <div class="row center">
+        <a class="btn btn-accent" href="organiza">Organizá tu día, gratis</a>
+        <a class="btn btn-ghost" href="#lista">Avisame lo próximo</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="section">
+  <div class="wrap stack gap-40">
+    <div class="stack gap-12">
+      <h2>Cinco cosas para empezar</h2>
+      <p class="lead muted">Una por una, sin cambiar toda tu vida de golpe.</p>
+    </div>
+    <div class="cards five"><article class="card"><span class="pill pill-salvia">Gratis · disponible ahora</span><h3>Organizar tu día</h3><p>Respondé 12 preguntas y recibí tu día armado en bloques con horarios.</p><a class="btn btn-dark btn-sm" href="organiza">Armar mi día</a></article><article class="card"><span class="pill ">Próximamente</span><h3>Hábitos que se quedan</h3><p>Elegís hasta 3 hábitos y los pegás a algo que ya hacés. Programa de 21 días con seguimiento.</p><div class="soon">Próximamente</div></article><article class="card"><span class="pill ">Próximamente</span><h3>Dormir mejor</h3><p>Guía de 14 días: horarios, rutina de noche y una última hora sin pantallas.</p><div class="soon">Próximamente</div></article><article class="card"><span class="pill ">Próximamente</span><h3>Calma y enfoque</h3><p>Respiraciones y pausas de 2 a 5 minutos para bajar el ritmo y concentrarte.</p><div class="soon">Próximamente</div></article><article class="card"><span class="pill ">Próximamente</span><h3>Energía y movimiento</h3><p>Rutina suave de 10 a 15 minutos, en casa y sin equipamiento.</p><div class="soon">Próximamente</div></article></div>
+    <div class="complete dark" style="--c:#86A892">
+      <div class="stack gap-12" style="flex:1 1 320px;min-width:0">
+        <div class="eyebrow">Plan completo</div>
+        <h3 style="font-size:30px">Forma Vida Completo</h3>
+        <p class="muted">Todo junto en un plan: tu día organizado, tus hábitos, tu sueño, tus pausas y tu movimiento, con actualizaciones.</p>
+      </div>
+      <div class="stack gap-12" style="flex:0 1 260px"><div class="big-price" style="font-size:40px">Próximamente</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section dark">
+  <div class="wrap stack gap-40">
+    <h2>Cómo lo pensamos</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Pocos hábitos, bien anclados</h3><p>Hasta tres a la vez, pegados a algo que ya hacés, para que se sostengan.</p></div>
+      <div class="step"><div class="n">2</div><h3>Un plan realista</h3><p>Estricto o flexible, con margen libre. Si un día no sale, el siguiente sigue.</p></div>
+      <div class="step"><div class="n">3</div><h3>Descanso incluido</h3><p>El sueño y las pausas son parte del plan, no lo que sobra.</p></div>
+    </div>
+    <p class="fineprint">Forma es una guía de organización y hábitos. No reemplaza la consulta médica: si tenés problemas de sueño persistentes, dolor o una lesión, consultá a un profesional de la salud.</p>
+  </div>
+</section>
+
+<section class="section" id="lista">
+  <div class="wrap stack center gap-24">
+    <h2>Avisame lo próximo</h2>
+    <p class="lead muted" style="max-width:600px">Elegí lo que más te interesa y te avisamos cuando salga.</p>
+    <form class="form" data-waitlist>
+      <label>Tu email<input type="email" name="email" required autocomplete="email" placeholder="nombre@email.com"></label>
+      <label>Me interesa
+        <select name="interes">
+          <option value="vida-habitos">Hábitos que se quedan</option>
+          <option value="vida-sueno">Dormir mejor</option>
+          <option value="vida-calma">Calma y enfoque</option>
+          <option value="vida-energia">Energía y movimiento</option>
+          <option value="vida-todo">Todo</option>
+        </select>
+      </label>
+      <input type="hidden" name="origen" value="">
+      <input type="hidden" name="pagina" value="">
+      <input class="hp" type="text" name="web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn btn-dark" type="submit">Avisame</button>
+      <div class="form-msg" role="status" aria-live="polite"></div>
+      <p class="fineprint">Usamos tu email solo para avisarte novedades de Forma. Podés pedir que lo borremos cuando quieras. Más en la <a href="privacidad">política de privacidad</a>.</p>
+    </form>
+  </div>
+</section>
+
+<footer class="site-footer dark">
+  <div class="wrap">
+    <div class="stack gap-8">
+      <a class="logo" href="./" aria-label="Forma, inicio">forma<span class="dot"></span></a>
+      <div class="muted" style="font-size:16px">Dale forma a la vida que querés</div>
+    </div>
+    <div class="links">
+      <a data-link="instagram" href="#">Instagram: @formargentina</a>
+      <a href="privacidad">Privacidad</a>
+      <div>© 2026 Forma</div>
+    </div>
+  </div>
+</footer>
+<script src="config.js"></script>
+<script src="common.js"></script>
+</body>
+</html>

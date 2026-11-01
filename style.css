@@ -188,3 +188,8 @@ details p { margin-top: 12px; color: var(--muted); }
 .card .soon { font-size: 16px; font-weight: 600; margin-top: auto; }
 .cards.four .card { flex: 1 1 230px; }
 .complete.dark { border-radius: 24px; }
+
+.cards.five .card { flex: 1 1 190px; }
+.base-card { background: var(--ink); color: var(--bone); border-radius: 24px; padding: 40px; display: flex; flex-wrap: wrap; gap: 32px; align-items: center; justify-content: space-between; }
+.base-card .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+.base-card .tags span { border: 2px solid var(--bone); border-radius: 999px; padding: 6px 16px; font-size: 16px; font-weight: 600; }
