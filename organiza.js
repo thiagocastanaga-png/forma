@@ -39,23 +39,32 @@
         if (d > 1260) return "Entre que te despertás y te dormís hay más de 21 horas. Revisá los horarios.";
         return "";
       } },
-    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, clases o cualquier horario que no se mueve. Si terminás después de medianoche, elegí la hora igual (por ejemplo, 06:00).",
+    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, clases o lo que no se mueve. Agregá todos los que necesites y ponele nombre a cada uno. Si terminás después de medianoche, elegí la hora igual (por ejemplo, 06:00).",
       fields: [
         { key: "fixedOn", label: "", type: "chips", opts: [["No tengo", "no"], ["Sí tengo", "yes"]] },
-        { key: "f1s", label: "Empieza", type: "select", placeholder: "Elegí una hora", opts: CLOCK, showIf: function (a) { return a.fixedOn === "yes"; } },
-        { key: "f1e", label: "Termina", type: "select", placeholder: "Elegí una hora", opts: CLOCK_END, showIf: function (a) { return a.fixedOn === "yes"; } },
-        { key: "f2On", label: "¿Tenés otro horario fijo en el día?", type: "chips", opts: [["No", "no"], ["Sí", "yes"]], showIf: function (a) { return a.fixedOn === "yes"; } },
-        { key: "f2s", label: "Empieza el segundo", type: "select", placeholder: "Elegí una hora", opts: CLOCK, showIf: function (a) { return a.fixedOn === "yes" && a.f2On === "yes"; } },
-        { key: "f2e", label: "Termina el segundo", type: "select", placeholder: "Elegí una hora", opts: CLOCK_END, showIf: function (a) { return a.fixedOn === "yes" && a.f2On === "yes"; } }
+        { key: "fixed", label: "", type: "blocks", showIf: function (a) { return a.fixedOn === "yes"; } }
       ],
       check: function (a) {
-        if (a.fixedOn === "yes" && a.f1s !== undefined && a.f1s === a.f1e) return "El primer horario empieza y termina a la misma hora.";
-        if (a.fixedOn === "yes" && a.f2On === "yes" && a.f2s !== undefined && a.f2s === a.f2e) return "El segundo horario empieza y termina a la misma hora.";
+        if (a.fixedOn !== "yes" || a.wake === undefined) return "";
+        var list = (a.fixed || []).filter(function (b) { return b.s !== undefined && b.e !== undefined; });
+        var iv = [];
+        for (var i = 0; i < list.length; i++) {
+          var dur = ((list[i].e - list[i].s) + 1440) % 1440;
+          if (dur === 0) return "El horario fijo " + (i + 1) + " empieza y termina a la misma hora.";
+          var st = list[i].s;
+          while (st < a.wake) st += 1440;
+          iv.push([st, st + dur, i + 1]);
+        }
+        for (var x = 0; x < iv.length; x++) for (var y = x + 1; y < iv.length; y++) {
+          if (iv[x][0] < iv[y][1] && iv[y][0] < iv[x][1]) return "Los horarios fijos " + iv[x][2] + " y " + iv[y][2] + " se superponen. Revisá las horas.";
+        }
         return "";
       } },
-    { title: "¿Cuánto tardás en cada traslado?", hint: "Lo que tardás en ir a tu horario fijo, y lo mismo para volver. Si no te movés, dejá 0.",
+    { title: "¿Cuánto tardás en cada traslado?", hint: "Es lo que tardás en llegar a tus horarios fijos y en volver. Elegí un tiempo de la lista o escribí el tuyo. Si no te movés, dejá \"No viajo\".",
       fields: [
-        { key: "commute", label: "Por trayecto", type: "select", opts: [["No viajo", 0], ["10 minutos", 10], ["15 minutos", 15], ["20 minutos", 20], ["30 minutos", 30], ["45 minutos", 45], ["1 hora", 60], ["1 hora 15", 75], ["1 hora 30", 90], ["2 horas", 120]] }
+        { key: "commuteGo", label: "Ida", type: "minutes" },
+        { key: "commuteSame", label: "¿La vuelta tarda lo mismo?", type: "chips", opts: [["Sí, igual", "same"], ["No, distinta", "diff"]] },
+        { key: "commuteBack", label: "Vuelta", type: "minutes", showIf: function (a) { return a.commuteSame === "diff"; } }
       ] },
     { title: "¿Cuáles son tus prioridades de esta etapa?", hint: "Las que más querés mover ahora. La primera que elijas es la más importante.",
       fields: [
@@ -109,8 +118,10 @@
     rest: { tag: "Descanso", dot: "#6B6B63" }
   };
 
+  function newBlock() { return { s: undefined, e: undefined, name: "", travel: "yes" }; }
+  var MIN_OPTS = [["No viajo", 0], ["5 minutos", 5], ["10 minutos", 10], ["15 minutos", 15], ["20 minutos", 20], ["30 minutos", 30], ["45 minutos", 45], ["1 hora", 60], ["1 hora 15", 75], ["1 hora 30", 90], ["2 horas", 120], ["2 horas 30", 150], ["3 horas", 180]];
   function initial() {
-    return { step: 0, ans: { commute: 0, dinner: "auto", fixedOn: "no", f2On: "no" }, focus: null };
+    return { step: 0, ans: { commuteGo: 0, commuteSame: "same", dinner: "auto", fixedOn: "no", fixed: [newBlock()] }, focus: null };
   }
   var state = initial();
 
@@ -192,36 +203,56 @@
         : Math.min(norm(a.dinner), sleep - 105);
       if (din < wake + 120) din = null;
     }
+    // La cena automática se corre para no pisar horarios fijos
+    if (din !== null && (a.dinner === "auto" || a.dinner === undefined) && a.fixedOn === "yes") {
+      var gGo = a.commuteGo || 0, gBack = a.commuteSame === "diff" ? (a.commuteBack || 0) : gGo;
+      var ivs = (a.fixed || []).filter(function (b) { return b.s !== undefined && b.e !== undefined && ((b.e - b.s) + 1440) % 1440 > 0; }).map(function (b) {
+        var st = norm(b.s), du = ((b.e - b.s) + 1440) % 1440, tr = b.travel !== "no";
+        return [st - (tr ? gGo : 0), st + du + (tr ? gBack : 0)];
+      });
+      var hit = function (x) { return ivs.filter(function (v) { return x < v[1] && x + 45 > v[0]; }); };
+      var cand = din, guard = 0;
+      while (hit(cand).length && guard++ < 10) {
+        cand = Math.round(Math.max.apply(null, hit(cand).map(function (v) { return v[1]; })) / 5) * 5;
+      }
+      if (hit(cand).length === 0 && cand <= sleep - 105) {
+        din = cand;
+      } else {
+        cand = din; guard = 0;
+        while (hit(cand).length && guard++ < 10) {
+          cand = Math.round(Math.min.apply(null, hit(cand).map(function (v) { return v[0]; })) / 5) * 5 - 45;
+        }
+        if (hit(cand).length === 0 && cand >= wake + 120) din = cand;
+      }
+    }
     var meals = [];
     if (lunch !== null) { fillFree(lunch, lunch + 45, "Almuerzo", "meal", ""); meals.push([lunch, lunch + 45]); }
     if (din !== null) { fillFree(din, din + 45, "Cena", "meal", ""); meals.push([din, din + 45]); }
 
     // Horarios fijos y traslados
-    var c = a.commute || 0;
-    var fixedList = [];
-    if (a.fixedOn === "yes" && a.f1s !== undefined) fixedList.push([a.f1s, a.f1e]);
-    if (a.fixedOn === "yes" && a.f2On === "yes" && a.f2s !== undefined) fixedList.push([a.f2s, a.f2e]);
-    var mainFixedEnd = null;
+    var cGo = a.commuteGo || 0;
+    var cBack = a.commuteSame === "diff" ? (a.commuteBack || 0) : cGo;
+    var fixedList = a.fixedOn === "yes" ? (a.fixed || []).filter(function (b) { return b.s !== undefined && b.e !== undefined; }) : [];
     fixedList.forEach(function (fx) {
-      var dur = ((fx[1] - fx[0]) + 1440) % 1440;
+      var dur = ((fx.e - fx.s) + 1440) % 1440;
       if (dur === 0) return;
-      var s = norm(fx[0]);
-      var e = s + dur;
-      s = Math.max(s, wake + 40 + c);
-      e = Math.min(e, sleep - 60 - c);
+      var tr = fx.travel !== "no";
+      var ci = tr ? cGo : 0, cb = tr ? cBack : 0;
+      var s = norm(fx.s), e = s + dur;
+      s = Math.max(s, wake + 40 + ci);
+      e = Math.min(e, sleep - 60 - cb);
+      var nm = (fx.name || "").trim() || "Tus horarios fijos";
       if (e - s < 30) {
-        warnings.push("Un horario fijo (" + fmt(fx[0]) + " a " + fmt(fx[1]) + ") quedó fuera de tu día entre que te despertás y te dormís.");
+        warnings.push("El horario " + nm + " (" + fmt(fx.s) + " a " + fmt(fx.e) + ") quedó casi fuera de tu día entre que te despertás y te dormís.");
         return;
       }
       var segs = [[s, e]];
       meals.forEach(function (cut) {
         segs = segs.reduce(function (acc, sg) { return acc.concat(sub(sg, cut)); }, []);
       });
-      segs.forEach(function (sg) { fillFree(sg[0], sg[1], "Tus horarios fijos", "fixed", "Trabajo, estudio o clases."); });
-      if (c > 0) {
-        fillFree(s - c, s, "Traslado", "commute", "");
-        fillFree(e, e + c, "Traslado de vuelta", "commute", "");
-      }
+      segs.forEach(function (sg) { fillFree(sg[0], sg[1], nm, "fixed", "Horario fijo."); });
+      if (ci > 0) fillFree(s - ci, s, "Traslado", "commute", "");
+      if (cb > 0) fillFree(e, e + cb, "Traslado de vuelta", "commute", "");
     });
 
     // Entrenamiento
@@ -340,14 +371,55 @@
     var okFields = visibleFields(step).every(function (f) {
       if (f.req === false) return true;
       var v = state.ans[f.key];
+      if (f.type === "blocks") return (v || []).length > 0 && v.every(function (b) { return b.s !== undefined && b.e !== undefined; });
+      if (f.type === "minutes") return typeof v === "number" && !isNaN(v) && v >= 0;
       return f.multi ? (v || []).length >= 1 : v !== undefined;
     });
     return okFields && stepMessage(step) === "";
   }
 
+  function selectHtml(label, attrs, opts, selectedFn, placeholder) {
+    var h = '<label class="field"><span style="font-size:16px;font-weight:600">' + esc(label) + "</span><select class=\"select\" " + attrs + ">";
+    var any = opts.some(function (o, i) { return selectedFn(o, i); });
+    if (placeholder) h += '<option value=""' + (any ? "" : " selected") + " disabled>" + esc(placeholder) + "</option>";
+    opts.forEach(function (o, i) { h += '<option value="' + i + '"' + (selectedFn(o, i) ? " selected" : "") + ">" + esc(o[0]) + "</option>"; });
+    return h + "</select></label>";
+  }
+
   function fieldHtml(f) {
     var val = state.ans[f.key];
     var h = '<div class="stack gap-12">';
+    if (f.type === "blocks") {
+      var list = state.ans.fixed || [];
+      h = '<div class="stack gap-24">';
+      list.forEach(function (b, i) {
+        h += '<div class="blockcard stack gap-16"><div class="row" style="justify-content:space-between"><b style="font-size:18px">Horario fijo ' + (i + 1) + "</b>"
+          + (list.length > 1 ? '<button type="button" class="btn btn-ghost btn-sm" data-act="rmblk" data-i="' + i + '">Quitar</button>' : "") + "</div>"
+          + '<label class="field"><span style="font-size:16px;font-weight:600">Nombre (opcional)</span><input class="select" type="text" maxlength="40" data-blk="' + i + '" data-prop="name" value="' + esc(b.name || "") + '" placeholder="Trabajo, facultad, clases..."></label>'
+          + '<div class="row" style="align-items:flex-start;gap:24px">'
+          + selectHtml("Empieza", 'data-blk="' + i + '" data-prop="s"', CLOCK, function (o) { return b.s === o[1]; }, "Elegí una hora")
+          + selectHtml("Termina", 'data-blk="' + i + '" data-prop="e"', CLOCK, function (o) { return b.e === o[1]; }, "Elegí una hora")
+          + "</div>"
+          + '<div class="stack gap-8"><div style="font-size:16px;font-weight:600">¿Tenés que trasladarte?</div><div class="chips">'
+          + [["Sí", "yes"], ["No", "no"]].map(function (o) {
+              return '<button type="button" class="chip" aria-pressed="' + (b.travel === o[1]) + '" data-blk="' + i + '" data-prop="travel" data-val="' + o[1] + '">' + o[0] + "</button>";
+            }).join("")
+          + "</div></div></div>";
+      });
+      if (list.length < 8) h += '<div><button type="button" class="btn btn-ghost btn-sm" data-act="addblk">+ Agregar otro horario fijo</button></div>';
+      return h + "</div>";
+    }
+    if (f.type === "minutes") {
+      var custom = state.ans[f.key + "Mode"] === "custom";
+      var opts = MIN_OPTS.concat([["Otro tiempo (escribir minutos)", "custom"]]);
+      h = '<div class="stack gap-12">' + selectHtml(f.label, 'data-key="' + f.key + '" data-kind="minutes"', opts, function (o) {
+        return custom ? o[1] === "custom" : o[1] === val;
+      }, null);
+      if (custom) {
+        h += '<label class="field"><span style="font-size:16px;font-weight:600">Minutos (de 0 a 300)</span><input class="select" type="number" min="0" max="300" inputmode="numeric" data-key="' + f.key + '" data-custom="1" value="' + (typeof val === "number" ? val : "") + '" placeholder="Por ejemplo, 37"></label>';
+      }
+      return h + "</div>";
+    }
     if (f.type === "select") {
       h += '<label class="field"><span style="font-size:16px;font-weight:600">' + esc(f.label) + "</span>"
         + '<select class="select" data-key="' + f.key + '">';
@@ -425,7 +497,7 @@
     }
     root.innerHTML = html;
     if (state.focus) {
-      var el = root.querySelector('[data-key="' + state.focus.key + '"]' + (state.focus.o !== undefined ? '[data-o="' + state.focus.o + '"]' : ""));
+      var el = state.focus.sel ? root.querySelector(state.focus.sel) : root.querySelector('[data-key="' + state.focus.key + '"]' + (state.focus.o !== undefined ? '[data-o="' + state.focus.o + '"]' : ""));
       if (el) el.focus();
       state.focus = null;
     } else {
@@ -440,9 +512,42 @@
     return null;
   }
 
+  function refreshNext() {
+    var btn = root.querySelector('[data-act="next"]');
+    if (btn) btn.disabled = !isReady(STEPS[state.step - 1]);
+  }
+
+  root.addEventListener("input", function (ev) {
+    var el = ev.target;
+    if (el.hasAttribute("data-blk") && el.getAttribute("data-prop") === "name") {
+      state.ans.fixed[+el.getAttribute("data-blk")].name = el.value;
+    } else if (el.hasAttribute("data-custom")) {
+      var raw = el.value.trim();
+      var key = el.getAttribute("data-key");
+      state.ans[key] = raw === "" || isNaN(Number(raw)) ? undefined : Math.min(300, Math.max(0, Math.round(Number(raw))));
+      refreshNext();
+    }
+  });
+
   root.addEventListener("change", function (ev) {
     var el = ev.target;
     if (!el.classList.contains("select")) return;
+    if (el.hasAttribute("data-blk") && el.tagName === "SELECT") {
+      var bi = +el.getAttribute("data-blk"), prop = el.getAttribute("data-prop");
+      state.ans.fixed[bi][prop] = CLOCK[+el.value][1];
+      state.focus = { sel: 'select[data-blk="' + bi + '"][data-prop="' + prop + '"]' };
+      render();
+      return;
+    }
+    if (el.getAttribute("data-kind") === "minutes") {
+      var mk = el.getAttribute("data-key");
+      if (el.value === String(MIN_OPTS.length)) { state.ans[mk + "Mode"] = "custom"; state.ans[mk] = undefined; }
+      else { state.ans[mk + "Mode"] = "preset"; state.ans[mk] = MIN_OPTS[+el.value][1]; }
+      state.focus = { sel: 'select[data-key="' + mk + '"]' };
+      render();
+      return;
+    }
+    if (el.tagName !== "SELECT") return;
     var f = findField(el.getAttribute("data-key"));
     if (!f || el.value === "") return;
     state.ans[f.key] = f.opts[+el.value][1];
@@ -460,6 +565,24 @@
     else if (act === "edit") state.step = 1;
     else if (act === "restart") state = initial();
     else if (act === "print") { window.print(); return; }
+    else if (act === "addblk") {
+      state.ans.fixed.push(newBlock());
+      state.focus = { sel: 'select[data-blk="' + (state.ans.fixed.length - 1) + '"][data-prop="s"]' };
+      render();
+      return;
+    }
+    else if (act === "rmblk") {
+      state.ans.fixed.splice(+el.getAttribute("data-i"), 1);
+      render();
+      return;
+    }
+    else if (el.hasAttribute("data-blk") && el.getAttribute("data-prop") === "travel") {
+      var tb = +el.getAttribute("data-blk");
+      state.ans.fixed[tb].travel = el.getAttribute("data-val");
+      state.focus = { sel: 'button[data-blk="' + tb + '"][data-prop="travel"][data-val="' + el.getAttribute("data-val") + '"]' };
+      render();
+      return;
+    }
     else if (el.hasAttribute("data-o")) {
       var f = findField(el.getAttribute("data-key"));
       var o = f.opts[+el.getAttribute("data-o")];
