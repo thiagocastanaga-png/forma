@@ -299,7 +299,7 @@
         + '<button type="button" class="btn btn-ghost" data-act="restart">Empezar de nuevo</button>'
         + '<button type="button" class="btn btn-ghost" data-act="print">Imprimir o guardar en PDF</button></div>'
         + '<div class="dark" style="border-radius:24px;padding:32px"><div class="stack gap-12"><h3 style="font-size:24px">¿Querés esto todos los días, sin armarlo a mano?</h3>'
-        + '<p class="muted">Estamos armando Forma Hábitos, la app que hace esto por vos.</p>'
+        + '<p class="muted">Estamos armando la app de Forma, que hace esto por vos.</p>'
         + '<div><a class="btn btn-accent" href="app">Anotarme en la lista de espera</a></div></div></div>'
         + "</div>";
     }
