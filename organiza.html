@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organizá tu día | Forma</title>
+<meta name="description" content="Respondé 12 preguntas y recibí tu día organizado en bloques con horarios. Gratis.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@800&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+@media print {
+  .site-header, .site-footer, .row, .dark { display: none !important; }
+  .stats .stat, .block .body { border: 1px solid #999; }
+  .stat { background: #fff !important; color: #000 !important; }
+  .stat span { color: #333 !important; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<div class="dark">
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="./" aria-label="Forma, inicio">forma<span class="dot"></span></a>
+      <nav class="nav" aria-label="Principal">
+        <a href="tenis">Sección Tenis</a>
+        <a href="app">App</a>
+      </nav>
+    </div>
+  </header>
+</div>
+
+<main class="section" style="padding-top:56px">
+  <div class="narrow" id="organiza"></div>
+  <noscript><div class="narrow"><p>Esta herramienta necesita JavaScript para funcionar.</p></div></noscript>
+</main>
+
+<footer class="site-footer dark">
+  <div class="wrap">
+    <div class="stack gap-8">
+      <a class="logo" href="./" aria-label="Forma, inicio">forma<span class="dot"></span></a>
+      <div class="muted" style="font-size:16px">Dale forma a la vida que querés</div>
+    </div>
+    <div class="links">
+      <a data-link="instagram" href="#">Instagram: @formargentina</a>
+      <a href="privacidad">Privacidad</a>
+      <div>© 2026 Forma</div>
+    </div>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script src="organiza.js"></script>
+</body>
+</html>

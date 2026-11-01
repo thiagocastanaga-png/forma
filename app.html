@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forma Hábitos: la app para organizar tu día</title>
+<meta name="description" content="Planificá tu día por bloques, trackeá tus hábitos y sumá nuevos con una guía. Anotate en la lista de espera.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Inter:wght@400;600&family=Montserrat:wght@800&family=Pacifico&family=Playfair+Display:ital,wght@1,900&family=Space+Mono:wght@700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dark">
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="./" aria-label="Forma, inicio">forma<span class="dot"></span></a>
+      <nav class="nav" aria-label="Principal">
+        <a href="organiza">Organizá tu día</a>
+        <a href="tenis">Sección Tenis</a>
+        <a class="btn btn-accent btn-sm" href="#lista">Anotarme</a>
+      </nav>
+    </div>
+  </header>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Próximamente</div>
+      <h1>Forma Hábitos</h1>
+      <p class="lead muted">La app para planificar tu día por bloques, trackear tus hábitos y sumar nuevos con una guía.</p>
+      <a class="btn btn-accent" href="#lista">Anotarme en la lista de espera</a>
+    </div>
+  </section>
+</div>
+
+<section class="section">
+  <div class="wrap stack gap-40">
+    <div class="stack gap-12">
+      <h2>Tu vida, en cinco áreas</h2>
+      <p class="lead muted">Cada bloque de tu día se conecta con lo que más te importa.</p>
+    </div>
+    <div class="cards">
+      <article class="card"><h3>Salud</h3><p>Comida, movimiento, descanso.</p></article>
+      <article class="card"><h3>Familia y relaciones</h3><p>Tiempo de calidad con quienes importan.</p></article>
+      <article class="card"><h3>Proyectos personales</h3><p>Pasos concretos, todos los días.</p></article>
+      <article class="card"><h3>Tenis</h3><p>Entrenamiento, partidos y preparación.</p></article>
+      <article class="card"><h3>Ingresos económicos</h3><p>Acciones que mueven tu economía.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section dark">
+  <div class="wrap stack gap-40">
+    <h2>Qué va a tener la primera versión</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Planificador del día</h3><p>Tu día en bloques con horarios, ajustable a mano.</p></div>
+      <div class="step"><div class="n">2</div><h3>Hábitos anclados</h3><p>Cada hábito nuevo se pega a algo que ya hacés.</p></div>
+      <div class="step"><div class="n">3</div><h3>Guía para empezar</h3><p>Respiraciones y rutinas cortas para arrancar.</p></div>
+    </div>
+    <p class="muted">Mientras la armamos, podés probar el <a href="organiza" style="font-weight:600">organizador de día gratis</a>, que es la base de la app.</p>
+  </div>
+</section>
+
+<section class="section" id="lista">
+  <div class="wrap stack center gap-24">
+    <h2>Anotate en la lista de espera</h2>
+    <p class="lead muted" style="max-width:600px">Vamos a avisarte cuando la app esté lista y vas a poder probarla antes que nadie.</p>
+    <form class="form" data-waitlist>
+      <label>Tu email<input type="email" name="email" required autocomplete="email" placeholder="nombre@email.com"></label>
+      <input type="hidden" name="interes" value="app">
+      <input type="hidden" name="origen" value="">
+      <input type="hidden" name="pagina" value="">
+      <input class="hp" type="text" name="web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn btn-dark" type="submit">Avisame</button>
+      <div class="form-msg" role="status" aria-live="polite"></div>
+      <p class="fineprint">Usamos tu email solo para avisarte novedades de Forma. Podés pedir que lo borremos cuando quieras. Más en la <a href="privacidad">política de privacidad</a>.</p>
+    </form>
+  </div>
+</section>
+
+<footer class="site-footer dark">
+  <div class="wrap">
+    <div class="stack gap-8">
+      <a class="logo" href="./" aria-label="Forma, inicio">forma<span class="dot"></span></a>
+      <div class="muted" style="font-size:16px">Dale forma a la vida que querés</div>
+    </div>
+    <div class="links">
+      <a data-link="instagram" href="#">Instagram: @formargentina</a>
+      <a href="privacidad">Privacidad</a>
+      <div>© 2026 Forma</div>
+    </div>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="common.js"></script>
+</body>
+</html>
