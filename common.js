@@ -93,21 +93,26 @@
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       if (form.querySelector('input[name="web"]').value) return; // trampa para bots
-      if (!CFG.formEndpoint) {
+      if (!CFG.formEndpoint && !CFG.googleForm) {
         msg.textContent = "El formulario todavía no está conectado. Mientras tanto, escribinos por Instagram @formargentina.";
         return;
       }
       var data = {};
       new FormData(form).forEach(function (v, k) { if (k !== "web") data[k] = v; });
       msg.textContent = "Enviando...";
+      function ok() { msg.textContent = "Listo, te anotamos. Gracias."; form.reset(); if (o) o.value = origin; if (p) p.value = location.pathname; }
+      function fail() { msg.textContent = "No pudimos enviarlo. Revisá tu conexión y probá de nuevo."; }
+      if (CFG.googleForm) {
+        var body = new URLSearchParams();
+        Object.keys(CFG.googleForm.fields).forEach(function (k) { body.append(CFG.googleForm.fields[k], data[k] || ""); });
+        fetch(CFG.googleForm.action, { method: "POST", mode: "no-cors", body: body }).then(ok).catch(fail);
+        return;
+      }
       fetch(CFG.formEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(data)
-      }).then(function (r) {
-        if (r.ok) { msg.textContent = "Listo, te anotamos. Gracias."; form.reset(); if (o) o.value = origin; if (p) p.value = location.pathname; }
-        else { msg.textContent = "No pudimos enviarlo. Probá de nuevo en un rato."; }
-      }).catch(function () { msg.textContent = "No pudimos enviarlo. Revisá tu conexión y probá de nuevo."; });
+      }).then(function (r) { if (r.ok) ok(); else msg.textContent = "No pudimos enviarlo. Probá de nuevo en un rato."; }).catch(fail);
     });
   });
 })();
