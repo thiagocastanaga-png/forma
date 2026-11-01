@@ -2,44 +2,99 @@
   var root = document.getElementById("organiza");
   if (!root) return;
 
+  // ---------- Utilidades ----------
+  function fmt(m) {
+    var x = ((m % 1440) + 1440) % 1440;
+    var h = Math.floor(x / 60), mm = x % 60;
+    return String(h).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+  }
+  function durText(d) {
+    if (d < 60) return d + " min";
+    var h = Math.floor(d / 60), r = d % 60;
+    return h + " h" + (r ? " " + r + " min" : "");
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  // Opciones de hora cada 30 min. wrap=true guarda la hora del día (0 a 1439).
+  function times(from, to, wrap) {
+    var o = [];
+    for (var m = from; m <= to; m += 30) o.push([fmt(m), wrap ? m % 1440 : m]);
+    return o;
+  }
+  var CLOCK = times(300, 300 + 1410, true); // 05:00 hasta 04:30, para horarios fijos
+  var CLOCK_END = times(300, 300 + 1410, true);
+
+  // ---------- Preguntas ----------
   var STEPS = [
-    { title: "¿A qué hora te despertás y a qué hora te dormís?", hint: "Con esto sabemos cuánto día tenés para repartir.", fields: [
-      { key: "wake", label: "Me despierto", opts: [["5:00", 300], ["6:00", 360], ["7:00", 420], ["8:00", 480], ["9:00", 540]] },
-      { key: "sleep", label: "Me duermo", opts: [["22:00", 1320], ["23:00", 1380], ["00:00", 1440], ["01:00", 1500]] }
-    ] },
-    { title: "¿Qué horarios fijos tenés?", hint: "Trabajo, estudio o clases que no se mueven.", fields: [
-      { key: "fixed", label: "", opts: [["Ninguno", "none"], ["Mañana (9 a 13)", "am"], ["Tarde (14 a 18)", "pm"], ["Jornada completa (9 a 18)", "full"], ["Noche (18 a 22)", "night"]] }
-    ] },
-    { title: "¿Cuánto tardás en cada traslado?", hint: "Lo que tardás en ir, y lo mismo para volver.", fields: [
-      { key: "commute", label: "", opts: [["No viajo", 0], ["Hasta 20 min", 20], ["Unos 45 min", 45], ["Hora y media", 90]] }
-    ] },
-    { title: "¿Cuáles son tus prioridades de esta etapa?", hint: "Las que más querés mover ahora. La primera que elijas es la más importante.", fields: [
-      { key: "prios", label: "", multi: true, max: 3, opts: [["Salud", "health"], ["Familia y relaciones", "family"], ["Proyectos personales", "projects"], ["Tenis o mi deporte", "sport"], ["Estudio", "study"], ["Ingresos económicos", "income"], ["Descanso y ocio", "rest"]] }
-    ] },
-    { title: "¿Qué hábitos nuevos querés sumar?", hint: "Mejor pocos y bien hechos. Si no querés sumar ninguno ahora, seguí.", fields: [
-      { key: "habits", label: "", multi: true, max: 3, req: false, opts: [["Leer", "read"], ["Meditar y respirar", "breathe"], ["Moverme y estirar", "move"], ["Escribir un diario", "write"], ["Aprender algo nuevo", "learn"], ["Caminar", "walk"]] }
-    ] },
-    { title: "¿En qué momento del día tenés más energía?", hint: "Ahí va lo que más te cuesta o más te importa.", fields: [
-      { key: "energy", label: "", opts: [["A la mañana", "am"], ["A la tarde", "pm"], ["A la noche", "night"]] }
-    ] },
-    { title: "¿Cuánto tiempo libre real tenés por día?", hint: "Sin contar trabajo, estudio, comidas ni traslados.", fields: [
-      { key: "free", label: "", opts: [["Poco, cerca de 1 hora", 60], ["Medio, 2 a 3 horas", 150], ["Mucho, 4 horas o más", 240]] }
-    ] },
-    { title: "¿Qué es lo que más te hace perder el tiempo?", hint: "No para prohibirlo: para planificarlo.", fields: [
-      { key: "waste", label: "", opts: [["El celular y las redes", "phone"], ["Postergar lo importante", "procrastinate"], ["Los imprevistos", "buffer"], ["Nada en particular", "none"]] }
-    ] },
-    { title: "¿Entrenás o hacés actividad física?", hint: "Contanos cuánto dura un día de entrenamiento.", fields: [
-      { key: "train", label: "", opts: [["No entreno", 0], ["Una hora", 60], ["Dos horas", 120]] }
-    ] },
-    { title: "¿A qué hora almorzás?", hint: "La cena la acomodamos nosotros según a qué hora te dormís.", fields: [
-      { key: "lunch", label: "", opts: [["12:30", 750], ["13:30", 810], ["14:30", 870]] }
-    ] },
-    { title: "¿Plan estricto o flexible?", hint: "Estricto asigna todo el día. Flexible deja margen libre a propósito.", fields: [
-      { key: "style", label: "", opts: [["Estricto", "strict"], ["Flexible", "flex"]] }
-    ] },
-    { title: "¿Querés pausas con respiración durante el día?", hint: "Son de 5 minutos y se acomodan dentro de los bloques más largos.", fields: [
-      { key: "pauses", label: "", opts: [["No, gracias", 0], ["Sí, 2 pausas", 2], ["Sí, 3 pausas", 3]] }
-    ] }
+    { title: "¿A qué hora te despertás y a qué hora te dormís?", hint: "Elegí tus horarios reales, aunque sean distintos cada día: usá los más habituales.",
+      fields: [
+        { key: "wake", label: "Me despierto", type: "select", placeholder: "Elegí una hora", opts: times(180, 960, true) },
+        { key: "sleep", label: "Me duermo", type: "select", placeholder: "Elegí una hora", opts: times(1200, 1920, false) }
+      ],
+      check: function (a) {
+        if (a.wake === undefined || a.sleep === undefined) return "";
+        var d = a.sleep - a.wake;
+        if (d < 360) return "Entre que te despertás y te dormís hay menos de 6 horas. Revisá los horarios.";
+        if (d > 1260) return "Entre que te despertás y te dormís hay más de 21 horas. Revisá los horarios.";
+        return "";
+      } },
+    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, clases o cualquier horario que no se mueve. Si terminás después de medianoche, elegí la hora igual (por ejemplo, 06:00).",
+      fields: [
+        { key: "fixedOn", label: "", type: "chips", opts: [["No tengo", "no"], ["Sí tengo", "yes"]] },
+        { key: "f1s", label: "Empieza", type: "select", placeholder: "Elegí una hora", opts: CLOCK, showIf: function (a) { return a.fixedOn === "yes"; } },
+        { key: "f1e", label: "Termina", type: "select", placeholder: "Elegí una hora", opts: CLOCK_END, showIf: function (a) { return a.fixedOn === "yes"; } },
+        { key: "f2On", label: "¿Tenés otro horario fijo en el día?", type: "chips", opts: [["No", "no"], ["Sí", "yes"]], showIf: function (a) { return a.fixedOn === "yes"; } },
+        { key: "f2s", label: "Empieza el segundo", type: "select", placeholder: "Elegí una hora", opts: CLOCK, showIf: function (a) { return a.fixedOn === "yes" && a.f2On === "yes"; } },
+        { key: "f2e", label: "Termina el segundo", type: "select", placeholder: "Elegí una hora", opts: CLOCK_END, showIf: function (a) { return a.fixedOn === "yes" && a.f2On === "yes"; } }
+      ],
+      check: function (a) {
+        if (a.fixedOn === "yes" && a.f1s !== undefined && a.f1s === a.f1e) return "El primer horario empieza y termina a la misma hora.";
+        if (a.fixedOn === "yes" && a.f2On === "yes" && a.f2s !== undefined && a.f2s === a.f2e) return "El segundo horario empieza y termina a la misma hora.";
+        return "";
+      } },
+    { title: "¿Cuánto tardás en cada traslado?", hint: "Lo que tardás en ir a tu horario fijo, y lo mismo para volver. Si no te movés, dejá 0.",
+      fields: [
+        { key: "commute", label: "Por trayecto", type: "select", opts: [["No viajo", 0], ["10 minutos", 10], ["15 minutos", 15], ["20 minutos", 20], ["30 minutos", 30], ["45 minutos", 45], ["1 hora", 60], ["1 hora 15", 75], ["1 hora 30", 90], ["2 horas", 120]] }
+      ] },
+    { title: "¿Cuáles son tus prioridades de esta etapa?", hint: "Las que más querés mover ahora. La primera que elijas es la más importante.",
+      fields: [
+        { key: "prios", label: "", type: "chips", multi: true, max: 3, opts: [["Salud", "health"], ["Familia y relaciones", "family"], ["Cuidar a otros", "care"], ["Proyectos personales", "projects"], ["Deporte o entrenamiento", "sport"], ["Estudio", "study"], ["Trabajo e ingresos", "income"], ["Casa y tareas", "home"], ["Descanso y ocio", "rest"]] }
+      ] },
+    { title: "¿Qué hábitos nuevos querés sumar?", hint: "Mejor pocos y bien hechos. Si no querés sumar ninguno ahora, seguí.",
+      fields: [
+        { key: "habits", label: "", type: "chips", multi: true, max: 3, req: false, opts: [["Leer", "read"], ["Meditar y respirar", "breathe"], ["Moverme y estirar", "move"], ["Escribir un diario", "write"], ["Aprender algo nuevo", "learn"], ["Caminar", "walk"], ["Planificar el día siguiente", "plan"]] }
+      ] },
+    { title: "¿En qué momento del día tenés más energía?", hint: "Ahí va lo que más te cuesta o más te importa.",
+      fields: [
+        { key: "energy", label: "", type: "chips", opts: [["A la mañana", "am"], ["A la tarde", "pm"], ["A la noche", "night"], ["Va cambiando", "any"]] }
+      ] },
+    { title: "¿Cuánto tiempo libre real tenés por día?", hint: "Sin contar trabajo, estudio, comidas ni traslados.",
+      fields: [
+        { key: "free", label: "", type: "chips", opts: [["Media hora", 30], ["1 hora", 60], ["1 hora y media", 90], ["2 horas", 120], ["3 horas", 180], ["4 horas", 240], ["5 horas o más", 300]] }
+      ] },
+    { title: "¿Qué es lo que más te hace perder el tiempo?", hint: "No para prohibirlo: para planificarlo.",
+      fields: [
+        { key: "waste", label: "", type: "chips", opts: [["El celular y las redes", "phone"], ["Postergar lo importante", "procrastinate"], ["Los imprevistos", "buffer"], ["Nada en particular", "none"]] }
+      ] },
+    { title: "¿Entrenás o hacés actividad física?", hint: "Contanos cuánto dura un día de entrenamiento y cuándo te gustaría hacerlo.",
+      fields: [
+        { key: "train", label: "Duración", type: "chips", opts: [["No entreno", 0], ["30 minutos", 30], ["45 minutos", 45], ["1 hora", 60], ["1 hora y media", 90], ["2 horas", 120]] },
+        { key: "trainWhen", label: "Momento preferido", type: "chips", opts: [["A la mañana", "am"], ["A la tarde", "pm"], ["A la noche", "night"], ["Me da igual", "any"]], showIf: function (a) { return a.train > 0; } }
+      ] },
+    { title: "¿A qué hora comés?", hint: "La hora del almuerzo y de la cena. Si no almorzás o no cenás, elegilo.",
+      fields: [
+        { key: "lunch", label: "Almuerzo", type: "select", placeholder: "Elegí una hora", opts: times(600, 1020, true).concat([["No almuerzo", -1]]) },
+        { key: "dinner", label: "Cena", type: "select", opts: [["Que la elija Forma", "auto"]].concat(times(1080, 1440, true)).concat([["No ceno", -1]]) }
+      ] },
+    { title: "¿Plan estricto o flexible?", hint: "Estricto asigna todo el día. Flexible deja margen libre a propósito.",
+      fields: [
+        { key: "style", label: "", type: "chips", opts: [["Estricto", "strict"], ["Flexible", "flex"]] }
+      ] },
+    { title: "¿Querés pausas con respiración durante el día?", hint: "Son de 5 minutos y se acomodan dentro de los bloques más largos.",
+      fields: [
+        { key: "pauses", label: "", type: "chips", opts: [["No, gracias", 0], ["Sí, 2 pausas", 2], ["Sí, 3 pausas", 3], ["Sí, 4 pausas", 4]] }
+      ] }
   ];
 
   var KIND = {
@@ -54,29 +109,22 @@
     rest: { tag: "Descanso", dot: "#6B6B63" }
   };
 
-  var state = { step: 0, ans: {} };
-
-  function fmt(m) {
-    var x = ((m % 1440) + 1440) % 1440;
-    var h = Math.floor(x / 60), mm = x % 60;
-    return String(h).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+  function initial() {
+    return { step: 0, ans: { commute: 0, dinner: "auto", fixedOn: "no", f2On: "no" }, focus: null };
   }
-  function durText(d) {
-    if (d < 60) return d + " min";
-    var h = Math.floor(d / 60), r = d % 60;
-    return h + " h" + (r ? " " + r + " min" : "");
-  }
-  function esc(s) {
-    return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
-  }
+  var state = initial();
 
   // ---------- Motor de reglas ----------
   function plan(a) {
     var blocks = [], warnings = [];
-    var wake = a.wake, sleep = a.sleep, lunch = a.lunch;
-    var din = Math.min(Math.max(sleep - 135, 1110), 1290);
+    var wake = a.wake, sleep = a.sleep;
     var strict = a.style === "strict";
 
+    function norm(t) {
+      while (t < wake) t += 1440;
+      while (t >= wake + 1440) t -= 1440;
+      return t;
+    }
     function add(s, e, label, kind, note) {
       if (e - s >= 5) blocks.push({ s: s, e: e, label: label, kind: kind, note: note || "" });
     }
@@ -94,6 +142,9 @@
       if (cur < to) out.push([cur, to]);
       return out;
     }
+    function fillFree(s, e, label, kind, note) {
+      gaps(s, e).forEach(function (g) { if (g[1] - g[0] >= 10) add(g[0], g[1], label, kind, note); });
+    }
     function place(dur, from, to, label, kind, note, backward) {
       var fs = [1, 0.75, 0.5];
       for (var i = 0; i < fs.length; i++) {
@@ -108,6 +159,15 @@
       }
       return false;
     }
+    // Ventana por hora del día (se prueba hoy y pasada la medianoche)
+    function placeClock(dur, win, label, kind, note) {
+      var lo = wake + 40, hi = sleep - 65;
+      for (var k = 0; k < 2; k++) {
+        var f = Math.max(win[0] + 1440 * k, lo), t = Math.min(win[1] + 1440 * k, hi);
+        if (t - f >= 15 && place(dur, f, t, label, kind, note)) return true;
+      }
+      return false;
+    }
     function sub(sg, cut) {
       if (cut[1] <= sg[0] || cut[0] >= sg[1]) return [sg];
       var out = [];
@@ -116,68 +176,99 @@
       return out;
     }
 
+    // Sueño y despertar
     add(sleep - 60, sleep, "Desconectar y dormir", "rest", "Sin pantallas. Preparás el día siguiente y bajás el ritmo.");
     add(wake, wake + 40, "Despertar, agua y desayuno", "meal", "Primero luz y un vaso de agua, antes que el celular.");
-    add(lunch, lunch + 45, "Almuerzo", "meal", "");
-    add(din, din + 45, "Cena", "meal", "");
 
-    var fxMap = { am: [540, 780], pm: [840, 1080], full: [540, 1080], night: [1080, 1320] };
-    var fx = fxMap[a.fixed];
-    if (fx) {
-      var c = a.commute;
-      var fs = Math.max(fx[0], wake + 40 + c);
-      var fe = Math.min(fx[1], sleep - 90 - c);
-      if (fe - fs >= 60) {
-        var segs = [[fs, fe]];
-        [[lunch, lunch + 45], [din, din + 45]].forEach(function (cut) {
-          segs = segs.reduce(function (acc, sg) { return acc.concat(sub(sg, cut)); }, []);
-        });
-        segs.forEach(function (sg) { add(sg[0], sg[1], "Tus horarios fijos", "fixed", "Trabajo, estudio o clases."); });
-        if (c > 0) {
-          gaps(fs - c, fs).forEach(function (g) { add(g[0], g[1], "Traslado", "commute", ""); });
-          gaps(fe, fe + c).forEach(function (g) { add(g[0], g[1], "Traslado de vuelta", "commute", ""); });
-        }
-      }
+    // Comidas
+    var lunch = null, din = null;
+    if (a.lunch !== -1 && a.lunch !== undefined) {
+      lunch = Math.max(norm(a.lunch), wake + 60);
+      if (lunch + 45 > sleep - 120) lunch = null;
     }
+    if (a.dinner !== -1) {
+      din = (a.dinner === "auto" || a.dinner === undefined)
+        ? Math.min(Math.max(sleep - 150, wake + 360), sleep - 105)
+        : Math.min(norm(a.dinner), sleep - 105);
+      if (din < wake + 120) din = null;
+    }
+    var meals = [];
+    if (lunch !== null) { fillFree(lunch, lunch + 45, "Almuerzo", "meal", ""); meals.push([lunch, lunch + 45]); }
+    if (din !== null) { fillFree(din, din + 45, "Cena", "meal", ""); meals.push([din, din + 45]); }
 
+    // Horarios fijos y traslados
+    var c = a.commute || 0;
+    var fixedList = [];
+    if (a.fixedOn === "yes" && a.f1s !== undefined) fixedList.push([a.f1s, a.f1e]);
+    if (a.fixedOn === "yes" && a.f2On === "yes" && a.f2s !== undefined) fixedList.push([a.f2s, a.f2e]);
+    var mainFixedEnd = null;
+    fixedList.forEach(function (fx) {
+      var dur = ((fx[1] - fx[0]) + 1440) % 1440;
+      if (dur === 0) return;
+      var s = norm(fx[0]);
+      var e = s + dur;
+      s = Math.max(s, wake + 40 + c);
+      e = Math.min(e, sleep - 60 - c);
+      if (e - s < 30) {
+        warnings.push("Un horario fijo (" + fmt(fx[0]) + " a " + fmt(fx[1]) + ") quedó fuera de tu día entre que te despertás y te dormís.");
+        return;
+      }
+      var segs = [[s, e]];
+      meals.forEach(function (cut) {
+        segs = segs.reduce(function (acc, sg) { return acc.concat(sub(sg, cut)); }, []);
+      });
+      segs.forEach(function (sg) { fillFree(sg[0], sg[1], "Tus horarios fijos", "fixed", "Trabajo, estudio o clases."); });
+      if (c > 0) {
+        fillFree(s - c, s, "Traslado", "commute", "");
+        fillFree(e, e + c, "Traslado de vuelta", "commute", "");
+      }
+    });
+
+    // Entrenamiento
     if (a.train > 0) {
-      var tdur = a.train + 30;
-      var win = a.energy === "pm" ? [wake + 40, 720] : [960, 1200];
-      var tnote = "Incluye 10 min de entrada en calor y 20 de recuperación.";
-      if (!place(tdur, win[0], win[1], "Entrenamiento", "train", tnote)) {
-        if (!place(tdur, wake + 40, sleep - 65, "Entrenamiento", "train", tnote)) {
-          warnings.push("No encontramos lugar para entrenar. Probá reducir el tiempo de entrenamiento o tus horarios fijos.");
-        }
-      }
+      var extra = a.train <= 30 ? 15 : 30;
+      var tdur = a.train + extra;
+      var tnote = "Incluye entrada en calor y recuperación.";
+      var tw = { am: [300, 720], pm: [720, 1080], night: [1080, 1440] }[a.trainWhen];
+      if (!tw) tw = a.energy === "pm" ? [300, 720] : [960, 1200];
+      var ok = placeClock(tdur, tw, "Entrenamiento", "train", tnote) || place(tdur, wake + 40, sleep - 65, "Entrenamiento", "train", tnote);
+      if (!ok) warnings.push("No encontramos lugar para entrenar. Probá reducir el tiempo de entrenamiento o tus horarios fijos.");
     }
 
+    // Hábitos anclados
     var HB = {
       read: { n: "Leer", d: 20, pref: "night" },
       breathe: { n: "Meditar y respirar", d: 10, pref: "am" },
       move: { n: "Moverme y estirar", d: 15, pref: "am" },
       write: { n: "Escribir un diario", d: 10, pref: "night" },
       learn: { n: "Aprender algo nuevo", d: 25, pref: "mid" },
-      walk: { n: "Caminar", d: 20, pref: "mid" }
+      walk: { n: "Caminar", d: 20, pref: "mid" },
+      plan: { n: "Planificar el día siguiente", d: 10, pref: "night" }
     };
     var habitList = (a.habits || []).map(function (k) { return HB[k]; });
+    var afterLunch = lunch !== null ? lunch + 45 : wake + 240;
+    var nightFrom = din !== null ? din + 45 : sleep - 240;
     habitList.forEach(function (h) {
       var anchors = {
         am: function () { return place(h.d, wake + 40, wake + 240, h.n, "habit", "Anclado a despertarte: lo pegás a algo que ya hacés."); },
-        mid: function () { return place(h.d, lunch + 45, lunch + 300, h.n, "habit", "Anclado a almorzar: justo después de comer."); },
-        night: function () { return place(h.d, din + 45, sleep - 60, h.n, "habit", "Anclado a desconectar: lo último antes de dormir.", true); }
+        mid: function () { return place(h.d, afterLunch, afterLunch + 300, h.n, "habit", lunch !== null ? "Anclado a almorzar: justo después de comer." : "A media jornada, después de arrancar."); },
+        night: function () { return place(h.d, nightFrom, sleep - 60, h.n, "habit", "Anclado a desconectar: lo último antes de dormir.", true); }
       };
       var ok = anchors[h.pref]();
       if (!ok) ok = ["am", "mid", "night"].some(function (k) { return anchors[k](); });
       if (!ok) warnings.push('No encontramos lugar para "' + h.n + '". Probá con menos hábitos o más tiempo libre.');
     });
 
+    // Prioridades
     var PR = {
       health: ["Salud", "Comida, movimiento y descanso."],
       family: ["Familia y relaciones", "Tiempo de calidad, sin celular."],
+      care: ["Cuidar a otros", "Tiempo reservado para quienes dependen de vos, para que no compita con todo lo demás."],
       projects: ["Proyectos personales", "Un paso concreto de tu proyecto, no todo el proyecto."],
-      sport: ["Tenis o mi deporte", "Práctica técnica o mental de tu deporte."],
+      sport: ["Deporte o entrenamiento", "Práctica técnica o mental de tu deporte."],
       study: ["Estudio", "Estudio profundo, un solo tema."],
-      income: ["Ingresos económicos", "Una acción concreta que mueva tus ingresos."],
+      income: ["Trabajo e ingresos", "Una acción concreta que mueva tu trabajo o tus ingresos."],
+      home: ["Casa y tareas", "Un bloque para lo que hay que hacer en casa, sin que se acumule."],
       rest: ["Descanso y ocio", "Descanso y ocio, con permiso."]
     };
     var prios = a.prios || [];
@@ -186,24 +277,30 @@
     var avail = Math.max(budget - habitsTotal, prios.length * 20);
     var weights = [3, 2, 1].slice(0, prios.length);
     var sumW = weights.reduce(function (s, w) { return s + w; }, 0) || 1;
-    var peak = { am: [wake + 40, 720], pm: [840, 1080], night: [1140, sleep - 75] }[a.energy];
+    var peak = { am: [300, 720], pm: [720, 1080], night: [1080, 1440] }[a.energy];
+    var peakNotePlaced = false;
     prios.forEach(function (k, i) {
       var dur = Math.max(20, Math.round(avail * weights[i] / sumW / 5) * 5);
-      var note = PR[k][1];
+      var base = PR[k][1];
       var extra = (i === 0 && a.waste === "procrastinate") ? " Regla de 10 minutos: empezá solo 10 y después decidís." : "";
-      var peakNote = (i === 0 ? "Tu mejor momento de energía. " : "") + note + extra;
-      var ok = place(dur, peak[0], peak[1], PR[k][0], "focus", peakNote) || place(dur, wake + 40, sleep - 65, PR[k][0], "focus", note + extra);
-      if (ok && i === 0 && peakNote !== note + extra) {
-        var placed = blocks.filter(function (b) { return b.label === PR[k][0] && b.kind === "focus"; })[0];
-        if (placed && (placed.e <= peak[0] || placed.s >= peak[1])) placed.note = note + extra;
-        if (placed && placed.note === note + extra) warnings.push("Tu mejor momento de energía está ocupado por tus horarios fijos, así que tu prioridad número 1 quedó en otro horario.");
+      var ok = false;
+      if (peak) {
+        var before = blocks.length;
+        ok = placeClock(dur, peak, PR[k][0], "focus", (i === 0 ? "Tu mejor momento de energía. " : "") + base + extra);
+        if (ok && i === 0) peakNotePlaced = true;
       }
+      if (!ok) ok = place(dur, wake + 40, sleep - 65, PR[k][0], "focus", base + extra);
       if (!ok) warnings.push('No encontramos lugar para "' + PR[k][0] + '". Probá con menos prioridades o más tiempo libre.');
     });
+    if (peak && prios.length && !peakNotePlaced) {
+      warnings.push("Tu mejor momento de energía está ocupado por otras cosas, así que tu prioridad número 1 quedó en otro horario.");
+    }
 
-    if (a.waste === "phone") place(20, lunch + 45, din, "Celular y redes, con límite", "free", "20 minutos con alarma. Después lo dejás.");
-    if (a.waste === "buffer") place(30, 900, din, "Margen para imprevistos", "free", "Si no pasa nada, es tiempo extra para vos.");
+    // Tiempo perdido
+    if (a.waste === "phone") place(20, afterLunch, Math.max(din !== null ? din : sleep - 120, afterLunch + 60), "Celular y redes, con límite", "free", "20 minutos con alarma. Después lo dejás.");
+    if (a.waste === "buffer") place(30, wake + 360, din !== null ? din : sleep - 120, "Margen para imprevistos", "free", "Si no pasa nada, es tiempo extra para vos.");
 
+    // Pausas con respiración
     blocks.filter(function (b) { return (b.kind === "fixed" || b.kind === "focus") && b.e - b.s >= 80; })
       .sort(function (x, y) { return (y.e - y.s) - (x.e - x.s); })
       .slice(0, a.pauses)
@@ -214,6 +311,7 @@
         add(mid + 5, end, b.label, b.kind, b.note);
       });
 
+    // Lo que queda libre
     gaps(wake, sleep - 60).forEach(function (g) {
       if (g[1] - g[0] >= 20) {
         if (strict) add(g[0], g[1], "Ocio y descanso", "rest", "Descanso sin culpa: también es parte del plan.");
@@ -229,14 +327,46 @@
     }
     return { blocks: blocks, warnings: warnings, focus: sum(["focus"]), habits: sum(["habit"]), free: Math.max(sum(["free", "rest"]) - 60, 0) };
   }
+  root.__plan = plan;
 
   // ---------- Interfaz ----------
+  function visibleFields(step) {
+    return step.fields.filter(function (f) { return !f.showIf || f.showIf(state.ans); });
+  }
+  function stepMessage(step) {
+    return step.check ? step.check(state.ans) : "";
+  }
   function isReady(step) {
-    return step.fields.every(function (f) {
+    var okFields = visibleFields(step).every(function (f) {
       if (f.req === false) return true;
       var v = state.ans[f.key];
       return f.multi ? (v || []).length >= 1 : v !== undefined;
     });
+    return okFields && stepMessage(step) === "";
+  }
+
+  function fieldHtml(f) {
+    var val = state.ans[f.key];
+    var h = '<div class="stack gap-12">';
+    if (f.type === "select") {
+      h += '<label class="field"><span style="font-size:16px;font-weight:600">' + esc(f.label) + "</span>"
+        + '<select class="select" data-key="' + f.key + '">';
+      if (f.placeholder) h += '<option value=""' + (val === undefined ? " selected" : "") + ' disabled>' + esc(f.placeholder) + "</option>";
+      f.opts.forEach(function (o, oi) {
+        h += '<option value="' + oi + '"' + (val === o[1] ? " selected" : "") + ">" + esc(o[0]) + "</option>";
+      });
+      h += "</select></label>";
+    } else {
+      if (f.label) h += '<div style="font-size:16px;font-weight:600">' + esc(f.label) + "</div>";
+      h += '<div class="chips">';
+      f.opts.forEach(function (o, oi) {
+        var sel = f.multi ? (val || []).indexOf(o[1]) >= 0 : val === o[1];
+        h += '<button type="button" class="chip" aria-pressed="' + sel + '" data-key="' + f.key + '" data-o="' + oi + '">' + esc(o[0]) + "</button>";
+      });
+      h += "</div>";
+      if (f.multi) h += '<div class="muted" style="font-size:16px">Elegí hasta ' + f.max + ".</div>";
+    }
+    return h + "</div>";
   }
 
   function render() {
@@ -245,29 +375,19 @@
     if (state.step === 0) {
       html = '<div class="stack gap-24">'
         + '<h1>Organizá tu día</h1>'
-        + '<p class="lead muted">Respondé 12 preguntas rápidas y recibí tu día armado en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas.</p>'
+        + '<p class="lead muted">Respondé 12 preguntas rápidas y recibí tu día armado en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Sirve para cualquier rutina: de mañana, de tarde o de noche.</p>'
         + '<div><button type="button" class="btn btn-dark" data-act="start">Empezar</button></div>'
         + '<p class="fineprint">Tarda 2 minutos. Tus respuestas no se envían ni se guardan: todo se calcula en tu navegador.</p></div>';
     } else if (state.step <= total) {
       var st = STEPS[state.step - 1];
       var pct = Math.round(state.step / total * 100);
+      var msg = stepMessage(st);
       html = '<div class="stack gap-32">'
         + '<div class="stack gap-12"><div class="muted" style="font-size:16px;font-weight:600">Pregunta ' + state.step + ' de ' + total + '</div>'
         + '<div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div style="width:' + pct + '%"></div></div></div>'
-        + '<div class="stack gap-12"><h2 style="font-size:clamp(26px,4vw,38px)" id="q-title" tabindex="-1">' + esc(st.title) + '</h2><p class="muted">' + esc(st.hint) + '</p></div>';
-      st.fields.forEach(function (f, fi) {
-        var val = state.ans[f.key];
-        html += '<div class="stack gap-12">';
-        if (f.label) html += '<div style="font-size:16px;font-weight:600">' + esc(f.label) + '</div>';
-        html += '<div class="chips">';
-        f.opts.forEach(function (o, oi) {
-          var sel = f.multi ? (val || []).indexOf(o[1]) >= 0 : val === o[1];
-          html += '<button type="button" class="chip" aria-pressed="' + sel + '" data-f="' + fi + '" data-o="' + oi + '">' + esc(o[0]) + '</button>';
-        });
-        html += '</div>';
-        if (f.multi) html += '<div class="muted" style="font-size:16px">Elegí hasta ' + f.max + '.</div>';
-        html += '</div>';
-      });
+        + '<div class="stack gap-12"><h2 style="font-size:clamp(26px,4vw,38px)" id="q-title" tabindex="-1">' + esc(st.title) + '</h2><p class="muted">' + esc(st.hint) + '</p></div>'
+        + '<div class="stack gap-24">' + visibleFields(st).map(fieldHtml).join("") + "</div>";
+      if (msg) html += '<div class="notice" role="alert">' + esc(msg) + "</div>";
       html += '<div class="row"><button type="button" class="btn btn-ghost" data-act="back">Atrás</button>'
         + '<button type="button" class="btn btn-accent" data-act="next"' + (isReady(st) ? "" : " disabled") + '>' + (state.step === total ? "Armar mi día" : "Siguiente") + '</button></div></div>';
     } else {
@@ -304,9 +424,31 @@
         + "</div>";
     }
     root.innerHTML = html;
-    var t = document.getElementById("q-title");
-    if (t && state.step > 0) { try { t.focus({ preventScroll: true }); } catch (e) { t.focus(); } }
+    if (state.focus) {
+      var el = root.querySelector('[data-key="' + state.focus.key + '"]' + (state.focus.o !== undefined ? '[data-o="' + state.focus.o + '"]' : ""));
+      if (el) el.focus();
+      state.focus = null;
+    } else {
+      var t = document.getElementById("q-title");
+      if (t && state.step > 0) { try { t.focus({ preventScroll: true }); } catch (e) { t.focus(); } }
+    }
   }
+
+  function findField(key) {
+    var fs = STEPS[state.step - 1].fields;
+    for (var i = 0; i < fs.length; i++) if (fs[i].key === key) return fs[i];
+    return null;
+  }
+
+  root.addEventListener("change", function (ev) {
+    var el = ev.target;
+    if (!el.classList.contains("select")) return;
+    var f = findField(el.getAttribute("data-key"));
+    if (!f || el.value === "") return;
+    state.ans[f.key] = f.opts[+el.value][1];
+    state.focus = { key: f.key };
+    render();
+  });
 
   root.addEventListener("click", function (ev) {
     var el = ev.target.closest("button");
@@ -316,10 +458,10 @@
     else if (act === "next") state.step += 1;
     else if (act === "back") state.step = Math.max(state.step - 1, 0);
     else if (act === "edit") state.step = 1;
-    else if (act === "restart") state = { step: 0, ans: {} };
+    else if (act === "restart") state = initial();
     else if (act === "print") { window.print(); return; }
-    else if (el.hasAttribute("data-f")) {
-      var f = STEPS[state.step - 1].fields[+el.getAttribute("data-f")];
+    else if (el.hasAttribute("data-o")) {
+      var f = findField(el.getAttribute("data-key"));
       var o = f.opts[+el.getAttribute("data-o")];
       if (f.multi) {
         var cur = (state.ans[f.key] || []).slice();
@@ -329,6 +471,7 @@
       } else {
         state.ans[f.key] = o[1];
       }
+      state.focus = { key: f.key, o: +el.getAttribute("data-o") };
       render();
       return;
     } else return;
