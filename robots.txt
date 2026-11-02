@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /miforma
+Disallow: /ig
+Sitemap: https://formargentina.com/sitemap.xml
