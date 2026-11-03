@@ -24,7 +24,7 @@
     ["hogar", "Hogar", "Orden y cosas del día a día"],
     ["plata", "Plata", "Claridad con mis gastos"]
   ];
-  function areaName(id) { var a = AREAS.filter(function (x) { return x[0] === id; })[0]; return a ? a[1] : id; }
+  function areaName(id) { if (id.indexOf("plan-") === 0) { var pl = planOf(id.slice(5)); return pl ? "Tu plan " + pl.n : id; } var a = AREAS.filter(function (x) { return x[0] === id; })[0]; return a ? a[1] : id; }
   var MOODS = ["Mal", "Así así", "Normal", "Bien", "Muy bien"], ENERGY = ["Baja", "Media", "Alta"];
   // Hábitos sugeridos por área. slot = [ancla, minutos]; f = veces por semana; m = versión mínima
   var TPL = [
@@ -42,6 +42,10 @@
     { id: "t-llamar", a: "relaciones", n: "Llamar a alguien que quiero", slot: ["we", 90], f: 1, m: "Mandar un audio corto" },
     { id: "t-gusto", a: "tiempo", n: "Algo que me gusta (30 min)", slot: ["we", 120], f: 3, m: "10 minutos de eso que me gusta" },
     { id: "t-casa", a: "hogar", n: "Casa en orden (15 min)", slot: ["we", 90], f: 3, m: "Ordenar una sola cosa" },
+    { id: "tn-pre", a: "plan-tenis", n: "Pre y post partido", slot: ["we", 60], f: 3, m: "5 minutos de movilidad", pr: "t-pre", need: "t-pre" },
+    { id: "tn-resp", a: "plan-tenis", n: "Respiración y enfoque", slot: ["we", 30], f: 3, m: "1 minuto de respiración antes de jugar", pr: "t-resp", need: "t-resp" },
+    { id: "tn-mov", a: "plan-tenis", n: "Movilidad", slot: ["wake", 20], f: 3, m: "5 movimientos suaves", pr: "t-mov", need: "t-mov" },
+    { id: "tn-rut", a: "plan-tenis", n: "Rutina física", slot: ["we", 90], f: 3, m: "10 minutos de lo más importante de la rutina", pr: "t-rut", need: "t-rut" },
     { id: "t-plata", a: "plata", n: "Revisar mis gastos (10 min)", slot: ["sleep", -240], f: 1, m: "Anotar un gasto" }
   ];
   var SPORTS = [["tenis", "Tenis"], ["futbol", "Fútbol"], ["voley", "Vóley"], ["basquet", "Básquet"], ["handball", "Handball"]];
@@ -51,11 +55,11 @@
     { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, price: "",
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
       free: ["Tu mapa de vida", "Check-in diario de ánimo y energía", "Hasta " + FREE_HABITS + " hábitos con horario", "Respiración guiada de 1 minuto"],
-      pros: ["Tu ritmo armado a tu medida", "Revisión semanal con tu progreso", "Actividades guiadas: calma, movimiento, foco, cierre del día y sueño", "Hábitos sin límite y recordatorios"] },
+      pros: ["Tu ritmo armado a tu medida", "Revisión semanal con tu progreso", "Actividades guiadas: calma, movimiento, foco, cierre del día y sueño", "Hábitos sin límite y recordatorios", "Se incluye con cualquier otro plan Pro"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
-      pros: ["Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física", "Revisión de tu rutina por WhatsApp"] },
+      pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
     { id: "futbol", n: "Fútbol", c: "#4C7DFF", pro: "plan-futbol", live: false, d: "Rutinas para futbolistas: antes y después del partido, movilidad y fuerza." },
     { id: "voley", n: "Vóley", c: "#FFC83D", pro: "plan-voley", live: false, d: "Rutinas para vóley: saltos, hombros y recuperación." },
     { id: "basquet", n: "Básquet", c: "#FF8A4C", pro: "plan-basquet", live: false, d: "Rutinas para básquet: explosividad, tobillos y recuperación." },
@@ -131,7 +135,12 @@
 
   // permisos
   function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo; }
-  function isPro(planId) { var p = planOf(planId); return !!p && hasProduct(p.pro); }
+  function isPro(planId) {
+    var p = planOf(planId); if (!p) return false;
+    if (hasProduct(p.pro)) return true;
+    if (planId === "vida") return PLANS.some(function (x) { return x.id !== "vida" && hasProduct(x.pro); });
+    return false;
+  }
   function owns(p) { return hasProduct(p.id) || isPro(p.s); }
   function habitLimit() { return isPro("vida") ? 9999 : FREE_HABITS; }
 
@@ -316,6 +325,50 @@
     }
     return html + "</div>";
   }
+  function dayOfYear(dt) { dt = dt || new Date(); return Math.floor((new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()) - new Date(dt.getFullYear(), 0, 0)) / 864e5); }
+  function quoteOfDay(dt) {
+    var a = window.FRASES; if (!a || !a.length) return "";
+    dt = dt || new Date();
+    return a[(dayOfYear(dt) * 11 + (dt.getFullYear() - 2026) * 53) % a.length];
+  }
+  function quoteCard() {
+    var q = quoteOfDay(); if (!q) return "";
+    return '<div class="quote"><span class="small muted">Frase del día</span><p>' + esc(q) + '</p><div class="row between"><button class="btn ghost sm" id="qimg">Guardar como imagen</button><span class="small muted">Usala de fondo de pantalla</span></div></div>';
+  }
+  function quoteImage() {
+    var q = quoteOfDay(), W = 1080, H = 1920, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var go = function () {
+      var c = cv.getContext("2d");
+      c.fillStyle = "#F5F1E8"; c.fillRect(0, 0, W, H);
+      c.textBaseline = "alphabetic";
+      c.fillStyle = "#111"; c.font = "800 110px Montserrat, Inter, sans-serif"; c.fillText("forma", 90, 230);
+      var wd = c.measureText("forma").width; c.fillStyle = "#86A892"; c.beginPath(); c.arc(90 + wd + 26, 218, 15, 0, 7); c.fill();
+      // frase
+      c.fillStyle = "#111"; c.font = "800 72px Montserrat, Inter, sans-serif";
+      var words = q.split(" "), lines = [], cur = "";
+      words.forEach(function (w) { var t = cur ? cur + " " + w : w; if (c.measureText(t).width > 880 && cur) { lines.push(cur); cur = w; } else cur = t; });
+      lines.push(cur);
+      var lh = 100, y0 = (H - lines.length * lh) / 2 + 40;
+      lines.forEach(function (l, i) { c.fillText(l, 90, y0 + i * lh); });
+      // formas
+      var cols = ["#C6F432", "#FFC83D", "#B9A7F0", "#4C7DFF", "#FF8A4C"], bx = 90, by = H - 330, s = 90;
+      c.fillStyle = cols[0]; c.beginPath(); c.arc(bx + s / 2, by + s / 2, s / 2, 0, 7); c.fill();
+      c.fillStyle = cols[1]; c.fillRect(bx + 130, by, s, s);
+      c.fillStyle = cols[2]; c.beginPath(); c.arc(bx + 260 + s / 2, by + s, s / 2, Math.PI, 0); c.fill();
+      c.fillStyle = cols[3]; c.beginPath(); c.moveTo(bx + 390, by + s); c.arc(bx + 390, by + s, s, -Math.PI / 2, 0, false); c.closePath(); c.fill();
+      c.fillStyle = cols[4]; c.beginPath(); c.moveTo(bx + 520 + s / 2, by); c.lineTo(bx + 520 + s, by + s); c.lineTo(bx + 520, by + s); c.closePath(); c.fill();
+      c.fillStyle = "#6b675e"; c.font = "600 40px Inter, sans-serif";
+      c.fillText("Frase del día · " + new Date().toLocaleDateString("es-AR", { day: "numeric", month: "long" }), 90, H - 190);
+      c.fillText("formargentina.com", 90, H - 130);
+      cv.toBlob(function (blob) {
+        if (!blob) return;
+        var file = new File([blob], "forma-frase-del-dia.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) { navigator.share({ files: [file], title: "Forma" }).catch(function () {}); return; }
+        var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "forma-frase-del-dia.png"; a.click();
+      }, "image/png");
+    };
+    if (document.fonts && document.fonts.load) Promise.all([document.fonts.load("800 72px Montserrat"), document.fonts.load("600 40px Inter")]).then(go, go); else go();
+  }
   var ci = { mood: 0, energy: 0 };
   function checkinCard() {
     var t = today(), c = S.checks[t];
@@ -346,8 +399,9 @@
       '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>" +
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
+    html += quoteCard();
     if (S.intencion) html += '<div class="card small"><span class="muted">Tu intención de la semana</span><br><b>' + esc(S.intencion) + "</b></div>";
-    html += checkinCard() + dayCta() + reviewCard();
+    html += checkinCard() + sportCta() + dayCta() + reviewCard();
     html += '<div class="sec">Tu día</div>';
     if (!hs.length) {
       html += '<div class="card empty"><b>Todavía no tenés hábitos</b><p class="muted small">Elegí unos pocos del menú o escribí el tuyo. Mejor pocos y que se sostengan.</p><button class="btn" id="menu">Elegir del menú</button></div>';
@@ -377,7 +431,7 @@
   }
   function vPlanes() {
     return "<h1 class='hello'>Tus planes</h1>" +
-      "<p class='muted small'>Cada plan es como un curso. Empezás gratis y pasás a <b>Pro</b> cuando quieras para desbloquear todo el plan. Los productos sueltos están aparte, en el Catálogo.</p>" +
+      "<p class='muted small'>Vida diaria es la base: organiza tu día y tu constancia. Cualquier plan Pro la desbloquea completa, y además te suma sus propios productos para agregar a tu día. Los productos sueltos están aparte, en el Catálogo.</p>" +
       '<div class="sec">Disponibles</div>' + PLANS.filter(function (p) { return p.live; }).map(planCard).join("") +
       '<div class="sec">Próximamente</div>' + PLANS.filter(function (p) { return !p.live; }).map(planCard).join("") +
       '<div class="card small" style="margin-top:14px">¿Querés planes como Estoico, Estudiante o Emprendedor? Estamos armándolos. Los vas a ver acá.</div>';
@@ -720,6 +774,16 @@
     var tool = tp.tool || (tp.pr ? (ownTool(tp.pr) || tp.fb || "") : "");
     return { id: "h" + Date.now() + "_" + Math.floor(Math.random() * 1e4), name: tp.n, time: tplTime(tp, q), tool: tool, freq: tp.f, min: tp.m, tpl: tp.id, gen: !!gen, days: {} };
   }
+  function tplVisible(aid) { return TPL.filter(function (tp) { return tp.a === aid && (!tp.need || owns(prodOf(tp.need))); }); }
+  function sportCta() {
+    var html = "";
+    PLANS.forEach(function (pl) {
+      if (pl.id === "vida") return;
+      var vis = tplVisible("plan-" + pl.id), miss = vis.filter(function (tp) { return !hasTpl(tp.id); });
+      if (vis.length && miss.length) html += '<div class="card" style="border-left:6px solid ' + pl.c + '"><b>Tu plan ' + esc(pl.n) + ' está activo</b><p class="small muted" style="margin:6px 0 10px">Sumá sus productos a tu día: ' + esc(miss.map(function (x) { return x.n.toLowerCase(); }).join(", ")) + '.</p><button class="btn" data-sportmenu="plan-' + pl.id + '">Agregar a mi día</button></div>';
+    });
+    return html;
+  }
   function hasTpl(id) { return S.habits.some(function (h) { return !h.del && h.tpl === id; }); }
   function addTpl(id) {
     var tp = TPL.filter(function (x) { return x.id === id; })[0]; if (!tp || hasTpl(id)) return;
@@ -729,11 +793,12 @@
   var menuAreas = null;
   function openMenu(areas) {
     menuAreas = areas && areas.length ? areas : null;
-    var list = menuAreas || AREAS.map(function (a) { return a[0]; });
+    var list = (menuAreas || AREAS.map(function (a) { return a[0]; })).filter(function (a) { return a.indexOf("plan-") !== 0 || tplVisible(a).length; });
+    PLANS.forEach(function (pl) { var k = "plan-" + pl.id; if (pl.id !== "vida" && tplVisible(k).length && list.indexOf(k) < 0) list.unshift(k); });
     var q = S.day && S.day.quiz;
     sheet('<h2 style="font-size:22px">Elegí tus hábitos</h2><p class="small muted">Empezá con pocos: uno o dos por área alcanzan. Cada uno trae un horario sugerido, una frecuencia flexible y una versión mínima para los días difíciles. Todo se puede cambiar.</p><div class="msg" id="mmsg" style="margin:6px 0"></div>' +
       list.map(function (aid) {
-        return '<div class="subsec">' + esc(areaName(aid)) + "</div>" + TPL.filter(function (tp) { return tp.a === aid; }).map(function (tp) {
+        return '<div class="subsec">' + esc(areaName(aid)) + "</div>" + tplVisible(aid).map(function (tp) {
           var has = hasTpl(tp.id);
           return '<button class="prod" ' + (has ? "disabled" : 'data-tpl="' + tp.id + '"') + '><span style="flex:1;min-width:0"><b>' + esc(tp.n) + "</b><small>" + (tp.f === 7 ? "Todos los días" : tp.f + (tp.f === 1 ? " vez" : " veces") + " por semana") + " · ⏰ " + tplTime(tp, q) + '</small></span><span class="tag' + (has ? " ok" : "") + '">' + (has ? "Agregado" : "+ Agregar") + "</span></button>";
         }).join("");
@@ -942,6 +1007,8 @@
     if (t.id === "notif") return enableNotif();
     if (t.id === "dayquiz") return openQuiz();
     if (t.id === "menu") return openMenu(S.focos);
+    if (d.sportmenu) return openMenu([d.sportmenu]);
+    if (t.id === "qimg") return quoteImage();
     if (d.menuall !== undefined) return openMenu(null);
     if (d.tpl) return addTpl(d.tpl);
     if (d.min) { var hm1 = S.habits.filter(function (x) { return x.id === d.min; })[0]; if (hm1) { hm1.days[today()] = "m"; save(); render(); } return; }

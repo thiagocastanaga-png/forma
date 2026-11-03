@@ -140,3 +140,6 @@ main{flex:1;padding:20px 18px 110px}
 .track .was{background:#cfc8b6}
 .track .now{background:var(--sage);height:50%;top:25%}
 .prod[disabled]{opacity:.6}
+
+.quote{border-left:6px solid var(--sage);background:#fff;border-radius:0 16px 16px 0;padding:14px 16px;margin:0 0 12px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.quote p{font-family:Montserrat,Inter,sans-serif;font-weight:800;font-size:19px;line-height:1.3;letter-spacing:-.01em;margin:6px 0 12px}
