@@ -11,5 +11,12 @@ window.FORMA = {
   },
   // Links de pago de la preventa de Sección Tenis
   mercadoPago: "",
-  paypal: ""
+  paypal: "",
+  // Links de pago por producto o plan: { "t-pre": "https://...", "plan-vida": "https://..." }
+  links: {},
+  // Cuentas y sincronización (Supabase). La clave "publishable" es pública por diseño; la seguridad la dan las reglas RLS.
+  supabase: {
+    url: "https://vimjookrejyzkmyxcniv.supabase.co",
+    key: "sb_publishable_RJSDb_1_YTh1wlvHSukETg_RbpcQbsU"
+  }
 };
