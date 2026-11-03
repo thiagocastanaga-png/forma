@@ -128,3 +128,15 @@ main{flex:1;padding:20px 18px 110px}
 .count{font-family:Montserrat,sans-serif;font-weight:800;font-size:44px;text-align:center}
 .actbody textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;resize:vertical}
 .actbody .btn{margin-top:auto}
+
+.habit{flex-wrap:wrap}
+.hsub{flex-basis:100%;padding-left:42px;margin-top:-4px;font-size:13px;color:var(--muted)}
+.habit.met{opacity:.6}
+.rng{margin:0 0 16px}
+.rng input[type=range]{width:100%;accent-color:#5f8571;margin-top:6px}
+.prog{display:grid;grid-template-columns:110px 1fr 54px;gap:8px;align-items:center;margin:6px 0}
+.track{position:relative;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.track i{position:absolute;left:0;top:0;height:100%;border-radius:99px}
+.track .was{background:#cfc8b6}
+.track .now{background:var(--sage);height:50%;top:25%}
+.prod[disabled]{opacity:.6}

@@ -2,7 +2,7 @@
   "use strict";
   var CFG = window.FORMA || {};
   var KEY = "forma_app_v1";
-  var FREE_HABITS = 5;
+  var FREE_HABITS = 3;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
 
@@ -16,17 +16,42 @@
     vida: '<svg viewBox="0 0 44 44"><path d="M3 22 A19 19 0 0 1 22 3 H41 V22 A19 19 0 0 1 22 41 H3 Z" fill="#86A892"/></svg>'
   };
   var AREAS = [
-    ["sueno", "Dormir mejor"], ["ansiedad", "Bajar la ansiedad"], ["habitos", "Armar hábitos"], ["foco", "Foco"],
-    ["energia", "Más energía"], ["comidas", "Comer ordenado"], ["orden", "Orden en casa y plata"], ["familia", "Tiempo con los tuyos"]
+    ["cuerpo", "Cuerpo", "Energía, sueño, movimiento y comida"],
+    ["mente", "Mente", "Calma, ánimo y cabeza despejada"],
+    ["relaciones", "Relaciones", "Familia, pareja y amigos"],
+    ["trabajo", "Trabajo o estudio", "Foco, avance y organización"],
+    ["tiempo", "Tiempo propio", "Disfrutar lo que me gusta"],
+    ["hogar", "Hogar", "Orden y cosas del día a día"],
+    ["plata", "Plata", "Claridad con mis gastos"]
+  ];
+  function areaName(id) { var a = AREAS.filter(function (x) { return x[0] === id; })[0]; return a ? a[1] : id; }
+  var MOODS = ["Mal", "Así así", "Normal", "Bien", "Muy bien"], ENERGY = ["Baja", "Media", "Alta"];
+  // Hábitos sugeridos por área. slot = [ancla, minutos]; f = veces por semana; m = versión mínima
+  var TPL = [
+    { id: "t-agua", a: "cuerpo", n: "Tomar agua al despertar", slot: ["wake", 0], f: 7, m: "Un vaso de agua" },
+    { id: "t-mov", a: "cuerpo", n: "Pausa de movimiento", slot: ["we", 45], f: 3, m: "2 minutos de estiramiento", pr: "energia" },
+    { id: "t-dormir", a: "cuerpo", n: "Rutina para dormir", slot: ["sleep", -30], f: 7, m: "Apagar pantallas 15 minutos antes", pr: "dormir" },
+    { id: "t-comida", a: "cuerpo", n: "Pensar mis comidas del día", slot: ["wake", 30], f: 5, m: "Decidir qué voy a almorzar" },
+    { id: "t-resp", a: "mente", n: "Respiración guiada", slot: ["wake", 10], f: 7, m: "3 respiraciones lentas", tool: "respirar" },
+    { id: "t-calma", a: "mente", n: "Respiración para calmar", slot: ["lunch", 180], f: 3, m: "1 minuto de respiración", pr: "ansiedad", fb: "respirar" },
+    { id: "t-cierre", a: "mente", n: "Cierre del día", slot: ["sleep", -60], f: 5, m: "Anotar una cosa que salió bien", pr: "cierre", fb: "organizar" },
+    { id: "t-pantallas", a: "mente", n: "10 minutos sin pantalla", slot: ["lunch", 270], f: 5, m: "3 minutos mirando por la ventana" },
+    { id: "t-foco", a: "trabajo", n: "Bloque de foco", slot: ["ws", 0], f: 5, m: "10 minutos en la tarea más importante", pr: "foco" },
+    { id: "t-org", a: "trabajo", n: "Organizar mi día", slot: ["wake", 25], f: 5, m: "Elegir 1 prioridad", tool: "organizar" },
+    { id: "t-fam", a: "relaciones", n: "Tiempo con los míos", slot: ["sleep", -180], f: 3, m: "Mandar un mensaje a alguien querido" },
+    { id: "t-llamar", a: "relaciones", n: "Llamar a alguien que quiero", slot: ["we", 90], f: 1, m: "Mandar un audio corto" },
+    { id: "t-gusto", a: "tiempo", n: "Algo que me gusta (30 min)", slot: ["we", 120], f: 3, m: "10 minutos de eso que me gusta" },
+    { id: "t-casa", a: "hogar", n: "Casa en orden (15 min)", slot: ["we", 90], f: 3, m: "Ordenar una sola cosa" },
+    { id: "t-plata", a: "plata", n: "Revisar mis gastos (10 min)", slot: ["sleep", -240], f: 1, m: "Anotar un gasto" }
   ];
   var SPORTS = [["tenis", "Tenis"], ["futbol", "Fútbol"], ["voley", "Vóley"], ["basquet", "Básquet"], ["handball", "Handball"]];
 
   // Planes: cada uno es como un "curso". Gratis para empezar, Pro para todo el plan.
   var PLANS = [
     { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, price: "",
-      d: "Organizá tu día, sumá hábitos y encontrá calma y energía. Para gente común, a tu ritmo.",
-      free: ["Organizá tu día", "Respiración guiada de 1 minuto", "Hasta " + FREE_HABITS + " hábitos con horario y racha"],
-      pros: ["Tu día armado a tu medida con un cuestionario", "Actividades guiadas: respiración, movimiento, foco, cierre del día y sueño", "Hábitos sin límite", "Recordatorios en tu calendario"] },
+      d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
+      free: ["Tu mapa de vida", "Check-in diario de ánimo y energía", "Hasta " + FREE_HABITS + " hábitos con horario", "Respiración guiada de 1 minuto"],
+      pros: ["Tu ritmo armado a tu medida", "Revisión semanal con tu progreso", "Actividades guiadas: calma, movimiento, foco, cierre del día y sueño", "Hábitos sin límite y recordatorios"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
@@ -40,17 +65,17 @@
 
   // Productos sueltos (no son el plan completo)
   var PRODUCTS = [
-    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir mejor", d: "Rutina guiada de 10 minutos para bajar el ritmo antes de dormir.", area: "sueno", act: "dormir" },
-    { id: "energia", g: "Cuerpo", s: "vida", n: "Energía y movimiento", d: "Pausa de movimiento guiada de 5 minutos, sin gimnasio ni equipamiento.", area: "energia", act: "movimiento" },
-    { id: "comidas", g: "Cuerpo", s: "vida", n: "Comidas ordenadas", d: "Organizar horarios y compras. No es una dieta.", area: "comidas", soon: true },
-    { id: "ansiedad", g: "Mente", s: "vida", n: "Bajar la ansiedad", d: "Respiración guiada de 3 minutos para bajar la ansiedad del día. No reemplaza a un profesional.", area: "ansiedad", act: "calma" },
-    { id: "foco", g: "Mente", s: "vida", n: "Foco y tiempo", d: "Bloque de foco de 25 minutos con intención y cierre.", area: "foco", act: "foco" },
-    { id: "tiempo", g: "Mente", s: "vida", n: "Tiempo para vos", d: "Espacios para descansar y hacer lo que te gusta.", area: "foco", soon: true },
-    { id: "cierre", g: "Mente", s: "vida", n: "Cierre del día", d: "Repasá tu día, soltá lo pendiente y dejá armado mañana. 5 minutos guiados.", area: "orden", act: "cierre" },
-    { id: "habitos-pro", g: "Orden", s: "vida", n: "Hábitos que se quedan", d: "Método para sostener hábitos en 21 días.", area: "habitos", soon: true },
-    { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "orden", soon: true },
-    { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "orden", soon: true },
-    { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "familia", soon: true },
+    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir mejor", d: "Rutina guiada de 10 minutos para bajar el ritmo antes de dormir.", area: "cuerpo", act: "dormir" },
+    { id: "energia", g: "Cuerpo", s: "vida", n: "Energía y movimiento", d: "Pausa de movimiento guiada de 5 minutos, sin gimnasio ni equipamiento.", area: "cuerpo", act: "movimiento" },
+    { id: "comidas", g: "Cuerpo", s: "vida", n: "Comidas ordenadas", d: "Organizar horarios y compras. No es una dieta.", area: "cuerpo", soon: true },
+    { id: "ansiedad", g: "Mente", s: "vida", n: "Bajar la ansiedad", d: "Respiración guiada de 3 minutos para bajar la ansiedad del día. No reemplaza a un profesional.", area: "mente", act: "calma" },
+    { id: "foco", g: "Mente", s: "vida", n: "Foco y tiempo", d: "Bloque de foco de 25 minutos con intención y cierre.", area: "trabajo", act: "foco" },
+    { id: "tiempo", g: "Mente", s: "vida", n: "Tiempo para vos", d: "Espacios para descansar y hacer lo que te gusta.", area: "tiempo", soon: true },
+    { id: "cierre", g: "Mente", s: "vida", n: "Cierre del día", d: "Repasá tu día, soltá lo pendiente y dejá armado mañana. 5 minutos guiados.", area: "mente", act: "cierre" },
+    { id: "habitos-pro", g: "Orden", s: "vida", n: "Hábitos que se quedan", d: "Método para sostener hábitos en 21 días.", area: "mente", soon: true },
+    { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "hogar", soon: true },
+    { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "plata", soon: true },
+    { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "relaciones", soon: true },
     { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "USD 5", was: "USD 7" },
     { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "USD 4", was: "USD 6" },
     { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "USD 6", was: "USD 8" },
@@ -61,7 +86,7 @@
 
   // ---------- estado ----------
   var S = load();
-  function blank() { return { profile: null, owned: {}, habits: [], demo: false, guest: false, best: 0 }; }
+  function blank() { return { profile: null, owned: {}, habits: [], demo: false, guest: false, best: 0, mapa: null, focos: [], checks: {}, reviews: [], intencion: "" }; }
   function load() {
     var r = null;
     try { r = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
@@ -69,6 +94,9 @@
     if (!r.owned) r.owned = {};
     if (!r.habits) r.habits = [];
     if (!r.best) r.best = 0;
+    if (!r.checks) r.checks = {};
+    if (!r.reviews) r.reviews = [];
+    if (!r.focos) r.focos = [];
     if (r.profile && !r.guest && r.guest !== false) r.guest = true;
     if (r.profile && r.guest === undefined) r.guest = true;
     return r;
@@ -87,6 +115,12 @@
   function today(d) { d = d || new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
   function daysBack(n) { var d = new Date(); d.setDate(d.getDate() - n); return today(d); }
   function anyDone(day) { return S.habits.some(function (h) { return h.days && h.days[day]; }); }
+  function weekDates(off) { var d = new Date(), idx = (d.getDay() + 6) % 7, out = []; for (var i = 0; i < 7; i++) { var dt = new Date(); dt.setDate(d.getDate() - idx + i + 7 * (off || 0)); out.push(today(dt)); } return out; }
+  function weekCount(off) { return weekDates(off).filter(anyDone).length; }
+  function weekStreak() { var n = 0, off = weekCount(0) >= 3 ? 0 : -1; while (n < 520 && weekCount(off) >= 3) { n++; off--; } return n; }
+  function habWeek(h, off) { return weekDates(off).filter(function (d) { return h.days[d]; }).length; }
+  function daysSince(d) { return Math.floor((Date.now() - new Date(d + "T00:00:00").getTime()) / 864e5); }
+  function lightToday() { var c = S.checks && S.checks[today()]; return !!c && (c.energy === 1 || c.mood <= 2); }
   function streakNow() { var n = 0, i = anyDone(today()) ? 0 : 1; while (i < 4000 && anyDone(daysBack(i))) { n++; i++; } return n; }
   function habitStreak(h) { var n = 0, i = h.days[today()] ? 0 : 1; while (i < 4000 && h.days[daysBack(i)]) { n++; i++; } return n; }
   function totalDone() { var n = 0; S.habits.forEach(function (h) { n += Object.keys(h.days || {}).length; }); return n; }
@@ -143,19 +177,29 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion"];
   function mergeStates(local, remote) {
-    var out = { profile: remote.profile || local.profile || null, habits: [], day: local.day || remote.day || null, notes: Object.assign({}, remote.notes || {}, local.notes || {}), best: Math.max(local.best || 0, remote.best || 0) };
+    var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
-    (remote.habits || []).forEach(function (h) { map[h.id] = { id: h.id, name: h.name, time: h.time || "", tool: h.tool || "", gen: !!h.gen, days: Object.assign({}, h.days || {}), del: !!h.del }; });
+    function clone(h) { return Object.assign({}, h, { days: Object.assign({}, h.days || {}) }); }
+    (remote.habits || []).forEach(function (h) { map[h.id] = clone(h); });
     (local.habits || []).forEach(function (h) {
       var m = map[h.id];
-      if (!m) map[h.id] = { id: h.id, name: h.name, time: h.time || "", tool: h.tool || "", gen: !!h.gen, days: Object.assign({}, h.days || {}), del: !!h.del };
-      else { m.name = h.name || m.name; m.time = h.time !== undefined ? h.time : m.time; Object.keys(h.days || {}).forEach(function (d) { m.days[d] = 1; }); m.del = m.del || !!h.del; }
+      if (!m) map[h.id] = clone(h);
+      else { var days = Object.assign({}, m.days, h.days || {}), del = m.del || h.del; Object.assign(m, h); m.days = days; m.del = !!del; }
     });
     Object.keys(map).forEach(function (k) { out.habits.push(map[k]); });
+    out.mapa = local.mapa || remote.mapa || null; out.day = local.day || remote.day || null;
+    out.focos = (local.focos && local.focos.length) ? local.focos : (remote.focos || []);
+    out.intencion = local.intencion || remote.intencion || "";
+    out.notes = Object.assign({}, remote.notes || {}, local.notes || {});
+    out.checks = Object.assign({}, remote.checks || {}, local.checks || {});
+    var seen = {}, rv = [];
+    (remote.reviews || []).concat(local.reviews || []).forEach(function (r) { if (!seen[r.at]) { seen[r.at] = 1; rv.push(r); } });
+    out.reviews = rv;
     return out;
   }
-  function pushableState() { return { profile: S.profile, habits: S.habits, best: S.best, day: S.day || null, notes: S.notes || {} }; }
+  function pushableState() { var o = { profile: S.profile, habits: S.habits, best: S.best }; EXTRA.forEach(function (k) { o[k] = S[k] === undefined ? null : S[k]; }); return o; }
   function push() {
     if (!user || !sb) return Promise.resolve();
     return sb.from("user_state").upsert({ user_id: user.id, state: pushableState(), updated_at: new Date().toISOString() }).then(function (r) {
@@ -173,9 +217,9 @@
       if (pr && pr.data) acct.username = pr.data.username || "";
       if (pu && pu.data) { var o = {}; pu.data.forEach(function (r) { o[r.product_id] = 1; }); S.owned = o; }
       var remote = (st && st.data && st.data.state) || null;
-      var local = { profile: S.profile, habits: S.habits, best: S.best, day: S.day, notes: S.notes };
+      var local = pushableState();
       var m = remote ? mergeStates(local, remote) : local;
-      S.profile = m.profile; S.habits = m.habits; S.best = m.best; S.day = m.day; S.notes = m.notes; S.guest = false;
+      S.profile = m.profile; S.habits = m.habits; S.best = m.best; EXTRA.forEach(function (k) { if (m[k] !== undefined) S[k] = m[k]; }); S.guest = false;
       if (S.profile && pr && pr.data && !S.profile.username) S.profile.username = pr.data.username;
       try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
       sync.state = "pending";
@@ -198,12 +242,12 @@
     if (!S.profile || S.profile.done === false) return renderOnboard();
     touchBest();
     var body = { hoy: vHoy, planes: vPlanes, catalogo: vCatalogo, perfil: vPerfil }[tab]();
-    var n = streakNow(), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
+    var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
     $app.innerHTML =
       '<div class="top"><div class="logo">forma<i></i></div><div class="row" style="gap:8px">' +
       (S.demo ? '<span class="tag">modo prueba</span>' : "") +
       '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? "Pro" : "Gratis") + "</span>" +
-      '<span class="flame-chip' + (n ? " on" : "") + '" title="Tu racha">' + ICON.flame + "<b>" + n + "</b></span></div></div>" +
+      '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span></div></div>" +
       "<main>" + body + "</main>" +
       '<nav class="tabs" aria-label="Principal"><div>' +
       [["hoy", "Hoy"], ["planes", "Planes"], ["catalogo", "Catálogo"], ["perfil", "Perfil"]].map(function (t) {
@@ -254,11 +298,9 @@
   function renderOnboard() {
     $app.innerHTML =
       '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack">' +
-      '<h1 class="hello" style="font-size:30px">Un último paso</h1><p class="muted">Contanos qué querés mejorar y te sugerimos por dónde empezar. Podés cambiarlo cuando quieras.</p>' +
+      '<h1 class="hello" style="font-size:30px">Un último paso</h1><p class="muted">Después te vamos a hacer unas preguntas para armar tu mapa de vida y encontrar el orden que vos querés. Sin apuro y sin respuestas correctas.</p>' +
       (user ? "" : '<label class="field"><span>¿Cómo te llamás?</span><input id="f-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>') +
-      '<div><span class="small" style="font-weight:600">¿Qué querés mejorar? (elegí las que quieras)</span><div class="chips" style="margin-top:8px">' +
-      AREAS.map(function (a) { return '<button class="chip" data-area="' + a[0] + '" aria-pressed="' + (draft.areas.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
-      '<div><span class="small" style="font-weight:600">¿Hacés algún deporte?</span><div class="chips" style="margin-top:8px">' +
+      '<div><span class="small" style="font-weight:600">¿Hacés algún deporte? (opcional)</span><div class="chips" style="margin-top:8px">' +
       SPORTS.map(function (a) { return '<button class="chip" data-sport="' + a[0] + '" aria-pressed="' + (draft.sports.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
       '<button class="btn block" id="create">Empezar</button><div class="msg" id="wmsg"></div></main>';
   }
@@ -274,36 +316,54 @@
     }
     return html + "</div>";
   }
+  var ci = { mood: 0, energy: 0 };
+  function checkinCard() {
+    var t = today(), c = S.checks[t];
+    if (c) {
+      var msg = lightToday() ? '<div class="card sage"><b>Hoy puede ser un día liviano</b><p class="small" style="margin:6px 0 10px">No hace falta hacer todo. Alcanza con las versiones mínimas de tus hábitos. Si querés, un minuto de respiración ayuda.</p><button class="btn" data-act="respirar">Respirar 1 minuto</button></div>' : (c.mood >= 4 && c.energy === 3 ? '<p class="small muted" style="margin:0 0 10px">Buen momento para avanzar en lo que más te importa.</p>' : "");
+      return '<div class="row between small" style="margin:0 0 10px"><span class="muted">Hoy: <b>' + MOODS[c.mood - 1] + "</b> · energía <b>" + ENERGY[c.energy - 1].toLowerCase() + '</b></span><button class="linkbtn" id="recheck">Cambiar</button></div>' + msg;
+    }
+    return '<div class="card"><b>¿Cómo estás hoy?</b><div class="chips" style="margin:10px 0">' + MOODS.map(function (m, i) { return '<button class="chip" data-mood="' + (i + 1) + '" aria-pressed="' + (ci.mood === i + 1) + '">' + m + "</button>"; }).join("") + '</div><span class="small" style="font-weight:600">¿Y la energía?</span><div class="chips" style="margin-top:8px">' + ENERGY.map(function (m, i) { return '<button class="chip" data-energy="' + (i + 1) + '" aria-pressed="' + (ci.energy === i + 1) + '">' + m + "</button>"; }).join("") + '</div><p class="small muted" style="margin:10px 0 0">Es para conocerte mejor, no un test médico. Con eso el día se adapta a vos.</p></div>';
+  }
+  function reviewDue() {
+    if (!S.mapa) return false;
+    var last = S.reviews.length ? S.reviews[S.reviews.length - 1].at : S.mapa.at;
+    return daysSince(last) >= 6;
+  }
+  function reviewCard() {
+    if (!reviewDue()) return "";
+    if (S.demo || isPro("vida")) return '<div class="card sage"><b>Es momento de tu revisión semanal</b><p class="small" style="margin:6px 0 12px">10 minutos para ver qué funcionó, soltar lo que no y ajustar tu ritmo.</p><button class="btn" id="review">Hacer mi revisión</button></div>';
+    return '<div class="card"><b>Revisión semanal (Pro)</b><p class="small muted" style="margin:6px 0 10px">Cada semana ves qué funcionó, qué soltar y cómo ajustar tu ritmo, con tu progreso a la vista.</p><button class="btn ghost" data-plan="vida">Ver Vida diaria Pro</button></div>';
+  }
   function vHoy() {
-    var t = today(), hs = activeHabits(), done = hs.filter(function (h) { return h.days[t]; }).length;
-    var pct = hs.length ? Math.round(done * 100 / hs.length) : 0, n = streakNow();
+    var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
+    var pct = hs.length ? Math.round(done * 100 / hs.length) : 0, wc = weekCount(0), ws = weekStreak(), light = lightToday();
     var d = new Date(), hr = d.getHours();
     var greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-    var sug = PRODUCTS.filter(function (p) { return p.s === "vida" && S.profile.areas.indexOf(p.area) >= 0 && !owns(p); }).slice(0, 2);
-    var head = anyDone(t) ? "¡Hoy ya sumaste a tu racha!" : (n ? "Marcá un hábito hoy para no perder tu racha" : "Marcá un hábito para empezar tu racha");
+    var head = wc === 0 ? "Esta semana todavía no sumaste nada. Con una cosa chica alcanza." : wc < 3 ? "Vas sumando. Tres días en la semana ya es una gran constancia." : "¡Muy buena semana! Así se construye el orden.";
     var html = '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p>" +
       '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>" +
-      '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (n ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + n + "</b><div class='small' style='opacity:.85'>" + (n === 1 ? "día de racha" : "días de racha") + "</div></div></div>" +
-      '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + "</div></div>";
-    html += dayCta() + '<div class="sec">Tu día</div>';
+      '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
+      '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
+    if (S.intencion) html += '<div class="card small"><span class="muted">Tu intención de la semana</span><br><b>' + esc(S.intencion) + "</b></div>";
+    html += checkinCard() + dayCta() + reviewCard();
+    html += '<div class="sec">Tu día</div>';
     if (!hs.length) {
-      var s = ["Tomar agua al despertar", "Caminar 20 minutos", "Leer 10 páginas", "Respirar 1 minuto", "Acostarme a horario"], tm = ["07:30", "18:00", "21:30", "12:00", "23:00"];
-      html += '<div class="card empty"><b>Empezá con uno solo</b><p class="muted small">Elegí una sugerencia o escribí la tuya.</p><div class="chips" style="justify-content:center">' +
-        s.map(function (x, i) { return '<button class="chip" data-addhabit="' + esc(x) + '" data-time="' + tm[i] + '">' + esc(x) + " · " + tm[i] + "</button>"; }).join("") + "</div></div>";
+      html += '<div class="card empty"><b>Todavía no tenés hábitos</b><p class="muted small">Elegí unos pocos del menú o escribí el tuyo. Mejor pocos y que se sostengan.</p><button class="btn" id="menu">Elegir del menú</button></div>';
+    } else html += dayList(hs, t, light);
+    var paused = activeHabits().filter(function (h) { return h.paused; });
+    if (paused.length) html += '<div class="daypart">En pausa</div><div class="card" style="padding:4px 14px">' + paused.map(function (h) { return '<div class="habit"><button class="hinfo" data-edithabit="' + h.id + '"><b>' + esc(h.name) + '</b><span class="htime none">Tocá para reanudar</span></button></div>'; }).join("") + "</div>";
+    if (activeHabits().length >= habitLimit()) {
+      html += '<div class="card sage"><b>Llegaste al límite del plan gratis (' + FREE_HABITS + " hábitos)</b><p class='small' style='margin:6px 0 12px'>Con Vida diaria Pro tenés hábitos sin límite, tu ritmo armado y la revisión semanal.</p><button class='btn' data-plan='vida'>Ver Vida diaria Pro</button></div>";
     } else {
-      html += dayList(hs, t);
+      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Mi propio hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:#fff"><button class="btn sage">Agregar</button></form><button class="btn ghost block" id="menu" style="margin-top:8px">Elegir del menú de hábitos</button><p class="small muted" style="margin:6px 0 0">El horario es un recordatorio, no una obligación.</p>';
     }
-    if (hs.length >= habitLimit()) {
-      html += '<div class="card sage"><b>Llegaste al límite del plan gratis (' + FREE_HABITS + " hábitos)</b><p class='small' style='margin:6px 0 12px'>Con Vida diaria Pro tenés hábitos sin límite y todos los productos del plan.</p><button class='btn' data-plan='vida'>Ver Vida diaria Pro</button></div>";
-    } else {
-      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Nuevo hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:#fff"><button class="btn sage">Agregar</button></form><p class="small muted" style="margin:6px 0 0">El horario es opcional y flexible: es solo un recordatorio, no una obligación.</p>' + reminderCard();
-    }
-    if (hs.length >= habitLimit()) html += reminderCard();
-    html += '<div class="sec">Herramientas gratis</div>' +
+    html += reminderCard();
+    html += '<div class="sec">Herramientas para cuando las necesites</div>' +
       '<button class="prod" data-open="organizar"><span class="shape">' + SHAPES.vida + '</span><span><b>Organizá tu día</b><small>Armá tu día en bloques con horarios</small></span><span class="tag ok">Gratis</span></button>' +
-      '<button class="prod" data-open="respirar"><span class="shape">' + SHAPES.tenis + '</span><span><b>Respirar 1 minuto</b><small>Pausa guiada para bajar un cambio</small></span><span class="tag ok">Gratis</span></button>';
-    if (sug.length) html += '<div class="sec">Para vos</div>' + sug.map(prodRow).join("");
+      '<button class="prod" data-open="respirar"><span class="shape">' + SHAPES.tenis + '</span><span><b>Respiración guiada</b><small>Un minuto para bajar un cambio</small></span><span class="tag ok">Gratis</span></button>' +
+      PRODUCTS.filter(function (p) { return p.act; }).map(prodRow).join("");
     return html;
   }
 
@@ -365,20 +425,30 @@
   }
 
   // --- Perfil ---
+  function progressCard() {
+    if (!S.mapa) return '<div class="card"><b>Tu mapa de vida</b><p class="small muted" style="margin:6px 0 10px">Todavía no lo armaste. Es el punto de partida de todo.</p><button class="btn sage" id="mapa">Armar mi mapa</button></div>';
+    var first = (S.mapa.h && S.mapa.h[0] && S.mapa.h[0].scores) || S.mapa.scores, now = S.mapa.scores, last7 = [];
+    weekDates(0).concat(weekDates(-1)).forEach(function (d) { if (S.checks[d]) last7.push(S.checks[d]); });
+    var avg = function (k) { return last7.length ? (last7.reduce(function (a, c) { return a + c[k]; }, 0) / last7.length) : 0; };
+    return '<div class="card"><b>Tu mapa de vida</b>' + (S.mapa.vida ? '<p class="small muted" style="margin:6px 0 0">“' + esc(S.mapa.vida) + "”</p>" : "") + '<div style="margin-top:10px">' + AREAS.map(function (a) {
+      var f = first[a[0]] || 0, n = now[a[0]] || 0, up = n - f;
+      return '<div class="prog"><span class="small">' + esc(a[1]) + '</span><span class="track"><i class="was" style="width:' + f * 20 + '%"></i><i class="now" style="width:' + n * 20 + '%"></i></span><span class="small muted">' + n + (up ? " (" + (up > 0 ? "+" : "") + up + ")" : "") + "</span></div>";
+    }).join("") + '</div><p class="small muted" style="margin:8px 0 10px">Barra clara: cómo empezaste. Barra verde: cómo estás hoy.</p>' +
+      (last7.length ? '<p class="small" style="margin:0 0 10px">Últimos 14 días: ánimo promedio <b>' + avg("mood").toFixed(1) + "/5</b> · energía <b>" + avg("energy").toFixed(1) + "/3</b></p>" : "") + '<button class="btn ghost" id="mapa">Rehacer mi mapa</button></div>';
+  }
   function vPerfil() {
-    var p = S.profile, n = streakNow(), initial = (p.name || "?").charAt(0).toUpperCase();
+    var p = S.profile, initial = (p.name || "?").charAt(0).toUpperCase();
     var syncTxt = user ? (sync.state === "ok" ? "Sincronizado" : sync.state === "pending" ? "Sincronizando..." : sync.state === "error" ? "Sin sincronizar (se reintenta al cambiar algo)" : "Conectado") : "";
     var html = "<h1 class='hello'>Tu perfil</h1>" +
       '<div class="card row"><span class="avatar">' + esc(initial) + '</span><div style="min-width:0"><b style="font-size:20px">' + esc(p.name) + "</b><div class='small muted'>" + (acct.username ? "@" + esc(acct.username) : "Sin cuenta") + (p.created ? " · desde " + esc(p.created) : "") + "</div></div></div>" +
-      '<div class="grid3"><div class="card stat"><b>' + n + '</b><span>racha</span></div><div class="card stat"><b>' + S.best + '</b><span>mejor racha</span></div><div class="card stat"><b>' + totalDone() + '</b><span>hábitos hechos</span></div></div>' +
+      '<div class="grid3"><div class="card stat"><b>' + weekCount(0) + '</b><span>días esta semana</span></div><div class="card stat"><b>' + weekStreak() + '</b><span>semanas con 3+ días</span></div><div class="card stat"><b>' + totalDone() + '</b><span>hábitos hechos</span></div></div>' +
+      progressCard() +
       '<div class="card"><b>Tus planes</b><div style="margin-top:8px">' + PLANS.filter(function (x) { return x.live; }).map(function (x) {
         return '<div class="row between" style="padding:6px 0"><span class="row"><span class="shape" style="width:26px;height:26px">' + SHAPES[x.id] + "</span>" + esc(x.n) + '</span><span class="tag' + (isPro(x.id) ? " ok" : "") + '">' + (isPro(x.id) ? "Pro" : "Gratis") + "</span></div>";
       }).join("") + "</div></div>";
     html += '<div class="card stack"><b>Tu cuenta</b>' +
       (user ? '<div class="small muted">' + esc(user.email || "") + " · " + esc(syncTxt) + "</div>" : '<p class="small muted" style="margin:0">Estás usando la app sin cuenta: tus datos están solo en este dispositivo y no podés guardar compras.</p><button class="btn sage block" id="mkacct">Crear cuenta o iniciar sesión</button>') +
       '<label class="field"><span>Nombre</span><input id="p-name" value="' + esc(p.name) + '" maxlength="40"></label>' +
-      '<div><span class="small" style="font-weight:600">Quiero mejorar</span><div class="chips" style="margin-top:8px">' +
-      AREAS.map(function (a) { return '<button class="chip" data-parea="' + a[0] + '" aria-pressed="' + (p.areas.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
       '<div><span class="small" style="font-weight:600">Deportes</span><div class="chips" style="margin-top:8px">' +
       SPORTS.map(function (a) { return '<button class="chip" data-psport="' + a[0] + '" aria-pressed="' + (p.sports.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
       '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
@@ -524,8 +594,8 @@
     if (act.tm) clearInterval(act.tm);
     if (vals.length) { S.notes = S.notes || {}; S.notes[today()] = S.notes[today()] || {}; S.notes[today()][key] = vals; }
     var marked = completeAct(key); touchBest(); save();
-    var n = streakNow(), el = $("#full"); act = null; if (!el) return;
-    el.innerHTML = '<div class="actbody" style="text-align:center;padding-top:80px"><div class="bigflame on" style="margin:0 auto 10px;width:70px;height:70px">' + ICON.flame + '</div><h2>¡Actividad completa!</h2><p class="muted">' + esc(A.t) + " hecha de verdad. " + (marked ? "Quedó tildada en tu día." : "") + '</p><p><b style="font-size:28px">' + n + "</b> " + (n === 1 ? "día" : "días") + ' de racha</p><button class="btn block" data-actdone>Volver a mi día</button></div>';
+    var n = weekCount(0), el = $("#full"); act = null; if (!el) return;
+    el.innerHTML = '<div class="actbody" style="text-align:center;padding-top:80px"><div class="bigflame on" style="margin:0 auto 10px;width:70px;height:70px">' + ICON.flame + '</div><h2>¡Actividad completa!</h2><p class="muted">' + esc(A.t) + " hecha de verdad. " + (marked ? "Quedó tildada en tu día." : "") + '</p><p><b style="font-size:28px">' + n + "</b>/7 días con algo hecho esta semana</p>" + '<button class="btn block" data-actdone>Volver a mi día</button></div>';
   }
   function completeAct(key) {
     var t = today(), hs = activeHabits().filter(function (h) { return gated(h) && actKey(h.tool) === key && !h.days[t]; });
@@ -601,100 +671,184 @@
   function addHabit(name, time) {
     name = (name || "").trim(); if (!name) return;
     if (activeHabits().length >= habitLimit()) { render(); return; }
-    S.habits.push({ id: "h" + Date.now(), name: name.slice(0, 60), time: /^\d\d:\d\d$/.test(time || "") ? time : "", days: {} }); save(); render();
+    S.habits.push({ id: "h" + Date.now(), name: name.slice(0, 60), time: /^\d\d:\d\d$/.test(time || "") ? time : "", freq: 7, min: "", days: {} }); save(); render();
   }
 
   // ---------- tu día (línea de tiempo) ----------
   var PARTS = [["Mañana", "00:00", "12:00"], ["Tarde", "12:00", "19:00"], ["Noche", "19:00", "99:99"]];
-  function habitRow(h, t, isNext) {
-    var dots = "";
-    for (var i = 6; i >= 0; i--) dots += '<i class="' + (h.days[daysBack(i)] ? "on" : "") + '"></i>';
-    var tool = h.tool ? toolLabel(h.tool) : "";
-    return '<div class="habit' + (isNext ? " next" : "") + '"><button class="check" role="checkbox" aria-checked="' + !!h.days[t] + '" aria-label="' + esc(h.name) + '" data-check="' + h.id + '">' + ICON.ok + '</button>' +
-      '<button class="hinfo" data-edithabit="' + h.id + '" aria-label="Editar ' + esc(h.name) + '"><b>' + esc(h.name) + '</b><span class="htime' + (h.time ? (h.time <= nowHM() && !h.days[t] ? " late" : "") : " none") + '">' + (h.time ? "⏰ " + esc(h.time) : "+ Poner horario") + (isNext ? " · Lo que sigue" : "") + '</span><span class="dots">' + dots + '</span></button>' +
-      (tool && !h.days[t] ? '<button class="btn sage sm" data-tool="' + esc(h.tool) + '">' + esc(tool) + "</button>" : '<span class="streak">' + habitStreak(h) + " 🔥</span>") + "</div>";
+  function habitRow(h, t, isNext, light) {
+    var tool = h.tool ? toolLabel(h.tool, light) : "", f = h.freq || 7, wk = habWeek(h, 0), met = f < 7 && wk >= f && !h.days[t];
+    var prog = f < 7 ? " · " + wk + "/" + f + " esta semana" : "";
+    var sub = h.min && !h.days[t] ? (light ? '<div class="hsub">Hoy alcanza con: <b>' + esc(h.min) + "</b></div>" : '<div class="hsub"><button class="linkbtn small" data-min="' + h.id + '">Hacer la versión mínima</button></div>') : "";
+    return '<div class="habit' + (isNext ? " next" : "") + (met ? " met" : "") + '"><button class="check" role="checkbox" aria-checked="' + !!h.days[t] + '" aria-label="' + esc(h.name) + '" data-check="' + h.id + '">' + ICON.ok + '</button>' +
+      '<button class="hinfo" data-edithabit="' + h.id + '" aria-label="Editar ' + esc(h.name) + '"><b>' + esc(h.name) + (h.days[t] === "m" ? " <span class='small muted'>(versión mínima)</span>" : "") + '</b><span class="htime' + (h.time ? (h.time <= nowHM() && !h.days[t] && !met ? " late" : "") : " none") + '">' + (h.time ? "⏰ " + esc(h.time) : "+ Poner horario") + esc(prog) + (met ? " · meta cumplida" : "") + (isNext ? " · Lo que sigue" : "") + "</span></button>" +
+      (tool && !h.days[t] ? '<button class="btn sage sm" data-tool="' + esc(h.tool) + '">' + esc(tool) + "</button>" : "") + sub + "</div>";
   }
-  function toolLabel(tl) { return actKey(tl) ? "Hacer" : "Ver"; }
-  function dayList(hs, t) {
+  function toolLabel(tl, light) { return actKey(tl) ? (light ? "Hacer completa" : "Hacer") : "Ver"; }
+  function dayList(hs, t, light) {
     var hm = nowHM(), nextId = null;
-    hs.forEach(function (h) { if (!nextId && h.time && h.time >= hm && !h.days[t]) nextId = h.id; });
+    hs.forEach(function (h) { if (!nextId && h.time && h.time >= hm && !h.days[t] && !(h.freq < 7 && habWeek(h, 0) >= h.freq)) nextId = h.id; });
     var html = "";
     PARTS.forEach(function (pt) {
       var items = hs.filter(function (h) { return h.time && h.time >= pt[1] && h.time < pt[2]; });
       if (!items.length) return;
-      html += '<div class="daypart">' + pt[0] + '</div><div class="card" style="padding:4px 14px">' + items.map(function (h) { return habitRow(h, t, h.id === nextId); }).join("") + "</div>";
+      html += '<div class="daypart">' + pt[0] + '</div><div class="card" style="padding:4px 14px">' + items.map(function (h) { return habitRow(h, t, h.id === nextId, light); }).join("") + "</div>";
     });
     var none = hs.filter(function (h) { return !h.time; });
-    if (none.length) html += '<div class="daypart">Sin horario</div><div class="card" style="padding:4px 14px">' + none.map(function (h) { return habitRow(h, t, false); }).join("") + "</div>";
+    if (none.length) html += '<div class="daypart">Sin horario</div><div class="card" style="padding:4px 14px">' + none.map(function (h) { return habitRow(h, t, false, light); }).join("") + "</div>";
     return html;
   }
   function dayCta() {
+    if (!S.mapa) return '<div class="card sage"><b>Empecemos por vos</b><p class="small" style="margin:6px 0 12px">Un mapa de tu vida hoy: cómo estás en cada área y qué querés cambiar. Con eso armamos un ritmo a tu medida. Lleva 3 minutos.</p><button class="btn" id="mapa">Armar mi mapa</button></div>';
     if (S.demo || isPro("vida")) {
-      if (!S.day) return '<div class="card sage"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px">Contestá un cuestionario corto y te armamos el día completo, con tus horarios, tus herramientas y tus recordatorios.</p><button class="btn" id="dayquiz">Armar mi día</button></div>';
-      return '<div class="row between small" style="margin:0 0 10px"><span class="muted">Día armado a tu medida</span><button class="linkbtn" id="dayquiz">Rehacer con el cuestionario</button></div>';
+      if (!S.day) return '<div class="card"><b>Armemos tu ritmo</b><p class="small muted" style="margin:6px 0 12px">Contanos tus horarios y armamos una propuesta con lo que elegiste trabajar. Después la ajustás a tu manera.</p><button class="btn" id="dayquiz">Armar mi ritmo</button></div>';
+      return '<div class="row between small" style="margin:0 0 10px"><span class="muted">Ritmo armado a tu medida</span><button class="linkbtn" id="dayquiz">Rehacer</button></div>';
     }
-    return '<div class="card dark"><b>Tu día, armado a tu medida</b><p class="small" style="margin:6px 0 12px;opacity:.85">Con Vida diaria Pro contestás un cuestionario y te armamos el día completo: hábitos en tus horarios, respiración, foco, comidas y cierre del día, con recordatorios.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>';
+    return '<div class="card dark"><b>Tu ritmo, armado a tu medida</b><p class="small" style="margin:6px 0 12px;opacity:.85">Con Vida diaria Pro armamos tu ritmo con tus horarios, las actividades guiadas y una revisión semanal para ajustarlo.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>';
   }
   function mm(t) { var a = t.split(":"); return (+a[0]) * 60 + (+a[1]); }
   function hmFrom(m) { m = Math.max(0, Math.min(1439, Math.round(m / 5) * 5)); return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
   function ownTool(id) { var p = prodOf(id); if (!p || !owns(p)) return ""; return p.act ? "act:" + p.act : "prod:" + id; }
-  function buildDay(q) {
+  function anchors(q) {
+    q = q || { wake: "07:00", sleep: "23:00", workStart: "09:00", workEnd: "18:00", lunch: "13:00" };
     var wake = mm(q.wake), sleep = mm(q.sleep); if (sleep <= wake) sleep += 1440; sleep = Math.min(sleep, 1439);
-    var ws = q.workStart ? mm(q.workStart) : null, we = q.workEnd ? mm(q.workEnd) : null, lunch = mm(q.lunch);
-    var A = q.areas || [], has = function (a) { return A.indexOf(a) >= 0; }, soft = q.pace === "suave", strong = q.pace === "intenso";
-    var out = [], n = 0;
-    function add(m, name, tool) { out.push({ id: "g" + Date.now() + "_" + (n++), name: name, time: hmFrom(m), tool: tool || "", gen: true, days: {} }); }
-    add(wake, "Tomar agua al despertar");
-    add(wake + 10, "Respirar 1 minuto", "respirar");
-    add(wake + 25, "Organizar mi día", "organizar");
-    if (has("comidas")) add(wake + 45, "Desayuno tranquilo", ownTool("comidas"));
-    if (ws !== null && we !== null && we > ws) {
-      add(ws, "Bloque de foco (45 min)", ownTool("foco"));
-      if (!soft && we - ws >= 300) add(ws + (we - ws) / 2 + 30, "Segundo bloque de foco", ownTool("foco"));
-    }
-    add(lunch, "Almuerzo", has("comidas") ? ownTool("comidas") : "");
-    if (has("ansiedad") || strong) add(lunch + 180, "Pausa de respiración", ownTool("ansiedad") || "respirar");
-    if (q.move && q.move !== "no") add(q.move === "manana" ? wake + 60 : (we !== null ? we + 45 : lunch + 300), "Movimiento (20 min)", ownTool("energia"));
-    if (has("orden")) add((we !== null ? we : lunch + 240) + 90, "Casa y plata en orden (15 min)", ownTool("casa"));
-    if (has("comidas")) add(sleep - 150, "Cena tranquila", ownTool("comidas"));
-    if (has("familia")) add(sleep - 180, "Tiempo con los tuyos", ownTool("familia"));
-    if (has("habitos")) add(sleep - 100, "Repasar mis hábitos", ownTool("habitos-pro"));
-    add(sleep - 60, "Cierre del día y preparar mañana", ownTool("cierre") || "organizar");
-    add(sleep - 30, "Rutina para dormir", ownTool("dormir"));
+    var lunch = mm(q.lunch);
+    return { wake: wake, sleep: sleep, lunch: lunch, ws: q.workStart ? mm(q.workStart) : wake + 120, we: q.workEnd ? mm(q.workEnd) : lunch + 240 };
+  }
+  function tplTime(tp, q) { var a = anchors(q); return hmFrom(a[tp.slot[0]] + tp.slot[1]); }
+  function tplHabit(tp, q, gen) {
+    var tool = tp.tool || (tp.pr ? (ownTool(tp.pr) || tp.fb || "") : "");
+    return { id: "h" + Date.now() + "_" + Math.floor(Math.random() * 1e4), name: tp.n, time: tplTime(tp, q), tool: tool, freq: tp.f, min: tp.m, tpl: tp.id, gen: !!gen, days: {} };
+  }
+  function hasTpl(id) { return S.habits.some(function (h) { return !h.del && h.tpl === id; }); }
+  function addTpl(id) {
+    var tp = TPL.filter(function (x) { return x.id === id; })[0]; if (!tp || hasTpl(id)) return;
+    if (activeHabits().length >= habitLimit()) { var m = $("#mmsg"); if (m) m.innerHTML = 'Llegaste al límite del plan gratis (' + FREE_HABITS + '). <button class="linkbtn" data-plan="vida">Ver Vida diaria Pro</button>'; return; }
+    S.habits.push(tplHabit(tp, S.day && S.day.quiz)); save(); openMenu(menuAreas); render();
+  }
+  var menuAreas = null;
+  function openMenu(areas) {
+    menuAreas = areas && areas.length ? areas : null;
+    var list = menuAreas || AREAS.map(function (a) { return a[0]; });
+    var q = S.day && S.day.quiz;
+    sheet('<h2 style="font-size:22px">Elegí tus hábitos</h2><p class="small muted">Empezá con pocos: uno o dos por área alcanzan. Cada uno trae un horario sugerido, una frecuencia flexible y una versión mínima para los días difíciles. Todo se puede cambiar.</p><div class="msg" id="mmsg" style="margin:6px 0"></div>' +
+      list.map(function (aid) {
+        return '<div class="subsec">' + esc(areaName(aid)) + "</div>" + TPL.filter(function (tp) { return tp.a === aid; }).map(function (tp) {
+          var has = hasTpl(tp.id);
+          return '<button class="prod" ' + (has ? "disabled" : 'data-tpl="' + tp.id + '"') + '><span style="flex:1;min-width:0"><b>' + esc(tp.n) + "</b><small>" + (tp.f === 7 ? "Todos los días" : tp.f + (tp.f === 1 ? " vez" : " veces") + " por semana") + " · ⏰ " + tplTime(tp, q) + '</small></span><span class="tag' + (has ? " ok" : "") + '">' + (has ? "Agregado" : "+ Agregar") + "</span></button>";
+        }).join("");
+      }).join("") + (menuAreas ? '<button class="btn ghost block" data-menuall style="margin-top:8px">Ver todas las áreas</button>' : "") +
+      '<button class="btn block" data-close style="margin-top:10px">Listo</button>');
+  }
+  function buildDay(q) {
+    var foc = S.focos.length ? S.focos : (S.mapa ? AREAS.map(function (a) { return a[0]; }).sort(function (a, b) { return (S.mapa.scores[a] || 3) - (S.mapa.scores[b] || 3); }).slice(0, 3) : ["cuerpo", "mente", "trabajo"]);
+    var out = [];
+    foc.forEach(function (aid) { TPL.filter(function (tp) { return tp.a === aid; }).slice(0, 2).forEach(function (tp) { if (out.length < 8 && !hasTpl(tp.id)) out.push(tplHabit(tp, q, true)); }); });
     return out;
   }
   function openQuiz() {
-    var q = (S.day && S.day.quiz) || { wake: "07:00", sleep: "23:00", workStart: "09:00", workEnd: "18:00", lunch: "13:00", pace: "normal", move: "tarde", areas: (S.profile && S.profile.areas) || [] };
+    var q = (S.day && S.day.quiz) || { wake: "07:00", sleep: "23:00", workStart: "09:00", workEnd: "18:00", lunch: "13:00" };
     function tin(id, label, v) { return '<label class="field"><span>' + label + '</span><input id="' + id + '" type="time" value="' + esc(v || "") + '"></label>'; }
-    sheet('<h2 style="font-size:22px">Armemos tu día</h2><p class="small muted">Contanos cómo es tu día y te armamos una propuesta. Después podés mover, cambiar o borrar lo que quieras.</p>' +
+    sheet('<h2 style="font-size:22px">Armemos tu ritmo</h2><p class="small muted">Con tus horarios ubicamos los hábitos de tus prioridades (' + esc((S.focos || []).map(areaName).join(", ") || "tu mapa") + '). Después podés mover, cambiar o borrar lo que quieras.</p>' +
       '<div class="grid2" style="margin-top:12px">' + tin("q-wake", "Me despierto", q.wake) + tin("q-sleep", "Me acuesto", q.sleep) + "</div>" +
       '<label class="row small" style="margin:12px 0 4px"><input id="q-nowork" type="checkbox" ' + (q.workStart ? "" : "checked") + '> <span>No tengo horario fijo de trabajo o estudio</span></label>' +
       '<div class="grid2">' + tin("q-ws", "Empiezo a trabajar/estudiar", q.workStart) + tin("q-we", "Termino", q.workEnd) + "</div>" +
-      '<div style="margin-top:10px">' + tin("q-lunch", "Almuerzo", q.lunch) + "</div>" +
-      '<div style="margin-top:12px"><span class="small" style="font-weight:600">¿Qué querés trabajar?</span><div class="chips" style="margin-top:8px">' +
-      AREAS.map(function (a) { return '<button class="chip" data-qarea="' + a[0] + '" aria-pressed="' + (q.areas.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
-      '<div class="grid2" style="margin-top:12px"><label class="field"><span>Movimiento</span><select id="q-move"><option value="no"' + (q.move === "no" ? " selected" : "") + '>No por ahora</option><option value="manana"' + (q.move === "manana" ? " selected" : "") + '>A la mañana</option><option value="tarde"' + (q.move === "tarde" ? " selected" : "") + '>A la tarde</option></select></label>' +
-      '<label class="field"><span>Ritmo</span><select id="q-pace"><option value="suave"' + (q.pace === "suave" ? " selected" : "") + '>Suave</option><option value="normal"' + (q.pace === "normal" ? " selected" : "") + '>Normal</option><option value="intenso"' + (q.pace === "intenso" ? " selected" : "") + '>Intenso</option></select></label></div>' +
-      '<div class="msg" id="qmsg"></div><button class="btn block" id="qgo">Armar mi día</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+      '<div style="margin:10px 0">' + tin("q-lunch", "Almuerzo", q.lunch) + "</div>" +
+      '<div class="msg" id="qmsg"></div><button class="btn block" id="qgo">Armar mi ritmo</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
   }
   function submitQuiz() {
-    var nowork = $("#q-nowork").checked, areas = [].slice.call(document.querySelectorAll("[data-qarea][aria-pressed=true]")).map(function (b) { return b.dataset.qarea; });
-    var q = { wake: val("q-wake"), sleep: val("q-sleep"), workStart: nowork ? "" : val("q-ws"), workEnd: nowork ? "" : val("q-we"), lunch: val("q-lunch"), areas: areas, move: val("q-move"), pace: val("q-pace") };
+    var nowork = $("#q-nowork").checked;
+    var q = { wake: val("q-wake"), sleep: val("q-sleep"), workStart: nowork ? "" : val("q-ws"), workEnd: nowork ? "" : val("q-we"), lunch: val("q-lunch") };
     if (!q.wake || !q.sleep || !q.lunch) { $("#qmsg").textContent = "Completá a qué hora te despertás, almorzás y te acostás."; return; }
     if (!nowork && (!q.workStart || !q.workEnd || mm(q.workEnd) <= mm(q.workStart))) { $("#qmsg").textContent = "Revisá el horario de trabajo o estudio, o marcá que no tenés horario fijo."; return; }
     S.habits.forEach(function (h) { if (h.gen) h.del = true; });
-    buildDay(q).forEach(function (h) { S.habits.push(h); });
     S.day = { quiz: q, at: today() };
+    buildDay(q).forEach(function (h) { S.habits.push(h); });
     save(); close(); tab = "hoy"; render(); window.scrollTo(0, 0);
+  }
+
+  // ---------- mapa de vida ----------
+  var md = null;
+  function ranges(scores) {
+    return AREAS.map(function (a) { var v = scores[a[0]] || 3; return '<div class="rng"><div class="row between"><b>' + esc(a[1]) + '</b><span class="rv small">' + v + " · " + ["", "Mal", "Flojo", "Más o menos", "Bien", "Muy bien"][v] + '</span></div><div class="small muted">' + esc(a[2]) + '</div><input type="range" min="1" max="5" step="1" id="sc-' + a[0] + '" value="' + v + '"></div>'; }).join("");
+  }
+  function readScores() { var o = {}; AREAS.forEach(function (a) { var e = $("#sc-" + a[0]); o[a[0]] = e ? +e.value : 3; }); return o; }
+  function openMapa() {
+    close();
+    var prev = S.mapa;
+    md = { step: 0, scores: prev ? Object.assign({}, prev.scores) : {}, vida: prev ? prev.vida : "", pesa: prev ? prev.pesa : "", prios: prev ? (S.focos || []).slice() : null };
+    var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawMapa();
+  }
+  function drawMapa() {
+    var el = $("#full"); if (!el || !md) return;
+    var body = "", btn = "Siguiente";
+    if (md.step === 0) body = '<h2>¿Cómo estás hoy en cada área?</h2><p class="muted">Sin respuestas correctas. Es una foto de este momento para que sepamos desde dónde partís.</p>' + ranges(md.scores);
+    else if (md.step === 1) body = '<h2>En tus palabras</h2><label class="field"><span>¿Qué vida querés vivir? ¿Cómo te imaginás tus días?</span><textarea id="m-vida" rows="4" maxlength="400" placeholder="Ej: días tranquilos, con tiempo para mí y para mi familia...">' + esc(md.vida) + '</textarea></label><label class="field"><span>¿Qué es lo que más te pesa hoy? (opcional)</span><textarea id="m-pesa" rows="3" maxlength="400" placeholder="Ej: siento que no llego a todo...">' + esc(md.pesa) + "</textarea></label>";
+    else {
+      if (!md.prios) md.prios = AREAS.map(function (a) { return a[0]; }).sort(function (a, b) { return (md.scores[a] || 3) - (md.scores[b] || 3); }).slice(0, 3);
+      body = '<h2>¿Qué querés priorizar ahora?</h2><p class="muted">Elegí hasta 3 áreas. Mejor pocas y que se sostengan. Te sugerimos las que marcaste más bajas, pero decidís vos.</p><div class="chips" style="margin:6px 0">' + AREAS.map(function (a) { return '<button class="chip" data-mprio="' + a[0] + '" aria-pressed="' + (md.prios.indexOf(a[0]) >= 0) + '">' + esc(a[1]) + "</button>"; }).join("") + '</div><div class="msg" id="mmsg2"></div>';
+      btn = "Listo, elegir mis hábitos";
+    }
+    el.innerHTML = '<header><button class="btn ghost sm" data-mexit>Salir</button><b>Mi mapa</b></header><div class="actbar"><i style="width:' + Math.round(md.step * 100 / 3) + '%"></i></div><div class="actbody"><span class="badge">Paso ' + (md.step + 1) + " de 3</span>" + body + '<button class="btn block" id="mnext">' + btn + "</button></div>";
+  }
+  function mapaNext() {
+    if (!md) return;
+    if (md.step === 0) md.scores = readScores();
+    if (md.step === 1) { md.vida = ($("#m-vida").value || "").trim(); md.pesa = ($("#m-pesa").value || "").trim(); }
+    if (md.step < 2) { md.step++; drawMapa(); window.scrollTo(0, 0); return; }
+    if (!md.prios.length) { $("#mmsg2").textContent = "Elegí al menos un área."; return; }
+    var hist = (S.mapa && S.mapa.h) || [];
+    hist = hist.concat([{ at: today(), scores: md.scores }]);
+    S.mapa = { scores: md.scores, vida: md.vida, pesa: md.pesa, at: today(), h: hist }; S.focos = md.prios.slice();
+    var pr = S.focos.slice(); md = null; save(); close(); tab = "hoy"; render(); openMenu(pr);
+  }
+
+  // ---------- revisión semanal ----------
+  var rv = null;
+  function openReview() {
+    close();
+    rv = { step: 0, worked: "", drop: "", scores: Object.assign({}, S.mapa.scores), intencion: "" };
+    var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawReview();
+  }
+  function weekSummary() {
+    var cs = weekDates(0).map(function (d) { return S.checks[d]; }).filter(Boolean);
+    var avg = function (k) { return cs.length ? (cs.reduce(function (a, c) { return a + c[k]; }, 0) / cs.length).toFixed(1) : null; };
+    var top = activeHabits().map(function (h) { return { n: h.name, c: habWeek(h, 0) }; }).filter(function (x) { return x.c > 0; }).sort(function (a, b) { return b.c - a.c; }).slice(0, 3);
+    return '<div class="card"><b>Tu semana en números</b><p class="small" style="margin:6px 0 0">Días con algo hecho: <b>' + weekCount(0) + "/7</b>" + (avg("mood") ? " · ánimo <b>" + avg("mood") + "/5</b> · energía <b>" + avg("energy") + "/3</b>" : "") + (top.length ? "<br>Lo más constante: " + top.map(function (x) { return esc(x.n) + " (" + x.c + ")"; }).join(", ") : "") + "</p></div>";
+  }
+  function drawReview() {
+    var el = $("#full"); if (!el || !rv) return;
+    var body = "", btn = "Siguiente";
+    if (rv.step === 0) body = "<h2>¿Qué funcionó esta semana?</h2>" + weekSummary() + '<textarea id="rv-in" rows="4" maxlength="400" placeholder="Lo que me ayudó, lo que me gustó...">' + esc(rv.worked) + "</textarea>";
+    else if (rv.step === 1) body = '<h2>¿Qué suelto o ajusto?</h2><p class="muted">Un hábito que pesa, un horario que no va, algo que te estresó. Soltar también es avanzar.</p><textarea id="rv-in" rows="4" maxlength="400" placeholder="Voy a soltar / cambiar...">' + esc(rv.drop) + "</textarea>";
+    else if (rv.step === 2) body = "<h2>¿Cómo estás ahora en cada área?</h2>" + ranges(rv.scores);
+    else { body = '<h2>Tu intención para la semana</h2><p class="muted">Una frase que te guíe. Va a aparecer arriba en Hoy.</p><textarea id="rv-in" rows="3" maxlength="200" placeholder="Esta semana quiero...">' + esc(rv.intencion) + "</textarea>"; btn = "Terminar revisión"; }
+    el.innerHTML = '<header><button class="btn ghost sm" data-rvexit>Salir</button><b>Revisión semanal</b></header><div class="actbar"><i style="width:' + Math.round(rv.step * 100 / 4) + '%"></i></div><div class="actbody"><span class="badge">Paso ' + (rv.step + 1) + " de 4</span>" + body + '<button class="btn block" id="rvnext">' + btn + "</button></div>";
+  }
+  function reviewNext() {
+    if (!rv) return;
+    var inp = $("#rv-in"), v = inp ? inp.value.trim() : "";
+    if (rv.step === 0) rv.worked = v; if (rv.step === 1) rv.drop = v; if (rv.step === 2) rv.scores = readScores();
+    if (rv.step === 3) {
+      if (!v) { inp.focus(); return; }
+      rv.intencion = v;
+      S.reviews.push({ at: today(), worked: rv.worked, drop: rv.drop, scores: rv.scores, intencion: v, days: weekCount(0) });
+      S.mapa.scores = rv.scores; S.mapa.h = (S.mapa.h || []).concat([{ at: today(), scores: rv.scores }]); S.intencion = v;
+      rv = null; save(); close(); tab = "hoy"; render(); window.scrollTo(0, 0); return;
+    }
+    rv.step++; drawReview(); window.scrollTo(0, 0);
   }
 
   // ---------- horarios y recordatorios ----------
   function openHabit(id) {
     var h = S.habits.filter(function (x) { return x.id === id; })[0]; if (!h) return;
-    sheet('<h2 style="font-size:22px">Tu hábito</h2><p class="small muted">Elegí un horario de referencia: te sirve de recordatorio, no hace falta cumplirlo al minuto.</p>' +
+    var f = h.freq || 7, opts = ""; for (var i = 1; i <= 7; i++) opts += '<option value="' + i + '"' + (f === i ? " selected" : "") + ">" + (i === 7 ? "Todos los días" : i + (i === 1 ? " vez" : " veces") + " por semana") + "</option>";
+    sheet('<h2 style="font-size:22px">Tu hábito</h2><p class="small muted">Es tuyo: ponele el horario y la frecuencia que te sirvan. Es una guía, no una obligación.</p>' +
       '<label class="field" style="margin-top:12px"><span>Nombre</span><input id="e-name" maxlength="60" value="' + esc(h.name) + '"></label>' +
-      '<label class="field" style="margin-top:12px"><span>Horario (opcional)</span><input id="e-time" type="time" value="' + esc(h.time || "") + '"></label>' +
-      '<button class="linkbtn small" id="hclear" style="margin:8px 0 14px">Quitar horario</button>' +
+      '<div class="grid2" style="margin-top:12px"><label class="field"><span>Horario (opcional)</span><input id="e-time" type="time" value="' + esc(h.time || "") + '"></label><label class="field"><span>Frecuencia</span><select id="e-freq">' + opts + "</select></label></div>" +
+      '<button class="linkbtn small" id="hclear" style="margin:8px 0 4px">Quitar horario</button>' +
+      '<label class="field" style="margin-top:8px"><span>Versión mínima (para días difíciles)</span><input id="e-min" maxlength="80" placeholder="Ej: 2 minutos" value="' + esc(h.min || "") + '"></label>' +
+      '<label class="row small" style="margin:12px 0"><input id="e-pause" type="checkbox" ' + (h.paused ? "checked" : "") + '> <span>Pausar este hábito (sin culpa, lo retomás cuando quieras)</span></label>' +
       '<button class="btn block" id="hsave" data-id="' + h.id + '">Guardar</button>' +
       '<div class="grid2" style="margin-top:10px"><button class="btn ghost" id="hdel" data-id="' + h.id + '">Borrar hábito</button><button class="btn ghost" data-close>Cerrar</button></div>');
   }
@@ -715,7 +869,7 @@
     var hm = nowHM(), t = today();
     activeHabits().forEach(function (h) {
       var k = h.id + t;
-      if (h.time && h.time <= hm && !h.days[t] && !notified[k] && h.time >= minusMin(10)) {
+      if (!h.paused && h.time && h.time <= hm && !h.days[t] && !notified[k] && h.time >= minusMin(10)) {
         notified[k] = 1;
         var opts = { body: "Es tu momento: " + h.name + " (" + h.time + "). Sin apuro, cuando puedas.", icon: "icon-192.png", tag: k };
         if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", opts); }, function () { new Notification("Forma", opts); });
@@ -772,21 +926,35 @@
       if (!nameV && !user) { $("#wmsg").textContent = "Escribí tu nombre para continuar."; return; }
       S.profile = Object.assign({ name: nameV, email: (user && user.email) || "", created: today() }, S.profile || {}, { areas: draft.areas.slice(), sports: draft.sports.slice(), done: true });
       if (!S.profile.name) S.profile.name = nameV;
-      save(); tab = "hoy"; render(); return;
+      save(); tab = "hoy"; render(); if (!S.mapa) openMapa(); return;
     }
     if (d.check) {
       var h = S.habits.filter(function (x) { return x.id === d.check; })[0];
-      if (h) { if (h.days[today()]) { delete h.days[today()]; touchBest(); save(); render(); } else if (gated(h)) { startAct(actKey(h.tool)); } else { h.days[today()] = 1; touchBest(); save(); render(); } }
+      if (h) { if (h.days[today()]) { delete h.days[today()]; save(); render(); } else if (lightToday() && h.min) { h.days[today()] = "m"; save(); render(); } else if (gated(h)) { startAct(actKey(h.tool)); } else { h.days[today()] = 1; save(); render(); } }
       return;
     }
     if (d.delhabit) { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hh = S.habits.filter(function (x) { return x.id === d.delhabit; })[0]; if (hh) hh.del = true; save(); render(); } return; }
     if (d.addhabit) { addHabit(d.addhabit, d.time); return; }
     if (d.edithabit) return openHabit(d.edithabit);
-    if (t.id === "hsave") { var eh = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0], nn = $("#e-name").value.trim(); if (eh && nn) { eh.name = nn.slice(0, 60); eh.time = $("#e-time").value || ""; save(); close(); render(); } return; }
+    if (t.id === "hsave") { var eh = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0], nn = $("#e-name").value.trim(); if (eh && nn) { eh.name = nn.slice(0, 60); eh.time = $("#e-time").value || ""; eh.freq = +$("#e-freq").value || 7; eh.min = $("#e-min").value.trim().slice(0, 80); eh.paused = $("#e-pause").checked; save(); close(); render(); } return; }
     if (t.id === "hclear") { $("#e-time").value = ""; return; }
     if (t.id === "hdel") { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hx = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0]; if (hx) hx.del = true; save(); close(); render(); } return; }
     if (t.id === "notif") return enableNotif();
     if (t.id === "dayquiz") return openQuiz();
+    if (t.id === "menu") return openMenu(S.focos);
+    if (d.menuall !== undefined) return openMenu(null);
+    if (d.tpl) return addTpl(d.tpl);
+    if (d.min) { var hm1 = S.habits.filter(function (x) { return x.id === d.min; })[0]; if (hm1) { hm1.days[today()] = "m"; save(); render(); } return; }
+    if (d.mood) { ci.mood = +d.mood; if (ci.energy) { S.checks[today()] = { mood: ci.mood, energy: ci.energy }; ci = { mood: 0, energy: 0 }; save(); } render(); return; }
+    if (d.energy) { ci.energy = +d.energy; if (ci.mood) { S.checks[today()] = { mood: ci.mood, energy: ci.energy }; ci = { mood: 0, energy: 0 }; save(); } render(); return; }
+    if (t.id === "recheck") { delete S.checks[today()]; save(); render(); return; }
+    if (t.id === "mapa") return openMapa();
+    if (d.mexit !== undefined) { md = null; close(); return; }
+    if (t.id === "mnext") return mapaNext();
+    if (d.mprio) { if (!md) return; var ix = md.prios.indexOf(d.mprio); if (ix >= 0) md.prios.splice(ix, 1); else if (md.prios.length < 3) md.prios.push(d.mprio); else { $("#mmsg2").textContent = "Hasta 3 áreas. Sacá una para elegir otra."; return; } drawMapa(); return; }
+    if (t.id === "review") return openReview();
+    if (d.rvexit !== undefined) { rv = null; close(); return; }
+    if (t.id === "rvnext") return reviewNext();
     if (t.id === "qgo") return submitQuiz();
     if (d.qarea) { t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") === "true" ? "false" : "true"); return; }
     if (d.tool) { var tl = d.tool; if (actKey(tl)) return startAct(actKey(tl)); if (tl.indexOf("prod:") === 0) return openProduct(tl.slice(5)); return; }
@@ -820,7 +988,11 @@
       postLead(em, "app-compra").then(function (ok) { $("#nmsg").textContent = ok ? "Listo, te avisamos." : "Ahora no se pudo enviar. Probá más tarde."; });
     }
   });
-  document.addEventListener("input", function (e) { if (e.target && e.target.id === "act-in") updateNext(); });
+  document.addEventListener("input", function (e) {
+    if (!e.target) return;
+    if (e.target.id === "act-in") updateNext();
+    if (/^sc-/.test(e.target.id || "")) { var v = +e.target.value, o = e.target.parentNode.querySelector(".rv"); if (o) o.textContent = v + " · " + ["", "Mal", "Flojo", "Más o menos", "Bien", "Muy bien"][v]; }
+  });
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Enter") return;
     var id = e.target && e.target.id;
