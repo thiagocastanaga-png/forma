@@ -197,3 +197,35 @@ details p { margin-top: 12px; color: var(--muted); }
 .select { font: inherit; font-size: 17px; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--ink); background: var(--white); color: var(--ink); min-height: 52px; width: 100%; }
 .blockcard { background: var(--white); border: 2px solid var(--ink); border-radius: 20px; padding: 24px; }
 input.select::placeholder { color: #6B6B63; }
+
+/* ---- Celular (v4) ---- */
+.base-card .muted { color: #D9D4C7; }
+@media (max-width: 640px) {
+  .wrap { padding: 0 18px; }
+  .site-header .wrap { padding-top: 14px; padding-bottom: 10px; gap: 10px; }
+  .site-header .logo { font-size: 28px; }
+  .nav { flex-wrap: nowrap; gap: 6px 16px; font-size: 15px; width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { white-space: nowrap; flex: none; }
+  .nav a.btn { display: none; }
+  .hero { padding-top: 24px; }
+  .hero .wrap { gap: 20px; }
+  .hero .row { flex-direction: column; align-items: stretch; width: 100%; }
+  .hero .row .btn { width: 100%; }
+  .section { padding-top: 48px; padding-bottom: 48px; }
+  .sec-block { padding: 44px 0; }
+  .base-card { padding: 26px 20px; gap: 22px; }
+  .base-card .btn { width: 100%; }
+  .complete { padding: 24px 20px; }
+  /* tarjetas de secciones: dos por fila */
+  #secciones .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sec-mini { padding: 16px; gap: 8px; }
+  .sec-mini h3 { font-size: 20px; }
+  .sec-mini p { font-size: 14px; }
+  /* productos de cada sección: carrusel horizontal */
+  .sec-block .cards { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 -18px; padding: 0 18px 8px; scrollbar-width: none; }
+  .sec-block .cards::-webkit-scrollbar { display: none; }
+  .sec-block .cards .card, .sec-block .cards.four .card { flex: 0 0 78%; scroll-snap-align: start; }
+  .jump { justify-content: center; gap: 8px; }
+  .big-price { font-size: 44px; }
+}
