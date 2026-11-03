@@ -25,8 +25,8 @@
   var PLANS = [
     { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, price: "",
       d: "Organizá tu día, sumá hábitos y encontrá calma y energía. Para gente común, a tu ritmo.",
-      free: ["Organizá tu día", "Respirar 1 minuto", "Hasta " + FREE_HABITS + " hábitos con racha"],
-      pros: ["Hábitos sin límite", "Los 10 productos de Vida diaria", "Programas nuevos cuando salgan"] },
+      free: ["Organizá tu día", "Respiración guiada de 1 minuto", "Hasta " + FREE_HABITS + " hábitos con horario y racha"],
+      pros: ["Tu día armado a tu medida con un cuestionario", "Actividades guiadas: respiración, movimiento, foco, cierre del día y sueño", "Hábitos sin límite", "Recordatorios en tu calendario"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
@@ -40,16 +40,17 @@
 
   // Productos sueltos (no son el plan completo)
   var PRODUCTS = [
-    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir mejor", d: "Rutina de noche y horarios para descansar mejor.", area: "sueno" },
-    { id: "energia", g: "Cuerpo", s: "vida", n: "Energía y movimiento", d: "Movimiento corto durante el día, sin gimnasio.", area: "energia" },
-    { id: "comidas", g: "Cuerpo", s: "vida", n: "Comidas ordenadas", d: "Organizar horarios y compras. No es una dieta.", area: "comidas" },
-    { id: "ansiedad", g: "Mente", s: "vida", n: "Bajar la ansiedad", d: "Respiración y pausas para el día a día. No reemplaza a un profesional.", area: "ansiedad" },
-    { id: "foco", g: "Mente", s: "vida", n: "Foco y tiempo", d: "Ordená tu semana, bloques de foco y un cierre del día.", area: "foco" },
-    { id: "tiempo", g: "Mente", s: "vida", n: "Tiempo para vos", d: "Espacios para descansar y hacer lo que te gusta.", area: "foco" },
-    { id: "habitos-pro", g: "Orden", s: "vida", n: "Hábitos que se quedan", d: "Método para sostener hábitos en 21 días.", area: "habitos" },
-    { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "orden" },
-    { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "orden" },
-    { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "familia" },
+    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir mejor", d: "Rutina guiada de 10 minutos para bajar el ritmo antes de dormir.", area: "sueno", act: "dormir" },
+    { id: "energia", g: "Cuerpo", s: "vida", n: "Energía y movimiento", d: "Pausa de movimiento guiada de 5 minutos, sin gimnasio ni equipamiento.", area: "energia", act: "movimiento" },
+    { id: "comidas", g: "Cuerpo", s: "vida", n: "Comidas ordenadas", d: "Organizar horarios y compras. No es una dieta.", area: "comidas", soon: true },
+    { id: "ansiedad", g: "Mente", s: "vida", n: "Bajar la ansiedad", d: "Respiración guiada de 3 minutos para bajar la ansiedad del día. No reemplaza a un profesional.", area: "ansiedad", act: "calma" },
+    { id: "foco", g: "Mente", s: "vida", n: "Foco y tiempo", d: "Bloque de foco de 25 minutos con intención y cierre.", area: "foco", act: "foco" },
+    { id: "tiempo", g: "Mente", s: "vida", n: "Tiempo para vos", d: "Espacios para descansar y hacer lo que te gusta.", area: "foco", soon: true },
+    { id: "cierre", g: "Mente", s: "vida", n: "Cierre del día", d: "Repasá tu día, soltá lo pendiente y dejá armado mañana. 5 minutos guiados.", area: "orden", act: "cierre" },
+    { id: "habitos-pro", g: "Orden", s: "vida", n: "Hábitos que se quedan", d: "Método para sostener hábitos en 21 días.", area: "habitos", soon: true },
+    { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "orden", soon: true },
+    { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "orden", soon: true },
+    { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "familia", soon: true },
     { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "USD 5", was: "USD 7" },
     { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "USD 4", was: "USD 6" },
     { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "USD 6", was: "USD 8" },
@@ -143,7 +144,7 @@
     return "No pudimos completar la acción. Probá de nuevo.";
   }
   function mergeStates(local, remote) {
-    var out = { profile: remote.profile || local.profile || null, habits: [], day: local.day || remote.day || null, best: Math.max(local.best || 0, remote.best || 0) };
+    var out = { profile: remote.profile || local.profile || null, habits: [], day: local.day || remote.day || null, notes: Object.assign({}, remote.notes || {}, local.notes || {}), best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
     (remote.habits || []).forEach(function (h) { map[h.id] = { id: h.id, name: h.name, time: h.time || "", tool: h.tool || "", gen: !!h.gen, days: Object.assign({}, h.days || {}), del: !!h.del }; });
     (local.habits || []).forEach(function (h) {
@@ -154,7 +155,7 @@
     Object.keys(map).forEach(function (k) { out.habits.push(map[k]); });
     return out;
   }
-  function pushableState() { return { profile: S.profile, habits: S.habits, best: S.best, day: S.day || null }; }
+  function pushableState() { return { profile: S.profile, habits: S.habits, best: S.best, day: S.day || null, notes: S.notes || {} }; }
   function push() {
     if (!user || !sb) return Promise.resolve();
     return sb.from("user_state").upsert({ user_id: user.id, state: pushableState(), updated_at: new Date().toISOString() }).then(function (r) {
@@ -172,9 +173,9 @@
       if (pr && pr.data) acct.username = pr.data.username || "";
       if (pu && pu.data) { var o = {}; pu.data.forEach(function (r) { o[r.product_id] = 1; }); S.owned = o; }
       var remote = (st && st.data && st.data.state) || null;
-      var local = { profile: S.profile, habits: S.habits, best: S.best, day: S.day };
+      var local = { profile: S.profile, habits: S.habits, best: S.best, day: S.day, notes: S.notes };
       var m = remote ? mergeStates(local, remote) : local;
-      S.profile = m.profile; S.habits = m.habits; S.best = m.best; S.day = m.day; S.guest = false;
+      S.profile = m.profile; S.habits = m.habits; S.best = m.best; S.day = m.day; S.notes = m.notes; S.guest = false;
       if (S.profile && pr && pr.data && !S.profile.username) S.profile.username = pr.data.username;
       try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
       sync.state = "pending";
@@ -341,7 +342,7 @@
   // --- Catálogo (productos sueltos) ---
   function prodRow(p) {
     var ok = owns(p), viaPro = ok && !hasProduct(p.id) && isPro(p.s);
-    var tag = ok ? (viaPro ? "Incluido en Pro" : "Tuyo") : (p.price || "Pronto");
+    var tag = ok ? (viaPro ? "Incluido en Pro" : "Tuyo") : (p.soon ? "Pronto" : (p.price || "Disponible"));
     return '<button class="prod" data-prod="' + p.id + '"><span class="shape">' + SHAPES[p.s] + "</span><span style='flex:1;min-width:0'><b>" + esc(p.n) + "</b><small>" + esc(p.d) + '</small></span><span class="tag' + (ok ? " ok" : "") + '">' + esc(tag) + "</span></button>";
   }
   function vCatalogo() {
@@ -411,34 +412,127 @@
     var pl = planOf(p.s), ok = owns(p), viaPro = ok && !hasProduct(p.id);
     sheet('<div class="row"><span class="shape">' + SHAPES[p.s] + '</span><div><span class="badge">Producto suelto</span><h2 style="font-size:22px;margin-top:4px">' + esc(p.n) + '</h2><span class="small muted">' + esc(pl ? pl.n : "") + " · " + esc(p.g) + (p.price ? " · " + esc(p.price) : "") + "</span></div></div>" +
       '<p style="margin:14px 0">' + esc(p.d) + "</p>" +
-      (ok ? '<div class="card"><b>' + (viaPro ? "Lo tenés incluido en tu plan Pro." : "Ya es tuyo.") + '</b><p class="small muted" style="margin:6px 0 0">Estamos terminando el contenido de este producto. Apenas esté listo lo vas a ver acá, sin que tengas que hacer nada.</p></div>'
-        : payButtons(p.id, p.n) + (pl && pl.live ? '<div class="card" style="margin-top:12px"><b>¿Querés todo el plan?</b><p class="small muted" style="margin:6px 0 10px">Forma ' + esc(pl.n) + " Pro incluye este y los demás productos de la sección.</p><button class='btn ghost block' data-plan='" + pl.id + "'>Ver plan " + esc(pl.n) + "</button></div>" : "")) +
+      (ok ? '<div class="card"><b>' + (viaPro ? "Lo tenés incluido en tu plan Pro." : "Ya es tuyo.") + "</b>" + (p.act ? '<p class="small muted" style="margin:6px 0 12px">Es una actividad guiada: se tilda en tu día solo cuando la hacés completa.</p><button class="btn block" data-act="' + p.act + '">Hacer ahora</button>' : '<p class="small muted" style="margin:6px 0 0">Estamos terminando el contenido de este producto. Apenas esté listo lo vas a ver acá, sin que tengas que hacer nada.</p>') + "</div>"
+        : actPreview(p) + (p.soon ? '<div class="card"><b>Todavía no está disponible</b><p class="small muted" style="margin:6px 0 0">Lo estamos armando. Va a estar incluido en Vida diaria Pro.</p></div>' : payButtons(p.id, p.n)) + (pl && pl.live ? '<div class="card" style="margin-top:12px"><b>¿Querés todo el plan?</b><p class="small muted" style="margin:6px 0 10px">Forma ' + esc(pl.n) + " Pro incluye este y los demás productos de la sección.</p><button class='btn ghost block' data-plan='" + pl.id + "'>Ver plan " + esc(pl.n) + "</button></div>" : "")) +
       (p.id === "ansiedad" || p.id === "dormir" || p.id === "comidas" || p.id === "plata" ? '<p class="small muted">Es un apoyo de bienestar y organización. No reemplaza la consulta con un profesional de la salud' + (p.id === "plata" ? " ni el asesoramiento financiero" : "") + ".</p>" : "") +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
+  function actPreview(p) {
+    var A = p.act && ACTS[p.act]; if (!A) return "";
+    return '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>";
   }
   function openOrganizar() {
     close();
     var el = document.createElement("div"); el.className = "full"; el.id = "full";
-    el.innerHTML = '<header><button class="btn ghost sm" data-close>← Volver</button><b>Organizá tu día</b></header><iframe src="organiza?app=1" title="Organizá tu día"></iframe>';
+    el.innerHTML = '<header><button class="btn ghost sm" data-close>← Volver</button><b>Organizá tu día</b></header><iframe src="organiza?app=1" title="Organizá tu día"></iframe><div style="padding:10px 14px;border-top:1px solid var(--line)"><button class="btn block" id="orgdone">Ya organicé mi día</button></div>';
     document.body.appendChild(el);
   }
-  var bt = null;
-  function stopBreath() { if (bt) { clearTimeout(bt); bt = null; } }
-  function openRespirar() {
-    sheet('<h2 style="font-size:22px">Respirar 1 minuto</h2><p class="small muted">Inhalá por la nariz, retené un momento y soltá lento por la boca. Si te mareás, parás y respirás normal.</p><div class="breath"><div class="orb" id="orb">Listo</div></div><div class="row"><button class="btn block" id="bstart">Empezar</button><button class="btn ghost" data-close>Cerrar</button></div>');
+
+  // ---------- actividades guiadas ----------
+  var FAST = false; try { FAST = new URLSearchParams(location.search).get("fast") === "1"; } catch (e) {}
+  var ACT_REQ = { movimiento: "energia", foco: "foco", dormir: "dormir", calma: "ansiedad", cierre: "cierre" };
+  var ACTS = {
+    respirar: { t: "Respiración guiada", note: "Si te mareás, parás y respirás normal.", steps: [
+      { t: "Un minuto para bajar un cambio", d: "Inhalá por la nariz mientras la esfera crece y soltá lento por la boca mientras se achica.", s: 60, type: "breath" }] },
+    calma: { t: "Respiración para calmar", note: "Es un apoyo de bienestar. No reemplaza a un profesional de la salud.", steps: [
+      { t: "Acomodate", d: "Sentate con la espalda apoyada, soltá los hombros y apoyá las manos sin apretar.", s: 20 },
+      { t: "Respiración lenta", d: "Inhalá en 4 tiempos y soltá en 6. La exhalación más larga ayuda a bajar el ritmo.", s: 150, type: "breath" },
+      { t: "Cerrá con atención", d: "Notá cómo estás ahora. ¿Qué cambió respecto de hace 3 minutos?", s: 20 }] },
+    movimiento: { t: "Pausa de movimiento", note: "Hacelo sin dolor. Si algo molesta, salteá ese movimiento con suavidad.", steps: [
+      { t: "Cuello", d: "Giros lentos de cabeza a un lado y al otro, sin forzar.", s: 40 },
+      { t: "Hombros", d: "Círculos amplios hacia atrás y después hacia adelante.", s: 40 },
+      { t: "Columna", d: "Sentado, arqueá la espalda llevando el pecho adelante y redondeala llevando el mentón al pecho, alternando.", s: 45 },
+      { t: "Pecho", d: "Manos atrás, entrelazadas, y abrí el pecho. Respirá profundo.", s: 40 },
+      { t: "Piernas", d: "De pie, inclinate hacia adelante con las rodillas flojas y dejá caer los brazos.", s: 45 },
+      { t: "Cadera", d: "De pie, llevá una rodilla al pecho y cambiá de pierna lentamente.", s: 45 },
+      { t: "Cerrá respirando", d: "Parate, inhalá subiendo los brazos y soltá bajándolos. Tres veces.", s: 30 }] },
+    foco: { t: "Bloque de foco", note: "Dejá el celular boca abajo y cerrá lo que no necesitás.", steps: [
+      { t: "Elegí una sola tarea", d: "¿Qué vas a avanzar en los próximos 25 minutos? Escribila en una frase.", type: "input", ph: "Ej: terminar el informe" },
+      { t: "Preparate", d: "Silenciá notificaciones, cerrá pestañas y llená tu vaso de agua.", s: 30 },
+      { t: "25 minutos de foco", d: "Trabajá solo en tu tarea. Si te distraés, volvé sin culparte.", s: 1500 },
+      { t: "Cerrá el bloque", d: "¿Qué avanzaste? Anotalo en una frase.", type: "input", ph: "Ej: armé el borrador" }] },
+    cierre: { t: "Cierre del día", note: "Lo que escribas queda guardado en tu cuenta.", steps: [
+      { t: "¿Qué salió bien hoy?", d: "Aunque sea algo chico.", type: "input", ph: "Hoy salió bien..." },
+      { t: "¿Qué quedó pendiente?", d: "Anotalo para soltarlo. Mañana se retoma.", type: "input", ph: "Quedó pendiente...", opt: true },
+      { t: "Tus 3 prioridades de mañana", d: "Tres cosas, no más.", type: "input", ph: "1) ... 2) ... 3) ..." },
+      { t: "Respirá y cerrá", d: "Tres respiraciones lentas. El día terminó.", s: 20, type: "breath" }] },
+    dormir: { t: "Rutina para dormir", note: "Si tenés problemas de sueño persistentes, consultá a un profesional.", steps: [
+      { t: "Bajá las luces y las pantallas", d: "Dejá el celular fuera de la cama y bajá la luz de la habitación.", s: 60 },
+      { t: "Estiramiento suave", d: "Sentado en el borde de la cama, llevá el pecho hacia las rodillas y quedate ahí respirando.", s: 90 },
+      { t: "Exhalación larga", d: "Inhalá en 4 y soltá en 6, sin apuro.", s: 180, type: "breath" },
+      { t: "Soltá lo pendiente", d: "Si hay algo que no querés olvidar, anotalo. Si no, seguí.", type: "input", ph: "Para mañana...", opt: true },
+      { t: "Listo para descansar", d: "Apagá la luz. Mañana arrancamos de nuevo.", s: 15 }] },
+    organizar: { t: "Organizá tu día", steps: [] }
+  };
+  var act = null;
+  function stopBreath() { if (act && act.tm) clearInterval(act.tm); act = null; }
+  function actKey(tool) { return tool === "respirar" ? "respirar" : tool === "organizar" ? "organizar" : (tool || "").indexOf("act:") === 0 ? tool.slice(4) : ""; }
+  function gated(h) { return !!h.tool && !!actKey(h.tool); }
+  function mmss(ms) { var s = Math.max(0, Math.ceil(ms / 1000)); return pad(Math.floor(s / 60)) + ":" + pad(s % 60); }
+  function startAct(key) {
+    if (key === "organizar") return openOrganizar();
+    var A = ACTS[key]; if (!A) return;
+    if (ACT_REQ[key] && !owns(prodOf(ACT_REQ[key]))) return openProduct(ACT_REQ[key]);
+    close();
+    act = { key: key, i: 0, vals: [], tm: null, end: 0 };
+    var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el);
+    drawStep();
   }
-  function runBreath() {
-    var orb = $("#orb"), btn = $("#bstart"); if (!orb) return;
-    var steps = [["Inhalá", 1.35, 4000], ["Retené", 1.35, 3000], ["Soltá", 1, 6000]], total = 60000, t0 = Date.now(), i = 0;
-    btn.disabled = true;
-    (function next() {
-      var o = $("#orb"); if (!o) return;
-      if (Date.now() - t0 > total) { o.textContent = "Listo"; o.style.transform = "scale(1)"; btn.disabled = false; btn.textContent = "Otra vez"; return; }
-      var s = steps[i % 3]; i++;
-      o.textContent = s[0]; o.style.transition = "transform " + (s[2] / 1000) + "s ease-in-out"; o.style.transform = "scale(" + s[1] + ")";
-      bt = setTimeout(next, s[2]);
-    })();
+  function drawStep() {
+    var el = $("#full"); if (!el || !act) return;
+    if (act.tm) clearInterval(act.tm);
+    var A = ACTS[act.key], st = A.steps[act.i], last = act.i === A.steps.length - 1;
+    var secs = st.s ? (FAST ? Math.min(st.s, 3) : st.s) : 0;
+    act.end = secs ? Date.now() + secs * 1000 : 0; act.secs = secs; act.phase = "";
+    el.innerHTML = '<header><button class="btn ghost sm" data-actexit>Salir</button><b>' + esc(A.t) + '</b></header>' +
+      '<div class="actbar"><i style="width:' + Math.round(act.i * 100 / A.steps.length) + '%"></i></div>' +
+      '<div class="actbody"><span class="badge">Paso ' + (act.i + 1) + " de " + A.steps.length + "</span><h2>" + esc(st.t) + '</h2><p class="muted">' + esc(st.d) + "</p>" +
+      (st.type === "breath" ? '<div class="breath"><div class="orb" id="orb">Inhalá</div></div>' : "") +
+      (secs ? '<div class="count" id="count">' + mmss(secs * 1000) + "</div>" : "") +
+      (st.type === "input" ? '<textarea id="act-in" rows="4" maxlength="400" placeholder="' + esc(st.ph || "") + '"></textarea>' : "") +
+      (act.i === 0 && A.note ? '<p class="small muted">' + esc(A.note) + "</p>" : "") +
+      '<button class="btn block" id="actnext" disabled>' + (last ? "Terminar" : "Siguiente") + "</button></div>";
+    if (secs) act.tm = setInterval(tickAct, 250);
+    tickAct();
   }
+  function tickAct() {
+    if (!act) return;
+    var A = ACTS[act.key], st = A.steps[act.i], rem = act.end ? act.end - Date.now() : 0;
+    var c = $("#count"); if (c) c.textContent = mmss(rem);
+    var orb = $("#orb");
+    if (orb && rem > 0) {
+      var el = (act.secs * 1000 - rem) % 10000, ph = el < 4000 ? "in" : "out";
+      if (ph !== act.phase) { act.phase = ph; orb.textContent = ph === "in" ? "Inhalá" : "Soltá"; orb.style.transition = "transform " + (ph === "in" ? 4 : 6) + "s ease-in-out"; orb.style.transform = ph === "in" ? "scale(1.35)" : "scale(1)"; }
+    } else if (orb) { orb.textContent = "Bien"; orb.style.transform = "scale(1)"; }
+    if (rem <= 0 && act.tm) { clearInterval(act.tm); act.tm = null; }
+    updateNext();
+  }
+  function updateNext() {
+    var b = $("#actnext"); if (!b || !act) return;
+    var st = ACTS[act.key].steps[act.i], timeOk = !act.end || Date.now() >= act.end;
+    var inOk = st.type !== "input" || st.opt || ($("#act-in") && $("#act-in").value.trim().length > 0);
+    b.disabled = !(timeOk && inOk);
+  }
+  function nextStep() {
+    if (!act) return;
+    var A = ACTS[act.key], st = A.steps[act.i];
+    if (st.type === "input") act.vals.push({ q: st.t, a: ($("#act-in").value || "").trim() });
+    if (act.i < A.steps.length - 1) { act.i++; drawStep(); } else finishAct();
+  }
+  function finishAct() {
+    var key = act.key, A = ACTS[key], vals = act.vals;
+    if (act.tm) clearInterval(act.tm);
+    if (vals.length) { S.notes = S.notes || {}; S.notes[today()] = S.notes[today()] || {}; S.notes[today()][key] = vals; }
+    var marked = completeAct(key); touchBest(); save();
+    var n = streakNow(), el = $("#full"); act = null; if (!el) return;
+    el.innerHTML = '<div class="actbody" style="text-align:center;padding-top:80px"><div class="bigflame on" style="margin:0 auto 10px;width:70px;height:70px">' + ICON.flame + '</div><h2>¡Actividad completa!</h2><p class="muted">' + esc(A.t) + " hecha de verdad. " + (marked ? "Quedó tildada en tu día." : "") + '</p><p><b style="font-size:28px">' + n + "</b> " + (n === 1 ? "día" : "días") + ' de racha</p><button class="btn block" data-actdone>Volver a mi día</button></div>';
+  }
+  function completeAct(key) {
+    var t = today(), hs = activeHabits().filter(function (h) { return gated(h) && actKey(h.tool) === key && !h.days[t]; });
+    if (!hs.length) return false;
+    hs[0].days[t] = 1; return true;
+  }
+  function openRespirar() { startAct("respirar"); }
 
   // ---------- acciones ----------
   function setMsg(t, ok) { var m = $("#amsg"); if (m) { m.textContent = t; m.style.color = ok ? "var(--sage-d)" : "#b3261e"; } }
@@ -518,9 +612,9 @@
     var tool = h.tool ? toolLabel(h.tool) : "";
     return '<div class="habit' + (isNext ? " next" : "") + '"><button class="check" role="checkbox" aria-checked="' + !!h.days[t] + '" aria-label="' + esc(h.name) + '" data-check="' + h.id + '">' + ICON.ok + '</button>' +
       '<button class="hinfo" data-edithabit="' + h.id + '" aria-label="Editar ' + esc(h.name) + '"><b>' + esc(h.name) + '</b><span class="htime' + (h.time ? (h.time <= nowHM() && !h.days[t] ? " late" : "") : " none") + '">' + (h.time ? "⏰ " + esc(h.time) : "+ Poner horario") + (isNext ? " · Lo que sigue" : "") + '</span><span class="dots">' + dots + '</span></button>' +
-      (tool ? '<button class="btn sage sm" data-tool="' + esc(h.tool) + '">' + esc(tool) + "</button>" : '<span class="streak">' + habitStreak(h) + " 🔥</span>") + "</div>";
+      (tool && !h.days[t] ? '<button class="btn sage sm" data-tool="' + esc(h.tool) + '">' + esc(tool) + "</button>" : '<span class="streak">' + habitStreak(h) + " 🔥</span>") + "</div>";
   }
-  function toolLabel(tl) { return tl === "respirar" ? "Respirar" : tl === "organizar" ? "Abrir" : "Ver"; }
+  function toolLabel(tl) { return actKey(tl) ? "Hacer" : "Ver"; }
   function dayList(hs, t) {
     var hm = nowHM(), nextId = null;
     hs.forEach(function (h) { if (!nextId && h.time && h.time >= hm && !h.days[t]) nextId = h.id; });
@@ -543,7 +637,7 @@
   }
   function mm(t) { var a = t.split(":"); return (+a[0]) * 60 + (+a[1]); }
   function hmFrom(m) { m = Math.max(0, Math.min(1439, Math.round(m / 5) * 5)); return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
-  function ownTool(id) { var p = prodOf(id); return p && owns(p) ? "prod:" + id : ""; }
+  function ownTool(id) { var p = prodOf(id); if (!p || !owns(p)) return ""; return p.act ? "act:" + p.act : "prod:" + id; }
   function buildDay(q) {
     var wake = mm(q.wake), sleep = mm(q.sleep); if (sleep <= wake) sleep += 1440; sleep = Math.min(sleep, 1439);
     var ws = q.workStart ? mm(q.workStart) : null, we = q.workEnd ? mm(q.workEnd) : null, lunch = mm(q.lunch);
@@ -559,13 +653,13 @@
       if (!soft && we - ws >= 300) add(ws + (we - ws) / 2 + 30, "Segundo bloque de foco", ownTool("foco"));
     }
     add(lunch, "Almuerzo", has("comidas") ? ownTool("comidas") : "");
-    if (has("ansiedad") || strong) add(lunch + 180, "Pausa de respiración", "respirar");
+    if (has("ansiedad") || strong) add(lunch + 180, "Pausa de respiración", ownTool("ansiedad") || "respirar");
     if (q.move && q.move !== "no") add(q.move === "manana" ? wake + 60 : (we !== null ? we + 45 : lunch + 300), "Movimiento (20 min)", ownTool("energia"));
     if (has("orden")) add((we !== null ? we : lunch + 240) + 90, "Casa y plata en orden (15 min)", ownTool("casa"));
     if (has("comidas")) add(sleep - 150, "Cena tranquila", ownTool("comidas"));
     if (has("familia")) add(sleep - 180, "Tiempo con los tuyos", ownTool("familia"));
     if (has("habitos")) add(sleep - 100, "Repasar mis hábitos", ownTool("habitos-pro"));
-    add(sleep - 60, "Cierre del día y preparar mañana", "organizar");
+    add(sleep - 60, "Cierre del día y preparar mañana", ownTool("cierre") || "organizar");
     add(sleep - 30, "Rutina para dormir", ownTool("dormir"));
     return out;
   }
@@ -665,7 +759,11 @@
     if (d.prod) return openProduct(d.prod);
     if (d.open === "organizar") return openOrganizar();
     if (d.open === "respirar") return openRespirar();
-    if (t.id === "bstart") return runBreath();
+    if (t.id === "orgdone") { completeAct("organizar"); touchBest(); save(); close(); render(); return; }
+    if (d.actexit !== undefined) { if (confirm("¿Salir? Si salís, la actividad no se tilda.")) { close(); } return; }
+    if (d.actdone !== undefined) { close(); render(); return; }
+    if (t.id === "actnext") return nextStep();
+    if (d.act) return startAct(d.act);
     if (d.area) { toggleIn(draft.areas, d.area); var nm = $("#f-name"); if (nm) draft.name = nm.value; renderOnboard(); return; }
     if (d.sport) { toggleIn(draft.sports, d.sport); var nm2 = $("#f-name"); if (nm2) draft.name = nm2.value; renderOnboard(); return; }
     if (t.id === "create") {
@@ -678,7 +776,7 @@
     }
     if (d.check) {
       var h = S.habits.filter(function (x) { return x.id === d.check; })[0];
-      if (h) { if (h.days[today()]) delete h.days[today()]; else h.days[today()] = 1; touchBest(); save(); render(); }
+      if (h) { if (h.days[today()]) { delete h.days[today()]; touchBest(); save(); render(); } else if (gated(h)) { startAct(actKey(h.tool)); } else { h.days[today()] = 1; touchBest(); save(); render(); } }
       return;
     }
     if (d.delhabit) { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hh = S.habits.filter(function (x) { return x.id === d.delhabit; })[0]; if (hh) hh.del = true; save(); render(); } return; }
@@ -691,7 +789,7 @@
     if (t.id === "dayquiz") return openQuiz();
     if (t.id === "qgo") return submitQuiz();
     if (d.qarea) { t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") === "true" ? "false" : "true"); return; }
-    if (d.tool) { var tl = d.tool; if (tl === "respirar") return openRespirar(); if (tl === "organizar") return openOrganizar(); if (tl.indexOf("prod:") === 0) return openProduct(tl.slice(5)); return; }
+    if (d.tool) { var tl = d.tool; if (actKey(tl)) return startAct(actKey(tl)); if (tl.indexOf("prod:") === 0) return openProduct(tl.slice(5)); return; }
     if (t.id === "ics") return downloadIcs();
     if (d.parea) { toggleIn(S.profile.areas, d.parea); save(); render(); return; }
     if (d.psport) { toggleIn(S.profile.sports, d.psport); save(); render(); return; }
@@ -722,6 +820,7 @@
       postLead(em, "app-compra").then(function (ok) { $("#nmsg").textContent = ok ? "Listo, te avisamos." : "Ahora no se pudo enviar. Probá más tarde."; });
     }
   });
+  document.addEventListener("input", function (e) { if (e.target && e.target.id === "act-in") updateNext(); });
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Enter") return;
     var id = e.target && e.target.id;

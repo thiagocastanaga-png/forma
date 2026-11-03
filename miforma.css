@@ -119,3 +119,12 @@ main{flex:1;padding:20px 18px 110px}
 
 .daypart{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
 .habit.next{background:rgba(198,244,50,.2);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:12px}
+
+.actbar{height:5px;background:var(--line)}
+.actbar i{display:block;height:100%;background:var(--sage);transition:width .3s}
+.actbody{padding:22px 18px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px;max-width:560px;width:100%;margin:0 auto}
+.actbody h2{font-size:28px;line-height:1.1}
+.actbody p{margin:0}
+.count{font-family:Montserrat,sans-serif;font-weight:800;font-size:44px;text-align:center}
+.actbody textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;resize:vertical}
+.actbody .btn{margin-top:auto}
