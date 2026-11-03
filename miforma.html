@@ -13,12 +13,31 @@
 <meta name="apple-mobile-web-app-title" content="Forma">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@800&display=swap">
 <link rel="stylesheet" href="miforma.css?v=6">
+<style>
+#splash{position:fixed;inset:0;z-index:100;background:#F5F1E8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .45s ease}
+#splash.out{opacity:0;pointer-events:none}
+#splash .w{font-family:Montserrat,Inter,system-ui,sans-serif;font-weight:800;font-size:60px;letter-spacing:-.04em;color:#111;display:flex;align-items:baseline;line-height:1}
+#splash .d{display:inline-block;width:13px;height:13px;margin-left:5px;background:#86A892;border-radius:50%;animation:morph 2.4s ease-in-out infinite}
+#splash p{margin:0;font:600 15px Inter,system-ui,sans-serif;color:#6b675e;letter-spacing:.01em;animation:rise .8s ease .2s both}
+@keyframes morph{0%,100%{border-radius:50%;background:#C6F432}20%{border-radius:0;background:#FFC83D}40%{border-radius:50% 50% 0 0;background:#B9A7F0}60%{border-radius:100% 0 0 0;background:#4C7DFF}80%{border-radius:0 50% 50% 0;background:#FF8A4C}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#splash .d{animation:none}#splash p{animation:none}}
+</style>
+<link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)" href="splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)" href="splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)" href="splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)" href="splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)" href="splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)" href="splash-828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)" href="splash-750x1334.png">
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="w">forma<i class="d"></i></div><p>Dale forma a la vida que querés</p></div>
 <div id="app"></div>
 <noscript>Esta app necesita JavaScript.</noscript>
 <script src="config.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="miforma.js?v=7"></script>
+<script src="miforma.js?v=8"></script>
+<script>setTimeout(function(){var e=document.getElementById("splash");if(e)e.classList.add("out")},7000)</script>
 </body>
 </html>

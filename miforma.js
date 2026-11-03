@@ -1003,6 +1003,7 @@
   // ---------- inicio ----------
   initSb();
   render();
+  (function () { var sp = document.getElementById("splash"); if (!sp) return; setTimeout(function () { sp.classList.add("out"); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 500); }, Math.max(0, 1100 - (window.performance ? performance.now() : 0))); })();
   if (sb) {
     sb.auth.onAuthStateChange(function (ev) { if (ev === "PASSWORD_RECOVERY") { mode = "recovery"; render(); } });
     sb.auth.getSession().then(function (r) { if (r && r.data && r.data.session && mode !== "recovery") return onSession(r.data.session); }).catch(function () {});
