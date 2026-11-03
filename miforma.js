@@ -89,7 +89,9 @@
   function streakNow() { var n = 0, i = anyDone(today()) ? 0 : 1; while (i < 4000 && anyDone(daysBack(i))) { n++; i++; } return n; }
   function habitStreak(h) { var n = 0, i = h.days[today()] ? 0 : 1; while (i < 4000 && h.days[daysBack(i)]) { n++; i++; } return n; }
   function totalDone() { var n = 0; S.habits.forEach(function (h) { n += Object.keys(h.days || {}).length; }); return n; }
-  function activeHabits() { return S.habits.filter(function (h) { return !h.del; }); }
+  function activeHabits() { return S.habits.filter(function (h) { return !h.del; }).sort(function (a, b) { var x = a.time || "99:99", y = b.time || "99:99"; return x < y ? -1 : x > y ? 1 : 0; }); }
+  function pad(n) { return ("0" + n).slice(-2); }
+  function nowHM() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
   function touchBest() { var n = streakNow(); if (n > S.best) S.best = n; }
 
   // permisos
@@ -143,11 +145,11 @@
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
-    (remote.habits || []).forEach(function (h) { map[h.id] = { id: h.id, name: h.name, days: Object.assign({}, h.days || {}), del: !!h.del }; });
+    (remote.habits || []).forEach(function (h) { map[h.id] = { id: h.id, name: h.name, time: h.time || "", days: Object.assign({}, h.days || {}), del: !!h.del }; });
     (local.habits || []).forEach(function (h) {
       var m = map[h.id];
-      if (!m) map[h.id] = { id: h.id, name: h.name, days: Object.assign({}, h.days || {}), del: !!h.del };
-      else { Object.keys(h.days || {}).forEach(function (d) { m.days[d] = 1; }); m.del = m.del || !!h.del; }
+      if (!m) map[h.id] = { id: h.id, name: h.name, time: h.time || "", days: Object.assign({}, h.days || {}), del: !!h.del };
+      else { m.name = h.name || m.name; m.time = h.time !== undefined ? h.time : m.time; Object.keys(h.days || {}).forEach(function (d) { m.days[d] = 1; }); m.del = m.del || !!h.del; }
     });
     Object.keys(map).forEach(function (k) { out.habits.push(map[k]); });
     return out;
@@ -285,21 +287,22 @@
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + "</div></div>";
     html += '<div class="sec">Tus hábitos de hoy</div>';
     if (!hs.length) {
-      var s = ["Tomar agua al despertar", "Caminar 20 minutos", "Leer 10 páginas", "Respirar 1 minuto", "Acostarme a horario"];
+      var s = ["Tomar agua al despertar", "Caminar 20 minutos", "Leer 10 páginas", "Respirar 1 minuto", "Acostarme a horario"], tm = ["07:30", "18:00", "21:30", "12:00", "23:00"];
       html += '<div class="card empty"><b>Empezá con uno solo</b><p class="muted small">Elegí una sugerencia o escribí la tuya.</p><div class="chips" style="justify-content:center">' +
-        s.map(function (x) { return '<button class="chip" data-addhabit="' + esc(x) + '">' + esc(x) + "</button>"; }).join("") + "</div></div>";
+        s.map(function (x, i) { return '<button class="chip" data-addhabit="' + esc(x) + '" data-time="' + tm[i] + '">' + esc(x) + " · " + tm[i] + "</button>"; }).join("") + "</div></div>";
     } else {
       html += '<div class="card">' + hs.map(function (h) {
         var dots = "";
         for (var i = 6; i >= 0; i--) dots += '<i class="' + (h.days[daysBack(i)] ? "on" : "") + '"></i>';
-        return '<div class="habit"><button class="check" role="checkbox" aria-checked="' + !!h.days[t] + '" aria-label="' + esc(h.name) + '" data-check="' + h.id + '">' + ICON.ok + '</button><div style="flex:1;min-width:0"><b>' + esc(h.name) + '</b><div class="dots">' + dots + '</div></div><span class="streak">' + habitStreak(h) + ' 🔥</span><button class="btn ghost sm" data-delhabit="' + h.id + '" aria-label="Borrar">✕</button></div>';
+        return '<div class="habit"><button class="check" role="checkbox" aria-checked="' + !!h.days[t] + '" aria-label="' + esc(h.name) + '" data-check="' + h.id + '">' + ICON.ok + '</button><button class="hinfo" data-edithabit="' + h.id + '" aria-label="Editar ' + esc(h.name) + '"><b>' + esc(h.name) + '</b><span class="htime' + (h.time ? (h.time <= nowHM() && !h.days[t] ? " late" : "") : " none") + '">' + (h.time ? "⏰ " + esc(h.time) : "+ Poner horario") + '</span><span class="dots">' + dots + '</span></button><span class="streak">' + habitStreak(h) + ' 🔥</span></div>';
       }).join("") + "</div>";
     }
     if (hs.length >= habitLimit()) {
       html += '<div class="card sage"><b>Llegaste al límite del plan gratis (' + FREE_HABITS + " hábitos)</b><p class='small' style='margin:6px 0 12px'>Con Vida diaria Pro tenés hábitos sin límite y todos los productos del plan.</p><button class='btn' data-plan='vida'>Ver Vida diaria Pro</button></div>";
     } else {
-      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Nuevo hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff"><button class="btn sage">Agregar</button></form>';
+      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Nuevo hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:#fff"><button class="btn sage">Agregar</button></form><p class="small muted" style="margin:6px 0 0">El horario es opcional y flexible: es solo un recordatorio, no una obligación.</p>' + reminderCard();
     }
+    if (hs.length >= habitLimit()) html += reminderCard();
     html += '<div class="sec">Herramientas gratis</div>' +
       '<button class="prod" data-open="organizar"><span class="shape">' + SHAPES.vida + '</span><span><b>Organizá tu día</b><small>Armá tu día en bloques con horarios</small></span><span class="tag ok">Gratis</span></button>' +
       '<button class="prod" data-open="respirar"><span class="shape">' + SHAPES.tenis + '</span><span><b>Respirar 1 minuto</b><small>Pausa guiada para bajar un cambio</small></span><span class="tag ok">Gratis</span></button>';
@@ -505,11 +508,63 @@
     };
     if (sb) sb.auth.signOut().then(go, go); else go();
   }
-  function addHabit(name) {
+  function addHabit(name, time) {
     name = (name || "").trim(); if (!name) return;
     if (activeHabits().length >= habitLimit()) { render(); return; }
-    S.habits.push({ id: "h" + Date.now(), name: name.slice(0, 60), days: {} }); save(); render();
+    S.habits.push({ id: "h" + Date.now(), name: name.slice(0, 60), time: /^\d\d:\d\d$/.test(time || "") ? time : "", days: {} }); save(); render();
   }
+
+  // ---------- horarios y recordatorios ----------
+  function openHabit(id) {
+    var h = S.habits.filter(function (x) { return x.id === id; })[0]; if (!h) return;
+    sheet('<h2 style="font-size:22px">Tu hábito</h2><p class="small muted">Elegí un horario de referencia: te sirve de recordatorio, no hace falta cumplirlo al minuto.</p>' +
+      '<label class="field" style="margin-top:12px"><span>Nombre</span><input id="e-name" maxlength="60" value="' + esc(h.name) + '"></label>' +
+      '<label class="field" style="margin-top:12px"><span>Horario (opcional)</span><input id="e-time" type="time" value="' + esc(h.time || "") + '"></label>' +
+      '<button class="linkbtn small" id="hclear" style="margin:8px 0 14px">Quitar horario</button>' +
+      '<button class="btn block" id="hsave" data-id="' + h.id + '">Guardar</button>' +
+      '<div class="grid2" style="margin-top:10px"><button class="btn ghost" id="hdel" data-id="' + h.id + '">Borrar hábito</button><button class="btn ghost" data-close>Cerrar</button></div>');
+  }
+  function reminderCard() {
+    if (!S.habits.some(function (h) { return !h.del && h.time; })) return "";
+    var perm = window.Notification ? Notification.permission : "unsupported";
+    return '<div class="card" style="margin-top:12px"><b>Recordatorios</b><p class="small muted" style="margin:6px 0 10px">Para que te avisen aunque no tengas la app abierta, pasá tus horarios al calendario del celular.</p>' +
+      '<button class="btn sage block" id="ics">Agregar a mi calendario</button>' +
+      (perm === "default" ? '<button class="btn ghost block" id="notif" style="margin-top:8px">Avisarme con la app abierta</button>' : perm === "granted" ? '<p class="small muted" style="margin:8px 0 0">Avisos con la app abierta: activados.</p>' : "") + "</div>";
+  }
+  function enableNotif() {
+    if (!window.Notification) { alert("Tu navegador no permite avisos. Usá el calendario."); return; }
+    Notification.requestPermission().then(function () { render(); });
+  }
+  var notified = {};
+  function checkReminders() {
+    if (!window.Notification || Notification.permission !== "granted" || !S.profile) return;
+    var hm = nowHM(), t = today();
+    activeHabits().forEach(function (h) {
+      var k = h.id + t;
+      if (h.time && h.time <= hm && !h.days[t] && !notified[k] && h.time >= minusMin(10)) {
+        notified[k] = 1;
+        var opts = { body: "Es tu momento: " + h.name + " (" + h.time + "). Sin apuro, cuando puedas.", icon: "icon-192.png", tag: k };
+        if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", opts); }, function () { new Notification("Forma", opts); });
+        else new Notification("Forma", opts);
+      }
+    });
+  }
+  function minusMin(m) { var d = new Date(Date.now() - m * 60000); return d.getDate() === new Date().getDate() ? pad(d.getHours()) + ":" + pad(d.getMinutes()) : "00:00"; }
+  function downloadIcs() {
+    var hs = activeHabits().filter(function (h) { return h.time; });
+    if (!hs.length) return;
+    var d = new Date(), day = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+    var L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Forma//ES", "CALSCALE:GREGORIAN"];
+    hs.forEach(function (h) {
+      var hh = h.time.replace(":", "") + "00";
+      L.push("BEGIN:VEVENT", "UID:" + h.id + "@formargentina.com", "DTSTAMP:" + day + "T000000Z", "DTSTART:" + day + "T" + hh, "DURATION:PT15M", "RRULE:FREQ=DAILY",
+        "SUMMARY:" + h.name.replace(/[,;\\\n]/g, " "), "DESCRIPTION:Recordatorio de Forma. Sin apuro, cuando puedas.",
+        "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + h.name.replace(/[,;\\\n]/g, " "), "END:VALARM", "END:VEVENT");
+    });
+    L.push("END:VCALENDAR");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([L.join("\r\n")], { type: "text/calendar" })); a.download = "forma-recordatorios.ics"; a.click();
+  }
+  setInterval(checkReminders, 30000);
 
   // ---------- eventos ----------
   document.addEventListener("click", function (e) {
@@ -547,7 +602,13 @@
       return;
     }
     if (d.delhabit) { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hh = S.habits.filter(function (x) { return x.id === d.delhabit; })[0]; if (hh) hh.del = true; save(); render(); } return; }
-    if (d.addhabit) { addHabit(d.addhabit); return; }
+    if (d.addhabit) { addHabit(d.addhabit, d.time); return; }
+    if (d.edithabit) return openHabit(d.edithabit);
+    if (t.id === "hsave") { var eh = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0], nn = $("#e-name").value.trim(); if (eh && nn) { eh.name = nn.slice(0, 60); eh.time = $("#e-time").value || ""; save(); close(); render(); } return; }
+    if (t.id === "hclear") { $("#e-time").value = ""; return; }
+    if (t.id === "hdel") { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hx = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0]; if (hx) hx.del = true; save(); close(); render(); } return; }
+    if (t.id === "notif") return enableNotif();
+    if (t.id === "ics") return downloadIcs();
     if (d.parea) { toggleIn(S.profile.areas, d.parea); save(); render(); return; }
     if (d.psport) { toggleIn(S.profile.sports, d.psport); save(); render(); return; }
     if (t.id === "psave") {
@@ -571,7 +632,7 @@
     }
   });
   document.addEventListener("submit", function (e) {
-    if (e.target.id === "addh") { e.preventDefault(); addHabit($("#hname").value); }
+    if (e.target.id === "addh") { e.preventDefault(); addHabit($("#hname").value, $("#htime").value); }
     if (e.target.id === "notify") {
       e.preventDefault(); var em = $("#n-email").value.trim(); $("#nmsg").textContent = "Enviando...";
       postLead(em, "app-compra").then(function (ok) { $("#nmsg").textContent = ok ? "Listo, te avisamos." : "Ahora no se pudo enviar. Probá más tarde."; });
