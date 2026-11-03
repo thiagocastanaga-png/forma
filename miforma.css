@@ -116,3 +116,6 @@ main{flex:1;padding:20px 18px 110px}
 .htime.late{color:#c0561a;font-weight:600}
 .htime.none{opacity:.6}
 .hinfo .dots{margin-top:5px}
+
+.daypart{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.habit.next{background:rgba(198,244,50,.2);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:12px}
