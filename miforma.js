@@ -1,7 +1,9 @@
 (function () {
   "use strict";
   var CFG = window.FORMA || {};
-  var KEY = "forma_app_v1";
+  var KEY = "forma_app_v1", NUEVO = false;
+  // ?nuevo=1 → cuenta de prueba nueva, aislada de tus datos reales (con &pro=1 desbloquea Pro)
+  try { var qn = new URLSearchParams(location.search); if (qn.get("nuevo") === "1") { NUEVO = true; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
   var FREE_HABITS = 0;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -115,6 +117,7 @@
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
     if (user && sb) { sync.state = "pending"; clearTimeout(pushT); pushT = setTimeout(push, 900); }
   }
+  try { if (NUEVO && !S.profile) { var qq = new URLSearchParams(location.search); S = blank(); S.profile = { name: "Prueba", email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = qq.get("pro") === "1"; localStorage.setItem(KEY, JSON.stringify(S)); } } catch (e) {}
   try { if (new URLSearchParams(location.search).get("demo") === "1") { S.demo = true; S.guest = true; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} } } catch (e) {}
 
   function today(d) { d = d || new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
@@ -170,6 +173,7 @@
 
   // ---------- cuentas y sincronización ----------
   function initSb() {
+    if (NUEVO) { sb = null; return; }
     try {
       if (window.supabase && CFG.supabase && CFG.supabase.url && CFG.supabase.key) {
         sb = window.supabase.createClient(CFG.supabase.url, CFG.supabase.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
