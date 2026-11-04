@@ -248,3 +248,13 @@ main{flex:1;padding:20px 18px 110px}
 .bignow .btn.ghost{border-color:rgba(17,17,17,.35);color:inherit}
 .nextprev{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--sage);border-radius:16px;padding:12px 14px;margin:0 0 14px;cursor:pointer}
 .nextprev b{font-size:16px}
+
+/* ---- "ahora" en salvia (más suave) con una forma lima de acento ---- */
+.lg.now{background:var(--sage)}
+.tl .blk.now{background:var(--sage);border-left-color:var(--ink)}
+.bignow{background:var(--sage);position:relative;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.14)}
+.bignow:after{content:"";position:absolute;right:-34px;top:-34px;width:120px;height:120px;border-radius:50%;background:var(--lima);opacity:.55;pointer-events:none}
+.bignow>*{position:relative;z-index:1}
+.bignow.soon:after,.bignow.end:after{background:var(--sage);opacity:.25}
+.bignow.soon,.bignow.end{background:var(--tl-next)}
+.bignow .bchips.big em{background:rgba(17,17,17,.16)}
