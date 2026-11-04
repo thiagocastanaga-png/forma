@@ -156,5 +156,21 @@ main{flex:1;padding:20px 18px 110px}
 @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(10px,-14px)}}
 @media (prefers-reduced-motion:reduce){#bg i{animation:none}}
 #app{z-index:1}
-.full{background:transparent}
 .full>header{background:rgba(245,241,232,.9)}
+
+/* ---- armado del día ---- */
+.dbody{flex:1;overflow:auto;padding:16px 16px 8px}
+.dfoot{padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bone)}
+.blk{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.blk:last-child{border:0}
+.blk .tm{width:46px;flex:none;font-size:13px;font-weight:600;color:var(--muted);line-height:1.35}
+.blk .bd{flex:1;min-width:0}
+.blk .kd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.blk .kd i{width:8px;height:8px;border-radius:50%;flex:none}
+.blk b{display:block;font-size:16px;margin-top:2px}
+.blk .nt{display:block;font-size:14px;color:var(--muted);margin-top:2px}
+.blk.now{background:rgba(198,244,50,.22);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:12px}
+.blk.done{opacity:.55}
+.blk.soft b{font-weight:500;color:var(--muted)}
+.blk .btn svg{width:14px;height:14px}
+.dbody .stat b{font-size:19px;white-space:nowrap}.dbody .stat span{font-size:12px}
