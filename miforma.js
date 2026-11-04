@@ -399,7 +399,7 @@
     if (S.demo || isPro("vida")) return vHoyPro();
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-    return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + armSection() +
+    return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
       (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
@@ -409,13 +409,13 @@
     var greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     var head = wc === 0 ? "Esta semana todavía no sumaste nada. Con una cosa chica alcanza." : wc < 3 ? "Vas sumando. Tres días en la semana ya es una gran constancia." : "¡Muy buena semana! Así se construye el orden.";
-    var html = '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p>" +
-      '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>" +
+    var gr = '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p>" + '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>";
+    var html = gr +
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
     html += quoteCard();
     if (S.intencion) html += '<div class="card small"><span class="muted">Tu intención de la semana</span><br><b>' + esc(S.intencion) + "</b></div>";
-    html += sportCta() + reviewCard() + armSection() + winsCard() + todoCard();
+    html += sportCta() + reviewCard() + "@@ARM@@" + winsCard() + todoCard();
     html += '<div class="sec">Mis hábitos</div>';
     if (!hs.length) {
       html += '<div class="card empty"><b>Todavía no tenés hábitos</b><p class="muted small">Elegí unos pocos del menú o escribí el tuyo. Mejor pocos y que se sostengan.</p><button class="btn" id="menu">Elegir del menú</button></div>';
@@ -432,7 +432,15 @@
       '<button class="prod" data-open="organizar"><span class="shape">' + SHAPES.vida + '</span><span><b>Organizá tu día</b><small>Armá tu día en bloques con horarios</small></span><span class="tag ok">Gratis</span></button>' +
       '<button class="prod" data-open="respirar"><span class="shape">' + SHAPES.tenis + '</span><span><b>Respiración guiada</b><small>Un minuto para bajar un cambio</small></span><span class="tag ok">Gratis</span></button>' +
       PRODUCTS.filter(function (p) { return p.act; }).map(prodRow).join("");
-    return html;
+    if (armBlocks().length) {
+      if (viewMode() === "now") {
+        var rest = html.slice(gr.length).replace("@@ARM@@", "");
+        return gr + viewToggle() + cierreCard() + nowSection() + compCard() +
+          '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy: constancia, frase, pendientes y hábitos") + "</button>" + (moreOpen ? rest : "");
+      }
+      return html.replace("@@ARM@@", viewToggle() + armSection());
+    }
+    return html.replace("@@ARM@@", armSection());
   }
 
   // --- Planes (como los cursos) ---
@@ -757,7 +765,7 @@
   function armSection() {
     var bl = armBlocks();
     if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 12 preguntas rápidas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
-    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake) now += 1440;
+    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
     var html = cierreCard() + compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
       '<p class="small muted" style="margin:0 0 6px">' + (pro && tr.length ? n + " de " + tr.length + " momentos hechos hoy. " : "") + "Sin apuro: es una guía, no una obligación.</p>" +
@@ -824,6 +832,35 @@
     }
     if (now < th && now >= 360) return "";
     return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.9">' + (n ? "Cumpliste " + n + " de " + list.length + " compromisos" + (nb ? " y " + nb + " momentos de tu día" : "") + ". Pasamos lo cumplido a “Lo que hice bien hoy”." : (nb ? "Hiciste " + nb + " momentos de tu día. Eso también cuenta." : "Hay días así. Cerrá el día sin culpa: mañana es otro.")) + '</p><button class="btn sage" id="cierre">Cerrar mi día</button></div>';
+  }
+
+
+  // ---------- vista "Ahora" (bloque actual en grande) ----------
+  var moreOpen = false;
+  function viewMode() { try { return localStorage.getItem("forma_view") === "day" ? "day" : "now"; } catch (e) { return "now"; } }
+  function viewToggle() {
+    var v = viewMode();
+    return '<div class="seg themeseg" style="margin:10px 0 14px"><button data-setview="now" aria-pressed="' + (v === "now") + '">Ahora</button><button data-setview="day" aria-pressed="' + (v === "day") + '">Día completo</button></div>';
+  }
+  function nowSection() {
+    var bl = armBlocks(); if (!bl.length) return armSection();
+    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(); if (now < bl[0].s && now + 1440 < bl[bl.length - 1].e) now += 1440;
+    var i = -1, state = "now"; bl.forEach(function (b, k) { if (now >= b.s && now < b.e) i = k; });
+    if (i < 0) { bl.forEach(function (b, k) { if (i < 0 && b.s > now) i = k; }); if (i >= 0) state = "soon"; else { i = bl.length - 1; state = "end"; } }
+    var b = bl[i], K = window.FormaDia.KIND[b.kind], pro = isProU(), ck = armCheckable(b), dn = armDone(b), tk = armToolOf(b), det = bdetails(b), F = window.FormaDia;
+    var when = state === "now" ? "Ahora · faltan " + F.durText(Math.max(1, b.e - now)) : state === "soon" ? "Empieza a las " + F.fmt(b.s) + " · en " + F.durText(Math.max(1, b.s - now)) : "Último momento de tu día";
+    var html = '<div class="bignow ' + state + (dn ? " done" : "") + '"><span class="kd"><i style="background:' + K.dot + '"></i>' + K.tag + " · " + F.durText(b.e - b.s) + (dn ? " · Hecho" : "") + '</span>' +
+      '<div class="bwhen">' + F.fmt(b.s) + " – " + F.fmt(b.e) + '</div><h2>' + esc(b.label) + '</h2><p class="bnote">' + esc(b.note || "") + "</p>" +
+      '<div class="bmeta">' + when + "</div>" +
+      (state === "now" ? '<span class="pg big"><i style="width:' + Math.round((now - b.s) * 100 / (b.e - b.s)) + '%"></i></span>' : "") +
+      (det.length ? '<div class="bchips big">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : "") +
+      '<div class="bbtns">' +
+      (pro && ck && tk && !dn ? '<button class="btn block" data-armtool="' + tk + '">Hacer ahora (actividad guiada)</button>' : "") +
+      (pro && ck ? '<button class="btn ' + (dn ? "ghost" : "") + ' block" data-ackb="' + i + '">' + (dn ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
+      '<button class="btn ghost block" data-blkopen="' + i + '">' + (pro ? "Mis detalles de este momento" : "Ver detalle") + "</button></div></div>";
+    var nb = bl[i + 1];
+    if (nb) html += '<button class="nextprev" data-blkopen="' + (i + 1) + '"><span class="small muted">Sigue</span><b>' + F.fmt(nb.s) + " · " + esc(nb.label) + '</b><span class="small muted">' + F.durText(nb.e - nb.s) + "</span></button>";
+    return html;
   }
 
   // ---------- compromisos de hoy y detalles por bloque ----------
@@ -1148,7 +1185,7 @@
   setInterval(function () {
     var ae = document.activeElement;
     if (tab !== "hoy" || $("#sheet") || $("#full") || !S.profile || (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName))) return;
-    if ($(".tl")) render();
+    if ($(".tl") || $(".bignow")) render();
   }, 60000);
 
   // ---------- eventos ----------
@@ -1204,6 +1241,8 @@
     if (d.ackb !== undefined) { if (!isProU()) return; var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2 && isProU()) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
+    if (d.setview) { try { localStorage.setItem("forma_view", d.setview); } catch (e) {} render(); window.scrollTo(0, 0); return; }
+    if (t.id === "more") { moreOpen = !moreOpen; render(); return; }
     if (t.id === "cierre") {
       var tdz = today(); S.wins = S.wins || {}; var wl2 = S.wins[tdz] = S.wins[tdz] || [];
       compToday().filter(compDone).forEach(function (x) { if (wl2.indexOf(x) < 0 && wl2.length < 8) wl2.push(x); });

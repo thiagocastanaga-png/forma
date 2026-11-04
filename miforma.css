@@ -227,3 +227,24 @@ main{flex:1;padding:20px 18px 110px}
 /* ---- nivel ---- */
 .lvshape{width:52px;height:52px;flex:none;display:grid;place-items:center}
 .lvshape svg{width:48px;height:48px}
+
+/* ---- vista Ahora ---- */
+.bignow{background:var(--lima);color:#111;border-radius:26px;padding:22px 20px;margin:0 0 12px;box-shadow:0 6px 22px rgba(0,0,0,.12)}
+.bignow.soon,.bignow.end{background:var(--tl-next);color:var(--tx);box-shadow:none;border:1px solid var(--line)}
+.bignow .kd{display:flex;align-items:center;gap:6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+.bignow .kd i{width:9px;height:9px;border-radius:50%;flex:none}
+.bignow .bwhen{font-family:Montserrat,sans-serif;font-weight:800;font-size:18px;margin-top:14px;opacity:.85}
+.bignow h2{font-size:34px;line-height:1.05;margin:6px 0 10px}
+.bignow .bnote{font-size:17px;line-height:1.4;margin:0 0 12px;opacity:.9}
+.bignow .bmeta{font-size:14px;font-weight:600;opacity:.8}
+.bignow .pg.big{height:9px;margin:10px 0 4px}
+.bignow .bchips.big em{font-size:14px;padding:5px 12px;background:rgba(17,17,17,.14)}
+.bignow.soon .bchips.big em,.bignow.end .bchips.big em{background:var(--chipbg)}
+.bignow .bbtns{display:grid;gap:8px;margin-top:16px}
+.bignow.soon .pg,.bignow.end .pg{display:none}
+.bignow.done h2{text-decoration:line-through;text-decoration-thickness:2px}
+.bignow .btn:not(.ghost){background:#111;color:#F5F1E8}
+.bignow.soon .btn:not(.ghost),.bignow.end .btn:not(.ghost){background:var(--dk);color:var(--dk-tx)}
+.bignow .btn.ghost{border-color:rgba(17,17,17,.35);color:inherit}
+.nextprev{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--sage);border-radius:16px;padding:12px 14px;margin:0 0 14px;cursor:pointer}
+.nextprev b{font-size:16px}
