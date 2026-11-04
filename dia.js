@@ -498,7 +498,7 @@
     st = { step: 0, ans: initial().ans, focus: null, opts: opts };
     if (opts.ans) { st.ans = JSON.parse(JSON.stringify(opts.ans)); st.step = 1; }
     host = document.createElement("div"); host.className = "full"; host.id = "full";
-    host.innerHTML = '<header><button class="btn ghost sm" data-da="exit">Salir</button><b>Armá tu día</b></header><div class="actbar"><i style="width:0%"></i></div><div class="dbody"></div><div class="dfoot"></div>';
+    host.innerHTML = '<header><button class="btn ghost sm" data-da="exit">Salir</button><b>'+String(opts.title||"Armá tu día").replace(/</g,"")+'</b></header><div class="actbar"><i style="width:0%"></i></div><div class="dbody"></div><div class="dfoot"></div>';
     document.body.appendChild(host);
     host.addEventListener("click", function (e) { e.stopPropagation(); onClick(e); });
     host.addEventListener("input", function (e) { e.stopPropagation(); onInput(e); });

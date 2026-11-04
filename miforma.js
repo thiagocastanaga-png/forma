@@ -186,7 +186,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "wk"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -208,6 +208,7 @@
     out.actn = Math.max(local.actn || 0, remote.actn || 0); out.cierre = Object.assign({}, remote.cierre || {}, local.cierre || {});
     out.comp = Object.assign({}, remote.comp || {}, local.comp || {}); out.bn = Object.assign({}, remote.bn || {}, local.bn || {});
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
+    out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.notes = Object.assign({}, remote.notes || {}, local.notes || {});
     out.checks = Object.assign({}, remote.checks || {}, local.checks || {});
     var seen = {}, rv = [];
@@ -400,7 +401,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -435,10 +436,10 @@
     if (armBlocks().length) {
       if (viewMode() === "now") {
         var rest = html.slice(gr.length).replace("@@ARM@@", "");
-        return gr + viewToggle() + cierreCard() + nowSection() + compCard() +
+        return gr + viewToggle() + cierreCard() + nowSection() + compCard() + weekCard() +
           '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy: constancia, frase, pendientes y hábitos") + "</button>" + (moreOpen ? rest : "");
       }
-      return html.replace("@@ARM@@", viewToggle() + armSection());
+      return html.replace("@@ARM@@", viewToggle() + weekCard() + armSection());
     }
     return html.replace("@@ARM@@", armSection());
   }
@@ -750,7 +751,42 @@
 
   // ---------- armado del día (el mismo de la página) ----------
   var ARMTOOL = { "Pausa y respiración": "respirar", "Desconectar y dormir": "dormir", "Meditar y respirar": "calma", "Moverme y estirar": "movimiento", "Planificar el día siguiente": "cierre", "Escribir un diario": "cierre" };
-  function armBlocks() { try { return S.arm && S.arm.ans && window.FormaDia ? window.FormaDia.plan(S.arm.ans).blocks : []; } catch (e) { return []; } }
+  function dayAns(dt) { dt = dt || new Date(); var w = S.wk && S.wk[dt.getDay()]; return w && w.ans ? w.ans : (S.arm && S.arm.ans) || null; }
+  function armBlocksFor(dt) { try { var a = dayAns(dt); return a && window.FormaDia ? window.FormaDia.plan(a).blocks : []; } catch (e) { return []; } }
+  function armBlocks() { return armBlocksFor(new Date()); }
+  // ---------- mi semana ----------
+  var DNL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], DNS = ["D", "L", "M", "M", "J", "V", "S"];
+  function weekDates() { var d = new Date(), k = (d.getDay() + 6) % 7, m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - k); return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return new Date(m.getFullYear(), m.getMonth(), m.getDate() + i); }); }
+  function wkCustom(dow) { return !!(S.wk && S.wk[dow] && S.wk[dow].ans); }
+  function weekCard() {
+    if (!isProU() || !S.arm || !S.arm.ans) return "";
+    var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
+    return '<div class="card weekc"><div class="row between"><b>Mi semana</b><span class="small muted">' + (n ? n + (n === 1 ? " día distinto" : " días distintos") : "Todos los días igual") + '</span></div><div class="wkstrip">' +
+      weekDates().map(function (d) { var c = wkCustom(d.getDay()); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" aria-label="' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
+      '</div><p class="small muted" style="margin:10px 0 0">Tocá un día para verlo o armarlo distinto: el finde, un día de entrenamiento, un día liviano.</p></div>';
+  }
+  function wkDate(dow) { return weekDates().filter(function (d) { return d.getDay() === dow; })[0]; }
+  function openWeekDay(dow) {
+    var F = window.FormaDia, d = wkDate(dow), bl = armBlocksFor(d), cu = wkCustom(dow);
+    sheet('<span class="badge">' + (cu ? "Armado para este día" : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">Se repite todos los ' + DNL[dow].toLowerCase() + (dow === 3 ? "" : "s") + ".</p>" +
+      '<div class="wklist">' + bl.map(function (b) { var K = F.KIND[b.kind]; return '<div class="wkrow"><span class="wkt">' + F.fmt(b.s) + '</span><i style="background:' + K.dot + '"></i><span>' + esc(b.label) + "</span></div>"; }).join("") + "</div>" +
+      '<button class="btn sage block" data-wkedit="' + dow + '" style="margin-top:14px">' + (cu ? "Cambiar este día" : "Armar este día distinto") + "</button>" +
+      (cu ? '<button class="btn ghost block" data-wkreset="' + dow + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
+      '<div class="sec" style="margin-top:16px">Copiar este día a</div><div class="wkto">' + [1, 2, 3, 4, 5, 6, 0].filter(function (x) { return x !== dow; }).map(function (x) { return '<button class="chip" data-wkto="' + x + '" aria-pressed="false">' + DNL[x].slice(0, 3) + "</button>"; }).join("") + '</div>' +
+      '<button class="btn ghost block" data-wkcopy="' + dow + '" style="margin-top:8px">Copiar</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
+  }
+  function wkEdit(dow) {
+    if (!window.FormaDia || !isProU()) return;
+    var base = dayAns(wkDate(dow)); close();
+    window.FormaDia.open({ title: "Armá tu " + DNL[dow].toLowerCase(), ans: base, onSave: function (a) { S.wk = S.wk || {}; S.wk[dow] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
+  }
+  function wkReset(dow) { S.wk = S.wk || {}; S.wk[dow] = { ans: null, at: today() }; save(); close(); render(); }
+  function wkCopy(src) {
+    var to = [].slice.call(document.querySelectorAll("#sheet [data-wkto][aria-pressed=true]")).map(function (b) { return +b.dataset.wkto; }); if (!to.length) return;
+    var a = dayAns(wkDate(src)), cu = wkCustom(src); S.wk = S.wk || {};
+    to.forEach(function (x) { S.wk[x] = { ans: cu ? JSON.parse(JSON.stringify(a)) : null, at: today() }; });
+    save(); close(); render();
+  }
   function armKey(b) { return b.kind + "|" + b.label + "|" + b.s; }
   function armCheckable(b) { return b.kind === "train" || b.kind === "focus" || b.kind === "habit" || b.kind === "pause" || (b.kind === "rest" && b.label.indexOf("Desconectar") === 0); }
   function bchips(b) { var d = bdetails(b); if (!d.length) return ""; return '<span class="bchips">' + d.slice(0, 3).map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + (d.length > 3 ? "<em>+" + (d.length - 3) + "</em>" : "") + "</span>"; }
@@ -1173,10 +1209,15 @@
         "SUMMARY:" + h.name.replace(/[,;\\\n]/g, " "), "DESCRIPTION:Recordatorio de Forma. Sin apuro, cuando puedas.",
         "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + h.name.replace(/[,;\\\n]/g, " "), "END:VALARM", "END:VEVENT");
     });
-    ab.forEach(function (b, i) {
-      var tm = window.FormaDia.fmt(b.s).replace(":", "") + "00", nm = b.label.replace(/[,;\\\n]/g, " ");
-      L.push("BEGIN:VEVENT", "UID:arm" + i + "-" + b.s + "@formargentina.com", "DTSTAMP:" + day + "T000000Z", "DTSTART:" + day + "T" + tm, "DURATION:PT" + Math.max(5, b.e - b.s) + "M", "RRULE:FREQ=DAILY",
-        "SUMMARY:" + nm, "DESCRIPTION:Tu día en Forma. Sin apuro, cuando puedas.", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + nm, "END:VALARM", "END:VEVENT");
+    var CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"], grp = [], hasWk = Object.keys(S.wk || {}).some(function (k) { return S.wk[k] && S.wk[k].ans; });
+    if (!hasWk) grp.push({ bl: ab, day: day, rule: "FREQ=DAILY", id: "x" });
+    else for (var w = 0; w < 7; w++) { var dd = new Date(); dd.setDate(dd.getDate() + ((w - dd.getDay() + 7) % 7)); grp.push({ bl: armBlocksFor(dd).filter(armCheckable), day: dd.getFullYear() + pad(dd.getMonth() + 1) + pad(dd.getDate()), rule: "FREQ=WEEKLY;BYDAY=" + CODES[dd.getDay()], id: "w" + w }); }
+    grp.forEach(function (g) {
+      g.bl.forEach(function (b, i) {
+        var tm = window.FormaDia.fmt(b.s).replace(":", "") + "00", nm = b.label.replace(/[,;\\\n]/g, " ");
+        L.push("BEGIN:VEVENT", "UID:arm" + g.id + i + "-" + b.s + "@formargentina.com", "DTSTAMP:" + g.day + "T000000Z", "DTSTART:" + g.day + "T" + tm, "DURATION:PT" + Math.max(5, b.e - b.s) + "M", "RRULE:" + g.rule,
+          "SUMMARY:" + nm, "DESCRIPTION:Tu día en Forma. Sin apuro, cuando puedas.", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + nm, "END:VALARM", "END:VEVENT");
+      });
     });
     L.push("END:VCALENDAR");
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([L.join("\r\n")], { type: "text/calendar" })); a.download = "forma-recordatorios.ics"; a.click();
@@ -1233,6 +1274,11 @@
     if (t.id === "hsave") { var eh = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0], nn = $("#e-name").value.trim(); if (eh && nn) { eh.name = nn.slice(0, 60); eh.time = $("#e-time").value || ""; eh.freq = +$("#e-freq").value || 7; eh.min = $("#e-min").value.trim().slice(0, 80); eh.paused = $("#e-pause").checked; save(); close(); render(); } return; }
     if (t.id === "hclear") { $("#e-time").value = ""; return; }
     if (t.id === "hdel") { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hx = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0]; if (hx) hx.del = true; save(); close(); render(); } return; }
+    if (d.wkday !== undefined) return openWeekDay(+d.wkday);
+    if (d.wkedit !== undefined) return wkEdit(+d.wkedit);
+    if (d.wkreset !== undefined) { if (isProU()) wkReset(+d.wkreset); return; }
+    if (d.wkto !== undefined) { t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") === "true" ? "false" : "true"); return; }
+    if (d.wkcopy !== undefined) { if (isProU()) wkCopy(+d.wkcopy); return; }
     if (d.blkopen !== undefined) return openBlock(+d.blkopen);
     if (t.id === "compedit") return openComp();
     if (d.compsel !== undefined && compDraft) { var ct = compDraft.all[+d.compsel], ci2 = compDraft.sel.indexOf(ct); if (ci2 >= 0) compDraft.sel.splice(ci2, 1); else if (compDraft.sel.length < 3) compDraft.sel.push(ct); else { var cm = $("#compmsg"); if (cm) cm.textContent = "Hasta 3. Sacá uno para elegir otro."; return; } drawComp(); return; }
