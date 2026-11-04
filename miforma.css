@@ -223,3 +223,7 @@ main{flex:1;padding:20px 18px 110px}
 /* ---- apariencia ---- */
 .dbody .stat b{color:inherit}
 .themeseg{margin-top:8px}
+
+/* ---- nivel ---- */
+.lvshape{width:52px;height:52px;flex:none;display:grid;place-items:center}
+.lvshape svg{width:48px;height:48px}

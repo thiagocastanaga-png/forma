@@ -186,7 +186,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -205,6 +205,7 @@
     out.ad = Object.assign({}, remote.ad || {});
     Object.keys(local.ad || {}).forEach(function (k) { out.ad[k] = Object.assign({}, out.ad[k] || {}, local.ad[k]); });
     out.wins = Object.assign({}, remote.wins || {}, local.wins || {});
+    out.actn = Math.max(local.actn || 0, remote.actn || 0); out.cierre = Object.assign({}, remote.cierre || {}, local.cierre || {});
     out.comp = Object.assign({}, remote.comp || {}, local.comp || {}); out.bn = Object.assign({}, remote.bn || {}, local.bn || {});
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.notes = Object.assign({}, remote.notes || {}, local.notes || {});
@@ -287,7 +288,7 @@
       } else if (reg) {
         html += '<p class="muted small">Creá tu cuenta gratis: tu racha, tus hábitos y lo que compres quedan guardados y los ves desde cualquier dispositivo.</p>' +
           '<label class="field"><span>¿Cómo te llamás?</span><input id="a-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
-          '<label class="field"><span>Nombre de usuario</span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21" placeholder="ej: thiago_10" value="' + esc(draft.username) + '"></label>' +
+          '<label class="field"><span>Nombre de usuario <small class="muted" style="font-weight:400">(único; podés cambiarlo)</small></span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21" placeholder="te proponemos uno" value="' + esc(draft.username) + '"></label>' +
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<label class="field"><span>Contraseña (mínimo 8 caracteres)</span><input id="a-pass" type="password" autocomplete="new-password"></label>' +
           '<label class="row small"><input id="a-terms" type="checkbox" ' + (draft.terms ? "checked" : "") + '> <span>Acepto los <a href="terminos" target="_blank" rel="noopener">términos</a> y la <a href="privacidad" target="_blank" rel="noopener">política de privacidad</a>.</span></label>' +
@@ -509,7 +510,7 @@
     var html = "<h1 class='hello'>Tu perfil</h1>" +
       '<div class="card row"><span class="avatar">' + esc(initial) + '</span><div style="min-width:0"><b style="font-size:20px">' + esc(p.name) + "</b><div class='small muted'>" + (acct.username ? "@" + esc(acct.username) : "Sin cuenta") + (p.created ? " · desde " + esc(p.created) : "") + "</div></div></div>" +
       '<div class="grid3"><div class="card stat"><b>' + weekCount(0) + '</b><span>días esta semana</span></div><div class="card stat"><b>' + weekStreak() + '</b><span>semanas con 3+ días</span></div><div class="card stat"><b>' + totalDone() + '</b><span>hábitos hechos</span></div></div>' +
-      themeCard() + progressCard() +
+      levelCard() + themeCard() + progressCard() +
       '<div class="card"><b>Tus planes</b><div style="margin-top:8px">' + PLANS.filter(function (x) { return x.live; }).map(function (x) {
         return '<div class="row between" style="padding:6px 0"><span class="row"><span class="shape" style="width:26px;height:26px">' + SHAPES[x.id] + "</span>" + esc(x.n) + '</span><span class="tag' + (isPro(x.id) ? " ok" : "") + '">' + (isPro(x.id) ? "Pro" : "Gratis") + "</span></div>";
       }).join("") + "</div></div>";
@@ -655,7 +656,7 @@
     var key = act.key, A = ACTS[key], vals = act.vals;
     if (act.tm) clearInterval(act.tm);
     if (vals.length) { S.notes = S.notes || {}; S.notes[today()] = S.notes[today()] || {}; S.notes[today()][key] = vals; }
-    var marked = completeAct(key); touchBest(); save();
+    var marked = completeAct(key); S.actn = (S.actn || 0) + 1; touchBest(); save();
     var n = weekCount(0), el = $("#full"); act = null; if (!el) return;
     el.innerHTML = '<div class="actbody" style="text-align:center;padding-top:80px"><div class="bigflame on" style="margin:0 auto 10px;width:70px;height:70px">' + ICON.flame + '</div><h2>¡Actividad completa!</h2><p class="muted">' + esc(A.t) + " hecha de verdad. " + (marked ? "Quedó tildada en tu día." : "") + '</p><p><b style="font-size:28px">' + n + "</b>/7 días con algo hecho esta semana</p>" + '<button class="btn block" data-actdone>Volver a mi día</button></div>';
   }
@@ -758,7 +759,7 @@
     if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 12 preguntas rápidas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
-    var html = compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
+    var html = cierreCard() + compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
       '<p class="small muted" style="margin:0 0 6px">' + (pro && tr.length ? n + " de " + tr.length + " momentos hechos hoy. " : "") + "Sin apuro: es una guía, no una obligación.</p>" +
       '<div class="legend"><span><i class="lg past"></i>Ya pasó</span><span><i class="lg now"></i>Ahora</span><span><i class="lg next"></i>Lo que sigue</span></div><div class="tl">';
     bl.forEach(function (b) {
@@ -787,6 +788,42 @@
   function themeCard() {
     var t = curTheme();
     return '<div class="card"><b>Apariencia</b><p class="small muted" style="margin:4px 0 0">Elegí cómo querés ver Forma.</p><div class="seg themeseg"><button data-settheme="dark" aria-pressed="' + (t === "dark") + '">Oscuro</button><button data-settheme="light" aria-pressed="' + (t === "light") + '">Claro</button></div></div>';
+  }
+
+
+  // ---------- nivel de constancia (formas) ----------
+  var LEVELS = [
+    { n: "Círculo", at: 0, svg: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#C6F432"/></svg>' },
+    { n: "Semicírculo", at: 4, svg: '<svg viewBox="0 0 44 44"><path d="M2 36 A20 20 0 0 1 42 36 Z" fill="#B9A7F0"/></svg>' },
+    { n: "Cuadrado", at: 10, svg: '<svg viewBox="0 0 44 44"><rect x="3" y="3" width="38" height="38" fill="#FFC83D"/></svg>' },
+    { n: "Triángulo", at: 20, svg: '<svg viewBox="0 0 44 44"><path d="M22 3 L41 41 H3 Z" fill="#FF8A4C"/></svg>' },
+    { n: "Cuarto de círculo", at: 35, svg: '<svg viewBox="0 0 44 44"><path d="M2 2 A40 40 0 0 1 42 42 H2 Z" fill="#4C7DFF"/></svg>' },
+    { n: "Forma completa", at: 55, svg: '<svg viewBox="0 0 44 44"><path d="M3 22 A19 19 0 0 1 22 3 H41 V22 A19 19 0 0 1 22 41 H3 Z" fill="#86A892"/></svg>' }
+  ];
+  function goodWeeksTotal() { var n = 0; for (var off = 0; off > -104; off--) { if (weekCount(off) >= 3) n++; } return n; }
+  function levelInfo() {
+    var gw = goodWeeksTotal(), acts = S.actn || 0, pts = gw * 4 + acts, i = 0;
+    LEVELS.forEach(function (l, k) { if (pts >= l.at) i = k; });
+    var cur = LEVELS[i], nxt = LEVELS[i + 1] || null;
+    return { i: i, cur: cur, nxt: nxt, pts: pts, gw: gw, acts: acts, pct: nxt ? Math.round((pts - cur.at) * 100 / (nxt.at - cur.at)) : 100 };
+  }
+  function levelCard() {
+    var L = levelInfo(), pro = isProU();
+    return '<div class="card"><div class="row"><span class="lvshape">' + L.cur.svg + '</span><div style="flex:1;min-width:0"><span class="small muted">Tu nivel de constancia</span><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:22px;line-height:1.1">' + L.cur.n + '</div></div><span class="tag">Nivel ' + (L.i + 1) + "</span></div>" +
+      '<span class="bar" style="--c:var(--sage);margin-top:12px"><i style="width:' + L.pct + '%"></i></span>' +
+      '<p class="small muted" style="margin:8px 0 0">' + (L.nxt ? (L.nxt.at - L.pts === 1 ? "Te falta 1 punto" : "Te faltan " + (L.nxt.at - L.pts) + " puntos") + " para ser " + L.nxt.n + "." : "Llegaste a la forma completa.") + "</p>" +
+      '<p class="small muted" style="margin:6px 0 0">Suben las semanas con 3 o más días de constancia (' + L.gw + ') y las actividades guiadas que hacés completas (' + L.acts + "). Tildar no suma por sí solo.</p>" +
+      (pro ? "" : '<p class="small" style="margin:8px 0 0"><button class="linkbtn" data-plan="vida">Con Vida diaria Pro empezás a subir de nivel</button></p>') + "</div>";
+  }
+  function cierreCard() {
+    if (!isProU() || !S.arm || !S.arm.ans) return "";
+    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), sl = S.arm.ans.sleep || 1380, th = Math.max(1080, Math.min(sl - 180, 1260)), t = today();
+    var list = compToday(), n = list.filter(compDone).length, bl = armBlocks().filter(armCheckable), nb = bl.filter(armDone).length;
+    if (S.cierre && S.cierre[t]) {
+      return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (n ? "Hoy cumpliste " + n + " de " + list.length + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + " Mañana seguimos.</p></div>";
+    }
+    if (now < th && now >= 360) return "";
+    return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.9">' + (n ? "Cumpliste " + n + " de " + list.length + " compromisos" + (nb ? " y " + nb + " momentos de tu día" : "") + ". Pasamos lo cumplido a “Lo que hice bien hoy”." : (nb ? "Hiciste " + nb + " momentos de tu día. Eso también cuenta." : "Hay días así. Cerrá el día sin culpa: mañana es otro.")) + '</p><button class="btn sage" id="cierre">Cerrar mi día</button></div>';
   }
 
   // ---------- compromisos de hoy y detalles por bloque ----------
@@ -1167,6 +1204,11 @@
     if (d.ackb !== undefined) { if (!isProU()) return; var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2 && isProU()) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
+    if (t.id === "cierre") {
+      var tdz = today(); S.wins = S.wins || {}; var wl2 = S.wins[tdz] = S.wins[tdz] || [];
+      compToday().filter(compDone).forEach(function (x) { if (wl2.indexOf(x) < 0 && wl2.length < 8) wl2.push(x); });
+      S.cierre = S.cierre || {}; S.cierre[tdz] = 1; save(); render(); return;
+    }
     if (t.id === "armgo") return armOpen();
     if (t.id === "armedit") return armOpen(S.arm && S.arm.ans);
     if (d.ack) { if (!(S.demo || isPro("vida"))) return; S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
@@ -1232,6 +1274,15 @@
   document.addEventListener("input", function (e) {
     if (!e.target) return;
     if (e.target.id === "act-in") updateNext();
+    if (e.target.id === "a-user") draft.userTouched = true;
+    if (e.target.id === "a-name") {
+      var uEl = $("#a-user");
+      if (uEl && !draft.userTouched) {
+        var slug = e.target.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 12);
+        draft.sfx = draft.sfx || String(100 + Math.floor(Math.random() * 900));
+        uEl.value = slug.length >= 2 ? slug + "_" + draft.sfx : "";
+      }
+    }
     if (/^sc-/.test(e.target.id || "")) { var v = +e.target.value, o = e.target.parentNode.querySelector(".rv"); if (o) o.textContent = v + " · " + ["", "Mal", "Flojo", "Más o menos", "Bien", "Muy bien"][v]; }
   });
   document.addEventListener("keydown", function (e) {
