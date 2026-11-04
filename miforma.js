@@ -757,14 +757,15 @@
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
     var html = '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
-      '<p class="small muted" style="margin:0 0 6px">' + (pro && tr.length ? n + " de " + tr.length + " momentos hechos hoy. " : "") + "Sin apuro: es una guía, no una obligación.</p><div class=\"card\" style=\"padding:4px 14px\">";
+      '<p class="small muted" style="margin:0 0 6px">' + (pro && tr.length ? n + " de " + tr.length + " momentos hechos hoy. " : "") + "Sin apuro: es una guía, no una obligación.</p>" +
+      '<div class="legend"><span><i class="lg past"></i>Ya pasó</span><span><i class="lg now"></i>Ahora</span><span><i class="lg next"></i>Lo que sigue</span></div><div class="tl">';
     bl.forEach(function (b) {
-      var k = window.FormaDia.KIND[b.kind], ck = armCheckable(b), dn = armDone(b), isNow = now >= b.s && now < b.e, tk = armToolOf(b), tbtn = "";
+      var k = window.FormaDia.KIND[b.kind], ck = armCheckable(b), dn = armDone(b), isNow = now >= b.s && now < b.e, st = isNow ? "now" : now >= b.e ? "past" : "next", pgw = isNow ? Math.round((now - b.s) * 100 / (b.e - b.s)) : 0, tk = armToolOf(b), tbtn = "";
       if (pro && tk && ck && !dn) {
         var locked = ACT_REQ[tk] && !owns(prodOf(ACT_REQ[tk]));
         tbtn = '<button class="btn ' + (locked ? "ghost" : "sage") + ' sm" data-armtool="' + tk + '" style="margin-top:8px">' + (locked ? ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Con Pro" : "Hacer ahora") + "</button>";
       }
-      html += '<div class="blk' + (isNow ? " now" : "") + (dn ? " done" : "") + (b.kind === "free" || b.kind === "commute" ? " soft" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + window.FormaDia.durText(b.e - b.s) + (isNow ? " · Ahora" : "") + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + tbtn + "</div>" +
+      html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + window.FormaDia.durText(b.e - b.s) + (isNow ? " · Ahora" : "") + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
         (pro && ck ? '<button class="check" role="checkbox" aria-checked="' + dn + '" aria-label="' + esc(b.label) + '" data-ack="' + esc(armKey(b)) + '">' + ICON.ok + "</button>" : "") + "</div>";
     });
     return html + "</div>";
@@ -1029,6 +1030,11 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([L.join("\r\n")], { type: "text/calendar" })); a.download = "forma-recordatorios.ics"; a.click();
   }
   setInterval(checkReminders, 30000);
+  setInterval(function () {
+    var ae = document.activeElement;
+    if (tab !== "hoy" || $("#sheet") || $("#full") || !S.profile || (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName))) return;
+    if ($(".tl")) render();
+  }, 60000);
 
   // ---------- eventos ----------
   document.addEventListener("click", function (e) {

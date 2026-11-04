@@ -174,3 +174,22 @@ main{flex:1;padding:20px 18px 110px}
 .blk.soft b{font-weight:500;color:var(--muted)}
 .blk .btn svg{width:14px;height:14px}
 .dbody .stat b{font-size:19px;white-space:nowrap}.dbody .stat span{font-size:12px}
+
+/* ---- estados del día: pasó / ahora / sigue ---- */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:2px 0 10px}
+.legend span{display:flex;align-items:center;gap:6px}
+.lg{width:12px;height:12px;border-radius:4px;display:inline-block}
+.lg.past{background:#CFC9B8}.lg.now{background:var(--lima)}.lg.next{background:rgba(134,168,146,.45)}
+.tl .blk{border:0;border-radius:14px;padding:12px;margin:0 0 8px;border-left:5px solid var(--sage);background:rgba(134,168,146,.3)}
+.tl .blk:last-child{border:0;border-left:5px solid var(--sage)}
+.tl .blk.past{background:#D9D4C5;border-left-color:#9a9484;color:#5b574d}
+.tl .blk.past b{color:#4b483f;font-weight:600}
+.tl .blk.now{background:var(--lima);border-left-color:var(--ink);box-shadow:0 3px 12px rgba(0,0,0,.1);margin-left:0;margin-right:0}
+.tl .blk.now .tm,.tl .blk.now .kd,.tl .blk.now .nt{color:#2a2a2a}
+.tl .blk.done{opacity:1}
+.tl .blk.done b{text-decoration:line-through;text-decoration-thickness:1px}
+.tl .blk .check{background:rgba(255,255,255,.7)}
+.tl .blk .check[aria-checked=true]{background:var(--ink);border-color:var(--ink)}
+.tl .blk .check[aria-checked=true] svg path{stroke:#fff}
+.pg{display:block;height:5px;border-radius:99px;background:rgba(0,0,0,.15);margin-top:8px;overflow:hidden}
+.pg i{display:block;height:100%;background:var(--ink)}
