@@ -447,7 +447,7 @@
       if (viewMode() === "now") {
         var rest = html.slice(gr.length).replace("@@ARM@@", "");
         return gr + viewToggle() + prioCard() + cierreCard() + mananaCard() + nowSection() + progCard() + compCard() + weekCard() +
-          '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy: constancia, frase, pendientes y hábitos") + "</button>" + (moreOpen ? rest : "");
+          '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy") + "</button>" + (moreOpen ? rest : "");
       }
       return html.replace("@@ARM@@", viewToggle() + prioCard() + progCard() + weekCard() + armSection());
     }
@@ -593,7 +593,7 @@
   function pgPreview(P) { return '<ol class="small pgprev">' + P.days.map(function (x) { return "<li>" + esc(x.t) + "</li>"; }).join("") + "</ol>"; }
   function progPreview(p) {
     var P = p.prog && pgOf(p.prog); if (!P) return "";
-    return '<div class="card"><b>Qué vas a hacer</b><p class="small muted" style="margin:6px 0 4px">Un paso por día, de 2 a 5 minutos, durante 14 días. Medís cómo estás antes y después para ver si funcionó.</p>' + pgPreview(P) + "</div>";
+    return '<div class="card"><b>Qué vas a hacer</b><p class="small muted" style="margin:6px 0 4px">Un paso por día, de 2 a 5 minutos, durante 14 días. Medís cómo estás antes y después para ver si funcionó.</p>' + pgPreview(P) + '<button class="btn sage block" data-pgtry="' + p.prog + '" style="margin-top:12px">Probar el paso 1 gratis</button></div>';
   }
   function scaleChips(P, key, sel) {
     return '<div class="pgm" data-key="' + key + '">' + [1, 2, 3, 4, 5].map(function (n) { return '<button class="chip" data-pgm="' + n + '" aria-pressed="' + (sel === n) + '">' + n + "</button>"; }).join("") + '</div><div class="row between small muted" style="margin-top:4px"><span>1 · ' + esc(P.lo) + "</span><span>5 · " + esc(P.hi) + "</span></div>";
@@ -632,7 +632,7 @@
     var id = pgCur();
     if (!id) {
       if (S.prog && S.prog.items && Object.keys(S.prog.items).length) return "";
-      return '<div class="card" style="margin-top:12px"><b>Programas de 14 días</b><p class="small muted" style="margin:6px 0 10px">Resolvé algo concreto: dormir mejor, usar menos el celular, dejar de postergar o calmar la cabeza. Un paso por día.</p><button class="btn sage" data-pgall>Elegir un programa</button></div>';
+      return '<div class="card" style="margin-top:12px"><b>Programas de 14 días</b><p class="small muted" style="margin:6px 0 10px">Un paso por día para dormir mejor, calmarte o arrancar.</p><button class="btn sage" data-pgall>Elegir un programa</button></div>';
     }
     var P = pgOf(id), n = pgCount(id);
     if (n >= 14) return '<div class="card sage" style="margin-top:12px"><b>Terminaste «' + esc(P.n) + '»</b><p class="small" style="margin:6px 0 10px">' + (pgItem(id).after ? "Mirá tu resultado y elegí qué sigue." : "Falta un último paso: contanos cómo estás ahora.") + '</p><button class="btn" data-pgopen="' + id + '">Ver resultado</button></div>';
@@ -640,6 +640,12 @@
     return '<div class="card pgcard" style="margin-top:12px"><span class="small muted">' + esc(P.n) + " · paso " + (n + 1) + " de 14</span><b style='display:block;font-size:18px;margin:4px 0'>" + (pgToday(id) ? "Listo por hoy ✓" : esc(st.t)) + "</b>" +
       (pgToday(id) ? '<p class="small muted" style="margin:0 0 10px">Mañana, el paso siguiente.</p>' : "<p class='small' style='margin:0 0 10px'>" + esc(st.a) + "</p>") +
       '<div class="row">' + (pgToday(id) ? "" : '<button class="btn sage sm" data-pgdone="' + id + '">Hecho</button>') + '<button class="btn ghost sm" data-pgopen="' + id + '">Ver paso</button></div></div>';
+  }
+  function openPgTry(id) {
+    var P = pgOf(id); if (!P) return; var st = P.days[0];
+    sheet('<span class="badge">Prueba gratis · paso 1 de 14</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(st.t) + '</h2><div class="card"><p style="margin:0 0 8px">' + esc(st.a) + '</p><p class="small muted" style="margin:0">' + esc(st.w) + '</p></div>' +
+      '<div class="card dark"><b>Quedan 13 pasos más</b><p class="small" style="margin:6px 0 12px;opacity:.9">Con Vida Pro seguís los 14 pasos, medís tu antes y después y se suma a tu constancia.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>' +
+      '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
   function pgDone(id) {
     if (!pgOwns(id)) return; var it = pgItem(id), n = pgCount(id); if (!it || pgToday(id) || n >= 14) return;
@@ -656,7 +662,7 @@
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(); if (now < tmThreshold()) return "";
     if (!(S.cierre && S.cierre[today()]) && !showTm) return "";
     var tm = tmDate(), bl = armBlocksFor(tm), k = today(tm), cur = S.tm && S.tm[k]; if (!bl.length) return "";
-    return '<div class="card manana"><b>Mañana, ' + DNL[tm.getDay()].toLowerCase() + '</b><p class="small muted" style="margin:4px 0 10px">' + bl.length + " momentos · arrancás a las " + window.FormaDia.fmt(bl[0].s) + "</p>" +
+    return '<div class="card manana"><b>Mañana, ' + DNL[tm.getDay()].toLowerCase() + '</b><div style="height:10px"></div>' +
       (cur && cur.t ? '<p style="margin:0 0 8px">Tu prioridad: <b>' + esc(cur.t) + '</b> <button class="linkbtn small" data-tmedit>Cambiar</button></p>' :
         '<form id="tmf" class="row"><input id="tmi" maxlength="80" placeholder="¿Qué es lo más importante de mañana?" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Dejar</button></form>') +
       '<button class="btn ghost block" data-wkday="' + tm.getDay() + '" data-wkdt="' + k + '" style="margin-top:10px">Ver o cambiar mañana</button></div>';
@@ -857,9 +863,9 @@
   function weekCard() {
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
-    return '<div class="card weekc"><div class="row between"><b>Mi semana</b><span class="small muted">' + (n ? n + (n === 1 ? " día distinto" : " días distintos") : "Todos los días igual") + '</span></div><div class="wkstrip">' +
+    return '<div class="card weekc"><div class="row between"><b>Mi semana</b></div><div class="wkstrip">' +
       weekDates().map(function (d) { var c = wkCustom(d.getDay()); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" aria-label="' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
-      '</div><p class="small muted" style="margin:10px 0 0">Tocá un día para verlo o armarlo distinto: el finde, un día de entrenamiento, un día liviano.</p></div>';
+      '</div></div>';
   }
   function wkDate(dow) { return weekDates().filter(function (d) { return d.getDay() === dow; })[0]; }
   function openWeekDay(dow, dt) {
@@ -900,7 +906,7 @@
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
     var html = cierreCard() + mananaCard() + compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
-      '<p class="small muted" style="margin:0 0 6px">' + (pro && tr.length ? n + " de " + tr.length + " momentos hechos hoy. " : "") + "Sin apuro: es una guía, no una obligación.</p>" +
+      (pro && tr.length ? '<p class="small muted" style="margin:0 0 6px">' + n + " de " + tr.length + " momentos hechos hoy</p>" : "") +
       '<div class="legend"><span><i class="lg past"></i>Ya pasó</span><span><i class="lg now"></i>Ahora</span><span><i class="lg next"></i>Lo que sigue</span></div><div class="tl">';
     bl.forEach(function (b) {
       var k = window.FormaDia.KIND[b.kind], ck = armCheckable(b), dn = armDone(b), isNow = now >= b.s && now < b.e, st = isNow ? "now" : now >= b.e ? "past" : "next", pgw = isNow ? Math.round((now - b.s) * 100 / (b.e - b.s)) : 0, tk = armToolOf(b), tbtn = "";
@@ -908,7 +914,7 @@
         var locked = ACT_REQ[tk] && !owns(prodOf(ACT_REQ[tk]));
         tbtn = '<button class="btn ' + (locked ? "ghost" : "sage") + ' sm" data-armtool="' + tk + '" style="margin-top:8px">' + (locked ? ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Con Pro" : "Hacer ahora") + "</button>";
       }
-      html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd" role="button" tabindex="0" data-blkopen="' + bl.indexOf(b) + '"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + window.FormaDia.durText(b.e - b.s) + (isNow ? " · Ahora" : st === "past" ? " · Ya pasó" : "") + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + bchips(b) + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
+      html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd" role="button" tabindex="0" data-blkopen="' + bl.indexOf(b) + '"><b>' + esc(b.label) + '</b>' + bchips(b) + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
         (pro && ck ? '<button class="check" role="checkbox" aria-checked="' + dn + '" aria-label="' + esc(b.label) + '" data-ack="' + esc(armKey(b)) + '">' + ICON.ok + "</button>" : "") + "</div>";
     });
     return html + "</div>";
@@ -963,7 +969,7 @@
       return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (n ? "Hoy cumpliste " + n + " de " + list.length + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + " Mañana seguimos.</p></div>";
     }
     if (now < th && now >= 360) return "";
-    return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.9">' + (n ? "Cumpliste " + n + " de " + list.length + " compromisos" + (nb ? " y " + nb + " momentos de tu día" : "") + ". Pasamos lo cumplido a “Lo que hice bien hoy”." : (nb ? "Hiciste " + nb + " momentos de tu día. Eso también cuenta." : "Hay días así. Cerrá el día sin culpa: mañana es otro.")) + '</p><button class="btn sage" id="cierre">Cerrar mi día</button> <button class="linkbtn small" data-tmshow style="margin-left:8px">Dejar armado mañana</button></div>';
+    return '<div class="card dark"><b>Cierre del día</b><div style="height:10px"></div><button class="btn sage" id="cierre">Cerrar mi día</button> <button class="linkbtn small" data-tmshow style="margin-left:8px">Dejar armado mañana</button></div>';
   }
 
 
@@ -981,17 +987,16 @@
     if (i < 0) { bl.forEach(function (b, k) { if (i < 0 && b.s > now) i = k; }); if (i >= 0) state = "soon"; else { i = bl.length - 1; state = "end"; } }
     var b = bl[i], K = window.FormaDia.KIND[b.kind], pro = isProU(), ck = armCheckable(b), dn = armDone(b), tk = armToolOf(b), det = bdetails(b), F = window.FormaDia;
     var when = state === "now" ? "Ahora · faltan " + F.durText(Math.max(1, b.e - now)) : state === "soon" ? "Empieza a las " + F.fmt(b.s) + " · en " + F.durText(Math.max(1, b.s - now)) : "Último momento de tu día";
-    var html = '<div class="bignow ' + state + (dn ? " done" : "") + '"><span class="kd"><i style="background:' + K.dot + '"></i>' + K.tag + " · " + F.durText(b.e - b.s) + (dn ? " · Hecho" : "") + '</span>' +
-      '<div class="bwhen">' + F.fmt(b.s) + " – " + F.fmt(b.e) + '</div><h2>' + esc(b.label) + '</h2><p class="bnote">' + esc(b.note || "") + "</p>" +
-      '<div class="bmeta">' + when + "</div>" +
+    var html = '<div class="bignow ' + state + (dn ? " done" : "") + '">' + (dn ? '<span class="kd">Hecho ✓</span>' : "") +
+      '<div class="bwhen">' + F.fmt(b.s) + " – " + F.fmt(b.e) + '</div><h2>' + esc(b.label) + '</h2>' +
       (state === "now" ? '<span class="pg big"><i style="width:' + Math.round((now - b.s) * 100 / (b.e - b.s)) + '%"></i></span>' : "") +
       (det.length ? '<div class="bchips big">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : "") +
       '<div class="bbtns">' +
-      (pro && ck && tk && !dn ? '<button class="btn block" data-armtool="' + tk + '">Hacer ahora (actividad guiada)</button>' : "") +
+      (pro && ck && tk && !dn ? '<button class="btn block" data-armtool="' + tk + '">Hacer ahora</button>' : "") +
       (pro && ck ? '<button class="btn ' + (dn ? "ghost" : "") + ' block" data-ackb="' + i + '">' + (dn ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
-      '<button class="btn ghost block" data-blkopen="' + i + '">' + (pro ? "Mis detalles de este momento" : "Ver detalle") + "</button></div></div>";
+      '<button class="linkbtn bdet" data-blkopen="' + i + '">' + (pro ? "Detalles" : "Ver detalle") + "</button></div></div>";
     var nb = bl[i + 1];
-    if (nb) html += '<button class="nextprev" data-blkopen="' + (i + 1) + '"><span class="small muted">Sigue</span><b>' + F.fmt(nb.s) + " · " + esc(nb.label) + '</b><span class="small muted">' + F.durText(nb.e - nb.s) + "</span></button>";
+    if (nb) html += '<button class="nextprev" data-blkopen="' + (i + 1) + '"><span class="small muted">Sigue</span><b>' + F.fmt(nb.s) + " · " + esc(nb.label) + "</b></button>";
     return html;
   }
 
@@ -1019,12 +1024,12 @@
   function compCard() {
     var list = compToday(), pro = isProU(); if (!list.length) return "";
     var n = list.filter(compDone).length;
-    return '<div class="card comp"><div class="row between"><b>Tus compromisos de hoy</b>' + (pro ? '<button class="linkbtn small" id="compedit">Cambiar</button>' : "") + "</div>" +
-      '<p class="small muted" style="margin:4px 0 6px">' + (pro ? (n === list.length ? "¡Los cumpliste todos! No hace falta sumar más." : n + " de " + list.length + ". Pocos y claros: así se cumplen.") : "Tres cosas simples para hoy. Pocas, para que se puedan cumplir.") + "</p>" +
+    return '<div class="card comp"><div class="row between"><b>Tus compromisos de hoy</b>' + (pro ? '<span class="small muted">' + n + "/" + list.length + ' <button class="linkbtn small" id="compedit" style="margin-left:6px">Cambiar</button></span>' : "") + "</div>" +
+      
       list.map(function (t, i) {
         return pro ? '<div class="habit" style="padding:8px 0"><button class="check" role="checkbox" aria-checked="' + compDone(t) + '" aria-label="' + esc(t) + '" data-cack="' + i + '">' + ICON.ok + '</button><span style="flex:1;min-width:0' + (compDone(t) ? ";text-decoration:line-through;opacity:.6" : "") + '">' + esc(t) + "</span></div>"
           : '<div class="cfree"><i></i><span>' + esc(t) + "</span></div>";
-      }).join("") + (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Con Pro elegís los tuyos y los tildás.</p>') + "</div>";
+      }).join("") + "</div>";
   }
   var compDraft = null;
   function openComp() {
@@ -1379,6 +1384,7 @@
     if (t.id === "hclear") { $("#e-time").value = ""; return; }
     if (t.id === "hdel") { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hx = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0]; if (hx) hx.del = true; save(); close(); render(); } return; }
     if (d.wkday !== undefined) { var wdt = null; if (d.wkdt) { var q = d.wkdt.split("-"); wdt = new Date(+q[0], +q[1] - 1, +q[2]); } return openWeekDay(+d.wkday, wdt); }
+    if (d.pgtry) return openPgTry(d.pgtry);
     if (d.pgall !== undefined) return openPrograms();
     if (d.pgopen) return openProgram(d.pgopen);
     if (d.pgm !== undefined) { var par = t.parentNode; [].slice.call(par.querySelectorAll("[data-pgm]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; }
