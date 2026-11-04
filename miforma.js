@@ -215,7 +215,7 @@
       var r = remote.prog || { items: {} }, l = local.prog || { items: {} }, it = {};
       Object.keys(Object.assign({}, r.items, l.items)).forEach(function (id) {
         var a = (r.items || {})[id] || {}, b = (l.items || {})[id] || {};
-        it[id] = { start: [a.start, b.start].filter(Boolean).sort()[0] || null, before: b.before || a.before || null, after: b.after || a.after || null, done: Object.assign({}, a.done || {}, b.done || {}), last: [a.last, b.last].filter(Boolean).sort().pop() || null };
+        it[id] = { start: [a.start, b.start].filter(Boolean).sort()[0] || null, before: b.before || a.before || null, after: b.after || a.after || null, why: b.why || a.why || "", at: b.at || a.at || "", done: Object.assign({}, a.done || {}, b.done || {}), last: [a.last, b.last].filter(Boolean).sort().pop() || null, lg: Object.assign({}, a.lg || {}, b.lg || {}), fl: Object.assign({}, a.fl || {}, b.fl || {}), dr: b.dr || a.dr || {}, st: b.st || a.st || null };
       });
       out.prog = { cur: local.prog && local.prog.cur !== undefined ? local.prog.cur : r.cur || null, items: it };
     })();
@@ -604,28 +604,91 @@
         return '<button class="prod" data-pgopen="' + P.id + '"><span class="shape">' + SHAPES.vida + "</span><span style='flex:1;min-width:0'><b>" + esc(P.n) + "</b><small>" + esc(P.tag) + " · " + esc(P.intro.split(".")[0]) + '.</small></span><span class="tag">' + st + "</span></button>"; }).join("") +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
+  // ---- pasos interactivos: solo cuentan si se completan ----
+  function pgWhenOk(st) { if (!st.when) return true; var d = new Date(), m = d.getHours() * 60 + d.getMinutes(); return st.when === "am" ? m < 840 : m >= 1080; }
+  function pgWhenTxt(st) { return st.when === "am" ? "Este paso se hace de día. Está disponible hasta las 14:00." : "Este paso se hace de noche. Se habilita a las 18:00."; }
+  function pgDr(it, k) { return it && it.dr && it.dr[k] !== undefined ? it.dr[k] : ""; }
+  function pgMmss(ms) { var s = Math.max(0, Math.ceil(ms / 1000)); return ("0" + Math.floor(s / 60)).slice(-2) + ":" + ("0" + (s % 60)).slice(-2); }
+  function pgFieldHtml(f, key, it) {
+    var lab = f.l ? '<label class="pgl">' + esc(f.l) + "</label>" : "";
+    if (f.k === "text") return lab + '<textarea class="pgin" rows="2" maxlength="300" data-fk="' + key + '" placeholder="' + esc(f.ph || "") + '">' + esc(pgDr(it, key)) + "</textarea>";
+    if (f.k === "list") { var o = ""; for (var i = 0; i < f.n; i++) o += '<input class="pgin" maxlength="80" data-fk="' + key + "_" + i + '" placeholder="' + esc(f.ph || "") + '" value="' + esc(pgDr(it, key + "_" + i)) + '">'; return lab + o; }
+    if (f.k === "choice") { var cur = pgDr(it, key); return lab + '<div class="pgch2">' + f.o.map(function (x, i) { return '<button class="chip" data-pgc="' + key + "|" + i + '" aria-pressed="' + (String(cur) === String(i)) + '">' + esc(x) + "</button>"; }).join("") + "</div>"; }
+    if (f.k === "time") return lab + '<input class="pgin" type="time" data-fk="' + key + '" value="' + esc(pgDr(it, key)) + '">';
+    if (f.k === "num") return lab + '<div class="row"><input class="pgin" type="number" inputmode="numeric" min="' + (f.min || 0) + '" max="' + (f.max || 99999) + '" data-fk="' + key + '" value="' + esc(pgDr(it, key)) + '" style="flex:1">' + (f.u ? '<span class="small muted">' + esc(f.u) + "</span>" : "") + "</div>";
+    if (f.k === "check") return lab + f.o.map(function (x, i) { return '<button class="pgck" data-pgk="' + key + "_" + i + '" aria-pressed="' + (pgDr(it, key + "_" + i) === 1) + '"><i></i><span>' + esc(x) + "</span></button>"; }).join("");
+    if (f.k === "timer") {
+      var tm = it && it.st && it.st.tm, run = tm && Date.now() < tm.end, fin = tm && !run;
+      return '<div class="pgtimer"><b>' + esc(f.l) + "</b>" + (fin ? '<div class="pgt done">✓ Completado</div>' : run ? '<div class="pgt" id="pgtmr" data-end="' + tm.end + '">' + pgMmss(tm.end - Date.now()) + '</div><p class="small muted" style="margin:4px 0 0">Seguí con lo tuyo. Cuando llegue a cero, volvé y completá el paso.</p>' : '<button class="btn sage block" data-pgtm="' + Math.round((FAST ? 3 : f.s)) + '" style="margin-top:8px">Empezar (' + (f.s >= 60 ? Math.round(f.s / 60) + " min" : f.s + " s") + ")</button>") + "</div>";
+    }
+    if (f.k === "act") { var dn = it && it.st && it.st.acts && it.st.acts[f.a]; return '<div class="pgtimer"><b>' + esc(f.l || "Actividad guiada") + "</b>" + (dn ? '<div class="pgt done">✓ Hecha completa</div>' : '<button class="btn sage block" data-pgact="' + f.a + '" style="margin-top:8px">Hacer ahora</button><p class="small muted" style="margin:6px 0 0">Cuenta cuando la terminás entera.</p>') + "</div>"; }
+    return "";
+  }
+  function pgFieldCheck(f, key, it) {
+    function bad(m) { return { ok: false, msg: m }; }
+    var d = it.dr || {}, v;
+    if (f.k === "text") { v = String(d[key] || "").trim(); return v.length >= f.min ? { ok: true, v: v } : bad("Falta completar: " + (f.l || "el texto") + " (un poco más largo).") }
+    if (f.k === "list") { var a = []; for (var i = 0; i < f.n; i++) a.push(String(d[key + "_" + i] || "").trim()); return a.every(function (x) { return x.length >= 2; }) ? { ok: true, v: a } : bad("Completá los " + f.n + " casilleros: " + (f.l || "")); }
+    if (f.k === "choice") { v = d[key]; if (v === undefined || v === "") return bad("Elegí una opción: " + (f.l || "")); if (f.need && f.need.indexOf(+v) < 0) return bad("Para que este paso cuente, la respuesta tiene que ser: " + f.need.map(function (i) { return f.o[i]; }).join(" o ") + ". Si hoy no pudiste, probalo de nuevo mañana."); return { ok: true, v: +v }; }
+    if (f.k === "time") { v = String(d[key] || ""); return /^\d\d:\d\d$/.test(v) ? { ok: true, v: v } : bad("Falta una hora: " + (f.l || "")); }
+    if (f.k === "num") { v = parseFloat(d[key]); return !isNaN(v) && v >= (f.min || 0) && v <= (f.max || 99999) ? { ok: true, v: v } : bad("Falta un número válido: " + (f.l || "")); }
+    if (f.k === "check") { var all = f.o.every(function (x, i) { return d[key + "_" + i] === 1; }); return all ? { ok: true, v: 1 } : bad("Marcá todo lo que hiciste. Si falta algo, hacelo primero y después completás el paso."); }
+    if (f.k === "timer") return it.st && it.st.tm && Date.now() >= it.st.tm.end ? { ok: true, v: 1 } : bad("Falta terminar el tiempo: " + f.l + ".");
+    if (f.k === "act") return it.st && it.st.acts && it.st.acts[f.a] ? { ok: true, v: 1 } : bad("Falta hacer la actividad guiada completa.");
+    return { ok: true };
+  }
+  function pgAvg(a) { return a.reduce(function (s, x) { return s + x; }, 0) / (a.length || 1); }
+  function pgSeries(P, it) { return Object.keys(it.lg || {}).sort().map(function (d) { return P.metric(it.lg[d]); }); }
+  function pgChart(P, it) {
+    var v = pgSeries(P, it); if (v.length < 2) return "";
+    var mx = Math.max.apply(null, v) || 1;
+    return '<div class="sec" style="margin-top:16px">' + esc(P.ml) + '</div><div class="pgbars">' + v.map(function (x) { return '<i style="height:' + Math.max(8, Math.round(x / mx * 64)) + 'px"></i>'; }).join("") + '</div><div class="row between small muted" style="margin-top:4px"><span>Día 1: ' + esc(P.fmt(v[0])) + "</span><span>Último: " + esc(P.fmt(v[v.length - 1])) + "</span></div>";
+  }
+  function pgReport(P, it) {
+    var v = pgSeries(P, it), out = [];
+    if (v.length >= 2) { var k = Math.min(3, Math.floor(v.length / 2)), a = pgAvg(v.slice(0, k)), b = pgAvg(v.slice(-k)); out.push(P.ml + ": " + P.fmt(a) + " al principio → " + P.fmt(b) + " al final"); }
+    else out.push("Registraste " + v.length + " día(s).");
+    if (P.extra) out = out.concat(P.extra(it)); return out;
+  }
+  function pgStepForm(P, id, n, it) {
+    var st = P.days[n], html = "", j;
+    if (P.log) {
+      var lg = it.lg && it.lg[today()];
+      if (lg && (!it.dr || !Object.keys(it.dr).length)) { it.dr = it.dr || {}; P.log.forEach(function (f, i) { var v = lg[P.logKeys[i]]; if (v !== undefined) it.dr["L" + i] = v; }); }
+      html += '<div class="sec" style="margin-top:14px">Tu registro de hoy</div>' + P.log.map(function (f, i) { return pgFieldHtml(f, "L" + i, it); }).join("");
+    }
+    if (st.f && st.f.length) html += '<div class="sec" style="margin-top:14px">Tu paso</div>' + st.f.map(function (f, i) { return pgFieldHtml(f, "F" + i, it); }).join("");
+    return html;
+  }
   function openProgram(id) {
     var P = pgOf(id); if (!P) return;
     if (!pgOwns(id)) { var pp = pgProd(id); return pp ? openProduct(pp.id) : undefined; }
     var it = pgItem(id), n = pgCount(id), h = '<span class="badge">Programa de 14 días</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(P.n) + "</h2>";
     if (!it) {
-      h += '<p>' + esc(P.intro) + '</p><div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + '<p class="small" id="pgmsg" style="margin:8px 0 0;color:var(--err)"></p></div>' +
-        '<button class="btn sage block" data-pgstart="' + id + '">Empezar programa</button><div class="sec" style="margin-top:16px">Los 14 pasos</div>' + pgPreview(P) + '<p class="small muted">' + esc(P.note) + "</p>";
+      h += '<p>' + esc(P.intro) + '</p><div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
+        '<div class="card"><b>Tu razón</b><p class="small muted" style="margin:4px 0 8px">Escribila: te la vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
+        '<label class="pgl">¿A qué hora querés hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + (P.reminder || "20:00") + '"><p class="small muted" style="margin:6px 0 0">Te avisamos a esa hora si tenés la app abierta o el aviso activado.</p></div>' +
+        '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn sage block" data-pgstart="' + id + '">Empezar programa</button><div class="sec" style="margin-top:16px">Los 14 pasos</div>' + pgPreview(P) + '<p class="small muted">' + esc(P.note) + "</p>";
     } else if (n >= 14) {
-      var b = it.before, a = it.after;
-      h += '<div class="card' + (a ? " sage" : "") + '"><b>¡Terminaste los 14 pasos!</b>' + (a ? '<p style="margin:8px 0 0">' + esc(P.q) + "<br><b>Antes: " + b + " · Después: " + a + "</b></p><p class=\"small\" style=\"margin:6px 0 0\">" + (P.better === "up" ? (a > b ? "Mejoraste. Mantené tus 3 pasos favoritos." : "Todavía no se nota el cambio. Es normal: probá repetir los pasos que más te sirvieron.") : (a < b ? "Bajó la tensión. Usá tu kit cuando haga falta." : "Todavía no bajó. Repetí lo que más te sirvió y, si sigue, hablalo con un profesional.")) + "</p>" :
+      var b = it.before, a = it.after, rep = pgReport(P, it);
+      h += '<div class="card' + (a ? " sage" : "") + '"><b>¡Terminaste los 14 pasos!</b>' + (a ? '<p style="margin:8px 0 0">' + esc(P.q) + "<br><b>Antes: " + b + " · Después: " + a + "</b></p><p class=\"small\" style=\"margin:6px 0 0\">" + (P.better === "up" ? (a > b ? "Mejoraste. Mantené tus pasos favoritos." : "Todavía no se nota el cambio. Es normal: repetí los pasos que más te sirvieron.") : (a < b ? "Bajó la tensión. Usá tu kit cuando haga falta." : "Todavía no bajó. Repetí lo que más te sirvió y, si sigue, hablalo con un profesional.")) + "</p>" :
         '<p class="small" style="margin:6px 0 10px">Último paso: contanos cómo estás ahora. ' + esc(P.q) + "</p>" + scaleChips(P, "after", 0) + '<button class="btn sage block" data-pgafter="' + id + '" style="margin-top:10px">Ver mi resultado</button>') + "</div>" +
-        '<button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:10px">Repetir el programa</button><button class="btn ghost block" data-pgall style="margin-top:8px">Elegir otro programa</button>';
+        (a ? '<div class="card"><b>Tus datos reales</b><ul class="ticks" style="margin:8px 0 0">' + rep.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" + pgChart(P, it) : "") +
+        '<button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:12px">Repetir el programa</button><button class="btn ghost block" data-pgall style="margin-top:8px">Elegir otro programa</button>';
     } else {
-      var st = P.days[n], done = pgToday(id);
-      h += '<div class="pgbar"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></div><p class="small muted" style="margin:6px 0 12px">Paso ' + (n + 1) + " de 14 · " + n + " hechos</p>" +
-        '<div class="card"><b style="font-size:18px">' + esc(st.t) + "</b><p style='margin:8px 0'>" + esc(st.a) + "</p><p class='small muted' style='margin:0'>" + esc(st.w) + "</p>" +
-        (st.tool ? '<button class="btn sage block" data-act="' + st.tool + '" style="margin-top:12px">Hacerlo guiado</button>' : "") + "</div>" +
-        (done ? '<div class="card sage"><b>Listo por hoy</b><p class="small" style="margin:4px 0 0">Mañana te espera el paso siguiente. Una cosa por día alcanza.</p></div>' : '<button class="btn block" data-pgdone="' + id + '">Hice este paso</button>') +
-        '<div class="sec" style="margin-top:16px">Tu camino</div><ol class="small pgprev">' + P.days.map(function (x, i) { return '<li class="' + (i < n ? "ok" : i === n ? "cur" : "") + '">' + (i < n ? "✓ " : "") + esc(x.t) + "</li>"; }).join("") + "</ol>" +
+      var st = P.days[n], done = pgToday(id), ok = pgWhenOk(st);
+      h += '<div class="pgbar"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></div><p class="small muted" style="margin:6px 0 4px">Paso ' + (n + 1) + " de 14 · " + n + " hechos</p>" + (it.why ? '<p class="small pgwhy">Tu razón: «' + esc(it.why) + "»</p>" : "");
+      if (done) h += '<div class="card sage"><b>Listo por hoy</b><p class="small" style="margin:4px 0 0">Mañana te espera el paso siguiente. Una cosa por día alcanza.</p></div>';
+      else if (!ok) h += '<div class="card"><b style="font-size:18px">' + esc(st.t) + '</b><p class="small muted" style="margin:8px 0 0">' + pgWhenTxt(st) + "</p></div>";
+      else h += '<div class="card"><b style="font-size:18px">' + esc(st.t) + "</b><p style='margin:8px 0'>" + esc(st.a) + "</p><p class='small muted' style='margin:0'>" + esc(st.w) + "</p>" + pgStepForm(P, id, n, it) + '<p class="small" id="pgmsg" style="margin:12px 0 0;color:var(--err)"></p><button class="btn block" data-pgdone="' + id + '" style="margin-top:10px">Completar paso</button></div>';
+      h += pgChart(P, it) + '<div class="sec" style="margin-top:16px">Tu camino</div><ol class="small pgprev">' + P.days.map(function (x, i) { return '<li class="' + (i < n ? "ok" : i === n ? "cur" : "") + '">' + (i < n ? "✓ " : "") + esc(x.t) + "</li>"; }).join("") + "</ol>" +
         (S.prog.cur === id ? '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este programa</button>' : '<button class="btn ghost block" data-pgresume="' + id + '">Retomar este programa</button>') + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
     }
     sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
+  function openPgQuit(id) {
+    var it = pgItem(id); if (!it) return;
+    sheet('<h2 style="font-size:22px">¿Pausar el programa?</h2>' + (it.why ? '<div class="card"><span class="small muted">Tu razón era</span><b style="display:block;margin-top:4px">«' + esc(it.why) + "»</b></div>" : "") + '<p class="small muted">Tu avance queda guardado y lo podés retomar cuando quieras.</p><button class="btn sage block" data-pgopen="' + id + '">Seguir con el programa</button><button class="btn ghost block" data-pgquit2="' + id + '" style="margin-top:8px">Pausar igual</button>');
   }
   function progCard() {
     if (!isProU() || !PG.list.length) return "";
@@ -636,23 +699,40 @@
     }
     var P = pgOf(id), n = pgCount(id);
     if (n >= 14) return '<div class="card sage" style="margin-top:12px"><b>Terminaste «' + esc(P.n) + '»</b><p class="small" style="margin:6px 0 10px">' + (pgItem(id).after ? "Mirá tu resultado y elegí qué sigue." : "Falta un último paso: contanos cómo estás ahora.") + '</p><button class="btn" data-pgopen="' + id + '">Ver resultado</button></div>';
-    var st = P.days[n];
-    return '<div class="card pgcard" style="margin-top:12px"><span class="small muted">' + esc(P.n) + " · paso " + (n + 1) + " de 14</span><b style='display:block;font-size:18px;margin:4px 0'>" + (pgToday(id) ? "Listo por hoy ✓" : esc(st.t)) + "</b>" +
-      (pgToday(id) ? '<p class="small muted" style="margin:0 0 10px">Mañana, el paso siguiente.</p>' : "<p class='small' style='margin:0 0 10px'>" + esc(st.a) + "</p>") +
-      '<div class="row">' + (pgToday(id) ? "" : '<button class="btn sage sm" data-pgdone="' + id + '">Hecho</button>') + '<button class="btn ghost sm" data-pgopen="' + id + '">Ver paso</button></div></div>';
+    var st = P.days[n], dn = pgToday(id), ok = pgWhenOk(st);
+    return '<div class="card pgcard" style="margin-top:12px"><span class="small muted">' + esc(P.n) + " · paso " + (n + 1) + " de 14</span><b style='display:block;font-size:18px;margin:4px 0 10px'>" + (dn ? "Listo por hoy ✓" : esc(st.t)) + "</b>" +
+      (dn ? "" : !ok ? '<p class="small muted" style="margin:0 0 10px">' + (st.when === "pm" ? "Esta noche, desde las 18:00." : "Mañana a la mañana, hasta las 14:00.") + "</p>" : "") +
+      '<button class="btn ' + (dn ? "ghost" : "sage") + ' sm" data-pgopen="' + id + '">' + (dn ? "Ver programa" : ok ? "Hacer el paso" : "Ver paso") + "</button></div>";
   }
+  function pgActDone(key) {
+    var id = pgCur(); if (!id) return; var it = pgItem(id), P = pgOf(id), n = pgCount(id); if (!it || n >= 14 || pgToday(id)) return;
+    var st = P.days[n]; if (!(st.f || []).some(function (f) { return f.k === "act" && f.a === key; })) return;
+    it.st = it.st || {}; it.st.acts = it.st.acts || {}; it.st.acts[key] = 1;
+  }
+  function pgSubmit(id) {
+    if (!pgOwns(id)) return; var it = pgItem(id), P = pgOf(id), n = pgCount(id); if (!it || pgToday(id) || n >= 14) return;
+    var st = P.days[n], msg = $("#pgmsg"), data = { log: {}, f: [] }, i, r;
+    function fail(m) { if (msg) msg.textContent = m; }
+    if (!pgWhenOk(st)) return fail(pgWhenTxt(st));
+    for (i = 0; i < (P.log || []).length; i++) { r = pgFieldCheck(P.log[i], "L" + i, it); if (!r.ok) return fail(r.msg); data.log[P.logKeys[i]] = r.v; }
+    for (i = 0; i < (st.f || []).length; i++) { r = pgFieldCheck(st.f[i], "F" + i, it); if (!r.ok) return fail(r.msg); data.f.push(r.v); }
+    if (P.log) { it.lg = it.lg || {}; it.lg[today()] = data.log; }
+    it.fl = it.fl || {}; it.fl[n] = data.f;
+    it.done[n] = today(); it.last = today(); it.dr = {}; it.st = null;
+    S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render();
+    openProgram(id);
+  }
+  setInterval(function () {
+    var e = document.getElementById("pgtmr"); if (!e) return;
+    var rem = (+e.getAttribute("data-end")) - Date.now();
+    if (rem <= 0) { e.textContent = "✓ Completado"; e.className = "pgt done"; e.removeAttribute("id"); } else e.textContent = pgMmss(rem);
+  }, 1000);
   function openPgTry(id) {
     var P = pgOf(id); if (!P) return; var st = P.days[0];
     sheet('<span class="badge">Prueba gratis · paso 1 de 14</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(st.t) + '</h2><div class="card"><p style="margin:0 0 8px">' + esc(st.a) + '</p><p class="small muted" style="margin:0">' + esc(st.w) + '</p></div>' +
       '<div class="card dark"><b>Quedan 13 pasos más</b><p class="small" style="margin:6px 0 12px;opacity:.9">Con Vida Pro seguís los 14 pasos, medís tu antes y después y se suma a tu constancia.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>' +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
-  function pgDone(id) {
-    if (!pgOwns(id)) return; var it = pgItem(id), n = pgCount(id); if (!it || pgToday(id) || n >= 14) return;
-    it.done[n] = today(); it.last = today(); S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render();
-    if (n + 1 >= 14) openProgram(id);
-  }
-
   // ---------- armar mañana y prioridad del día ----------
   var showTm = false;
   function tmDate() { var d = new Date(); d.setDate(d.getDate() + 1); return d; }
@@ -767,7 +847,7 @@
     var key = act.key, A = ACTS[key], vals = act.vals;
     if (act.tm) clearInterval(act.tm);
     if (vals.length) { S.notes = S.notes || {}; S.notes[today()] = S.notes[today()] || {}; S.notes[today()][key] = vals; }
-    var marked = completeAct(key); S.actn = (S.actn || 0) + 1; touchBest(); save();
+    var marked = completeAct(key); pgActDone(key); S.actn = (S.actn || 0) + 1; touchBest(); save();
     var n = weekCount(0), el = $("#full"); act = null; if (!el) return;
     el.innerHTML = '<div class="actbody" style="text-align:center;padding-top:80px"><div class="bigflame on" style="margin:0 auto 10px;width:70px;height:70px">' + ICON.flame + '</div><h2>¡Actividad completa!</h2><p class="muted">' + esc(A.t) + " hecha de verdad. " + (marked ? "Quedó tildada en tu día." : "") + '</p><p><b style="font-size:28px">' + n + "</b>/7 días con algo hecho esta semana</p>" + '<button class="btn block" data-actdone>Volver a mi día</button></div>';
   }
@@ -1296,6 +1376,12 @@
         else new Notification("Forma", o3);
       }
     }
+    var pid = pgCur(), pit = pid && pgItem(pid);
+    if (pit && pit.at && pit.at <= hm && pit.at >= minusMin(10) && !pgToday(pid) && pgCount(pid) < 14 && !notified["pg" + t]) {
+      notified["pg" + t] = 1; var o4 = { body: "Tu paso de hoy de «" + pgOf(pid).n + "» te espera. Son unos minutos.", icon: "icon-192.png", tag: "pg" + t };
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o4); }, function () { new Notification("Forma", o4); });
+      else new Notification("Forma", o4);
+    }
     activeHabits().forEach(function (h) {
       var k = h.id + t;
       if (!h.paused && h.time && h.time <= hm && !h.days[t] && !notified[k] && h.time >= minusMin(10)) {
@@ -1388,10 +1474,15 @@
     if (d.pgall !== undefined) return openPrograms();
     if (d.pgopen) return openProgram(d.pgopen);
     if (d.pgm !== undefined) { var par = t.parentNode; [].slice.call(par.querySelectorAll("[data-pgm]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; }
-    if (d.pgstart) { if (!pgOwns(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'); if (!sb) { var pm = $("#pgmsg"); if (pm) pm.textContent = "Elegí un número para empezar."; return; } S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, done: {}, last: null }; S.prog.cur = d.pgstart; save(); close(); render(); return openProgram(d.pgstart); }
-    if (d.pgdone) return pgDone(d.pgdone);
+    if (d.pgstart) { if (!pgOwns(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'), pm = $("#pgmsg"), why = ($("#pgwhy").value || "").trim(); if (!sb) { if (pm) pm.textContent = "Elegí un número para empezar."; return; } if (why.length < 8) { if (pm) pm.textContent = "Escribí tu razón (una frase corta alcanza)."; return; } S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, why: why.slice(0, 200), at: ($("#pgat").value || "").slice(0, 5), done: {}, last: null, lg: {}, fl: {}, dr: {}, st: null }; S.prog.cur = d.pgstart; save(); close(); render(); return openProgram(d.pgstart); }
+    if (d.pgdone) return pgSubmit(d.pgdone);
+    if (d.pgc) { var pc = d.pgc.split("|"), cit = pgItem(S.prog && S.prog.cur); if (cit) { cit.dr = cit.dr || {}; cit.dr[pc[0]] = +pc[1]; [].slice.call(t.parentNode.querySelectorAll("[data-pgc]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); save(); } return; }
+    if (d.pgk) { var kit = pgItem(S.prog && S.prog.cur); if (kit) { kit.dr = kit.dr || {}; kit.dr[d.pgk] = kit.dr[d.pgk] === 1 ? 0 : 1; t.setAttribute("aria-pressed", kit.dr[d.pgk] === 1 ? "true" : "false"); save(); } return; }
+    if (d.pgtm) { var tid = S.prog && S.prog.cur, tit = pgItem(tid); if (tit) { tit.st = tit.st || {}; tit.st.tm = { end: Date.now() + (+d.pgtm) * 1000 }; save(); openProgram(tid); } return; }
+    if (d.pgact) return startAct(d.pgact);
+    if (d.pgquit2) { S.prog.cur = null; save(); close(); render(); return; }
     if (d.pgafter) { var sa = document.querySelector('#sheet .pgm[data-key=after] [aria-pressed=true]'); if (!sa) return; pgItem(d.pgafter).after = +sa.dataset.pgm; save(); render(); return openProgram(d.pgafter); }
-    if (d.pgquit) { S.prog.cur = null; save(); close(); render(); return; }
+    if (d.pgquit) return openPgQuit(d.pgquit);
     if (d.pgresume) { if (pgOwns(d.pgresume)) { S.prog.cur = d.pgresume; save(); close(); render(); openProgram(d.pgresume); } return; }
     if (d.pgagain) { delete S.prog.items[d.pgagain]; save(); render(); return openProgram(d.pgagain); }
     if (d.tmshow !== undefined) { showTm = true; render(); return; }
@@ -1468,6 +1559,7 @@
       return;
     }
   });
+  document.addEventListener("change", function (e) { if (e.target.getAttribute && e.target.getAttribute("data-fk")) save(); });
   document.addEventListener("submit", function (e) {
     if (e.target.id === "compf") { e.preventDefault(); var cv = $("#compown").value.trim(); if (cv && compDraft) { if (compDraft.sel.length >= 3) { $("#compmsg").textContent = "Hasta 3. Sacá uno para sumar otro."; return; } if (compDraft.sel.indexOf(cv) < 0) compDraft.sel.push(cv.slice(0, 80)); drawComp(); } return; }
     if (e.target.id === "bnf") { e.preventDefault(); if (!isProU()) return; var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim(); if (bx && bv) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv.slice(0, 80)); save(); render(); openBlock(bi); } return; }
@@ -1481,6 +1573,8 @@
     }
   });
   document.addEventListener("input", function (e) {
+    var fk = e.target.getAttribute && e.target.getAttribute("data-fk");
+    if (fk) { var fit = pgItem(S.prog && S.prog.cur); if (fit) { fit.dr = fit.dr || {}; fit.dr[fk] = e.target.value; } return; }
     if (!e.target) return;
     if (e.target.id === "act-in") updateNext();
     if (e.target.id === "a-user") draft.userTouched = true;

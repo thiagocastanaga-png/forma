@@ -293,3 +293,20 @@ main{flex:1;padding:20px 18px 110px}
 .bignow h2{margin-top:6px}
 .bignow .bwhen{font-size:15px;opacity:.8}
 .tl .blk .bd b{font-size:16px}
+
+/* ---- pasos interactivos ---- */
+.pgl{display:block;margin:14px 0 6px;font-weight:600;font-size:14px}
+.pgin{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surf);color:inherit;font:inherit;margin-bottom:8px;box-sizing:border-box}
+textarea.pgin{resize:vertical;min-height:64px}
+.pgch2{display:flex;flex-wrap:wrap;gap:8px}
+.pgch2 .chip[aria-pressed=true]{background:var(--sage);color:var(--ink);border-color:var(--sage)}
+.pgck{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;color:inherit;font:inherit}
+.pgck i{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--sage)}
+.pgck[aria-pressed=true] i{background:var(--sage);box-shadow:inset 0 0 0 4px var(--bg)}
+.pgtimer{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px}
+.pgt{font-size:36px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:6px}
+.pgt.done{font-size:18px;color:var(--sage)}
+.pgbars{display:flex;align-items:flex-end;gap:4px;height:70px;margin-top:8px}
+.pgbars i{flex:1;background:var(--sage);border-radius:4px 4px 0 0;min-width:4px}
+.pgwhy{font-style:italic;opacity:.8;margin:0 0 10px}
+.pgbars i{max-width:30px}
