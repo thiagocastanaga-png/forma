@@ -105,7 +105,7 @@
   ];
 
   var KIND = {
-    fixed: { tag: "Fijo", dot: "#111111" },
+    fixed: { tag: "Fijo", dot: "#8A8678" },
     commute: { tag: "Traslado", dot: "#8A8478" },
     meal: { tag: "Comida", dot: "#C9AE72" },
     train: { tag: "Entreno", dot: "#2F5D46" },

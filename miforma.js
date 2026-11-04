@@ -165,7 +165,7 @@
     return fetch(g.action, { method: "POST", mode: "no-cors", body: b }).then(function () { return true; }, function () { return false; });
   }
   function toggleIn(arr, v) { var i = arr.indexOf(v); if (i < 0) arr.push(v); else arr.splice(i, 1); }
-  function fieldCss() { return "width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff"; }
+  function fieldCss() { return "width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"; }
 
   // ---------- cuentas y sincronización ----------
   function initSb() {
@@ -424,7 +424,7 @@
     if (activeHabits().length >= habitLimit()) {
       html += '<div class="card sage"><b>Llegaste al límite del plan gratis (' + FREE_HABITS + " hábitos)</b><p class='small' style='margin:6px 0 12px'>Con Vida diaria Pro tenés hábitos sin límite, tu ritmo armado y la revisión semanal.</p><button class='btn' data-plan='vida'>Ver Vida diaria Pro</button></div>";
     } else {
-      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Mi propio hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:#fff"><button class="btn sage">Agregar</button></form><button class="btn ghost block" id="menu" style="margin-top:8px">Elegir del menú de hábitos</button><p class="small muted" style="margin:6px 0 0">El horario es un recordatorio, no una obligación.</p>';
+      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Mi propio hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"><button class="btn sage">Agregar</button></form><button class="btn ghost block" id="menu" style="margin-top:8px">Elegir del menú de hábitos</button><p class="small muted" style="margin:6px 0 0">El horario es un recordatorio, no una obligación.</p>';
     }
     html += dayCta() + reminderCard();
     html += '<div class="sec">Herramientas para cuando las necesites</div>' +
@@ -509,7 +509,7 @@
     var html = "<h1 class='hello'>Tu perfil</h1>" +
       '<div class="card row"><span class="avatar">' + esc(initial) + '</span><div style="min-width:0"><b style="font-size:20px">' + esc(p.name) + "</b><div class='small muted'>" + (acct.username ? "@" + esc(acct.username) : "Sin cuenta") + (p.created ? " · desde " + esc(p.created) : "") + "</div></div></div>" +
       '<div class="grid3"><div class="card stat"><b>' + weekCount(0) + '</b><span>días esta semana</span></div><div class="card stat"><b>' + weekStreak() + '</b><span>semanas con 3+ días</span></div><div class="card stat"><b>' + totalDone() + '</b><span>hábitos hechos</span></div></div>' +
-      progressCard() +
+      themeCard() + progressCard() +
       '<div class="card"><b>Tus planes</b><div style="margin-top:8px">' + PLANS.filter(function (x) { return x.live; }).map(function (x) {
         return '<div class="row between" style="padding:6px 0"><span class="row"><span class="shape" style="width:26px;height:26px">' + SHAPES[x.id] + "</span>" + esc(x.n) + '</span><span class="tag' + (isPro(x.id) ? " ok" : "") + '">' + (isPro(x.id) ? "Pro" : "Gratis") + "</span></div>";
       }).join("") + "</div></div>";
@@ -669,7 +669,7 @@
   function openRespirar() { startAct("respirar"); }
 
   // ---------- acciones ----------
-  function setMsg(t, ok) { var m = $("#amsg"); if (m) { m.textContent = t; m.style.color = ok ? "var(--sage-d)" : "#b3261e"; } }
+  function setMsg(t, ok) { var m = $("#amsg"); if (m) { m.textContent = t; m.style.color = ok ? "var(--sage-d)" : "var(--err)"; } }
   function val(id) { var e = $("#" + id); return e ? e.value : ""; }
   function readAuthDraft() {
     var a = $("#a-name"), u = $("#a-user"), e = $("#a-email"), t = $("#a-terms");
@@ -774,6 +774,20 @@
   }
 
 
+
+
+  // ---------- apariencia (oscuro / claro) ----------
+  function curTheme() { return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark"; }
+  function setTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("forma_theme", t); } catch (e) {}
+    var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", t === "dark" ? "#121211" : "#F5F1E8");
+    render();
+  }
+  function themeCard() {
+    var t = curTheme();
+    return '<div class="card"><b>Apariencia</b><p class="small muted" style="margin:4px 0 0">Elegí cómo querés ver Forma.</p><div class="seg themeseg"><button data-settheme="dark" aria-pressed="' + (t === "dark") + '">Oscuro</button><button data-settheme="light" aria-pressed="' + (t === "light") + '">Claro</button></div></div>';
+  }
 
   // ---------- compromisos de hoy y detalles por bloque ----------
   function isProU() { return !!(S.demo || isPro("vida")); }
@@ -1152,6 +1166,7 @@
     if (d.cack !== undefined) { if (!isProU()) return; var ctx = compToday()[+d.cack]; if (ctx !== undefined) { S.ad = S.ad || {}; var tdc = today(); S.ad[tdc] = S.ad[tdc] || {}; if (S.ad[tdc]["c|" + ctx]) delete S.ad[tdc]["c|" + ctx]; else S.ad[tdc]["c|" + ctx] = 1; touchBest(); save(); render(); } return; }
     if (d.ackb !== undefined) { if (!isProU()) return; var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2 && isProU()) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
+    if (d.settheme) return setTheme(d.settheme);
     if (t.id === "armgo") return armOpen();
     if (t.id === "armedit") return armOpen(S.arm && S.arm.ans);
     if (d.ack) { if (!(S.demo || isPro("vida"))) return; S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
