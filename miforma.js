@@ -69,11 +69,12 @@
 
   // Productos sueltos (no son el plan completo)
   var PRODUCTS = [
-    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir mejor", d: "Rutina guiada de 10 minutos para bajar el ritmo antes de dormir.", area: "cuerpo", act: "dormir" },
+    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir de verdad", d: "Programa de 14 días para ordenar tu sueño, con una rutina guiada para bajar el ritmo. Un cambio chico por día.", area: "cuerpo", act: "dormir", prog: "dormir" },
     { id: "energia", g: "Cuerpo", s: "vida", n: "Energía y movimiento", d: "Pausa de movimiento guiada de 5 minutos, sin gimnasio ni equipamiento.", area: "cuerpo", act: "movimiento" },
     { id: "comidas", g: "Cuerpo", s: "vida", n: "Comidas ordenadas", d: "Organizar horarios y compras. No es una dieta.", area: "cuerpo", soon: true },
-    { id: "ansiedad", g: "Mente", s: "vida", n: "Bajar la ansiedad", d: "Respiración guiada de 3 minutos para bajar la ansiedad del día. No reemplaza a un profesional.", area: "mente", act: "calma" },
-    { id: "foco", g: "Mente", s: "vida", n: "Foco y tiempo", d: "Bloque de foco de 25 minutos con intención y cierre.", area: "trabajo", act: "foco" },
+    { id: "ansiedad", g: "Mente", s: "vida", n: "Calmar la cabeza", d: "Programa de 14 días con herramientas simples para bajar la tensión de todos los días. No reemplaza a un profesional.", area: "mente", act: "calma", prog: "calma" },
+    { id: "foco", g: "Mente", s: "vida", n: "Arrancar", d: "Programa de 14 días para dejar de postergar: pasos diminutos, foco de 25 minutos y una prioridad por día.", area: "trabajo", act: "foco", prog: "arrancar" },
+    { id: "celular", g: "Mente", s: "vida", n: "Celular bajo control", d: "Programa de 14 días para usar el celular vos y que no te use a vos. Sin prohibirte nada.", area: "mente", prog: "celular" },
     { id: "tiempo", g: "Mente", s: "vida", n: "Tiempo para vos", d: "Espacios para descansar y hacer lo que te gusta.", area: "tiempo", soon: true },
     { id: "cierre", g: "Mente", s: "vida", n: "Cierre del día", d: "Repasá tu día, soltá lo pendiente y dejá armado mañana. 5 minutos guiados.", area: "mente", act: "cierre" },
     { id: "habitos-pro", g: "Orden", s: "vida", n: "Hábitos que se quedan", d: "Método para sostener hábitos en 21 días.", area: "mente", soon: true },
@@ -186,7 +187,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "wk"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "wk", "tm", "prog"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -209,6 +210,15 @@
     out.comp = Object.assign({}, remote.comp || {}, local.comp || {}); out.bn = Object.assign({}, remote.bn || {}, local.bn || {});
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
+    out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
+    (function () {
+      var r = remote.prog || { items: {} }, l = local.prog || { items: {} }, it = {};
+      Object.keys(Object.assign({}, r.items, l.items)).forEach(function (id) {
+        var a = (r.items || {})[id] || {}, b = (l.items || {})[id] || {};
+        it[id] = { start: [a.start, b.start].filter(Boolean).sort()[0] || null, before: b.before || a.before || null, after: b.after || a.after || null, done: Object.assign({}, a.done || {}, b.done || {}), last: [a.last, b.last].filter(Boolean).sort().pop() || null };
+      });
+      out.prog = { cur: local.prog && local.prog.cur !== undefined ? local.prog.cur : r.cur || null, items: it };
+    })();
     out.notes = Object.assign({}, remote.notes || {}, local.notes || {});
     out.checks = Object.assign({}, remote.checks || {}, local.checks || {});
     var seen = {}, rv = [];
@@ -401,7 +411,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -436,10 +446,10 @@
     if (armBlocks().length) {
       if (viewMode() === "now") {
         var rest = html.slice(gr.length).replace("@@ARM@@", "");
-        return gr + viewToggle() + cierreCard() + nowSection() + compCard() + weekCard() +
+        return gr + viewToggle() + prioCard() + cierreCard() + mananaCard() + nowSection() + progCard() + compCard() + weekCard() +
           '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy: constancia, frase, pendientes y hábitos") + "</button>" + (moreOpen ? rest : "");
       }
-      return html.replace("@@ARM@@", viewToggle() + weekCard() + armSection());
+      return html.replace("@@ARM@@", viewToggle() + prioCard() + progCard() + weekCard() + armSection());
     }
     return html.replace("@@ARM@@", armSection());
   }
@@ -557,11 +567,12 @@
   function openProduct(id) {
     var p = prodOf(id); if (!p) return;
     var pl = planOf(p.s), ok = owns(p), viaPro = ok && !hasProduct(p.id);
+    if (ok && p.prog) return openProgram(p.prog);
     sheet('<div class="row"><span class="shape">' + SHAPES[p.s] + '</span><div><span class="badge">Producto suelto</span><h2 style="font-size:22px;margin-top:4px">' + esc(p.n) + '</h2><span class="small muted">' + esc(pl ? pl.n : "") + " · " + esc(p.g) + (p.price ? " · " + esc(p.price) : "") + "</span></div></div>" +
       '<p style="margin:14px 0">' + esc(p.d) + "</p>" +
       (ok ? '<div class="card"><b>' + (viaPro ? "Lo tenés incluido en tu plan Pro." : "Ya es tuyo.") + "</b>" + (p.act ? '<p class="small muted" style="margin:6px 0 12px">Es una actividad guiada: se tilda en tu día solo cuando la hacés completa.</p><button class="btn block" data-act="' + p.act + '">Hacer ahora</button>' : '<p class="small muted" style="margin:6px 0 0">Estamos terminando el contenido de este producto. Apenas esté listo lo vas a ver acá, sin que tengas que hacer nada.</p>') + "</div>"
-        : actPreview(p) + (p.soon ? '<div class="card"><b>Todavía no está disponible</b><p class="small muted" style="margin:6px 0 0">Lo estamos armando. Va a estar incluido en Vida diaria Pro.</p></div>' : payButtons(p.id, p.n)) + (pl && pl.live ? '<div class="card" style="margin-top:12px"><b>¿Querés todo el plan?</b><p class="small muted" style="margin:6px 0 10px">Forma ' + esc(pl.n) + " Pro incluye este y los demás productos de la sección.</p><button class='btn ghost block' data-plan='" + pl.id + "'>Ver plan " + esc(pl.n) + "</button></div>" : "")) +
-      (p.id === "ansiedad" || p.id === "dormir" || p.id === "comidas" || p.id === "plata" ? '<p class="small muted">Es un apoyo de bienestar y organización. No reemplaza la consulta con un profesional de la salud' + (p.id === "plata" ? " ni el asesoramiento financiero" : "") + ".</p>" : "") +
+        : progPreview(p) + actPreview(p) + (p.soon ? '<div class="card"><b>Todavía no está disponible</b><p class="small muted" style="margin:6px 0 0">Lo estamos armando. Va a estar incluido en Vida diaria Pro.</p></div>' : payButtons(p.id, p.n)) + (pl && pl.live ? '<div class="card" style="margin-top:12px"><b>¿Querés todo el plan?</b><p class="small muted" style="margin:6px 0 10px">Forma ' + esc(pl.n) + " Pro incluye este y los demás productos de la sección.</p><button class='btn ghost block' data-plan='" + pl.id + "'>Ver plan " + esc(pl.n) + "</button></div>" : "")) +
+      (p.id === "ansiedad" || p.id === "dormir" || p.id === "celular" || p.id === "comidas" || p.id === "plata" ? '<p class="small muted">Es un apoyo de bienestar y organización. No reemplaza la consulta con un profesional de la salud' + (p.id === "plata" ? " ni el asesoramiento financiero" : "") + ".</p>" : "") +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
   function actPreview(p) {
@@ -569,6 +580,91 @@
     return '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>";
   }
   function openOrganizar() { armOpen(S.arm && S.arm.ans); }
+
+  // ---------- programas de 14 días ----------
+  var PG = window.FormaProg || { list: [], byId: {} };
+  function pgOf(id) { return PG.byId[id]; }
+  function pgProd(id) { return PRODUCTS.filter(function (p) { return p.prog === id; })[0]; }
+  function pgOwns(id) { var p = pgProd(id); return !!(p && owns(p)); }
+  function pgItem(id) { return S.prog && S.prog.items && S.prog.items[id]; }
+  function pgCount(id) { var it = pgItem(id); return it && it.done ? Object.keys(it.done).length : 0; }
+  function pgCur() { var id = S.prog && S.prog.cur; return id && pgOf(id) && pgOwns(id) ? id : null; }
+  function pgToday(id) { var it = pgItem(id); return !!(it && it.last === today()); }
+  function pgPreview(P) { return '<ol class="small pgprev">' + P.days.map(function (x) { return "<li>" + esc(x.t) + "</li>"; }).join("") + "</ol>"; }
+  function progPreview(p) {
+    var P = p.prog && pgOf(p.prog); if (!P) return "";
+    return '<div class="card"><b>Qué vas a hacer</b><p class="small muted" style="margin:6px 0 4px">Un paso por día, de 2 a 5 minutos, durante 14 días. Medís cómo estás antes y después para ver si funcionó.</p>' + pgPreview(P) + "</div>";
+  }
+  function scaleChips(P, key, sel) {
+    return '<div class="pgm" data-key="' + key + '">' + [1, 2, 3, 4, 5].map(function (n) { return '<button class="chip" data-pgm="' + n + '" aria-pressed="' + (sel === n) + '">' + n + "</button>"; }).join("") + '</div><div class="row between small muted" style="margin-top:4px"><span>1 · ' + esc(P.lo) + "</span><span>5 · " + esc(P.hi) + "</span></div>";
+  }
+  function openPrograms() {
+    sheet('<h2 style="font-size:22px">Programas de 14 días</h2><p class="muted small">Uno por vez, un paso por día. Elegí el que más te haga falta ahora.</p>' +
+      PG.list.map(function (P) { var it = pgItem(P.id), n = pgCount(P.id), st = !it ? "Empezar" : n >= 14 ? "Terminado" : (S.prog.cur === P.id ? "Paso " + (n + 1) + " de 14" : "Retomar");
+        return '<button class="prod" data-pgopen="' + P.id + '"><span class="shape">' + SHAPES.vida + "</span><span style='flex:1;min-width:0'><b>" + esc(P.n) + "</b><small>" + esc(P.tag) + " · " + esc(P.intro.split(".")[0]) + '.</small></span><span class="tag">' + st + "</span></button>"; }).join("") +
+      '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
+  function openProgram(id) {
+    var P = pgOf(id); if (!P) return;
+    if (!pgOwns(id)) { var pp = pgProd(id); return pp ? openProduct(pp.id) : undefined; }
+    var it = pgItem(id), n = pgCount(id), h = '<span class="badge">Programa de 14 días</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(P.n) + "</h2>";
+    if (!it) {
+      h += '<p>' + esc(P.intro) + '</p><div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + '<p class="small" id="pgmsg" style="margin:8px 0 0;color:var(--err)"></p></div>' +
+        '<button class="btn sage block" data-pgstart="' + id + '">Empezar programa</button><div class="sec" style="margin-top:16px">Los 14 pasos</div>' + pgPreview(P) + '<p class="small muted">' + esc(P.note) + "</p>";
+    } else if (n >= 14) {
+      var b = it.before, a = it.after;
+      h += '<div class="card' + (a ? " sage" : "") + '"><b>¡Terminaste los 14 pasos!</b>' + (a ? '<p style="margin:8px 0 0">' + esc(P.q) + "<br><b>Antes: " + b + " · Después: " + a + "</b></p><p class=\"small\" style=\"margin:6px 0 0\">" + (P.better === "up" ? (a > b ? "Mejoraste. Mantené tus 3 pasos favoritos." : "Todavía no se nota el cambio. Es normal: probá repetir los pasos que más te sirvieron.") : (a < b ? "Bajó la tensión. Usá tu kit cuando haga falta." : "Todavía no bajó. Repetí lo que más te sirvió y, si sigue, hablalo con un profesional.")) + "</p>" :
+        '<p class="small" style="margin:6px 0 10px">Último paso: contanos cómo estás ahora. ' + esc(P.q) + "</p>" + scaleChips(P, "after", 0) + '<button class="btn sage block" data-pgafter="' + id + '" style="margin-top:10px">Ver mi resultado</button>') + "</div>" +
+        '<button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:10px">Repetir el programa</button><button class="btn ghost block" data-pgall style="margin-top:8px">Elegir otro programa</button>';
+    } else {
+      var st = P.days[n], done = pgToday(id);
+      h += '<div class="pgbar"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></div><p class="small muted" style="margin:6px 0 12px">Paso ' + (n + 1) + " de 14 · " + n + " hechos</p>" +
+        '<div class="card"><b style="font-size:18px">' + esc(st.t) + "</b><p style='margin:8px 0'>" + esc(st.a) + "</p><p class='small muted' style='margin:0'>" + esc(st.w) + "</p>" +
+        (st.tool ? '<button class="btn sage block" data-act="' + st.tool + '" style="margin-top:12px">Hacerlo guiado</button>' : "") + "</div>" +
+        (done ? '<div class="card sage"><b>Listo por hoy</b><p class="small" style="margin:4px 0 0">Mañana te espera el paso siguiente. Una cosa por día alcanza.</p></div>' : '<button class="btn block" data-pgdone="' + id + '">Hice este paso</button>') +
+        '<div class="sec" style="margin-top:16px">Tu camino</div><ol class="small pgprev">' + P.days.map(function (x, i) { return '<li class="' + (i < n ? "ok" : i === n ? "cur" : "") + '">' + (i < n ? "✓ " : "") + esc(x.t) + "</li>"; }).join("") + "</ol>" +
+        (S.prog.cur === id ? '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este programa</button>' : '<button class="btn ghost block" data-pgresume="' + id + '">Retomar este programa</button>') + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
+    }
+    sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
+  function progCard() {
+    if (!isProU() || !PG.list.length) return "";
+    var id = pgCur();
+    if (!id) {
+      if (S.prog && S.prog.items && Object.keys(S.prog.items).length) return "";
+      return '<div class="card" style="margin-top:12px"><b>Programas de 14 días</b><p class="small muted" style="margin:6px 0 10px">Resolvé algo concreto: dormir mejor, usar menos el celular, dejar de postergar o calmar la cabeza. Un paso por día.</p><button class="btn sage" data-pgall>Elegir un programa</button></div>';
+    }
+    var P = pgOf(id), n = pgCount(id);
+    if (n >= 14) return '<div class="card sage" style="margin-top:12px"><b>Terminaste «' + esc(P.n) + '»</b><p class="small" style="margin:6px 0 10px">' + (pgItem(id).after ? "Mirá tu resultado y elegí qué sigue." : "Falta un último paso: contanos cómo estás ahora.") + '</p><button class="btn" data-pgopen="' + id + '">Ver resultado</button></div>';
+    var st = P.days[n];
+    return '<div class="card pgcard" style="margin-top:12px"><span class="small muted">' + esc(P.n) + " · paso " + (n + 1) + " de 14</span><b style='display:block;font-size:18px;margin:4px 0'>" + (pgToday(id) ? "Listo por hoy ✓" : esc(st.t)) + "</b>" +
+      (pgToday(id) ? '<p class="small muted" style="margin:0 0 10px">Mañana, el paso siguiente.</p>' : "<p class='small' style='margin:0 0 10px'>" + esc(st.a) + "</p>") +
+      '<div class="row">' + (pgToday(id) ? "" : '<button class="btn sage sm" data-pgdone="' + id + '">Hecho</button>') + '<button class="btn ghost sm" data-pgopen="' + id + '">Ver paso</button></div></div>';
+  }
+  function pgDone(id) {
+    if (!pgOwns(id)) return; var it = pgItem(id), n = pgCount(id); if (!it || pgToday(id) || n >= 14) return;
+    it.done[n] = today(); it.last = today(); S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render();
+    if (n + 1 >= 14) openProgram(id);
+  }
+
+  // ---------- armar mañana y prioridad del día ----------
+  var showTm = false;
+  function tmDate() { var d = new Date(); d.setDate(d.getDate() + 1); return d; }
+  function tmThreshold() { var a = dayAns(new Date()) || {}, sl = a.sleep || 1380; return Math.max(1080, Math.min(sl - 180, 1260)); }
+  function mananaCard() {
+    if (!isProU() || !S.arm || !S.arm.ans) return "";
+    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(); if (now < tmThreshold()) return "";
+    if (!(S.cierre && S.cierre[today()]) && !showTm) return "";
+    var tm = tmDate(), bl = armBlocksFor(tm), k = today(tm), cur = S.tm && S.tm[k]; if (!bl.length) return "";
+    return '<div class="card manana"><b>Mañana, ' + DNL[tm.getDay()].toLowerCase() + '</b><p class="small muted" style="margin:4px 0 10px">' + bl.length + " momentos · arrancás a las " + window.FormaDia.fmt(bl[0].s) + "</p>" +
+      (cur && cur.t ? '<p style="margin:0 0 8px">Tu prioridad: <b>' + esc(cur.t) + '</b> <button class="linkbtn small" data-tmedit>Cambiar</button></p>' :
+        '<form id="tmf" class="row"><input id="tmi" maxlength="80" placeholder="¿Qué es lo más importante de mañana?" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Dejar</button></form>') +
+      '<button class="btn ghost block" data-wkday="' + tm.getDay() + '" data-wkdt="' + k + '" style="margin-top:10px">Ver o cambiar mañana</button></div>';
+  }
+  function prioCard() {
+    var c = isProU() && S.tm && S.tm[today()]; if (!c || !c.t) return "";
+    return '<div class="card prio' + (c.d ? " done" : "") + '"><button class="pcheck" data-tmdone aria-pressed="' + !!c.d + '" aria-label="Marcar como hecha"></button><div><span class="small muted">Tu prioridad de hoy · la dejaste anoche</span><b style="display:block;font-size:17px">' + esc(c.t) + "</b></div></div>";
+  }
 
   // ---------- actividades guiadas ----------
   var FAST = false; try { FAST = new URLSearchParams(location.search).get("fast") === "1"; } catch (e) {}
@@ -766,8 +862,8 @@
       '</div><p class="small muted" style="margin:10px 0 0">Tocá un día para verlo o armarlo distinto: el finde, un día de entrenamiento, un día liviano.</p></div>';
   }
   function wkDate(dow) { return weekDates().filter(function (d) { return d.getDay() === dow; })[0]; }
-  function openWeekDay(dow) {
-    var F = window.FormaDia, d = wkDate(dow), bl = armBlocksFor(d), cu = wkCustom(dow);
+  function openWeekDay(dow, dt) {
+    var F = window.FormaDia, d = dt || wkDate(dow), bl = armBlocksFor(d), cu = wkCustom(dow);
     sheet('<span class="badge">' + (cu ? "Armado para este día" : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">Se repite todos los ' + DNL[dow].toLowerCase() + (dow === 3 ? "" : "s") + ".</p>" +
       '<div class="wklist">' + bl.map(function (b) { var K = F.KIND[b.kind]; return '<div class="wkrow"><span class="wkt">' + F.fmt(b.s) + '</span><i style="background:' + K.dot + '"></i><span>' + esc(b.label) + "</span></div>"; }).join("") + "</div>" +
       '<button class="btn sage block" data-wkedit="' + dow + '" style="margin-top:14px">' + (cu ? "Cambiar este día" : "Armar este día distinto") + "</button>" +
@@ -803,7 +899,7 @@
     if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 12 preguntas rápidas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
-    var html = cierreCard() + compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
+    var html = cierreCard() + mananaCard() + compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
       '<p class="small muted" style="margin:0 0 6px">' + (pro && tr.length ? n + " de " + tr.length + " momentos hechos hoy. " : "") + "Sin apuro: es una guía, no una obligación.</p>" +
       '<div class="legend"><span><i class="lg past"></i>Ya pasó</span><span><i class="lg now"></i>Ahora</span><span><i class="lg next"></i>Lo que sigue</span></div><div class="tl">';
     bl.forEach(function (b) {
@@ -867,7 +963,7 @@
       return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (n ? "Hoy cumpliste " + n + " de " + list.length + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + " Mañana seguimos.</p></div>";
     }
     if (now < th && now >= 360) return "";
-    return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.9">' + (n ? "Cumpliste " + n + " de " + list.length + " compromisos" + (nb ? " y " + nb + " momentos de tu día" : "") + ". Pasamos lo cumplido a “Lo que hice bien hoy”." : (nb ? "Hiciste " + nb + " momentos de tu día. Eso también cuenta." : "Hay días así. Cerrá el día sin culpa: mañana es otro.")) + '</p><button class="btn sage" id="cierre">Cerrar mi día</button></div>';
+    return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.9">' + (n ? "Cumpliste " + n + " de " + list.length + " compromisos" + (nb ? " y " + nb + " momentos de tu día" : "") + ". Pasamos lo cumplido a “Lo que hice bien hoy”." : (nb ? "Hiciste " + nb + " momentos de tu día. Eso también cuenta." : "Hay días así. Cerrá el día sin culpa: mañana es otro.")) + '</p><button class="btn sage" id="cierre">Cerrar mi día</button> <button class="linkbtn small" data-tmshow style="margin-left:8px">Dejar armado mañana</button></div>';
   }
 
 
@@ -1187,6 +1283,14 @@
         else new Notification("Forma", o2);
       }
     });
+    if (S.arm && S.arm.ans) {
+      var ttm = window.FormaDia.fmt(tmThreshold()), ktm = "tm" + t;
+      if (ttm <= hm && ttm >= minusMin(10) && !notified[ktm] && !(S.tm && S.tm[today(tmDate())])) {
+        notified[ktm] = 1; var o3 = { body: "¿Dejamos armado mañana? Son 2 minutos y mañana arrancás tranquilo.", icon: "icon-192.png", tag: ktm };
+        if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o3); }, function () { new Notification("Forma", o3); });
+        else new Notification("Forma", o3);
+      }
+    }
     activeHabits().forEach(function (h) {
       var k = h.id + t;
       if (!h.paused && h.time && h.time <= hm && !h.days[t] && !notified[k] && h.time >= minusMin(10)) {
@@ -1274,6 +1378,19 @@
     if (t.id === "hsave") { var eh = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0], nn = $("#e-name").value.trim(); if (eh && nn) { eh.name = nn.slice(0, 60); eh.time = $("#e-time").value || ""; eh.freq = +$("#e-freq").value || 7; eh.min = $("#e-min").value.trim().slice(0, 80); eh.paused = $("#e-pause").checked; save(); close(); render(); } return; }
     if (t.id === "hclear") { $("#e-time").value = ""; return; }
     if (t.id === "hdel") { if (confirm("¿Borrar este hábito? Tu racha no se pierde.")) { var hx = S.habits.filter(function (x) { return x.id === t.dataset.id; })[0]; if (hx) hx.del = true; save(); close(); render(); } return; }
+    if (d.wkday !== undefined) { var wdt = null; if (d.wkdt) { var q = d.wkdt.split("-"); wdt = new Date(+q[0], +q[1] - 1, +q[2]); } return openWeekDay(+d.wkday, wdt); }
+    if (d.pgall !== undefined) return openPrograms();
+    if (d.pgopen) return openProgram(d.pgopen);
+    if (d.pgm !== undefined) { var par = t.parentNode; [].slice.call(par.querySelectorAll("[data-pgm]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; }
+    if (d.pgstart) { if (!pgOwns(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'); if (!sb) { var pm = $("#pgmsg"); if (pm) pm.textContent = "Elegí un número para empezar."; return; } S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, done: {}, last: null }; S.prog.cur = d.pgstart; save(); close(); render(); return openProgram(d.pgstart); }
+    if (d.pgdone) return pgDone(d.pgdone);
+    if (d.pgafter) { var sa = document.querySelector('#sheet .pgm[data-key=after] [aria-pressed=true]'); if (!sa) return; pgItem(d.pgafter).after = +sa.dataset.pgm; save(); render(); return openProgram(d.pgafter); }
+    if (d.pgquit) { S.prog.cur = null; save(); close(); render(); return; }
+    if (d.pgresume) { if (pgOwns(d.pgresume)) { S.prog.cur = d.pgresume; save(); close(); render(); openProgram(d.pgresume); } return; }
+    if (d.pgagain) { delete S.prog.items[d.pgagain]; save(); render(); return openProgram(d.pgagain); }
+    if (d.tmshow !== undefined) { showTm = true; render(); return; }
+    if (d.tmedit !== undefined) { if (S.tm) delete S.tm[today(tmDate())]; save(); render(); return; }
+    if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0 && isProU()) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
     if (d.wkday !== undefined) return openWeekDay(+d.wkday);
     if (d.wkedit !== undefined) return wkEdit(+d.wkedit);
     if (d.wkreset !== undefined) { if (isProU()) wkReset(+d.wkreset); return; }
@@ -1348,6 +1465,7 @@
   document.addEventListener("submit", function (e) {
     if (e.target.id === "compf") { e.preventDefault(); var cv = $("#compown").value.trim(); if (cv && compDraft) { if (compDraft.sel.length >= 3) { $("#compmsg").textContent = "Hasta 3. Sacá uno para sumar otro."; return; } if (compDraft.sel.indexOf(cv) < 0) compDraft.sel.push(cv.slice(0, 80)); drawComp(); } return; }
     if (e.target.id === "bnf") { e.preventDefault(); if (!isProU()) return; var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim(); if (bx && bv) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv.slice(0, 80)); save(); render(); openBlock(bi); } return; }
+    if (e.target.id === "tmf") { e.preventDefault(); if (!isProU()) return; var tv = $("#tmi").value.trim(); if (tv) { S.tm = S.tm || {}; S.tm[today(tmDate())] = { t: tv.slice(0, 80), d: 0 }; save(); render(); } return; }
     if (e.target.id === "winf") { e.preventDefault(); var wv = $("#win").value.trim(); if (wv) { S.wins = S.wins || {}; (S.wins[today()] = S.wins[today()] || []).push(wv.slice(0, 120)); save(); render(); } return; }
     if (e.target.id === "todof") { e.preventDefault(); var tv = $("#todo").value.trim(); if (tv && (S.todo || []).length < 60) { S.todo = S.todo || []; S.todo.push({ id: "t" + Date.now(), t: tv.slice(0, 120), done: false, doneAt: "" }); save(); render(); } return; }
     if (e.target.id === "addh") { e.preventDefault(); addHabit($("#hname").value, $("#htime").value); }
