@@ -193,3 +193,15 @@ main{flex:1;padding:20px 18px 110px}
 .tl .blk .check[aria-checked=true] svg path{stroke:#fff}
 .pg{display:block;height:5px;border-radius:99px;background:rgba(0,0,0,.15);margin-top:8px;overflow:hidden}
 .pg i{display:block;height:100%;background:var(--ink)}
+
+/* ---- contraste claro: pasó = oscuro, ahora = lima, sigue = blanco ---- */
+.lg.past{background:#1d1d1b}.lg.next{background:#fff;border:1px solid var(--line)}
+.tl .blk.next{background:#fff;border-left-color:var(--sage)}
+.tl .blk.past{background:#1d1d1b;border-left-color:#4a4a45;color:#cfcabb;padding:9px 12px}
+.tl .blk.past b{color:#e9e4d5;font-weight:500;font-size:15px}
+.tl .blk.past .tm,.tl .blk.past .kd{color:#9a9689}
+.tl .blk.past .nt,.tl .blk.past .btn{display:none}
+.tl .blk.past .check{background:#2e2e2b;border-color:#555}
+.tl .blk.past .check[aria-checked=true]{background:var(--lima);border-color:var(--lima)}
+.tl .blk.past .check[aria-checked=true] svg path{stroke:#111}
+.tl .blk.now{border-left-width:8px}

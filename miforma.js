@@ -765,7 +765,7 @@
         var locked = ACT_REQ[tk] && !owns(prodOf(ACT_REQ[tk]));
         tbtn = '<button class="btn ' + (locked ? "ghost" : "sage") + ' sm" data-armtool="' + tk + '" style="margin-top:8px">' + (locked ? ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Con Pro" : "Hacer ahora") + "</button>";
       }
-      html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + window.FormaDia.durText(b.e - b.s) + (isNow ? " · Ahora" : "") + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
+      html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + window.FormaDia.durText(b.e - b.s) + (isNow ? " · Ahora" : st === "past" ? " · Ya pasó" : "") + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
         (pro && ck ? '<button class="check" role="checkbox" aria-checked="' + dn + '" aria-label="' + esc(b.label) + '" data-ack="' + esc(armKey(b)) + '">' + ICON.ok + "</button>" : "") + "</div>";
     });
     return html + "</div>";
