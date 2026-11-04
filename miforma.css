@@ -205,3 +205,12 @@ main{flex:1;padding:20px 18px 110px}
 .tl .blk.past .check[aria-checked=true]{background:var(--lima);border-color:var(--lima)}
 .tl .blk.past .check[aria-checked=true] svg path{stroke:#111}
 .tl .blk.now{border-left-width:8px}
+
+/* ---- compromisos y detalles ---- */
+.cfree{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+.cfree i{width:10px;height:10px;border-radius:3px;background:var(--lima);border:1px solid #9bbd1f;flex:none;margin-top:6px}
+.tl .blk .bd[role=button]{cursor:pointer}
+.bchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.bchips em{font-style:normal;font-size:12px;background:rgba(17,17,17,.08);border-radius:999px;padding:3px 9px}
+.tl .blk.now .bchips em{background:rgba(17,17,17,.14)}
+.tl .blk.past .bchips{margin-top:5px}.tl .blk.past .bchips em{background:rgba(255,255,255,.12);color:#cfcabb}
