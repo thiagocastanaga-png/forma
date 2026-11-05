@@ -335,7 +335,7 @@
   function renderAuth() {
     var reg = mode === "register", forgot = mode === "forgot";
     var html = '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div></div><main class="stack">' +
-      (reg ? '<p class="welk">Bienvenido</p>' : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
+      (reg ? '<div class="bigmark">' + LMARK + '</div><p class="welk">Bienvenido</p>' : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
     if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
     if ((sb || FLUJO) && !forgot) {
       html += '<div class="seg" role="tablist"><button data-mode="register" aria-pressed="' + reg + '">Crear cuenta</button><button data-mode="login" aria-pressed="' + !reg + '">Ya tengo cuenta</button></div>';
@@ -1114,7 +1114,7 @@
   function goalCard(compact) {
     if (!S.arm) return "";
     var G = S.goal;
-    if (G && G.fin) return '<div class="card goalcard"><b style="font-size:19px">¡Terminaste tu plan inicial!</b><p class="small muted" style="margin:6px 0 10px">Tu día ya incluye todos los cambios. ¿Querés sumar otro objetivo?</p><button class="btn sage sm" data-open="test">Elegir otro objetivo</button></div>';
+    if (G && G.fin) return '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center">' + stageRing(3) + '<b style="font-size:19px">¡Terminaste tu plan inicial!</b></div><p class="small muted" style="margin:6px 0 10px">Tu día ya incluye todos los cambios. ¿Querés sumar otro objetivo?</p><button class="btn sage sm" data-open="test">Elegir otro objetivo</button></div>';
     if (G && goalDue()) return goalReview();
     if (G && compact && !goalOpen) {
       var d0 = new Date(), nm0 = d0.getHours() * 60 + d0.getMinutes(), nx = null;

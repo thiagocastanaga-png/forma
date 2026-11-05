@@ -356,3 +356,7 @@ textarea.pgin{resize:vertical;min-height:64px}
 
 .lmark{width:.95em;height:.95em;vertical-align:-.12em;margin-right:.28em}
 .sring{width:44px;height:44px;flex:none}
+
+.bigmark{width:64px;height:64px;margin:0 0 14px}.bigmark .lmark{width:64px;height:64px;margin:0}
+html[data-theme=dark] #splash svg{color:#F5F1E8}
+#splash svg{color:#111}html[data-theme=dark] #splash svg{color:#F5F1E8}
