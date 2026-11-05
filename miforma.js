@@ -335,7 +335,7 @@
   function renderAuth() {
     var reg = mode === "register", forgot = mode === "forgot";
     var html = '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div></div><main class="stack">' +
-      (reg ? '<div class="bigmark">' + LMARK + '</div><p class="welk">Bienvenido</p>' : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
+      (reg ? "" : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Bienvenido" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
     if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
     if ((sb || FLUJO) && !forgot) {
       html += '<div class="seg" role="tablist"><button data-mode="register" aria-pressed="' + reg + '">Crear cuenta</button><button data-mode="login" aria-pressed="' + !reg + '">Ya tengo cuenta</button></div>';
