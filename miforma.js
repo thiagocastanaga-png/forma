@@ -1166,7 +1166,7 @@
       var d0 = new Date(), nm0 = d0.getHours() * 60 + d0.getMinutes(), nx = null;
       armBlocks().forEach(function (b) { if (b.goalact && b.s >= nm0 && !nx) nx = b; });
       var nms = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n; }).join(" y ");
-      return '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center">' + stageRing(goalStage()) + '<div><span class="small muted">Tu objetivo · semana ' + goalStage() + ' de 3</span><b style="display:block;font-size:18px;margin:2px 0 4px">' + esc(nms || "Mi objetivo") + '</b></div></div><p class="small" style="margin:0 0 8px">' + (nx ? "Próxima acción: <b>" + fmtT(nx.s) + " · " + esc(nx.label) + "</b>" : "Hoy no quedan más acciones de tu objetivo.") + '</p><button class="linkbtn small" data-gtoggle>Ver la semana</button></div>';
+      return '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center">' + stageRing(goalStage()) + '<div><span class="small muted">Tu objetivo · semana ' + goalStage() + ' de 3</span><b style="display:block;font-size:18px;margin:2px 0 4px">' + esc(nms || "Mi objetivo") + '</b></div></div><p class="small" style="margin:0 0 8px">' + (nx ? "Próxima acción: <b>" + fmtT(nx.s) + " · " + esc(nx.label) + "</b>" : "Hoy no quedan más acciones de tu objetivo.") + '</p><div class="gbar"><i style="width:' + Math.round(100 * (goalStats().d ? goalStats().n / goalStats().d : 0)) + '%"></i></div><button class="linkbtn small" data-gtoggle>Ver la semana</button> <button class="linkbtn small" data-open="prog" style="margin-left:12px">Mi progreso</button></div>';
     }
     if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
     var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n; }).join(" y ");
@@ -1175,13 +1175,46 @@
     var h = '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center;margin-bottom:8px">' + stageRing(st) + '<div><span class="small muted">Tu objetivo · semana ' + st + ' de 3</span><b style="display:block;font-size:19px;margin:2px 0 0">' + esc(names || "Mi objetivo") + "</b></div></div>";
     h += cur.map(function (c) { var ap = G.ap && G.ap[c.id], p = !!(c.patch || c.act), tb = null; tbl.forEach(function (b) { if (b.goalact && b.goalact.split("|")[0] === c.id && !tb) tb = b; }); return '<div class="row" style="align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line)"><span style="flex:1"><b class="small">' + (tb ? fmtT(tb.s) + " · " : "") + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></span>" + (p ? (ap ? '<span class="tag ok">En tu día</span>' : pro ? '<button class="btn sage sm" data-gapply="' + c.id + '">Sumar</button>' : "") : "") + "</div>"; }).join("");
     if (pend.length && !pro) h += '<button class="btn ghost block" data-plan="vida" style="margin-top:10px">Con Pro tu día se ajusta cada semana</button>';
-    h += (compact ? '<button class="linkbtn small" data-gtoggle style="margin-top:8px">Ocultar</button> ' : "") + '<button class="linkbtn small" data-open="test" style="margin:8px 0 0 12px">Cambiar mi objetivo</button></div>';
+    h += (compact ? '<button class="linkbtn small" data-gtoggle style="margin-top:8px">Ocultar</button> ' : "") + '<button class="linkbtn small" data-open="prog" style="margin:8px 0 0 12px">Mi progreso</button> <button class="linkbtn small" data-open="test" style="margin:8px 0 0 12px">Cambiar mi objetivo</button></div>';
     return h;
   }
   function applyGoalChange(id) {
     if (!isProU()) { return; }
     var c = goalChanges().filter(function (x) { return x.id === id; })[0]; if (!c || !(c.patch || c.act) || !S.arm || !S.arm.ans) return;
     var a = Object.assign({}, S.arm.ans); if (c.patch) c.patch(a); S.arm.ans = a; S.goal.ap = S.goal.ap || {}; S.goal.apd = S.goal.apd || {}; S.goal.ap[id] = 1; S.goal.apd[id] = today(); save(); render();
+  }
+
+  // ---------- Mi progreso (seguimiento del objetivo) ----------
+  function progData() {
+    var G = S.goal, out = { strip: [], total: 0, daysAct: 0, best: 0, run: 0 }; if (!G || !S.arm) return out;
+    var start = G.start || today(), cur = 0;
+    for (var i = 29; i >= 0; i--) {
+      var dt = new Date(); dt.setDate(dt.getDate() - i); var k = today(dt), n = 0, d = 0;
+      if (k >= start) armBlocksFor(dt).forEach(function (b) { if (b.goalact) { d++; if (S.ad && S.ad[k] && S.ad[k][armKey(b)]) n++; } });
+      out.total += n; if (n) { out.daysAct++; cur++; if (cur > out.best) out.best = cur; } else if (k < today()) cur = 0;
+      if (i < 14) out.strip.push({ k: k, n: n, d: d, dn: ["D", "L", "M", "M", "J", "V", "S"][dt.getDay()], before: k < start });
+    }
+    out.run = cur; return out;
+  }
+  function openProg() {
+    var G = S.goal; if (!G) return; var P = progData(), st = goalStage(), x = goalStats(), pro = isProU();
+    var names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
+    var day = Math.max(1, daysSince(G.start || today()) + 1);
+    var h = '<div class="row" style="gap:14px;align-items:center;margin-bottom:6px"><span class="progring">' + stageRing(G.fin ? 3 : st) + '</span><div><span class="small muted">Día ' + day + " de tu objetivo</span><h2 style=\"font-size:22px;margin:2px 0 0\">" + esc(names || "Mi objetivo") + "</h2></div></div>";
+    h += '<div class="row" style="gap:8px;margin:12px 0"><div class="card pstat"><b>' + P.total + '</b><span class="small muted">acciones hechas</span></div><div class="card pstat"><b>' + P.daysAct + '</b><span class="small muted">días con avance</span></div><div class="card pstat"><b>' + P.best + '</b><span class="small muted">mejor racha</span></div></div>';
+    if (!pro) h += '<div class="card"><b class="small">Con Pro registrás cada acción que hacés</b><p class="small muted" style="margin:4px 0 8px">Así ves tu avance real hacia el objetivo.</p><button class="btn sage sm" data-plan="vida">Ver Pro</button></div>';
+    h += '<div class="card"><b>Últimos 14 días</b><div class="pstrip">' + P.strip.map(function (p) { var lv = p.before ? "off" : !p.d ? "none" : p.n >= p.d ? "full" : p.n ? "part" : "zero"; return '<div class="pday ' + lv + '"><i></i><span>' + p.dn + "</span></div>"; }).join("") + '</div><p class="small muted" style="margin:8px 0 0">Lleno: hiciste todas las acciones del día. Medio: hiciste algunas.</p></div>';
+    var ch = goalChanges(), stages = [1, 2, 3].map(function (n) { var c = ch.filter(function (z) { return z.s === n && !z.tip; }), state = G.fin || n < st ? "done" : n === st ? "now" : "next"; return '<div class="pstage ' + state + '"><span class="pdot">' + (state === "done" ? "✓" : n) + '</span><div><b class="small">Semana ' + n + (state === "now" ? " · ahora" : "") + '</b><span class="small muted" style="display:block">' + (c.length ? esc(c.slice(0, 2).map(function (z) { return z.t; }).join(" · ")) : "Un paso más") + "</span></div></div>"; }).join("");
+    h += '<div class="card"><b>Tu camino</b><div class="pstages">' + stages + "</div></div>";
+    var tot = P.total, ms = [
+      [tot >= 1, "Primera acción hecha"], [P.best >= 3, "3 días seguidos"], [tot >= 10, "10 acciones hechas"], [st >= 2 || G.fin, "Semana 1 completa"], [P.best >= 7, "7 días seguidos"], [tot >= 25, "25 acciones hechas"], [!!G.fin, "Plan inicial terminado"]
+    ];
+    h += '<div class="card"><b>Logros</b><div class="pms">' + ms.map(function (m) { return '<span class="pm' + (m[0] ? " on" : "") + '">' + (m[0] ? "✓ " : "") + m[1] + "</span>"; }).join("") + "</div></div>";
+    var chk = G.chk || {}, ks = Object.keys(chk).sort(), td = today();
+    h += '<div class="card"><b>¿Cómo sentís que vas?</b><p class="small muted" style="margin:4px 0 10px">Una vez por semana, sin presión. Sirve para ver tu evolución.</p><div class="row" style="gap:6px">' + [["1", "Mal"], ["2", "Regular"], ["3", "Bien"], ["4", "Muy bien"], ["5", "Genial"]].map(function (o) { return '<button class="btn ghost sm pchk' + (chk[td] === +o[0] ? " sel" : "") + '" data-gchk="' + o[0] + '" style="flex:1;padding:8px 2px;font-size:12px">' + o[1] + "</button>"; }).join("") + "</div>" +
+      (ks.length ? '<div class="pspark">' + ks.slice(-8).map(function (k) { return '<i style="height:' + (chk[k] * 8) + 'px" title="' + k + '"></i>'; }).join("") + "</div>" : "") + "</div>";
+    h += '<button class="btn ghost block" data-close style="margin-top:6px">Cerrar</button>';
+    sheet(h);
   }
   function openTest() { return openGoals(); }
   function openTestOld() {
@@ -2189,6 +2222,8 @@
     if (d.gapply) { applyGoalChange(d.gapply); return; }
     if (d.grev) { goalReviewDo(d.grev); return; }
     if (d.gtoggle !== undefined) { goalOpen = !goalOpen; render(); return; }
+    if (d.open === "prog") return openProg();
+    if (d.gchk) { if (S.goal) { S.goal.chk = S.goal.chk || {}; S.goal.chk[today()] = +d.gchk; save(); openProg(); } return; }
     if (d.open === "wsum") return openWeekSum();
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
     if (d.tstpick !== undefined) { if (tst) { tst.a[testVisible(tst.a)[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
