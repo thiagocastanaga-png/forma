@@ -353,3 +353,6 @@ textarea.pgin{resize:vertical;min-height:64px}
 
 .top{padding-top:calc(16px + env(safe-area-inset-top))}
 .full>header{padding-top:calc(10px + env(safe-area-inset-top))}
+
+.lmark{width:.95em;height:.95em;vertical-align:-.12em;margin-right:.28em}
+.sring{width:44px;height:44px;flex:none}

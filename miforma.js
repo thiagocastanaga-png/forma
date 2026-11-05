@@ -10,6 +10,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
 
+  var LMARK = '<svg class="lmark" viewBox="0 0 512 512" aria-hidden="true"><path d="M278.7 71.4A186 186 0 0 1 392.0 382.9L323.3 318.7A92 92 0 0 0 267.2 164.7Z" fill="#C6F432" stroke="#C6F432" stroke-width="14" stroke-linejoin="round"/><path d="M357.3 412.0A186 186 0 0 1 71.4 278.7L164.7 267.2A92 92 0 0 0 306.1 333.2Z" fill="currentColor" stroke="currentColor" stroke-width="14" stroke-linejoin="round"/><path d="M71.4 233.3A186 186 0 0 1 233.3 71.4L244.8 164.7A92 92 0 0 0 164.7 244.8Z" fill="#86A892" stroke="#86A892" stroke-width="14" stroke-linejoin="round"/></svg>';
+  function stageRing(st) { var P = ['M278.7 71.4A186 186 0 0 1 392.0 382.9L323.3 318.7A92 92 0 0 0 267.2 164.7Z', 'M357.3 412.0A186 186 0 0 1 71.4 278.7L164.7 267.2A92 92 0 0 0 306.1 333.2Z', 'M71.4 233.3A186 186 0 0 1 233.3 71.4L244.8 164.7A92 92 0 0 0 164.7 244.8Z'], C = ['#C6F432', '#F5F1E8', '#86A892']; return '<svg class="sring" viewBox="0 0 512 512" aria-hidden="true">' + P.map(function (d, i) { var on = i + 1 <= st; return '<path d="' + d + '" fill="' + C[i] + '" stroke="' + C[i] + '" stroke-width="14" stroke-linejoin="round" opacity="' + (on ? 1 : .22) + '"/>'; }).join('') + '</svg>'; }
   // ---------- catálogo ----------
   var SHAPES = {
     tenis: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#C6F432"/></svg>',
@@ -318,7 +320,7 @@
     var body = { hoy: vHoy, tools: vTools, planes: vPlanes, perfil: vPerfil }[tab]();
     var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
     $app.innerHTML =
-      '<div class="top"><div class="logo">forma<i></i></div><div class="row" style="gap:8px">' +
+      '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div><div class="row" style="gap:8px">' +
       (S.demo ? '<span class="tag">modo prueba</span>' : "") +
       '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? "Pro" : "Gratis") + "</span>" +
       (topPro ? '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" : "") + "</div></div>" +
@@ -332,7 +334,7 @@
   // --- acceso: crear cuenta / iniciar sesión / probar sin cuenta ---
   function renderAuth() {
     var reg = mode === "register", forgot = mode === "forgot";
-    var html = '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack">' +
+    var html = '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div></div><main class="stack">' +
       (reg ? '<p class="welk">Bienvenido</p>' : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
     if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
     if ((sb || FLUJO) && !forgot) {
@@ -362,7 +364,7 @@
     $app.innerHTML = html + "</main>";
   }
   function renderRecovery() {
-    $app.innerHTML = '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack"><h1 class="hello" style="font-size:30px">Elegí una contraseña nueva</h1>' +
+    $app.innerHTML = '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div></div><main class="stack"><h1 class="hello" style="font-size:30px">Elegí una contraseña nueva</h1>' +
       '<label class="field"><span>Contraseña nueva (mínimo 8 caracteres)</span><input id="r-pass" type="password" autocomplete="new-password"></label>' +
       '<button class="btn block" id="r-save">Guardar contraseña</button><div class="msg" id="amsg" role="status"></div></main>';
   }
@@ -370,7 +372,7 @@
   // --- personalizar (primer ingreso) ---
   function renderOnboard() {
     $app.innerHTML =
-      '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack">' +
+      '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div></div><main class="stack">' +
       '<h1 class="hello" style="font-size:30px">¿Cómo te llamás?</h1><p class="muted">Después armamos tu día en 2 minutos.</p>' +
       '<label class="field"><span>Tu nombre</span><input id="f-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
       '<button class="btn block" id="create">Empezar</button><div class="msg" id="wmsg"></div></main>';
@@ -1117,14 +1119,14 @@
     if (G && compact && !goalOpen) {
       var d0 = new Date(), nm0 = d0.getHours() * 60 + d0.getMinutes(), nx = null;
       armBlocks().forEach(function (b) { if (b.goalact && b.s >= nm0 && !nx) nx = b; });
-      var nms = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
-      return '<div class="card goalcard"><span class="small muted">Tu objetivo · semana ' + goalStage() + ' de 3</span><b style="display:block;font-size:18px;margin:2px 0 4px">' + esc(nms || "Mi objetivo") + '</b><p class="small" style="margin:0 0 8px">' + (nx ? "Próxima acción: <b>" + fmtT(nx.s) + " · " + esc(nx.label) + "</b>" : "Hoy no quedan más acciones de tu objetivo.") + '</p><button class="linkbtn small" data-gtoggle>Ver la semana</button></div>';
+      var nms = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n; }).join(" y ");
+      return '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center">' + stageRing(goalStage()) + '<div><span class="small muted">Tu objetivo · semana ' + goalStage() + ' de 3</span><b style="display:block;font-size:18px;margin:2px 0 4px">' + esc(nms || "Mi objetivo") + '</b></div></div><p class="small" style="margin:0 0 8px">' + (nx ? "Próxima acción: <b>" + fmtT(nx.s) + " · " + esc(nx.label) + "</b>" : "Hoy no quedan más acciones de tu objetivo.") + '</p><button class="linkbtn small" data-gtoggle>Ver la semana</button></div>';
     }
     if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
-    var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
+    var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n; }).join(" y ");
     var cur = ch.filter(function (c) { return c.s === st; }).sort(function (x, y) { return (x.tip ? 1 : 0) - (y.tip ? 1 : 0); }).slice(0, 4), tbl = armBlocks(), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && (c.patch || c.act); });
     var pro = isProU();
-    var h = '<div class="card goalcard"><span class="small muted">Tu objetivo · semana ' + st + ' de 3</span><b style="display:block;font-size:19px;margin:2px 0 8px">' + esc(names || "Mi objetivo") + "</b>";
+    var h = '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center;margin-bottom:8px">' + stageRing(st) + '<div><span class="small muted">Tu objetivo · semana ' + st + ' de 3</span><b style="display:block;font-size:19px;margin:2px 0 0">' + esc(names || "Mi objetivo") + "</b></div></div>";
     h += cur.map(function (c) { var ap = G.ap && G.ap[c.id], p = !!(c.patch || c.act), tb = null; tbl.forEach(function (b) { if (b.goalact && b.goalact.split("|")[0] === c.id && !tb) tb = b; }); return '<div class="row" style="align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line)"><span style="flex:1"><b class="small">' + (tb ? fmtT(tb.s) + " · " : "") + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></span>" + (p ? (ap ? '<span class="tag ok">En tu día</span>' : pro ? '<button class="btn sage sm" data-gapply="' + c.id + '">Sumar</button>' : "") : "") + "</div>"; }).join("");
     if (pend.length && !pro) h += '<button class="btn ghost block" data-plan="vida" style="margin-top:10px">Con Pro tu día se ajusta cada semana</button>';
     h += (compact ? '<button class="linkbtn small" data-gtoggle style="margin-top:8px">Ocultar</button> ' : "") + '<button class="linkbtn small" data-open="test" style="margin:8px 0 0 12px">Cambiar mi objetivo</button></div>';
