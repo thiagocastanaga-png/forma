@@ -1008,8 +1008,54 @@
         out.push({ s: 1, t: "Forma te ayuda a ordenarte, pero no da asesoramiento financiero", why: "Para decisiones de inversión o deudas grandes, consultá a un profesional", patch: null, tip: true });
         return out;
       } },
-    { id: "viaje", n: "Organizar un viaje", d: "Armar el viaje que querés, paso a paso", plan: "viajes", soon: true },
-    { id: "laburo", n: "Buscar trabajo", d: "CV, entrevistas y búsqueda organizada", plan: "laburo", soon: true }
+    { id: "viaje", n: "Organizar un viaje", d: "Armar el viaje que querés, paso a paso", plan: "viajes",
+      qs: [
+        { k: "w", q: "¿En qué etapa estás?", o: ["Tengo ganas pero nada definido", "Ya sé adónde, falta organizar", "Ya tengo fecha y destino, faltan los detalles"] },
+        { k: "c", q: "¿Con quién viajás?", o: ["Solo", "En pareja", "Con amigos", "En familia"] },
+        { k: "b", q: "¿Qué es lo que más te frena?", o: ["La plata", "Elegir el destino", "Organizar los días", "Encontrar el momento"] },
+        { k: "t", q: "¿Cuánto tiempo por día podés dedicarle?", o: ["10 minutos", "20 minutos", "30 minutos"] }
+      ],
+      build: function (g) {
+        var out = [], mn = [10, 20, 30][g.t] || 20;
+        if (g.w === 0) out.push({ s: 1, t: "Anotar 3 destinos posibles", why: "Es el primer paso para que deje de ser una idea suelta.", patch: null, act: A_("Anotar 3 destinos posibles y por qué", 10, [["mid", 0]], "Sin comparar todavía: solo qué te atrae de cada uno.", { once: true }) });
+        if (g.w === 1) out.push({ s: 1, t: "Definir fechas y cuántos días", why: "Con fechas, todo lo demás se ordena.", patch: null, act: A_("Definir las fechas y cuántos días", 15, [["mid", 0]], "Mirá tu calendario y elegí un rango posible.", { once: true }) });
+        if (g.w === 2) out.push({ s: 1, t: "Hacer la lista de lo que falta", why: "Pasajes, alojamiento, documentos, seguro: ver todo junto da tranquilidad.", patch: null, act: A_("Hacer la lista de lo que falta reservar", 15, [["mid", 0]], "Pasajes, alojamiento, documentos, seguro y traslados.", { once: true }) });
+        out.push({ s: 1, t: "Un bloque corto de viaje por día", why: "De a " + mn + " minutos avanzás sin que se vuelva una tarea gigante.", patch: null, act: A_("Avanzar con el viaje", mn, [["abs", 1140]], "Una sola cosa por vez: buscar, comparar o reservar.") });
+        if (g.b === 0) out.push({ s: 2, t: "Armar el presupuesto del viaje", why: "Dijiste que la plata es lo que más frena: ponerle números ayuda.", patch: null, act: A_("Armar el presupuesto del viaje", 20, [["mid", 0]], "Transporte, alojamiento, comidas, actividades y un margen.", { once: true }) });
+        if (g.b === 0) out.push({ s: 2, t: "Separar un monto fijo para el viaje", why: "Ahorrar de a poco es más fácil que de golpe.", patch: null, act: A_("Separar plata para el viaje", 5, [["mid", 0]], "Un monto chico y fijo.", { dow: [1] }) });
+        if (g.b === 1) out.push({ s: 2, t: "Comparar tus destinos con 3 criterios", why: "Costo, época y qué querés hacer. Así decidís con datos.", patch: null, act: A_("Comparar destinos: costo, época y qué hacer", 20, [["mid", 0]], "Una tabla simple de tres columnas.", { once: true }) });
+        if (g.b === 2) out.push({ s: 2, t: "Armar los días de a uno", why: "Un día por vez es más fácil que todo el itinerario.", patch: null, act: A_("Armar un día del itinerario", 20, [["mid", 0]], "Mañana, tarde y noche. Qué es imprescindible y qué opcional.", { dow: [2, 4] }) });
+        if (g.b === 3) out.push({ s: 2, t: "Elegir una fecha y bloquearla", why: "Si no la reservás en el calendario, se corre.", patch: null, act: A_("Elegir fecha y bloquearla en el calendario", 10, [["mid", 0]], "Aunque después la muevas.", { once: true }) });
+        out.push({ s: 2, t: "Revisar pasajes y alojamiento", why: "Comparar con calma evita decidir apurado.", patch: null, act: A_("Comparar pasajes y alojamiento", 20, [["mid", 0]], "Anotá precio, cancelación y ubicación.", { dow: [6] }) });
+        out.push({ s: 3, t: "Reservar lo principal", why: "Con lo grande resuelto, el resto es detalle.", patch: null, act: A_("Reservar pasaje o alojamiento", 20, [["mid", 0]], "Elegí una de las dos para esta semana.", { dow: [3] }) });
+        out.push({ s: 3, t: "Lista de documentos y valija", why: "Se arma mejor de a poco que la noche anterior.", patch: null, act: A_("Lista de documentos y valija", 10, [["abs", 1140]], "Documentos, medicación, cargadores, ropa según el clima.", { once: true }) });
+        out.push({ s: 3, t: "Dejar todo en una sola nota", why: "Reservas, horarios y direcciones juntas.", patch: ah("plan") });
+        return out;
+      } },
+    { id: "laburo", n: "Buscar trabajo", d: "CV, entrevistas y búsqueda organizada", plan: "laburo",
+      qs: [
+        { k: "s", q: "¿Cómo estás hoy?", o: ["Sin trabajo y buscando", "Trabajo pero quiero cambiar", "Busco mi primer trabajo", "Quiero ofrecer mis servicios por mi cuenta"] },
+        { k: "p", q: "¿Qué es lo que más te cuesta?", o: ["Armar el CV", "Encontrar dónde postularme", "Las entrevistas", "No recibir respuestas", "Empezar"] },
+        { k: "h", q: "¿Cuánto tiempo por día podés dedicarle?", o: ["30 minutos", "1 hora", "2 horas", "3 horas o más"] },
+        { k: "w", q: "¿Cuándo rendís mejor?", o: ["A la mañana", "A la tarde", "A la noche", "Me da igual"] }
+      ],
+      build: function (g) {
+        var out = [], hrs = [30, 60, 120, 180][g.h] || 60, en = ["am", "pm", "night", "any"][g.w] || "any";
+        out.push({ s: 1, t: "Un bloque de " + hrsTxt(hrs) + " por día para tu búsqueda", why: "Buscar trabajo es un trabajo: con horario se sostiene más.", patch: function (a) { var p = (a.prios || []).slice(); if (p.indexOf("income") < 0) { if (p.length >= 3) p.pop(); p.unshift("income"); } a.prios = p; a.free = Math.max(a.free || 0, hrs); a.energy = en; } });
+        if (g.p === 0 || g.s === 2) out.push({ s: 1, t: "Armar o actualizar tu CV", why: "Es la base de todo lo demás.", patch: null, act: A_("Armar o actualizar mi CV", 30, [["mid", 0]], "Una página: datos, experiencia o estudios, y lo que sabés hacer.", { once: true }) });
+        if (g.p === 1) out.push({ s: 1, t: "Postularte a 3 avisos por día", why: "Constancia gana a esperar el aviso perfecto.", patch: null, act: A_("Postularme a 3 avisos", 30, [["mid", 0]], "Anotá empresa, fecha y puesto en una lista.") });
+        if (g.p === 2) out.push({ s: 1, t: "Practicar una entrevista en voz alta", why: "Hablarlo antes te saca nervios.", patch: null, act: A_("Practicar respuestas de entrevista en voz alta", 15, [["mid", 0]], "Contate: quién sos, qué sabés hacer y por qué ese puesto.", { dow: [1, 3, 5] }) });
+        if (g.p === 3) out.push({ s: 1, t: "Anotar a quién te postulaste y cuándo", why: "Sin registro no sabés a quién seguir.", patch: null, act: A_("Actualizar la lista de postulaciones", 10, [["mid", 0]], "Empresa, fecha, estado.") });
+        if (g.p === 4) out.push({ s: 1, t: "Regla de 10 minutos", why: "Empezar es lo más difícil, no seguir.", patch: null, act: A_("", 0, [], "Regla de 10 minutos: empezá solo 10 y después decidís si seguís.", { into: "focus" }) });
+        if (g.s === 3) out.push({ s: 1, t: "Definir qué ofrecés y a quién", why: "Con una frase clara es más fácil que te contraten.", patch: null, act: A_("Escribir en una frase qué ofrezco y a quién", 15, [["mid", 0]], "Servicio, tipo de cliente y precio de referencia.", { once: true }) });
+        out.push({ s: 2, t: "Escribirle a 2 personas por día", why: "Muchos trabajos se consiguen por contactos.", patch: null, act: A_("Escribirle a 2 personas del rubro", 15, [["mid", 0]], "Un mensaje corto y concreto: quién sos y qué buscás.", { dow: [1, 2, 3, 4] }) });
+        out.push({ s: 2, t: "Perfil de LinkedIn al día", why: "Es lo primero que miran después del CV.", patch: null, act: A_("Actualizar mi perfil de LinkedIn", 20, [["mid", 0]], "Foto, titular y experiencia.", { once: true }) });
+        out.push({ s: 2, t: "Seguimiento de lo que mandaste", why: "Un mensaje de seguimiento muchas veces abre la puerta.", patch: null, act: A_("Hacer seguimiento de postulaciones enviadas", 15, [["mid", 0]], "A los 5 a 7 días, un mensaje breve y amable.", { dow: [5] }) });
+        out.push({ s: 3, t: "Repasar la semana de búsqueda", why: "Ver qué dio respuestas te dice qué repetir.", patch: null, act: A_("Repasar mi semana de búsqueda", 15, [["mid", 0]], "Cuántas postulaciones, respuestas y qué ajustar.", { dow: [0] }) });
+        out.push({ s: 3, t: "Preparar historias para la entrevista", why: "Tener 3 ejemplos listos te da seguridad.", patch: null, act: A_("Preparar 3 historias de logros", 20, [["mid", 0]], "Situación, qué hiciste y qué resultado.", { once: true }) });
+        out.push({ s: 3, t: "Cuidar la energía mientras buscás", why: "Buscar cansa: una pausa o salida al día ayuda a sostenerlo.", patch: ah("walk") });
+        return out;
+      } }
   ];
   function goalById(id) { return GOALS.filter(function (g) { return g.id === id; })[0]; }
   var gs = null;
