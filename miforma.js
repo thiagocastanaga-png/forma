@@ -480,7 +480,7 @@
     html += reminderCard() + cierreCard() + mananaCard();
     if (armBlocks().length) {
       if (viewMode() === "now") {
-        return gr + viewToggle() + nowSection() + prioCard() + goalCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
+        return gr + viewToggle() + nowSection() + prioCard() + goalCard(true) + weekSumCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
       }
       return html.replace("@@ARM@@", viewToggle() + prioCard() + weekCard() + armSection());
     }
@@ -944,8 +944,68 @@
         return out;
       } },
     { id: "deporte", n: "Mejorar en mi deporte", d: "Entrenar mejor y rendir más", plan: "tenis", go: "planes" },
-    { id: "peso", n: "Bajar de peso", d: "Ordenar tus comidas y moverte más", plan: "comer", soon: true },
-    { id: "plata", n: "Ordenar mi plata", d: "Presupuesto simple y llegar a fin de mes", plan: "plata", soon: true },
+    { id: "peso", n: "Comer mejor y bajar de peso", d: "Comidas más ordenadas y más movimiento, sin dietas", plan: "comer",
+      qs: [
+        { k: "m", q: "¿Qué es lo que más te cuesta hoy?", o: ["Picotear entre comidas", "Comer muy tarde o saltearme comidas", "Las porciones grandes", "Comer por ansiedad o aburrimiento", "No sé por dónde empezar"] },
+        { k: "c", q: "¿Cuántas comidas hacés por día?", o: ["1 o 2", "3", "4 o más"] },
+        { k: "a", q: "¿Tomás agua durante el día?", o: ["Casi nada", "Algo", "Sí, bastante"] },
+        { k: "e", q: "¿Cuánto te movés hoy?", o: ["Casi nada", "Camino algo", "Entreno 1 o 2 veces por semana", "Entreno 3 veces o más"] },
+        { k: "t", q: "¿Cuánto tiempo podés sumar por día para moverte?", o: ["10 minutos", "20 minutos", "30 minutos", "45 minutos o más"] },
+        { k: "o", q: "¿Tenés una indicación médica o de un nutricionista?", o: ["No", "Sí, y la sigo"] }
+      ],
+      build: function (g) {
+        var out = [], mv = [10, 20, 30, 45][g.t] || 20;
+        out.push({ s: 1, t: "Comer sin pantallas, despacio", why: "Prestar atención a la comida ayuda a notar cuándo ya estás conforme.", patch: null, act: A_("", 0, [], "Sin pantalla y despacio. Parate cuando estés conforme.", { into: "meal" }) });
+        if (g.a < 2) out.push({ s: 1, t: "Un vaso de agua al despertar", why: "Es fácil y arranca el hábito de tomar agua.", patch: null, act: A_("", 0, [], "Un vaso de agua apenas te levantás.", { into: "first" }) });
+        if (g.m === 0) out.push({ s: 1, t: "Dejar lista una colación", why: "Si ya tenés algo preparado, picoteás menos.", patch: null, act: A_("Preparar una colación (fruta, yogur, frutos secos)", 5, [["abs", 600]], "Dejala a la vista para cuando te dé hambre.") });
+        if (g.m === 1) out.push({ s: 1, t: "No saltear la comida principal", why: "Llegar con mucha hambre hace comer más y peor.", patch: null, act: A_("", 0, [], "No te la saltees: comer a horario evita llegar con demasiada hambre.", { into: "meal" }) });
+        if (g.m === 2) out.push({ s: 1, t: "Servirte una porción y esperar 10 minutos", why: "La señal de estar conforme tarda en llegar.", patch: null, act: A_("", 0, [], "Servite una sola porción y esperá 10 minutos antes de repetir.", { into: "meal" }) });
+        if (g.m === 3) out.push({ s: 1, t: "Pausa antes de comer algo fuera de hora", why: "Ayuda a distinguir hambre de ansiedad o aburrimiento.", patch: null, act: A_("Pausa de 5 minutos: ¿tengo hambre o es otra cosa?", 5, [["abs", 1020]], "Tomá agua, respirá o caminá un poco. Si sigue el hambre, comé algo tranquilo.") });
+        if (g.m === 4) out.push({ s: 1, t: "Anotar lo que comés, sin juzgar", why: "Para ver dónde estás antes de cambiar nada.", patch: null, act: A_("Anotar lo que comí hoy (solo anotar)", 5, [["sleep", -100]], "Sin culpa: es para conocerte.") });
+        out.push({ s: 2, t: "Caminar " + mv + " minutos por día", why: "Moverte todos los días pesa más que un gran esfuerzo un día.", patch: null, act: A_("Caminar " + mv + " minutos", mv, [["mid", 0]], "Al ritmo que puedas.") });
+        out.push({ s: 2, t: "Dejar preparada la comida de mañana", why: "Decidir con hambre es lo más difícil.", patch: null, act: A_("Dejar lista la comida de mañana", 15, [["sleep", -120]], "Aunque sea una parte: la base, la fruta o la vianda.") });
+        out.push({ s: 3, t: "Un paso más de movimiento", why: "Cuando ya caminás, sumamos movimiento con fuerza o estiramiento.", patch: ah("move") });
+        out.push({ s: 3, t: "Repasar la semana de comidas", why: "Ver qué te costó más te dice qué cambiar.", patch: null, act: A_("Repasar la semana: qué comida me costó más", 10, [["mid", 0]], "Elegí un solo cambio para la semana que viene.", { dow: [0] }) });
+        out.push({ s: 1, t: g.o === 1 ? "Seguí la indicación de tu médico o nutricionista: Forma la complementa, no la reemplaza" : "Para bajar de peso de forma segura, consultá a un médico o nutricionista", why: "Forma ordena tus hábitos pero no da dietas ni reemplaza a un profesional", patch: null, tip: true });
+        return out;
+      } },
+    { id: "movimiento", n: "Moverme más", d: "Empezar a entrenar o a moverte, de a poco", plan: "movimiento",
+      qs: [
+        { k: "e", q: "¿Cuánto te movés hoy?", o: ["Casi nada", "Camino algo", "Entreno 1 o 2 veces por semana", "Entreno 3 veces o más"] },
+        { k: "q", q: "¿Qué te gustaría hacer?", o: ["Caminar", "Entrenar en casa", "Ir al gimnasio", "Un deporte"] },
+        { k: "l", q: "¿Tenés alguna molestia o lesión?", o: ["No", "Sí, leve", "Sí, y me limita"] },
+        { k: "d", q: "¿Cuándo preferís moverte?", o: ["A la mañana", "A la tarde", "A la noche", "Me da igual"] },
+        { k: "t", q: "¿Cuánto tiempo podés por sesión?", o: ["20 minutos", "30 minutos", "45 minutos", "1 hora"] }
+      ],
+      build: function (g) {
+        var out = [], dur = [30, 30, 45, 60][g.t] || 30, tw = ["am", "pm", "night", "any"][g.d] || "any", nm = ["Caminata", "Entrenamiento en casa", "Gimnasio", "Deporte"][g.q] || "Movimiento";
+        out.push({ s: 1, t: nm + " de " + (g.t === 0 ? 20 : dur) + " minutos en tu día", why: "Un horario fijo es lo que más ayuda a sostener el movimiento.", patch: function (a) { a.train = Math.max(a.train || 0, 30); a.trainWhen = tw; } });
+        out.push({ s: 1, t: "Caminar 10 minutos después de comer", why: "Es poco, se puede hacer en cualquier lado y suma mucho.", patch: null, act: A_("", 0, [], "Caminá 10 minutos después de comer.", { into: "meal" }) });
+        if (g.l >= 1) out.push({ s: 1, t: g.l === 2 ? "Antes de empezar, consultá a un médico por tu molestia" : "Empezá suave y parás si algo duele", why: "Moverte con una molestia pide cuidado.", patch: null, tip: true });
+        out.push({ s: 2, t: "Subir la sesión a " + Math.max(dur, 45) + " minutos", why: "Cuando ya te acostumbraste, sumamos un poco más.", patch: function (a) { a.train = Math.max(a.train || 0, dur >= 60 ? 60 : 45); } });
+        out.push({ s: 2, t: "Estirar 5 minutos al terminar", why: "Ayuda a recuperarte y a evitar molestias.", patch: ah("move") });
+        out.push({ s: 3, t: "Anotar cómo te sentiste en cada sesión", why: "Te muestra tu progreso aunque la balanza o el espejo no cambien.", patch: null, act: A_("Anotar cómo me sentí al entrenar", 5, [["sleep", -100]], "Una frase: energía, ánimo y qué me costó.") });
+        out.push({ s: 3, t: "Pensar un objetivo concreto para el mes", why: "Es más fácil sostener algo con una meta.", patch: null, act: A_("Elegir una meta de movimiento para el mes", 10, [["mid", 0]], "Por ejemplo: caminar 4 veces por semana.", { dow: [0], once: false }) });
+        return out;
+      } },
+    { id: "plata", n: "Ordenar mi plata", d: "Saber en qué gastás y armar un presupuesto simple", plan: "plata",
+      qs: [
+        { k: "p", q: "¿Qué te pasa con la plata?", o: ["No sé en qué gasto", "Llego justo a fin de mes", "Tengo cuotas o deudas", "Quiero ahorrar pero no puedo"] },
+        { k: "r", q: "¿Llevás algún registro de tus gastos?", o: ["No", "A veces", "Sí"] },
+        { k: "m", q: "¿Cuál es tu meta?", o: ["Ordenarme", "Ahorrar para algo", "Salir de deudas"] },
+        { k: "t", q: "¿Cuánto tiempo podés dedicarle?", o: ["5 minutos por día", "5 minutos por día y 15 por semana"] }
+      ],
+      build: function (g) {
+        var out = [];
+        out.push({ s: 1, t: "Anotar los gastos del día", why: g.r === 2 ? "Ya llevás un registro: lo hacemos parte del día." : "Anotar es el paso que más ordena. Sin juzgar, solo anotar.", patch: null, act: A_("Anotar los gastos de hoy", 5, [["sleep", -100]], "Todo lo que gastaste hoy, aunque sea poco.") });
+        out.push({ s: 1, t: "Anotar tus gastos fijos del mes", why: "Alquiler, servicios, cuotas, suscripciones: la base del presupuesto.", patch: null, act: A_("Anotar mis gastos fijos del mes", 15, [["mid", 0]], "Una lista simple con el monto de cada uno.", { once: true }) });
+        out.push({ s: 2, t: "Mirar cuánto gastaste en la semana", why: "Los domingos, 10 minutos para ver adónde se fue la plata.", patch: null, act: A_("Revisar los gastos de la semana", 15, [["mid", 0]], "Sumá por categoría: comida, transporte, salidas, otros.", { dow: [0] }) });
+        out.push({ s: 2, t: "Revisar suscripciones y cuotas", why: "Casi todos tenemos alguna que no usamos.", patch: null, act: A_("Revisar suscripciones y cuotas", 15, [["mid", 0]], "¿Cuáles uso? ¿Cuáles puedo dar de baja?", { once: true }) });
+        out.push({ s: 3, t: g.m === 2 ? "Elegir una deuda para ir cancelando primero" : "Separar un monto fijo apenas cobrás", why: g.m === 2 ? "Ir de a una es más claro que tratar de todo a la vez." : "Ahorrar lo primero, no lo que sobra.", patch: null, act: A_(g.m === 2 ? "Elegir qué deuda cancelar primero" : "Separar un monto para ahorrar", 10, [["mid", 0]], "Un monto chico que puedas sostener todos los meses.", { once: true }) });
+        out.push({ s: 3, t: "Armar tu presupuesto simple del mes", why: "Con 2 semanas de registro ya sabés cuánto gastás de verdad.", patch: ah("plan"), act: A_("Armar mi presupuesto del mes", 20, [["mid", 0]], "Ingresos, gastos fijos, gastos variables y ahorro.", { once: true }) });
+        out.push({ s: 1, t: "Forma te ayuda a ordenarte, pero no da asesoramiento financiero", why: "Para decisiones de inversión o deudas grandes, consultá a un profesional", patch: null, tip: true });
+        return out;
+      } },
     { id: "viaje", n: "Organizar un viaje", d: "Armar el viaje que querés, paso a paso", plan: "viajes", soon: true },
     { id: "laburo", n: "Buscar trabajo", d: "CV, entrevistas y búsqueda organizada", plan: "laburo", soon: true }
   ];
@@ -1007,7 +1067,7 @@
     var html = '<header><b>Tu plan</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Armamos tu día para lograrlo</h2><p class="muted small" style="margin:0 0 12px">Tu día de hoy es el punto de partida. Los cambios llegan por etapas, de a poco, así se sostienen.</p>';
     ids.forEach(function (id) {
       var g = goalById(id), pl = planOf(g.plan); if (!g) return;
-      html += '<div class="card"><div class="row"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><div><b>" + esc(g.n) + '</b><span class="small muted" style="display:block">' + (g.soon ? "Lo estamos armando. Mientras tanto, tu día ordenado ya es un buen comienzo." : g.go ? "Tenés un plan de entrenamiento para vos." : "Plan recomendado: " + esc(pl.n)) + "</span></div></div>";
+      html += '<div class="card"><div class="row"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><div><b>" + esc(g.n) + '</b><span class="small muted" style="display:block">' + (g.soon ? "Lo estamos armando. Mientras tanto, tu día ordenado ya es un buen comienzo." : g.go ? "Tenés un plan de entrenamiento para vos." : pl && !pl.live ? "El plan «" + esc(pl.n) + "» viene en camino. Mientras tanto, estos cambios ya van en tu día." : "Plan recomendado: " + esc(pl.n)) + "</span></div></div>";
       if (g.build) {
         [1, 2, 3].forEach(function (st) {
           var L = ch.filter(function (c) { return c.goal === id && c.s === st; }); if (!L.length) return;
@@ -1048,11 +1108,18 @@
     }
     save(); render();
   }
-  function goalCard() {
+  var goalOpen = false;
+  function goalCard(compact) {
     if (!S.arm) return "";
     var G = S.goal;
     if (G && G.fin) return '<div class="card goalcard"><b style="font-size:19px">¡Terminaste tu plan inicial!</b><p class="small muted" style="margin:6px 0 10px">Tu día ya incluye todos los cambios. ¿Querés sumar otro objetivo?</p><button class="btn sage sm" data-open="test">Elegir otro objetivo</button></div>';
     if (G && goalDue()) return goalReview();
+    if (G && compact && !goalOpen) {
+      var d0 = new Date(), nm0 = d0.getHours() * 60 + d0.getMinutes(), nx = null;
+      armBlocks().forEach(function (b) { if (b.goalact && b.s >= nm0 && !nx) nx = b; });
+      var nms = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
+      return '<div class="card goalcard"><span class="small muted">Tu objetivo · semana ' + goalStage() + ' de 3</span><b style="display:block;font-size:18px;margin:2px 0 4px">' + esc(nms || "Mi objetivo") + '</b><p class="small" style="margin:0 0 8px">' + (nx ? "Próxima acción: <b>" + fmtT(nx.s) + " · " + esc(nx.label) + "</b>" : "Hoy no quedan más acciones de tu objetivo.") + '</p><button class="linkbtn small" data-gtoggle>Ver la semana</button></div>';
+    }
     if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
     var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
     var cur = ch.filter(function (c) { return c.s === st; }).sort(function (x, y) { return (x.tip ? 1 : 0) - (y.tip ? 1 : 0); }).slice(0, 4), tbl = armBlocks(), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && (c.patch || c.act); });
@@ -1060,7 +1127,7 @@
     var h = '<div class="card goalcard"><span class="small muted">Tu objetivo · semana ' + st + ' de 3</span><b style="display:block;font-size:19px;margin:2px 0 8px">' + esc(names || "Mi objetivo") + "</b>";
     h += cur.map(function (c) { var ap = G.ap && G.ap[c.id], p = !!(c.patch || c.act), tb = null; tbl.forEach(function (b) { if (b.goalact && b.goalact.split("|")[0] === c.id && !tb) tb = b; }); return '<div class="row" style="align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line)"><span style="flex:1"><b class="small">' + (tb ? fmtT(tb.s) + " · " : "") + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></span>" + (p ? (ap ? '<span class="tag ok">En tu día</span>' : pro ? '<button class="btn sage sm" data-gapply="' + c.id + '">Sumar</button>' : "") : "") + "</div>"; }).join("");
     if (pend.length && !pro) h += '<button class="btn ghost block" data-plan="vida" style="margin-top:10px">Con Pro tu día se ajusta cada semana</button>';
-    h += '<button class="linkbtn small" data-open="test" style="margin-top:8px">Cambiar mi objetivo</button></div>';
+    h += (compact ? '<button class="linkbtn small" data-gtoggle style="margin-top:8px">Ocultar</button> ' : "") + '<button class="linkbtn small" data-open="test" style="margin:8px 0 0 12px">Cambiar mi objetivo</button></div>';
     return h;
   }
   function applyGoalChange(id) {
@@ -1438,10 +1505,31 @@
   function weekDates() { var d = new Date(), k = (d.getDay() + 6) % 7, m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - k); return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return new Date(m.getFullYear(), m.getMonth(), m.getDate() + i); }); }
   function ddCustom(dt) { var k = today(dt), x = S.dd && S.dd[k]; return !!(x && x.ans); }
   function wkCustom(dow) { return !!(S.wk && S.wk[dow] && S.wk[dow].ans); }
+  function weekSumData() {
+    var days = [], wins = [], tot = 0, DN = ["D", "L", "M", "M", "J", "V", "S"];
+    for (var i = 6; i >= 0; i--) { var dt = new Date(); dt.setDate(dt.getDate() - i); var k = today(dt), lv = S.cierre && S.cierre[k] ? ((S.cierreL && S.cierreL[k]) || 1) : 0; if (lv) tot++; days.push({ n: DN[dt.getDay()], lv: lv, k: k }); ((S.wins && S.wins[k]) || []).forEach(function (w) { if (wins.length < 3) wins.push(w); }); }
+    return { days: days, closed: tot, active: weekCount(0), g: goalStats(), wins: wins, streak: cierreStreak() };
+  }
+  function openWeekSum() {
+    var D = weekSumData(), nm = (S.profile && S.profile.name) || "";
+    var shapes = '<div class="row" style="justify-content:space-between;margin:12px 0">' + D.days.map(function (d, i) { return '<div style="text-align:center"><div style="height:34px">' + (d.lv ? shapeSvg(d.lv, SHCOL[i % 6], 34) : '<svg viewBox="0 0 24 24" width="34" height="34"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="3 3"/></svg>') + '</div><small class="muted">' + d.n + "</small></div>"; }).join("") + "</div>";
+    var lines = '<div class="card"><div class="row between"><span>Días que cerraste</span><b>' + D.closed + " de 7</b></div>" +
+      '<div class="row between" style="margin-top:8px"><span>Días con algo hecho</span><b>' + D.active + " de 7</b></div>" +
+      (S.goal && D.g.d ? '<div class="row between" style="margin-top:8px"><span>Acciones de tu objetivo</span><b>' + D.g.n + " de " + D.g.d + "</b></div>" : "") +
+      (D.streak > 1 ? '<div class="row between" style="margin-top:8px"><span>Racha de cierres</span><b>' + D.streak + " días</b></div>" : "") + "</div>";
+    var wl = D.wins.length ? '<div class="card"><b>Lo que hiciste bien</b>' + D.wins.map(function (w) { return '<p class="small" style="margin:6px 0 0">• ' + esc(w) + "</p>"; }).join("") + "</div>" : "";
+    var msg = D.closed >= 5 ? "Semana muy sólida. Eso es constancia." : D.closed >= 3 ? "Buena semana. Tres o más cierres ya arman un hábito." : D.closed >= 1 ? "Algo es más que nada. Sumá un día más la semana que viene." : "Esta semana fue tranquila. Lo importante es volver.";
+    sheet('<h2 style="font-size:24px;margin:0 0 4px">Tu semana' + (nm ? ", " + esc(nm) : "") + '</h2><p class="muted small" style="margin:0">' + msg + "</p>" + shapes + lines + wl + '<button class="btn ghost block" data-close style="margin-top:14px">Listo</button>');
+  }
+  function weekSumCard() {
+    if (!isProU() || !S.arm) return "";
+    var dw = new Date().getDay(); if (dw !== 0 && dw !== 1) return "";
+    return '<div class="card"><div class="row between"><div><b>Tu semana</b><span class="small muted" style="display:block">Mirá cómo te fue y qué cerraste.</span></div><button class="btn sage sm" data-open="wsum">Ver resumen</button></div></div>';
+  }
   function weekCard() {
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
-    return '<div class="card weekc"><div class="row between"><b>Mi semana</b></div><div class="wkstrip">' +
+    return '<div class="card weekc"><div class="row between"><b>Mi semana</b><button class="linkbtn small" data-open="wsum">Ver resumen</button></div><div class="wkstrip">' +
       weekDates().map(function (d) { var c = wkCustom(d.getDay()) || ddCustom(d); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" data-wkdt="' + today(d) + '" aria-label=""' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
       '</div></div>';
   }
@@ -2052,6 +2140,8 @@
     if (d.gdone !== undefined) { var gf2 = $("#full"); if (gf2) gf2.remove(); tab = "hoy"; render(); window.scrollTo(0, 0); return; }
     if (d.gapply) { applyGoalChange(d.gapply); return; }
     if (d.grev) { goalReviewDo(d.grev); return; }
+    if (d.gtoggle !== undefined) { goalOpen = !goalOpen; render(); return; }
+    if (d.open === "wsum") return openWeekSum();
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
     if (d.tstpick !== undefined) { if (tst) { tst.a[testVisible(tst.a)[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
     if (d.tstback !== undefined) { if (tst && tst.i) { tst.i--; drawTest(); } return; }
