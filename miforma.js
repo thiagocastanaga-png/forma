@@ -220,7 +220,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -243,6 +243,7 @@
     out.comp = Object.assign({}, remote.comp || {}, local.comp || {}); out.bn = Object.assign({}, remote.bn || {}, local.bn || {});
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.dd = Object.assign({}, remote.dd || {}); Object.keys(local.dd || {}).forEach(function (k) { var r = out.dd[k], l = local.dd[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.dd[k] = l; });
+    var xm = {}; (remote.xt || []).forEach(function (x) { xm[x.id] = x; }); (local.xt || []).forEach(function (x) { var r = xm[x.id]; if (!r || (x.at || "") >= (r.at || "")) xm[x.id] = x; }); out.xt = Object.keys(xm).map(function (k) { return xm[k]; });
     out.cierreAt = local.cierreAt != null ? local.cierreAt : remote.cierreAt;
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
@@ -457,7 +458,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? testCard() + toolsCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -485,14 +486,11 @@
       html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Mi propio hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"><button class="btn sage">Agregar</button></form><button class="btn ghost block" id="menu" style="margin-top:8px">Elegir del menú de hábitos</button><p class="small muted" style="margin:6px 0 0">El horario es un recordatorio, no una obligación.</p>';
     }
     html += dayCta() + reminderCard();
-    html += '<div class="sec">Herramientas para cuando las necesites</div>' +
-      '<button class="prod" data-open="organizar"><span class="shape">' + SHAPES.vida + '</span><span><b>Organizá tu día</b><small>Armá tu día en bloques con horarios</small></span><span class="tag ok">Gratis</span></button>' +
-      '<button class="prod" data-open="respirar"><span class="shape">' + SHAPES.tenis + '</span><span><b>Respiración guiada</b><small>Un minuto para bajar un cambio</small></span><span class="tag ok">Gratis</span></button>' +
-      PRODUCTS.filter(function (p) { return p.act; }).map(prodRow).join("");
+    html += toolsCard();
     if (armBlocks().length) {
       if (viewMode() === "now") {
         var rest = html.slice(gr.length).replace("@@ARM@@", "");
-        return gr + viewToggle() + prioCard() + cierreCard() + mananaCard() + nowSection() + progCard() + compCard() + weekCard() +
+        return gr + viewToggle() + prioCard() + cierreCard() + mananaCard() + nowSection() + toolsCard() + progCard() + compCard() + weekCard() +
           '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy") + "</button>" + (moreOpen ? rest : "");
       }
       return html.replace("@@ARM@@", viewToggle() + prioCard() + progCard() + weekCard() + armSection());
@@ -529,6 +527,7 @@
       h += '<div class="cols"><div class="card"><b>Gratis</b><ul class="ticks">' + p.free.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" +
         '<div class="card pro"><b>Pro</b><ul class="ticks">' + p.pros.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div></div>";
       if (p.prog) h += pgOwns(id) ? '<button class="btn block" data-pgopen="' + id + '" style="margin-top:12px">Abrir mi programa</button>' : '<button class="btn sage block" data-pgtry="' + id + '" style="margin-top:12px">Probar el paso 1 gratis</button>';
+      if (toolsOf(id).length) h += '<div class="sec" style="margin-top:10px">Herramientas del plan</div>' + toolsOf(id).map(toolRow).join("");
       var items = inPlan(id);
       if (items.length) h += '<div class="sec" style="margin-top:6px">Productos del plan</div>' + items.map(prodRow).join("");
       if (pro) h += '<div class="card"><b>Tenés este plan.</b><p class="small muted" style="margin:6px 0 0">Todo lo del plan es tuyo, incluidos los productos que se sumen.</p></div>';
@@ -652,7 +651,7 @@
   function openPrograms() {
     sheet('<h2 style="font-size:22px">Programas de 14 días</h2><p class="muted small">Uno por vez, un paso por día. Elegí el que más te haga falta ahora.</p>' +
       PG.list.map(function (P) { var it = pgItem(P.id), n = pgCount(P.id), st = !it ? "Empezar" : n >= 14 ? "Terminado" : (S.prog.cur === P.id ? "Paso " + (n + 1) + " de 14" : "Retomar");
-        return '<button class="prod" data-pgopen="' + P.id + '"><span class="shape">' + SHAPES.vida + "</span><span style='flex:1;min-width:0'><b>" + esc(P.n) + "</b><small>" + esc(P.tag) + " · " + esc(P.intro.split(".")[0]) + '.</small></span><span class="tag">' + st + "</span></button>"; }).join("") +
+        return '<button class="prod" data-pgopen="' + P.id + '"><span class="shape">' + (SHAPES[P.id] || SHAPES.vida) + "</span><span style='flex:1;min-width:0'><b>" + esc(P.n) + "</b><small>" + esc(P.tag) + " · " + esc(P.intro.split(".")[0]) + '.</small></span><span class="tag">' + st + "</span></button>"; }).join("") +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
   // ---- pasos interactivos: solo cuentan si se completan ----
@@ -746,7 +745,7 @@
     var id = pgCur();
     if (!id) {
       if (S.prog && S.prog.items && Object.keys(S.prog.items).length) return "";
-      return '<div class="card" style="margin-top:12px"><b>Programas de 14 días</b><p class="small muted" style="margin:6px 0 10px">Un paso por día para dormir mejor, calmarte o arrancar.</p><button class="btn sage" data-pgall>Elegir un programa</button></div>';
+      return '<div class="card" style="margin-top:12px"><b>Programas de 14 días</b><p class="small muted" style="margin:6px 0 10px">Un paso por día para dormir mejor, calmarte, arrancar o estudiar.</p><button class="btn sage" data-pgall>Elegir un programa</button></div>';
     }
     var P = pgOf(id), n = pgCount(id);
     if (n >= 14) return '<div class="card sage" style="margin-top:12px"><b>Terminaste «' + esc(P.n) + '»</b><p class="small" style="margin:6px 0 10px">' + (pgItem(id).after ? "Mirá tu resultado y elegí qué sigue." : "Falta un último paso: contanos cómo estás ahora.") + '</p><button class="btn" data-pgopen="' + id + '">Ver resultado</button></div>';
@@ -899,8 +898,108 @@
       { t: "Exhalación larga", d: "Inhalá en 4 y soltá en 6, sin apuro.", s: 180, type: "breath" },
       { t: "Soltá lo pendiente", d: "Si hay algo que no querés olvidar, anotalo. Si no, seguí.", type: "input", ph: "Para mañana...", opt: true },
       { t: "Listo para descansar", d: "Apagá la luz. Mañana arrancamos de nuevo.", s: 15 }] },
+    descarga: { t: "Descarga mental", note: "Lo que escribas queda guardado en tu cuenta.", steps: [
+      { t: "Sacalo de la cabeza", d: "Escribí lo que te da vueltas, sin ordenar y sin juzgar.", type: "input", ph: "Me da vueltas..." },
+      { t: "¿Algo para mañana?", d: "Si hay algo que podés hacer, anotá solo el primer paso. Si no, dejalo ir.", type: "input", ph: "Mañana voy a...", opt: true },
+      { t: "Soltá", d: "Respirá lento: inhalá en 4 y soltá en 6. Ya está anotado, no hace falta recordarlo.", s: 45, type: "breath" }] },
+    antesabrir: { t: "Antes de abrir el celular", steps: [
+      { t: "Pará un momento", d: "Antes de desbloquear, respirá lento. Inhalá y soltá.", s: 20, type: "breath" },
+      { t: "¿Para qué lo abrís?", d: "Escribilo en una frase. Si no sabés, ya es una respuesta.", type: "input", ph: "Lo abro para..." },
+      { t: "Decidí", d: "Si es algo concreto, hacelo y cerrá. Si no, dejalo y volvé a lo que estabas haciendo.", s: 10 }] },
+    pausacel: { t: "Pausa sin celular", steps: [
+      { t: "Dejalo lejos", d: "Ponelo en otra habitación o dado vuelta, fuera de tu alcance.", s: 15 },
+      { t: "10 minutos sin celular", d: "Caminá, tomá agua, mirá por la ventana o estirá. Lo que quieras, menos el celular.", s: 600 },
+      { t: "¿Cómo te sentís?", d: "Anotá en una frase qué hiciste y cómo te sentís.", type: "input", ph: "Hice... y me siento...", opt: true }] },
+    dosmin: { t: "Regla de los 2 minutos", steps: [
+      { t: "¿Qué vas a empezar?", d: "Elegí algo que venís postergando.", type: "input", ph: "Tengo que..." },
+      { t: "El primer paso diminuto", d: "El más chico posible: abrir el archivo, juntar los papeles.", type: "input", ph: "Primer paso..." },
+      { t: "2 minutos, solo eso", d: "Hacé ese primer paso. Nada más. Después podés parar.", s: 120 },
+      { t: "¿Seguís?", d: "Si querés seguir, seguí. Si no, está bien: ya empezaste.", s: 10 }] },
+    grounding: { t: "5-4-3-2-1", note: "Es un apoyo de bienestar. No reemplaza a un profesional de la salud.", steps: [
+      { t: "5 cosas que ves", d: "Mirá alrededor y nombrá cinco cosas que ves.", type: "input", ph: "Veo..." },
+      { t: "4 que tocás, 3 que escuchás", d: "Nombrá cuatro cosas que tocás y tres que escuchás.", type: "input", ph: "Toco... Escucho..." },
+      { t: "Respirá", d: "Dos cosas que olés y una que saboreás. Después, tres respiraciones lentas.", s: 40, type: "breath" }] },
+    estudio: { t: "Bloque de estudio", note: "Dejá el celular fuera de tu vista.", steps: [
+      { t: "¿Qué vas a estudiar?", d: "Un solo tema, en una frase.", type: "input", ph: "Hoy estudio..." },
+      { t: "Preparate", d: "Material a mano, celular lejos y agua cerca.", s: 30 },
+      { t: "25 minutos de estudio", d: "Solo ese tema. Si te distraés, volvé sin culparte.", s: 1500 },
+      { t: "Recordá sin mirar", d: "Sin mirar el material, escribí todo lo que te acuerdes del tema.", type: "input", ph: "Me acuerdo de..." },
+      { t: "Pausa de verdad", d: "Caminá o tomá agua, sin celular.", s: 300 }] },
+    repaso: { t: "Repaso activo", steps: [
+      { t: "¿Qué vas a repasar?", d: "Un tema que viste hace uno o dos días.", type: "input", ph: "Repaso..." },
+      { t: "Escribí lo que recordás", d: "Sin mirar el material, todo lo que te acuerdes.", type: "input", ph: "Me acuerdo de..." },
+      { t: "¿Qué no pudiste recordar?", d: "Eso es lo que hay que repasar primero.", type: "input", ph: "No me acuerdo de...", opt: true }] },
     organizar: { t: "Organizá tu día", steps: [] }
   };
+
+  // ---------- herramientas: se usan solas o se agregan a tu día ----------
+  var TOOLS = [
+    { id: "respirar", n: "Respiración guiada", d: "Un minuto para bajar un cambio.", act: "respirar", plan: "vida", mins: 5, free: true },
+    { id: "movimiento", n: "Pausa de movimiento", d: "5 minutos de movimiento guiado, sin equipamiento.", act: "movimiento", plan: "vida", gate: "vida", mins: 10 },
+    { id: "cierre", n: "Cierre del día guiado", d: "Repasá tu día, soltá lo pendiente y dejá armado mañana.", act: "cierre", plan: "vida", gate: "vida", mins: 10 },
+    { id: "dormir", n: "Rutina para dormir", d: "10 minutos para bajar el ritmo antes de acostarte.", act: "dormir", plan: "dormir", gate: "vida", mins: 15 },
+    { id: "descarga", n: "Descarga mental", d: "Sacá de la cabeza lo que te da vueltas antes de dormir.", act: "descarga", plan: "dormir", mins: 10 },
+    { id: "antesabrir", n: "Antes de abrir el celular", d: "Un freno de 1 minuto: respirás y decidís para qué lo abrís.", act: "antesabrir", plan: "celular", mins: 5 },
+    { id: "pausacel", n: "Pausa sin celular", d: "10 minutos lejos del celular, con un cierre corto.", act: "pausacel", plan: "celular", mins: 15 },
+    { id: "foco", n: "Bloque de foco", d: "25 minutos con una sola tarea, con intención y cierre.", act: "foco", plan: "arrancar", gate: "vida", mins: 30 },
+    { id: "dosmin", n: "Regla de los 2 minutos", d: "Para arrancar lo que venís postergando: un paso diminuto.", act: "dosmin", plan: "arrancar", mins: 10 },
+    { id: "calma", n: "Respiración para calmar", d: "3 minutos de respiración lenta para bajar la tensión.", act: "calma", plan: "calma", gate: "vida", mins: 10 },
+    { id: "grounding", n: "5-4-3-2-1", d: "Volvé al presente cuando la cabeza se acelera.", act: "grounding", plan: "calma", mins: 10 },
+    { id: "estudio", n: "Bloque de estudio", d: "25 minutos de estudio y recuerdo activo, con pausa.", act: "estudio", plan: "estudio", mins: 35 },
+    { id: "repaso", n: "Repaso activo", d: "Repasá recordando sin mirar: lo que te falta es lo que hay que estudiar.", act: "repaso", plan: "estudio", mins: 15 }
+  ];
+  function toolById(id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }
+  function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
+  function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
+  function toolOk(T) { return !!(T.free || (T.gate === "vida" ? isProU() : planOwned(T.plan))); }
+  function toolsOf(pid) { return TOOLS.filter(function (t) { return t.plan === pid; }); }
+  function toolRow(T) {
+    var ok = toolOk(T), pl = planOf(T.plan);
+    return '<button class="prod" data-tl="' + T.id + '"><span class="shape">' + SHAPES[T.plan] + "</span><span style='flex:1;min-width:0'><b>" + esc(T.n) + "</b><small>" + esc(T.d) + '</small></span><span class="tag' + (ok ? " ok" : "") + '">' + (ok ? (T.free ? "Gratis" : "Tuya") : "Con " + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n)) + "</span></button>";
+  }
+  function toolsCard() {
+    if (!S.arm) return "";
+    var n = TOOLS.filter(toolOk).length;
+    return '<button class="prod toolscard" data-open="tools"><span class="shape">' + SHAPES.calma + '</span><span style="flex:1;min-width:0"><b>Herramientas</b><small>Para usar cuando las necesites · ' + n + " disponibles</small></span></button>";
+  }
+  function openTools() {
+    var h = '<h2 style="font-size:24px;margin:0 0 4px">Herramientas</h2><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>';
+    PLANS.forEach(function (p) { var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
+    sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
+  function openTool(id) {
+    var T = toolById(id); if (!T) return; var ok = toolOk(T), pl = planOf(T.plan), A = ACTS[T.act];
+    sheet('<div class="row"><span class="shape">' + SHAPES[T.plan] + '</span><div><span class="badge">Herramienta · ' + esc(pl.n) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><p style="margin:14px 0">' + esc(T.d) + "</p>" +
+      '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>" +
+      (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" data-xtadd="' + T.id + '" style="margin-top:8px">Agregar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
+        : '<div class="card dark" style="margin-top:12px"><b>' + (T.gate === "vida" ? "Es parte de Vida diaria Pro" : "Es parte del plan " + esc(pl.n)) + '</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con el plan la usás cuando quieras y la sumás a tu día.</p><button class="btn sage" data-plan="' + (T.gate === "vida" ? "vida" : pl.id) + '">Ver el plan</button></div>') +
+      '<button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
+  }
+  function xtFree(b) { return b.kind === "free" || (b.kind === "rest" && b.label === "Ocio y descanso"); }
+  var xtd = { w: "hoy" };
+  function xtSlots(T) {
+    var out = [], bl = armBlocks(), F = window.FormaDia;
+    bl.forEach(function (b) { if (!xtFree(b)) return; for (var t = b.s; t + T.mins <= b.e && out.length < 60; t += 15) out.push(t); });
+    return out;
+  }
+  function openXtAdd(id) {
+    var T = toolById(id); if (!T || !isProU()) return; var F = window.FormaDia, sl = xtSlots(T); xtd = { w: "hoy", id: id };
+    if (!sl.length) { sheet('<h2 style="font-size:22px">No hay un hueco libre</h2><p class="muted">Hoy no tenés ' + T.mins + " minutos libres seguidos en tu día. Podés cambiar tu día desde Mi semana y volver a intentarlo.</p>" + '<button class="btn ghost block" data-close>Cerrar</button>'); return; }
+    sheet('<h2 style="font-size:22px">Agregar a mi día</h2><p class="muted small">' + esc(T.n) + " · reservamos " + T.mins + ' minutos en un horario libre. No se agrega solo: lo elegís vos.</p><label class="field"><span>¿A qué hora?</span><select id="xts" style="' + fieldCss() + '">' + sl.map(function (t) { return '<option value="' + t + '">' + F.fmt(t) + "</option>"; }).join("") + '</select></label>' +
+      '<div class="chips" style="margin:6px 0 14px"><button class="chip" data-xtw="hoy" aria-pressed="true">Solo hoy</button><button class="chip" data-xtw="todos" aria-pressed="false">Todos los días</button></div><p class="small muted" style="margin:0 0 10px">Si elegís todos los días, aparece los días en que ese horario esté libre.</p><button class="btn sage block" data-xtok>Agregar</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+  }
+  function xtApply(bl, dt) {
+    var k = today(dt), xs = (S.xt || []).filter(function (x) { return !x.del && (!x.d || x.d === k); }).sort(function (a, b) { return a.s - b.s; });
+    if (!xs.length) return bl; var out = bl.slice();
+    xs.forEach(function (x) {
+      var T = toolById(x.tool); if (!T) return; var s0 = x.s, e0 = x.s + T.mins, ix = -1;
+      out.forEach(function (b, i) { if (ix < 0 && xtFree(b) && b.s <= s0 && b.e >= e0) ix = i; }); if (ix < 0) return;
+      var f = out[ix], parts = []; if (f.s < s0) parts.push(Object.assign({}, f, { e: s0 }));
+      parts.push({ s: s0, e: e0, kind: "habit", label: T.n, note: T.d, tool: T.act, xt: x.id }); if (f.e > e0) parts.push(Object.assign({}, f, { s: e0 }));
+      out.splice.apply(out, [ix, 1].concat(parts));
+    });
+    return out;
+  }
   var act = null;
   function stopBreath() { if (act && act.tm) clearInterval(act.tm); act = null; }
   function actKey(tool) { return tool === "respirar" ? "respirar" : tool === "organizar" ? "organizar" : (tool || "").indexOf("act:") === 0 ? tool.slice(4) : ""; }
@@ -909,7 +1008,7 @@
   function startAct(key) {
     if (key === "organizar") return openOrganizar();
     var A = ACTS[key]; if (!A) return;
-    if (ACT_REQ[key] && !isProU()) return openPlan("vida");
+    var TT = toolByAct(key); if (TT ? !toolOk(TT) : (ACT_REQ[key] && !isProU())) return openPlan(TT && TT.gate !== "vida" ? TT.plan : "vida");
     close();
     act = { key: key, i: 0, vals: [], tm: null, end: 0 };
     var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el);
@@ -1048,7 +1147,7 @@
   // ---------- armado del día (el mismo de la página) ----------
   var ARMTOOL = { "Pausa y respiración": "respirar", "Desconectar y dormir": "dormir", "Meditar y respirar": "calma", "Moverme y estirar": "movimiento", "Planificar el día siguiente": "cierre", "Escribir un diario": "cierre" };
   function dayAns(dt) { dt = dt || new Date(); var dd = S.dd && S.dd[today(dt)]; if (dd && dd.ans) return dd.ans; var w = S.wk && S.wk[dt.getDay()]; return w && w.ans ? w.ans : (S.arm && S.arm.ans) || null; }
-  function armBlocksFor(dt) { try { var a = dayAns(dt); return a && window.FormaDia ? window.FormaDia.plan(a).blocks : []; } catch (e) { return []; } }
+  function armBlocksFor(dt) { try { var a = dayAns(dt); return a && window.FormaDia ? xtApply(window.FormaDia.plan(a).blocks, dt || new Date()) : []; } catch (e) { return []; } }
   function armBlocks() { return armBlocksFor(new Date()); }
   // ---------- mi semana ----------
   var DNL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], DNS = ["D", "L", "M", "M", "J", "V", "S"];
@@ -1095,7 +1194,7 @@
   function armKey(b) { return b.kind + "|" + b.label + "|" + b.s; }
   function armCheckable(b) { return b.kind === "train" || b.kind === "focus" || b.kind === "habit" || b.kind === "pause" || (b.kind === "rest" && b.label.indexOf("Desconectar") === 0); }
   function bchips(b) { var d = bdetails(b); if (!d.length) return ""; return '<span class="bchips">' + d.slice(0, 3).map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + (d.length > 3 ? "<em>+" + (d.length - 3) + "</em>" : "") + "</span>"; }
-  function armToolOf(b) { return ARMTOOL[b.label] || (b.kind === "train" ? "movimiento" : b.kind === "focus" ? "foco" : ""); }
+  function armToolOf(b) { return b.tool || ARMTOOL[b.label] || (b.kind === "train" ? "movimiento" : b.kind === "focus" ? "foco" : ""); }
   function armDone(b) { return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
@@ -1114,7 +1213,7 @@
     bl.forEach(function (b) {
       var k = window.FormaDia.KIND[b.kind], ck = armCheckable(b), dn = armDone(b), isNow = now >= b.s && now < b.e, st = isNow ? "now" : now >= b.e ? "past" : "next", pgw = isNow ? Math.round((now - b.s) * 100 / (b.e - b.s)) : 0, tk = armToolOf(b), tbtn = "";
       if (pro && tk && ck && !dn) {
-        var locked = ACT_REQ[tk] && !isProU();
+        var TTk = toolByAct(tk), locked = TTk ? !toolOk(TTk) : (ACT_REQ[tk] && !isProU());
         tbtn = '<button class="btn ' + (locked ? "ghost" : "sage") + ' sm" data-armtool="' + tk + '" style="margin-top:8px">' + (locked ? ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Con Pro" : "Hacer ahora") + "</button>";
       }
       html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd" role="button" tabindex="0" data-blkopen="' + bl.indexOf(b) + '"><b>' + esc(b.label) + '</b>' + bchips(b) + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
@@ -1309,6 +1408,7 @@
       (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:7px 0;border-top:1px solid var(--line)"><span>' + esc(x) + "</span>" + (pro ? '<button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button>' : "") + "</div>"; }).join("") : '<p class="small muted" style="margin:0 0 6px">' + (pro ? "Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien." : "Todavía no hay detalles.") + "</p>") +
       (pro ? (det.length < 8 ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px"><input id="bn" maxlength="80" placeholder="Agregar un detalle" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form>' : "") +
         '<p class="small muted" style="margin:8px 0 0">Se repite todos los días en este momento.</p>' +
+        (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
         (ck && tk && !armDone(b) ? '<button class="btn sage block" data-armtool="' + tk + '" style="margin-top:12px">Hacer ahora (actividad guiada)</button>' : "") +
         (ck ? '<button class="btn block" data-ackb="' + i + '" style="margin-top:8px">' + (armDone(b) ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "")
         : '<div class="card dark" style="margin-top:12px"><b>Poné tus propios detalles con Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Agregá a cada momento lo que querés que no se te olvide.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>') +
@@ -1615,6 +1715,12 @@
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
     if (d.prod) return openProduct(d.prod);
+    if (d.open === "tools") return openTools();
+    if (d.tl) return openTool(d.tl);
+    if (d.xtadd) return openXtAdd(d.xtadd);
+    if (d.xtw) { xtd.w = d.xtw; [].slice.call(document.querySelectorAll("#sheet [data-xtw]")).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.xtw === d.xtw ? "true" : "false"); }); return; }
+    if (d.xtok !== undefined) { var sel = $("#xts"); if (!sel || !xtd.id || !isProU()) return; S.xt = S.xt || []; S.xt.push({ id: "x" + Date.now(), tool: xtd.id, s: +sel.value, d: xtd.w === "hoy" ? today() : "", at: today() }); save(); close(); render(); return; }
+    if (d.xtdel) { var xi = (S.xt || []).filter(function (x) { return x.id === d.xtdel; })[0]; if (xi) { xi.del = true; xi.at = today(); save(); } close(); render(); return; }
     if (d.open === "test") return openTest();
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
     if (d.tstpick !== undefined) { if (tst) { tst.a[testVisible(tst.a)[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
