@@ -223,7 +223,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -247,7 +247,7 @@
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.dd = Object.assign({}, remote.dd || {}); Object.keys(local.dd || {}).forEach(function (k) { var r = out.dd[k], l = local.dd[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.dd[k] = l; });
     var xm = {}; (remote.xt || []).forEach(function (x) { xm[x.id] = x; }); (local.xt || []).forEach(function (x) { var r = xm[x.id]; if (!r || (x.at || "") >= (r.at || "")) xm[x.id] = x; }); out.xt = Object.keys(xm).map(function (k) { return xm[k]; });
-    out.rem = local.rem || remote.rem || null;
+    out.rem = local.rem || remote.rem || null; out.goal = local.goal || remote.goal || null;
     out.cierreAt = local.cierreAt != null ? local.cierreAt : remote.cierreAt;
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
@@ -452,7 +452,7 @@
   function vArmar() {
     var nm = (S.profile && S.profile.name) || "";
     return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1>' +
-      '<ol class="armsteps"><li><b>Contanos cómo es tu día</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Te lo armamos</b><span>En bloques con horarios, listo para usar.</span></li><li><b>Descubrí qué plan te conviene</b><span>Un test corto, opcional.</span></li></ol>' +
+      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día para lograrlo</b><span>Con cambios de a poco, para que se sostengan.</span></li></ol>' +
       '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
   function vHoy() {
@@ -475,11 +475,11 @@
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
     if (S.intencion) html += '<div class="card small"><span class="muted">Tu intención de la semana</span><br><b>' + esc(S.intencion) + "</b></div>";
-    html += reviewCard() + "@@ARM@@";
+    html += goalCard() + reviewCard() + "@@ARM@@";
     html += reminderCard() + cierreCard() + mananaCard();
     if (armBlocks().length) {
       if (viewMode() === "now") {
-        return gr + viewToggle() + nowSection() + prioCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
+        return gr + viewToggle() + nowSection() + prioCard() + goalCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
       }
       return html.replace("@@ARM@@", viewToggle() + prioCard() + weekCard() + armSection());
     }
@@ -498,7 +498,7 @@
   function vPlanes() {
     var rec = recIds(), head = "";
     if (rec.length) head = '<div class="sec">Para vos</div>' + rec.map(function (id) { return planCard(planOf(id)); }).join("") + '<button class="linkbtn small" data-open="test" style="margin:4px 0 8px">Rehacer el test</button>';
-    else head = '<div class="card testcta"><b>¿Qué plan te conviene?</b><p class="small muted" style="margin:6px 0 12px">Un test de 1 minuto, gratis. Te mostramos los planes que van con lo que necesitás.</p><button class="btn sage" data-open="test">Hacer el test</button></div>';
+    else head = '<div class="card testcta"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 12px">Contanos tu objetivo y te mostramos los planes que van con eso. Gratis.</p><button class="btn sage" data-open="test">Elegir mi objetivo</button></div>';
     var GR = ["Vida diaria", "Estudio y trabajo", "Deportes", "Servicios extras"], out = "";
     GR.forEach(function (g) {
       var L = PLANS.filter(function (p) { return p.grp === g && rec.indexOf(p.id) < 0; }).sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); });
@@ -822,7 +822,216 @@
     if (!res.length) res.push({ id: "vida", why: "Te ayuda a sostener tu día y tu constancia" });
     return res.map(function (r) { return { id: r.id, why: r.why }; });
   }
-  function openTest() {
+  // ---------- OBJETIVOS: qué querés lograr -> cuestionario a fondo -> día nuevo por etapas ----------
+  function ah(k) { return function (a) { var h = (a.habits || []).slice(); if (h.indexOf(k) < 0 && h.length < 3) h.push(k); a.habits = h; }; }
+  function pcat() { var fs = arguments; return function (a) { for (var i = 0; i < fs.length; i++) fs[i](a); }; }
+  function hrsTxt(m) { return (Math.round(m / 6) / 10).toString().replace(".", ",") + " h"; }
+  function fmtT(m) { return window.FormaDia ? window.FormaDia.fmt(m) : String(m); }
+  var GOALS = [
+    { id: "dormir", n: "Dormir mejor", d: "Acostarte y levantarte mejor, sin darle vueltas", plan: "dormir",
+      qs: [
+        { k: "w", q: "¿Qué te pasa con el sueño?", o: ["Me cuesta dormirme", "Me despierto de noche", "Duermo poco por mis horarios", "Duermo pero me levanto cansado"] },
+        { k: "l", q: "¿Qué hacés la última hora antes de acostarte?", o: ["Celular, series o redes", "Trabajo o estudio", "Cosas de la casa", "Ya me relajo"] },
+        { k: "c", q: "¿Tomás café, mate o energizantes a la tarde o noche?", o: ["Sí, seguido", "A veces", "No"] },
+        { k: "h", q: "¿Cuántas horas te gustaría dormir?", o: ["6 horas", "7 horas", "8 horas", "9 horas"] },
+        { k: "f", q: "¿Cambia mucho tu horario los fines de semana?", o: ["Mucho", "Un poco", "Casi nada"] },
+        { k: "p", q: "¿Cuánto cambio podés hacer por semana en tu hora de dormir?", o: ["Muy poco: 15 minutos", "Moderado: 30 minutos", "Lo que haga falta: 1 hora"] }
+      ],
+      build: function (g, A) {
+        var H = [6, 7, 8, 9][g.h]; if (H === undefined) H = 8; var step = [15, 30, 60][g.p] || 30;
+        var tgt = Math.max(1200, A.wake + 1440 - H * 60), cur = A.sleep, need = cur > tgt, out = [];
+        function sl(n) { return Math.max(tgt, cur - step * n); }
+        var hoy = hrsTxt(1440 - (cur - A.wake));
+        if (need) out.push({ s: 1, t: "Acostarte a las " + fmtT(sl(1)) + " (antes: " + fmtT(cur) + ")", why: "Hoy dormís unas " + hoy + " y querés " + H + ". Lo hacemos de a poco, " + step + " minutos por semana.", patch: function (a) { a.sleep = sl(1); } });
+        else out.push({ s: 1, t: "Tu horario ya alcanza para dormir " + H + " horas", why: "Entonces trabajamos la calidad del sueño, no la hora.", patch: null });
+        var tip1 = [["Si no te dormís en 20 minutos, levantate y hacé algo tranquilo con luz baja. Volvé a la cama cuando tengas sueño."], ["Si te despertás de noche, no mires el celular: respirá lento, 4 segundos entrando y 6 saliendo."], ["Tu problema es el horario, no el sueño: por eso movemos la hora de dormir de a poco."], ["Si dormís pero te levantás cansado, puede ser la calidad: sumamos una rutina para bajar el ritmo antes de acostarte."]][g.w];
+        if (tip1) out.push({ s: 1, t: tip1[0], why: "Para tu caso", patch: null });
+        var tl = [["La última hora, el celular lejos: dejalo cargando fuera de la cama."], ["Cortá el trabajo o el estudio una hora antes. Lo dejamos armado en «Desconectar y dormir»."], ["Dejá lo de la casa listo antes, para que la última hora sea solo para vos."], null][g.l];
+        if (tl) out.push({ s: 1, t: tl[0], why: "La última hora cuenta", patch: null });
+        if (g.c === 0) out.push({ s: 1, t: "Último café, mate o energizante antes de las 15:00", why: "La cafeína tarda horas en irse del cuerpo", patch: null });
+        if (g.c === 1) out.push({ s: 2, t: "Probá cortar la cafeína después de las 16:00", why: "La cafeína tarda horas en irse del cuerpo", patch: null });
+        if (need && sl(2) < sl(1)) out.push({ s: 2, t: "Acostarte a las " + fmtT(sl(2)), why: "Un paso más hacia tus " + H + " horas", patch: function (a) { a.sleep = sl(2); } });
+        out.push({ s: 2, t: "Sumar 5 minutos de respiración antes de dormir", why: "Ayuda a bajar el ritmo y a dormirte más rápido", patch: ah("breathe") });
+        if (g.f === 0) out.push({ s: 2, t: "Fines de semana: no más de 1 hora de diferencia con tu horario normal", why: "Cambiar mucho el horario desordena todo el reloj del cuerpo", patch: null });
+        if (need && sl(3) < sl(2)) out.push({ s: 3, t: "Acostarte a las " + fmtT(sl(3)), why: need && sl(3) === tgt ? "¡Llegás a tus " + H + " horas!" : "Seguimos acercándonos a tus " + H + " horas", patch: function (a) { a.sleep = sl(3); } });
+        out.push({ s: 3, t: "Dejar anotado lo de mañana antes de dormir", why: "Sacás las cosas de la cabeza y llegás más tranquilo a la cama", patch: ah("plan") });
+        return out;
+      } },
+    { id: "celular", n: "Usar menos el celular", d: "Dejar de perder horas y recuperar tu tiempo", plan: "celular",
+      qs: [
+        { k: "u", q: "¿Cuándo lo usás más, sin querer?", o: ["Apenas me levanto", "En los ratos libres", "Cuando tengo algo importante que hacer", "De noche, en la cama"] },
+        { k: "h", q: "¿Cuántas horas por día mirás la pantalla? (lo ves en los ajustes del celular)", o: ["Menos de 3", "Entre 3 y 5", "Entre 5 y 7", "Más de 7"] },
+        { k: "a", q: "¿Qué es lo que más tiempo te lleva?", o: ["Redes (Instagram, TikTok)", "Videos o series", "Mensajes", "Juegos"] },
+        { k: "t", q: "¿Qué te gustaría hacer con ese tiempo?", o: ["Leer o aprender", "Moverme", "Estar con gente", "Descansar de verdad"] },
+        { k: "m", q: "¿Cuánto querés bajar?", o: ["Un poco, me alcanza", "Casi la mitad", "Todo lo que se pueda"] }
+      ],
+      build: function (g) {
+        var out = [];
+        out.push({ s: 1, t: "Sumar «Celular y redes, con límite» a tu día", why: "Un momento elegido para usarlo sin culpa, en vez de miradas sueltas todo el día.", patch: function (a) { a.waste = "phone"; } });
+        var tu = ["Al despertar, no lo agarres los primeros 30 minutos y cargalo lejos de la cama.", "Sacá las apps de redes de la primera pantalla: si cuesta abrirlas, las abrís menos.", "Cuando tengas algo importante, celular en otra habitación o en modo avión.", "De noche, cargalo fuera de la cama y usá un despertador común."][g.u];
+        if (tu) out.push({ s: 1, t: tu, why: "Para tu momento más difícil", patch: null });
+        if (g.a === 0 || g.a === 1) out.push({ s: 1, t: "Poné un límite diario en la app que más usás (en Bienestar digital o Tiempo en pantalla)", why: "Un límite que te avisa es más fácil que la fuerza de voluntad", patch: null });
+        out.push({ s: 2, t: "Sumar pausas sin pantalla durante el día", why: "Para que el celular no ocupe todos los huecos libres", patch: function (a) { a.pauses = Math.max(a.pauses || 0, 2); } });
+        var hb = [["read", "Leer 10 minutos"], ["move", "Moverte y estirar"], ["walk", "Caminar 15 minutos, mejor con alguien"], ["breathe", "Respirar y descansar de verdad"]][g.t] || ["read", "Leer 10 minutos"];
+        out.push({ s: 2, t: "Hábito para reemplazar el tiempo de pantalla: " + hb[1], why: "Lo que dijiste que querés hacer con ese tiempo", patch: ah(hb[0]) });
+        out.push({ s: 3, t: "Probá una tarde entera sin redes", why: ["Sirve para ver cuánto cambia cómo te sentís.", "Con la mitad ya hay un cambio enorme. Esto te muestra que se puede.", "Si querés llegar lejos, hay que probar qué se siente."][g.m] || "Sirve para ver cómo te sentís.", patch: null });
+        out.push({ s: 3, t: "Dejar listo mañana antes de dormir, con el celular fuera del cuarto", why: "Así arrancás sin pantalla", patch: ah("plan") });
+        return out;
+      } },
+    { id: "estudio", n: "Estudiar y rendir mejor", d: "Organizar tu estudio y mejorar tus notas", plan: "estudio",
+      qs: [
+        { k: "e", q: "¿Qué estudiás?", o: ["Colegio", "Terciario o universidad", "Un idioma", "Cursos o por mi cuenta"] },
+        { k: "d", q: "¿Qué es lo que más te cuesta?", o: ["Empezar", "Concentrarme", "Organizarme con las fechas", "Acordarme de lo que estudié"] },
+        { k: "h", q: "¿Cuántas horas por día podés estudiar de verdad?", o: ["1 hora", "2 horas", "3 horas", "4 horas o más"] },
+        { k: "x", q: "¿Tenés algún examen cerca?", o: ["Sí, en menos de 2 semanas", "En 1 o 2 meses", "No, o no tengo fecha fija"] },
+        { k: "r", q: "¿Cuándo rendís mejor?", o: ["A la mañana", "A la tarde", "A la noche", "Me da igual"] }
+      ],
+      build: function (g) {
+        var out = [], hrs = [60, 120, 180, 240][g.h] || 120, en = ["am", "pm", "night", "any"][g.r] || "any";
+        out.push({ s: 1, t: "Reservar " + hrsTxt(hrs) + " por día para estudiar, en tu mejor momento", why: "Estudiar pasa a ser una prioridad de tu día, con horario.", patch: function (a) { var p = (a.prios || []).slice(); if (p.indexOf("study") < 0) { if (p.length >= 3) p.pop(); p.unshift("study"); } a.prios = p; a.free = Math.max(a.free || 0, hrs); a.energy = en; } });
+        var td = [["Empezar es lo más difícil: prometé solo 10 minutos y después decidís si seguís.", function (a) { if (!a.waste || a.waste === "none") a.waste = "procrastinate"; }], ["Para concentrarte: celular en otra habitación mientras estudiás.", null], ["Al cerrar el día, anotá qué vas a estudiar mañana.", ah("plan")], ["Para retener: al terminar, cerrá el cuaderno y escribí de memoria lo que recordás.", null]][g.d];
+        if (td) out.push({ s: 1, t: td[0], why: "Para lo que más te cuesta", patch: td[1] });
+        out.push({ s: 2, t: "Estudiar en tandas de 25 a 50 minutos con una pausa corta", why: "El cerebro rinde más con pausas que con una maratón", patch: function (a) { a.pauses = Math.max(a.pauses || 0, 2); } });
+        if (g.x === 0) out.push({ s: 2, t: "Examen cerca: repasá 30 minutos por día lo que ya viste y hacé un simulacro la semana previa", why: "Repasar de a poco rinde más que todo junto", patch: null });
+        else if (g.x === 1) out.push({ s: 2, t: "Armá un calendario hacia el examen: temas por semana y un repaso final", why: "Con tiempo, la clave es repartir", patch: null });
+        out.push({ s: 3, t: "Un repaso semanal de 20 minutos con todo lo de la semana", why: "Repasar espaciado es lo que más ayuda a recordar", patch: ah("read") });
+        return out;
+      } },
+    { id: "calma", n: "Bajar la ansiedad", d: "Estar más tranquilo y manejar la tensión", plan: "calma",
+      qs: [
+        { k: "c", q: "¿Cuándo la sentís más?", o: ["Al despertarme", "Durante el día", "A la noche", "Sin horario claro"] },
+        { k: "s", q: "¿Cómo se nota?", o: ["Pensamientos acelerados", "Tensión en el cuerpo", "Inquietud, no puedo parar", "Un poco de todo"] },
+        { k: "g", q: "¿Qué la dispara más?", o: ["Trabajo o estudio", "Pensar en el futuro", "Las relaciones", "No lo sé"] },
+        { k: "a", q: "¿Qué te ayuda hoy?", o: ["Moverme", "Hablar con alguien", "Estar solo un rato", "Nada, no encuentro algo que me ayude"] },
+        { k: "t", q: "¿Cuánto tiempo por día podés dedicarle?", o: ["5 minutos", "10 minutos", "20 minutos", "30 minutos o más"] }
+      ],
+      build: function (g) {
+        var out = [];
+        out.push({ s: 1, t: "Sumar respiración y pausas a tu día", why: "Son herramientas simples que funcionan mejor cuando las usás todos los días, no solo cuando estás mal.", patch: pcat(ah("breathe"), function (a) { a.pauses = Math.max(a.pauses || 0, 2); }) });
+        var tc = ["Al despertar, antes del celular, hacé 5 respiraciones lentas.", "Durante el día: pausa de 2 minutos cada 2 horas, soltando los hombros.", "A la noche: anotá lo que te preocupa en un papel para sacarlo de la cabeza.", "Cuando aparezca, nombrá lo que sentís y respirá lento: 4 segundos entrando, 6 saliendo."][g.c];
+        if (tc) out.push({ s: 1, t: tc, why: "Para tu momento más difícil", patch: null });
+        out.push({ s: 2, t: "Caminar 15 minutos por día", why: g.a === 0 ? "Dijiste que moverte te ayuda: lo sumamos a tu día." : "Moverse baja la tensión del cuerpo.", patch: ah("walk") });
+        if (g.a === 1) out.push({ s: 2, t: "Elegí una persona con quien hablar esta semana, aunque sea 10 minutos", why: "Dijiste que hablar te ayuda", patch: null });
+        if (g.a === 3) out.push({ s: 2, t: "Probá una cosa distinta por día: caminar, respirar, escribir o hablar. Anotá cuál te hace bien", why: "Todavía no sabés cuál te sirve, así que lo descubrimos probando", patch: null });
+        out.push({ s: 3, t: "Escribir 3 líneas antes de dormir: cómo te fue y qué te preocupa", why: "Escribirlo ayuda a soltarlo", patch: ah("write") });
+        out.push({ s: 3, t: "Si en 3 semanas sigue igual o te frena en tu vida, hablalo con un profesional", why: "Forma ordena tus hábitos, pero no reemplaza un tratamiento", patch: null });
+        return out;
+      } },
+    { id: "arrancar", n: "Arrancar el día con energía", d: "Mañanas ordenadas y dejar de postergar", plan: "arrancar",
+      qs: [
+        { k: "m", q: "¿Cómo son tus mañanas hoy?", o: ["Pesadas, me cuesta salir de la cama", "Apuradas, siempre llego justo", "Bien, pero sin una rutina", "Pierdo la mañana y arranco tarde"] },
+        { k: "p", q: "¿Qué hacés primero al despertarte?", o: ["Miro el celular", "Tomo algo y salgo", "Me ducho o me preparo", "Nada fijo"] },
+        { k: "c", q: "¿Qué es lo que más te cuesta?", o: ["Levantarme", "Empezar a hacer cosas", "Concentrarme", "Todo un poco"] },
+        { k: "t", q: "¿Cuánto tiempo podés dedicarle a tu mañana?", o: ["15 minutos", "30 minutos", "45 minutos", "1 hora"] }
+      ],
+      build: function (g) {
+        var out = [];
+        out.push({ s: 1, t: "Un primer paso fijo cada mañana: agua, luz natural y un primer paso chico", why: "Arrancar siempre igual saca la decisión y baja la pereza.", patch: pcat(ah("plan"), function (a) { if (g.c === 1 || g.c === 3) a.waste = "procrastinate"; }) });
+        if (g.p === 0) out.push({ s: 1, t: "Los primeros 20 minutos, sin celular", why: "Lo primero que mirás define cómo arrancás", patch: null });
+        if (g.c === 0) out.push({ s: 1, t: "Dejá el despertador lejos de la cama y levantate al primer sonido", why: "Para lo que más te cuesta", patch: null });
+        out.push({ s: 2, t: "Moverte 5 minutos apenas te levantás", why: "Despierta el cuerpo y sube la energía", patch: ah("move") });
+        if (g.c === 1 || g.c === 3) out.push({ s: 2, t: "Regla de 10 minutos: empezá solo 10 y después decidís", why: "Empezar es lo más difícil, no seguir", patch: null });
+        out.push({ s: 3, t: "Dejar la mañana de mañana preparada la noche anterior", why: "Ropa, mochila y lo primero que vas a hacer", patch: ah("write") });
+        return out;
+      } },
+    { id: "deporte", n: "Mejorar en mi deporte", d: "Entrenar mejor y rendir más", plan: "tenis", go: "planes" },
+    { id: "peso", n: "Bajar de peso", d: "Ordenar tus comidas y moverte más", plan: "comer", soon: true },
+    { id: "plata", n: "Ordenar mi plata", d: "Presupuesto simple y llegar a fin de mes", plan: "plata", soon: true },
+    { id: "viaje", n: "Organizar un viaje", d: "Armar el viaje que querés, paso a paso", plan: "viajes", soon: true },
+    { id: "laburo", n: "Buscar trabajo", d: "CV, entrevistas y búsqueda organizada", plan: "laburo", soon: true }
+  ];
+  function goalById(id) { return GOALS.filter(function (g) { return g.id === id; })[0]; }
+  var gs = null;
+  function goalStage() { var G = S.goal; if (!G || !G.start) return 1; return Math.max(1, Math.min(3, 1 + Math.floor(daysSince(G.start) / 7))); }
+  function goalChanges() {
+    var G = S.goal; if (!G || !S.arm || !S.arm.ans) return [];
+    var base = S.arm.ans0 || S.arm.ans, out = [];
+    (G.ids || []).forEach(function (id) { var g = goalById(id); if (!g || !g.build) return; var ga = (G.a && G.a[id]) || {}; g.build(ga, base).forEach(function (c, i) { out.push({ id: id + "_" + i, goal: id, s: c.s, t: c.t, why: c.why, patch: c.patch || null }); }); });
+    return out;
+  }
+  function openGoals() {
+    close(); var old = $("#full"); if (old) old.remove();
+    gs = { st: "pick", sel: ((S.goal && S.goal.ids) || []).slice(), gi: 0, qi: 0, a: JSON.parse(JSON.stringify((S.goal && S.goal.a) || {})), other: (S.goal && S.goal.other) || "" };
+    var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawGoals();
+  }
+  function gLive() { return gs.sel.map(goalById).filter(function (g) { return g && g.qs; }); }
+  function drawGoals() {
+    var el = $("#full"); if (!el || !gs) return;
+    if (gs.st === "pick") {
+      var cards = GOALS.map(function (g) {
+        var on = gs.sel.indexOf(g.id) >= 0, pl = planOf(g.plan);
+        return '<button class="plancard gpick" data-gpick="' + g.id + '" aria-pressed="' + on + '" style="--c:' + (pl ? pl.c : "#86A892") + '"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><span style='flex:1;min-width:0'><b>" + esc(g.n) + "</b><small>" + esc(g.d) + "</small></span>" + (g.soon ? '<span class="tag">Próximamente</span>' : "") + (on ? '<span class="tag ok">✓</span>' : "") + "</button>";
+      }).join("");
+      el.innerHTML = '<header><button class="btn ghost sm" data-gexit>Salir</button><b>Tu objetivo</b></header><div class="actbar"><i style="width:8%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">¿Qué querés lograr?</h2><p class="muted small" style="margin:0 0 12px">Elegí hasta 2. Con tu día de hoy como punto de partida, armamos los cambios para llegar ahí, de a poco.</p>' + cards +
+        '<label class="field" style="margin-top:12px"><span>¿Otra cosa? <small class="muted" style="font-weight:400">(opcional)</small></span><input id="gother" maxlength="80" placeholder="Contanos qué querés lograr" value="' + esc(gs.other) + '" style="' + fieldCss() + '"></label></div><div class="dfoot"><button class="btn sage block" data-gnext' + (gs.sel.length ? "" : " disabled") + ">Continuar</button></div>";
+      return;
+    }
+    if (gs.st === "q") {
+      var L = gLive(), g = L[gs.gi]; if (!g) return gFinish();
+      var q = g.qs[gs.qi], tot = 0, dn = 0; L.forEach(function (x, ix) { tot += x.qs.length; if (ix < gs.gi) dn += x.qs.length; }); dn += gs.qi;
+      var cur = (gs.a[g.id] || {})[q.k];
+      el.innerHTML = '<header><button class="btn ghost sm" data-gexit>Salir</button><b>' + esc(g.n) + '</b></header><div class="actbar"><i style="width:' + Math.round(10 + dn * 90 / tot) + '%"></i></div><div class="dbody"><span class="badge">Pregunta ' + (dn + 1) + " de " + tot + '</span><h2 style="font-size:24px;margin:10px 0 14px">' + esc(q.q) + "</h2>" +
+        q.o.map(function (x, j) { return '<button class="btn ' + (cur === j ? "" : "ghost ") + 'block tstopt" data-gopt="' + j + '">' + esc(x) + "</button>"; }).join("") + '</div><div class="dfoot"><button class="btn ghost" data-gback>Atrás</button></div>';
+    }
+  }
+  function gAnswer(j) {
+    var L = gLive(), g = L[gs.gi], q = g.qs[gs.qi]; gs.a[g.id] = gs.a[g.id] || {}; gs.a[g.id][q.k] = j;
+    if (gs.qi + 1 < g.qs.length) gs.qi++; else { gs.gi++; gs.qi = 0; }
+    if (gs.gi >= L.length) return gFinish(); drawGoals();
+  }
+  function gBack() {
+    if (gs.qi > 0) gs.qi--; else if (gs.gi > 0) { gs.gi--; gs.qi = gLive()[gs.gi].qs.length - 1; } else gs.st = "pick";
+    drawGoals();
+  }
+  function gFinish() {
+    var oldAns = S.arm && S.arm.ans ? JSON.stringify(S.arm.ans) : null;
+    var ids = gs.sel.slice(), a = gs.a, other = gs.other; gs = null;
+    S.goal = { ids: ids, a: a, other: other, at: today(), start: today(), ap: {} };
+    if (S.arm && S.arm.ans) {
+      if (!S.arm.ans0) S.arm.ans0 = JSON.parse(oldAns);
+      goalChanges().forEach(function (c) { if (c.s === 1 && c.patch) { c.patch(S.arm.ans); } if (c.s === 1) S.goal.ap[c.id] = 1; });
+    }
+    var rec = []; ids.forEach(function (id) { var g = goalById(id); if (g && g.plan && planOf(g.plan) && rec.map(function (r) { return r.id; }).indexOf(g.plan) < 0) rec.push({ id: g.plan, why: "Para tu objetivo: " + g.n.toLowerCase() }); });
+    S.test = { a: {}, rec: rec, at: today() }; save(); render();
+    var el = $("#full"); if (!el) return;
+    var ch = goalChanges(), hasLive = ids.some(function (id) { var g = goalById(id); return g && g.build; });
+    var html = '<header><b>Tu plan</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Armamos tu día para lograrlo</h2><p class="muted small" style="margin:0 0 12px">Tu día de hoy es el punto de partida. Los cambios llegan por etapas, de a poco, así se sostienen.</p>';
+    ids.forEach(function (id) {
+      var g = goalById(id), pl = planOf(g.plan); if (!g) return;
+      html += '<div class="card"><div class="row"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><div><b>" + esc(g.n) + '</b><span class="small muted" style="display:block">' + (g.soon ? "Lo estamos armando. Mientras tanto, tu día ordenado ya es un buen comienzo." : g.go ? "Tenés un plan de entrenamiento para vos." : "Plan recomendado: " + esc(pl.n)) + "</span></div></div>";
+      if (g.build) {
+        [1, 2, 3].forEach(function (st) {
+          var L = ch.filter(function (c) { return c.goal === id && c.s === st; }); if (!L.length) return;
+          html += '<div class="sec" style="margin:14px 0 4px">' + (st === 1 ? "Esta semana (ya está en tu día)" : "Semana " + st) + "</div>" + L.map(function (c) { return '<div style="padding:6px 0;border-top:1px solid var(--line)"><b class="small">' + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></div>"; }).join("");
+        });
+      }
+      if (g.plan && planOf(g.plan) && planOf(g.plan).live) html += '<button class="btn ghost block" data-tstplan="' + g.plan + '" style="margin-top:10px">Ver el plan</button>';
+      html += "</div>";
+    });
+    if (hasLive && !isProU()) html += '<div class="card dark"><b>Los cambios de las semanas 2 y 3</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Vida diaria Pro tu día se va ajustando solo cada semana, y los pasos de cada plan quedan en tu día.</p><button class="btn sage" data-tstplan="vida">Ver Vida diaria Pro</button></div>';
+    if (other) html += '<p class="small muted">Anotamos lo que nos contaste: «' + esc(other) + '».</p>';
+    el.innerHTML = html + '</div><div class="dfoot"><button class="btn sage block" data-gdone>Ver mi día</button></div>';
+  }
+  function goalCard() {
+    if (!S.arm) return "";
+    var G = S.goal;
+    if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
+    var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
+    var cur = ch.filter(function (c) { return c.s === st; }).slice(0, 3), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && c.patch; });
+    var pro = isProU();
+    var h = '<div class="card goalcard"><span class="small muted">Tu objetivo · semana ' + st + ' de 3</span><b style="display:block;font-size:19px;margin:2px 0 8px">' + esc(names || "Mi objetivo") + "</b>";
+    h += cur.map(function (c) { var ap = G.ap && G.ap[c.id], p = !!c.patch; return '<div class="row" style="align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line)"><span style="flex:1"><b class="small">' + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></span>" + (p ? (ap ? '<span class="tag ok">En tu día</span>' : pro ? '<button class="btn sage sm" data-gapply="' + c.id + '">Sumar</button>' : "") : "") + "</div>"; }).join("");
+    if (pend.length && !pro) h += '<button class="btn ghost block" data-plan="vida" style="margin-top:10px">Con Pro tu día se ajusta cada semana</button>';
+    h += '<button class="linkbtn small" data-open="test" style="margin-top:8px">Cambiar mi objetivo</button></div>';
+    return h;
+  }
+  function applyGoalChange(id) {
+    if (!isProU()) { return; }
+    var c = goalChanges().filter(function (x) { return x.id === id; })[0]; if (!c || !c.patch || !S.arm || !S.arm.ans) return;
+    var a = Object.assign({}, S.arm.ans); c.patch(a); S.arm.ans = a; S.goal.ap = S.goal.ap || {}; S.goal.ap[id] = 1; save(); render();
+  }
+  function openTest() { return openGoals(); }
+  function openTestOld() {
     close(); var old = $("#full"); if (old) old.remove();
     tst = { i: 0, a: {} }; var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawTest();
   }
@@ -840,12 +1049,14 @@
     el.innerHTML = '<header><b>Tus planes</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Esto es lo que te conviene</h2><p class="muted small">Según lo que respondiste. Los de vida diaria vienen incluidos en Vida diaria Pro.</p>' +
       rec.map(function (r) { var pl = planOf(r.id); return '<div class="card"><div class="row"><span class="shape">' + SHAPES[r.id] + "</span><div><b>" + esc(pl.n) + '</b><span class="small muted" style="display:block">' + esc(r.why) + '</span></div></div><button class="btn sage block" data-tstplan="' + r.id + '" style="margin-top:10px">' + (pl.live ? "Ver plan" : "Avisarme cuando salga") + "</button></div>"; }).join("") + '</div><div class="dfoot"><button class="btn ghost block" data-tstclose>Cerrar</button></div>';
   }
-  function testCard() {
+  function testCard() { return goalCard(); }
+  function testCardOld() {
     if (!S.arm) return "";
     if (S.test) return '<div class="card" style="margin-top:12px"><b>Tus planes</b><p class="small muted" style="margin:6px 0 10px">' + recIds().map(function (id) { return planOf(id).n; }).join(", ") + '</p><button class="btn sage sm" data-tab="planes">Ver mis planes</button></div>';
     return '<div class="card testcta" style="margin-top:12px"><b>¿Qué plan te conviene?</b><p class="small muted" style="margin:6px 0 10px">Test de 1 minuto, gratis.</p><button class="btn sage sm" data-open="test">Hacer el test</button></div>';
   }
-  function promptTest() {
+  function promptTest() { return openGoals(); }
+  function promptTestOld() {
     sheet('<h2 style="font-size:24px">¡Tu día está armado!</h2><p class="muted">Lo vas a ver siempre en Hoy. ¿Querés saber qué plan te conviene para sumarle? Es un test de 1 minuto, gratis.</p><button class="btn sage block" data-open="test">Hacer el test</button><button class="btn ghost block" data-close style="margin-top:8px">Ahora no</button>');
   }
 
@@ -1211,7 +1422,7 @@
     if (S.arm && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, tildarlo y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
-    window.FormaDia.open({ ans: pre, onSave: function (a) { var first = !S.arm; if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.test) setTimeout(promptTest, 350); } });
+    window.FormaDia.open({ ans: pre, onSave: function (a) { var first = !S.arm; if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
@@ -1756,6 +1967,13 @@
     if (d.xtok !== undefined) { var sel = $("#xts"); if (!sel || !xtd.id || !isProU()) return; S.xt = S.xt || []; S.xt.push({ id: "x" + Date.now(), tool: xtd.id, s: +sel.value, d: xtd.w === "hoy" ? today() : "", n: xtd.n ? 1 : 0, at: today() }); save(); close(); render(); return; }
     if (d.xtdel) { var xi = (S.xt || []).filter(function (x) { return x.id === d.xtdel; })[0]; if (xi) { xi.del = true; xi.at = today(); save(); } close(); render(); return; }
     if (d.open === "test") return openTest();
+    if (d.gexit !== undefined) { gs = null; var gf = $("#full"); if (gf) gf.remove(); return; }
+    if (d.gpick) { if (!gs) return; var go0 = $("#gother"); if (go0) gs.other = go0.value; var gix = gs.sel.indexOf(d.gpick); if (gix >= 0) gs.sel.splice(gix, 1); else { if (gs.sel.length >= 2) gs.sel.shift(); gs.sel.push(d.gpick); } var gfe = $("#full"), gsc = gfe ? gfe.scrollTop : 0, gbd = $("#full .dbody"), gsb = gbd ? gbd.scrollTop : 0; drawGoals(); gfe = $("#full"); if (gfe) gfe.scrollTop = gsc; gbd = $("#full .dbody"); if (gbd) gbd.scrollTop = gsb; return; }
+    if (d.gnext !== undefined) { if (!gs || !gs.sel.length) return; var go1 = $("#gother"); if (go1) gs.other = go1.value; if (gLive().length) { gs.st = "q"; gs.gi = 0; gs.qi = 0; drawGoals(); } else gFinish(); return; }
+    if (d.gopt !== undefined) { if (gs) gAnswer(+d.gopt); return; }
+    if (d.gback !== undefined) { if (gs) gBack(); return; }
+    if (d.gdone !== undefined) { var gf2 = $("#full"); if (gf2) gf2.remove(); tab = "hoy"; render(); window.scrollTo(0, 0); return; }
+    if (d.gapply) { applyGoalChange(d.gapply); return; }
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
     if (d.tstpick !== undefined) { if (tst) { tst.a[testVisible(tst.a)[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
     if (d.tstback !== undefined) { if (tst && tst.i) { tst.i--; drawTest(); } return; }

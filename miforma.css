@@ -347,3 +347,6 @@ textarea.pgin{resize:vertical;min-height:64px}
 .welk{margin:6px 0 0;font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-d,#4f7a60)}
 .welk+.hello{margin-top:4px}
 .freepill{align-self:flex-start;display:inline-block;background:var(--lima);color:#111;font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:5px 14px;margin:2px 0 6px}
+.gpick{width:100%;text-align:left}
+.gpick[aria-pressed=true]{outline:3px solid var(--lima);outline-offset:-3px}
+.goalcard{border-left:6px solid var(--lima)}
