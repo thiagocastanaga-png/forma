@@ -340,3 +340,6 @@ textarea.pgin{resize:vertical;min-height:64px}
 .remsw{width:42px;height:24px;border-radius:12px;background:rgba(128,128,128,.35);position:relative;flex:none;transition:background .2s}
 .remsw i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s}
 .remrow[aria-pressed=true] .remsw{background:var(--sage)}.remrow[aria-pressed=true] .remsw i{left:21px}
+
+#fbtab{position:fixed;right:0;top:46%;z-index:40;writing-mode:vertical-rl;transform:rotate(180deg);background:var(--lima,#C6F432);color:#111;border:0;border-radius:0 10px 10px 0;padding:14px 7px;font:600 12px/1 inherit;font-family:inherit;letter-spacing:.04em;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#sheet textarea{font-family:inherit}

@@ -1,9 +1,10 @@
 (function () {
   "use strict";
   var CFG = window.FORMA || {};
-  var KEY = "forma_app_v1", NUEVO = false, FLUJO = false;
+  var KEY = "forma_app_v1", NUEVO = false, FLUJO = false, PRUEBA = false, PFREE = false;
   // ?nuevo=1 → cuenta de prueba nueva, aislada de tus datos reales (con &pro=1 desbloquea Pro)
-  try { var qn = new URLSearchParams(location.search); if (qn.get("nuevo") === "1" || qn.get("flujo") === "1") { NUEVO = true; FLUJO = qn.get("flujo") === "1"; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
+  try { var qp = new URLSearchParams(location.search); if (qp.get("prueba") === "1") { NUEVO = true; FLUJO = true; PRUEBA = true; PFREE = qp.get("free") === "1"; KEY = PFREE ? "forma_app_prueba_free" : "forma_app_prueba"; } } catch (e) {}
+  try { var qn = new URLSearchParams(location.search); if (!PRUEBA && qn.get("nuevo") === "1" || qn.get("flujo") === "1") { NUEVO = true; FLUJO = qn.get("flujo") === "1"; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
   var FREE_HABITS = 0;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -137,6 +138,7 @@
     if (r.profile && r.guest === undefined) r.guest = true;
     return r;
   }
+  if (PRUEBA) { S.demo = !PFREE; }
   var user = null;          // usuario de Supabase (si inició sesión)
   var acct = { username: "" };
   var sync = { state: "off", t: 0 }; // off | ok | pending | error
@@ -300,7 +302,7 @@
   // ---------- render ----------
   var mode = "register";   // register | login | forgot | recovery
   var draft = { name: "", username: "", email: "", areas: [], sports: [], news: true, terms: false };
-  function needAuth() { return !user && !S.guest && !S.demo; }
+  function needAuth() { return !user && !S.guest && (PRUEBA || !S.demo); }
   function render() {
     if (mode === "recovery") return renderRecovery();
     if (needAuth()) return renderAuth();
@@ -451,7 +453,7 @@
     var nm = (S.profile && S.profile.name) || "";
     return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1><p>Forma te ayuda a darle forma a tu día: que sepas qué hacer y a qué hora, sin pensarlo de más. Empezamos por lo más importante.</p>' +
       '<ol class="armsteps"><li><b>Contanos cómo es tu día</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Te lo armamos</b><span>En bloques con horarios, listo para usar.</span></li><li><b>Descubrí qué plan te conviene</b><span>Un test corto, opcional.</span></li></ol>' +
-      '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">Es gratis y tu día queda siempre acá, en Hoy.</p></div>';
+      '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
   function vHoy() {
     if (!S.arm) return vArmar();
@@ -585,6 +587,7 @@
       '<div class="card"><b>Tus planes</b><div style="margin-top:8px">' + PLANS.filter(function (x) { return x.live; }).map(function (x) {
         return '<div class="row between" style="padding:6px 0"><span class="row"><span class="shape" style="width:26px;height:26px">' + SHAPES[x.id] + "</span>" + esc(x.n) + '</span><span class="tag' + (isPro(x.id) ? " ok" : "") + '">' + (isPro(x.id) ? "Pro" : "Gratis") + "</span></div>";
       }).join("") + "</div></div>";
+    if (PRUEBA) html += '<div class="card"><b>Versión de prueba ' + esc(BUILD) + '</b><p class="small muted" style="margin:6px 0 10px">Tus datos quedan solo en este celular. Usá el botón Comentarios (a la derecha) cuando algo no te cierre.</p><button class="btn ghost sm" data-fbreset>Empezar de cero</button></div>';
     html += '<div class="card stack"><b>Tu cuenta</b>' +
       (user ? '<div class="small muted">' + esc(user.email || "") + " · " + esc(syncTxt) + "</div>" : '<p class="small muted" style="margin:0">Estás usando la app sin cuenta: tus datos están solo en este dispositivo y no podés guardar compras.</p><button class="btn sage block" id="mkacct">Crear cuenta o iniciar sesión</button>') +
       '<label class="field"><span>Nombre</span><input id="p-name" value="' + esc(p.name) + '" maxlength="40"></label>' +
@@ -784,6 +787,22 @@
       '<div class="card dark"><b>Quedan 13 pasos más</b><p class="small" style="margin:6px 0 12px;opacity:.9">' + (planOf(id) && planOf(id).inc ? "Con Vida diaria Pro seguís" : "Con este plan seguís") + ' los 14 pasos, medís tu antes y después y se suma a tu constancia.</p><button class="btn sage" data-plan="' + (planOf(id) && planOf(id).inc ? "vida" : id) + '">' + (planOf(id) && planOf(id).inc ? "Ver Vida diaria Pro" : "Ver el plan") + '</button></div>' +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
+  // ---------- versión de prueba: comentarios ----------
+  var BUILD = (function () { try { var m = ((document.querySelector('script[src*="miforma.js"]') || {}).src || "").match(/v=(\d+)/); return m ? m[1] : "?"; } catch (e) { return "?"; } })();
+  var fbCat = "";
+  function openFeedback() {
+    var cats = ["Algo no funciona", "No se entiende", "Una idea", "Me gustó"];
+    sheet('<h2 style="font-size:22px">Tu comentario</h2><p class="muted small">Contame qué te pasó o qué pensás. Todo sirve, lo bueno y lo malo.</p><div class="chips" style="margin:8px 0">' + cats.map(function (c) { return '<button class="chip" data-fbc="' + esc(c) + '" aria-pressed="' + (fbCat === c) + '">' + esc(c) + "</button>"; }).join("") + '</div><textarea id="fbt" rows="5" maxlength="800" placeholder="Escribí acá..." style="width:100%;' + fieldCss() + '"></textarea><button class="btn sage block" data-fbsend style="margin-top:12px">Enviar</button><p class="small muted" style="margin:8px 0 0">Se abre para que lo mandes por WhatsApp o donde quieras. Ya incluye en qué pantalla estabas.</p><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+  }
+  function sendFeedback() {
+    var t = ($("#fbt") || {}).value || ""; if (!t.trim()) return;
+    var txt = "Comentario sobre Forma (" + (fbCat || "general") + "):\n" + t.trim() + "\n\n— versión " + BUILD + " · " + (PFREE ? "gratis" : "completa") + " · pantalla: " + tab + " · " + window.innerWidth + "x" + window.innerHeight;
+    function done(m) { sheet('<h2 style="font-size:22px">' + m + '</h2><button class="btn block" data-close>Listo</button>'); }
+    if (navigator.share) navigator.share({ text: txt }).then(function () { done("¡Gracias!"); }, function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { done("Copiado. Pegalo en un mensaje para mandármelo."); }, function () { done("No se pudo copiar."); });
+  }
+  if (PRUEBA) { document.addEventListener("DOMContentLoaded", function () { var b = document.createElement("button"); b.id = "fbtab"; b.textContent = "Comentarios"; b.setAttribute("data-fbopen", ""); document.body.appendChild(b); }); if (document.readyState !== "loading") { var b0 = document.createElement("button"); b0.id = "fbtab"; b0.textContent = "Comentarios"; b0.setAttribute("data-fbopen", ""); document.body.appendChild(b0); } }
+
   // ---------- test de planes ----------
   var TESTQ = [
     { k: "occ", q: "¿A qué te dedicás hoy?", o: ["Estudio", "Trabajo", "Estudio y trabajo", "Otra cosa"], w: [{}, {}, {}, {}] },
@@ -1084,7 +1103,7 @@
     readAuthDraft();
     var name = draft.name.trim(), uname = draft.username.trim().replace(/^@/, "").toLowerCase(), email = draft.email.trim(), pass = val("a-pass");
     if (!name) return setMsg("Escribí tu nombre.");
-    if (FLUJO) { S.profile = { name: name, email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = new URLSearchParams(location.search).get("pro") === "1"; save(); tab = "hoy"; render(); return; }
+    if (FLUJO) { S.profile = { name: name, email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = PRUEBA ? !PFREE : new URLSearchParams(location.search).get("pro") === "1"; save(); tab = "hoy"; render(); return; }
     if (!/^[a-z0-9_]{3,20}$/.test(uname)) return setMsg("El usuario tiene que tener de 3 a 20 caracteres: letras sin tilde, números o guion bajo.");
     if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg("Revisá el email.");
     if (pass.length < 8) return setMsg("La contraseña tiene que tener al menos 8 caracteres.");
@@ -1731,6 +1750,10 @@
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
     if (d.prod) return openProduct(d.prod);
+    if (d.fbopen !== undefined) return openFeedback();
+    if (d.fbc) { fbCat = d.fbc; [].slice.call(document.querySelectorAll("#sheet [data-fbc]")).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.fbc === fbCat ? "true" : "false"); }); return; }
+    if (d.fbsend !== undefined) return sendFeedback();
+    if (d.fbreset !== undefined) { if (confirm("Se borra todo lo que cargaste y empezás de cero. ¿Seguro?")) { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); } return; }
     if (d.remopen !== undefined) return openRem();
     if (d.remt) { var rr = remSet(), kk = d.remt; rr[kk] = !rr[kk]; S.rem = { a: rr.a ? 1 : 0, p: rr.p ? 1 : 0, c: rr.c ? 1 : 0, b: rr.b ? 1 : 0 }; save(); openRem(); render(); return; }
     if (d.open === "tools") return openTools();
