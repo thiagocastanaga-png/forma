@@ -220,7 +220,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -244,6 +244,7 @@
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.dd = Object.assign({}, remote.dd || {}); Object.keys(local.dd || {}).forEach(function (k) { var r = out.dd[k], l = local.dd[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.dd[k] = l; });
     var xm = {}; (remote.xt || []).forEach(function (x) { xm[x.id] = x; }); (local.xt || []).forEach(function (x) { var r = xm[x.id]; if (!r || (x.at || "") >= (r.at || "")) xm[x.id] = x; }); out.xt = Object.keys(xm).map(function (k) { return xm[k]; });
+    out.rem = local.rem || remote.rem || null;
     out.cierreAt = local.cierreAt != null ? local.cierreAt : remote.cierreAt;
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
@@ -983,10 +984,10 @@
     return out;
   }
   function openXtAdd(id) {
-    var T = toolById(id); if (!T || !isProU()) return; var F = window.FormaDia, sl = xtSlots(T); xtd = { w: "hoy", id: id };
+    var T = toolById(id); if (!T || !isProU()) return; var F = window.FormaDia, sl = xtSlots(T); xtd = { w: "hoy", id: id, n: false };
     if (!sl.length) { sheet('<h2 style="font-size:22px">No hay un hueco libre</h2><p class="muted">Hoy no tenés ' + T.mins + " minutos libres seguidos en tu día. Podés cambiar tu día desde Mi semana y volver a intentarlo.</p>" + '<button class="btn ghost block" data-close>Cerrar</button>'); return; }
     sheet('<h2 style="font-size:22px">Agregar a mi día</h2><p class="muted small">' + esc(T.n) + " · reservamos " + T.mins + ' minutos en un horario libre. No se agrega solo: lo elegís vos.</p><label class="field"><span>¿A qué hora?</span><select id="xts" style="' + fieldCss() + '">' + sl.map(function (t) { return '<option value="' + t + '">' + F.fmt(t) + "</option>"; }).join("") + '</select></label>' +
-      '<div class="chips" style="margin:6px 0 14px"><button class="chip" data-xtw="hoy" aria-pressed="true">Solo hoy</button><button class="chip" data-xtw="todos" aria-pressed="false">Todos los días</button></div><p class="small muted" style="margin:0 0 10px">Si elegís todos los días, aparece los días en que ese horario esté libre.</p><button class="btn sage block" data-xtok>Agregar</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+      '<div class="chips" style="margin:6px 0 14px"><button class="chip" data-xtw="hoy" aria-pressed="true">Solo hoy</button><button class="chip" data-xtw="todos" aria-pressed="false">Todos los días</button></div><p class="small muted" style="margin:0 0 10px">Si elegís todos los días, aparece los días en que ese horario esté libre.</p><button class="chip" data-xtn aria-pressed="false" style="margin-bottom:12px">Avisarme a esa hora</button><button class="btn sage block" data-xtok>Agregar</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
   }
   function xtApply(bl, dt) {
     var k = today(dt), xs = (S.xt || []).filter(function (x) { return !x.del && (!x.d || x.d === k); }).sort(function (a, b) { return a.s - b.s; });
@@ -1619,76 +1620,90 @@
       '<button class="btn block" id="hsave" data-id="' + h.id + '">Guardar</button>' +
       '<div class="grid2" style="margin-top:10px"><button class="btn ghost" id="hdel" data-id="' + h.id + '">Borrar hábito</button><button class="btn ghost" data-close>Cerrar</button></div>');
   }
+  // ---------- recordatorios: pocos y con sentido ----------
+  // Por defecto, como máximo 3 por día: arranque, paso del programa (si hay) y cierre.
+  function remSet() { var r = S.rem || {}; return { a: r.a !== 0, p: r.p !== 0, c: r.c !== 0, b: r.b === 1 }; }
+  function remList() {
+    var R = remSet(), F = window.FormaDia, bl = armBlocks(), out = [], pid = pgCur(), pit = pid && pgItem(pid);
+    if (!bl.length || !F) return out;
+    if (R.a) out.push({ k: "a", t: bl[0].s + 30, n: "Tu día está armado", body: "" });
+    if (R.p && pit && pit.at && pgCount(pid) < 14) out.push({ k: "p", t: (function (q) { return +q[0] * 60 + +q[1]; })(pit.at.split(":")), n: "Tu paso de «" + pgOf(pid).n + "»", body: "Tu paso de hoy de «" + pgOf(pid).n + "» te espera. Son unos minutos." });
+    if (R.c) out.push({ k: "c", t: tmThreshold(), n: "Cerrar tu día", body: "Es hora de cerrar tu día: mirá cómo te fue y dejá armado mañana." });
+    return out;
+  }
+  function remSummary() {
+    var L = remList().map(function (x) { return window.FormaDia.fmt(x.t % 1440) + " " + x.n.toLowerCase(); }), R = remSet(), extra = R.b ? " + un aviso por cada momento" : "";
+    return L.length ? L.join(" · ") + extra : (R.b ? "Un aviso por cada momento de tu día" : "Sin avisos");
+  }
   function reminderCard() {
     if (!armBlocks().length && !S.habits.some(function (h) { return !h.del && h.time; })) return "";
     if (!(S.demo || isPro("vida"))) return "";
-    var perm = window.Notification ? Notification.permission : "unsupported";
-    return '<div class="card" style="margin-top:12px"><b>Recordatorios</b><p class="small muted" style="margin:6px 0 10px">Para que te avisen aunque no tengas la app abierta, pasá tus horarios al calendario del celular.</p>' +
+    var perm = window.Notification ? Notification.permission : "unsupported", n = remList().length + (remSet().b ? armBlocks().filter(armCheckable).length : 0);
+    return '<div class="card" style="margin-top:12px"><div class="row between"><b>Recordatorios</b><button class="linkbtn small" data-remopen>Cambiar</button></div><p class="small muted" style="margin:6px 0 10px">' + (n <= 3 ? "Pocos, a propósito: " : "") + esc(remSummary()) + ".</p>" +
       '<button class="btn sage block" id="ics">Agregar a mi calendario</button>' +
       (perm === "default" ? '<button class="btn ghost block" id="notif" style="margin-top:8px">Avisarme con la app abierta</button>' : perm === "granted" ? '<p class="small muted" style="margin:8px 0 0">Avisos con la app abierta: activados.</p>' : "") + "</div>";
+  }
+  function openRem() {
+    var R = remSet(), F = window.FormaDia, pid = pgCur(), nb = armBlocks().filter(armCheckable).length;
+    function row(k, on, t, d) { return '<button class="remrow" data-remt="' + k + '" aria-pressed="' + on + '"><span style="flex:1;text-align:left"><b>' + esc(t) + '</b><small class="muted" style="display:block">' + esc(d) + '</small></span><span class="remsw"><i></i></span></button>'; }
+    sheet('<h2 style="font-size:22px">Tus recordatorios</h2><p class="muted small">Pocos, para que los mires. Si te avisan por todo, terminás ignorándolos.</p>' +
+      row("a", R.a, "Arranque del día", "Un aviso a la mañana, 30 minutos después de despertarte.") +
+      row("p", R.p, "Paso de tu programa", pid ? "Un aviso por día a la hora que elegiste, mientras dure." : "Se activa cuando empezás un programa de 14 días.") +
+      row("c", R.c, "Cierre del día", "A las " + F.fmt(tmThreshold()) + ", la hora que elegiste. También para dejar armado mañana.") +
+      row("b", R.b, "Un aviso por cada momento", nb + " avisos por día. Puede ser mucho: activalo solo si lo necesitás.") +
+      '<p class="small muted" style="margin:10px 0 0">Después de cambiar algo, volvé a tocar "Agregar a mi calendario": el calendario no se actualiza solo, y conviene borrar el evento anterior.</p><button class="btn ghost block" data-close style="margin-top:12px">Listo</button>');
   }
   function enableNotif() {
     if (!window.Notification) { alert("Tu navegador no permite avisos. Usá el calendario."); return; }
     Notification.requestPermission().then(function () { render(); });
   }
-  var notified = {};
+  var notified = {}, notifN = {};
+  function pushNote(k, body) {
+    var t = today(); if (notified[k]) return; notified[k] = 1; notifN[t] = (notifN[t] || 0) + 1; if (notifN[t] > 4) return;
+    var o = { body: body, icon: "icon-192.png", tag: k };
+    if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o); }, function () { new Notification("Forma", o); });
+    else new Notification("Forma", o);
+  }
   function checkReminders() {
     if (!window.Notification || Notification.permission !== "granted" || !S.profile || !(S.demo || isPro("vida"))) return;
-    var hm = nowHM(), t = today();
-    armBlocks().filter(armCheckable).forEach(function (b) {
-      var k = "arm" + armKey(b) + t, bt = window.FormaDia.fmt(b.s);
-      if (bt <= hm && !armDone(b) && !notified[k] && bt >= minusMin(10)) {
-        notified[k] = 1; var o2 = { body: "Es tu momento: " + b.label + " (" + bt + "). Sin apuro, cuando puedas.", icon: "icon-192.png", tag: k };
-        if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o2); }, function () { new Notification("Forma", o2); });
-        else new Notification("Forma", o2);
-      }
+    var hm = nowHM(), t = today(), F = window.FormaDia; if (!F) return;
+    remList().forEach(function (x) {
+      var tm = F.fmt(x.t % 1440), k = "r" + x.k + t; if (!(tm <= hm && tm >= minusMin(10))) return;
+      if (x.k === "a") { var pr = S.tm && S.tm[t]; pushNote(k, pr && pr.t ? "Tu día está armado. Tu prioridad de hoy: " + pr.t : "Tu día está armado. Mirá qué viene primero."); }
+      else if (x.k === "p") { if (!pgToday(pgCur())) pushNote(k, x.body); }
+      else if (x.k === "c") { if (!(S.cierre && S.cierre[t])) pushNote(k, x.body); }
     });
-    if (S.arm && S.arm.ans) {
-      var ttm = window.FormaDia.fmt(tmThreshold()), ktm = "tm" + t;
-      if (ttm <= hm && ttm >= minusMin(10) && !notified[ktm] && !(S.tm && S.tm[today(tmDate())])) {
-        notified[ktm] = 1; var o3 = { body: "¿Dejamos armado mañana? Son 2 minutos y mañana arrancás tranquilo.", icon: "icon-192.png", tag: ktm };
-        if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o3); }, function () { new Notification("Forma", o3); });
-        else new Notification("Forma", o3);
-      }
-    }
-    var pid = pgCur(), pit = pid && pgItem(pid);
-    if (pit && pit.at && pit.at <= hm && pit.at >= minusMin(10) && !pgToday(pid) && pgCount(pid) < 14 && !notified["pg" + t]) {
-      notified["pg" + t] = 1; var o4 = { body: "Tu paso de hoy de «" + pgOf(pid).n + "» te espera. Son unos minutos.", icon: "icon-192.png", tag: "pg" + t };
-      if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o4); }, function () { new Notification("Forma", o4); });
-      else new Notification("Forma", o4);
-    }
+    if (remSet().b) armBlocks().filter(armCheckable).forEach(function (b) {
+      var k = "arm" + armKey(b) + t, bt = F.fmt(b.s);
+      if (bt <= hm && !armDone(b) && bt >= minusMin(10)) pushNote(k, "Es tu momento: " + b.label + " (" + bt + "). Sin apuro, cuando puedas.");
+    });
+    (S.xt || []).filter(function (x) { return x.n && !x.del && (!x.d || x.d === t); }).forEach(function (x) {
+      var T = toolById(x.tool), tm = F.fmt(x.s % 1440), k = "xt" + x.id + t; if (T && tm <= hm && tm >= minusMin(10)) pushNote(k, "Es tu momento: " + T.n + " (" + tm + ").");
+    });
     activeHabits().forEach(function (h) {
-      var k = h.id + t;
-      if (!h.paused && h.time && h.time <= hm && !h.days[t] && !notified[k] && h.time >= minusMin(10)) {
-        notified[k] = 1;
-        var opts = { body: "Es tu momento: " + h.name + " (" + h.time + "). Sin apuro, cuando puedas.", icon: "icon-192.png", tag: k };
-        if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", opts); }, function () { new Notification("Forma", opts); });
-        else new Notification("Forma", opts);
-      }
+      var k = h.id + t; if (!h.paused && h.time && h.time <= hm && !h.days[t] && h.time >= minusMin(10)) pushNote(k, "Es tu momento: " + h.name + " (" + h.time + "). Sin apuro, cuando puedas.");
     });
   }
   function minusMin(m) { var d = new Date(Date.now() - m * 60000); return d.getDate() === new Date().getDate() ? pad(d.getHours()) + ":" + pad(d.getMinutes()) : "00:00"; }
   function downloadIcs() {
-    var hs = activeHabits().filter(function (h) { return h.time; }), ab = armBlocks().filter(armCheckable);
-    if (!hs.length && !ab.length) return;
+    var F = window.FormaDia, R = remSet(), rl = remList(), hs = activeHabits().filter(function (h) { return h.time; }), ab = R.b ? armBlocks().filter(armCheckable) : [], xs = (S.xt || []).filter(function (x) { return x.n && !x.del; });
+    if (!rl.length && !hs.length && !ab.length && !xs.length) { alert("No hay recordatorios activados."); return; }
     var d = new Date(), day = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+    function ev(uid, dd, hhmm, dur, rule, name, desc) {
+      return ["BEGIN:VEVENT", "UID:" + uid + "@formargentina.com", "DTSTAMP:" + dd + "T000000Z", "DTSTART:" + dd + "T" + hhmm, "DURATION:PT" + dur + "M"].concat(rule ? ["RRULE:" + rule] : [], ["SUMMARY:" + name, "DESCRIPTION:" + desc, "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + name, "END:VALARM", "END:VEVENT"]);
+    }
+    function cl(x) { return x.replace(/[,;\\\n]/g, " "); }
+    function hh(m) { m = m % 1440; return pad(Math.floor(m / 60)) + pad(m % 60) + "00"; }
     var L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Forma//ES", "CALSCALE:GREGORIAN"];
-    hs.forEach(function (h) {
-      var hh = h.time.replace(":", "") + "00";
-      L.push("BEGIN:VEVENT", "UID:" + h.id + "@formargentina.com", "DTSTAMP:" + day + "T000000Z", "DTSTART:" + day + "T" + hh, "DURATION:PT15M", "RRULE:FREQ=DAILY",
-        "SUMMARY:" + h.name.replace(/[,;\\\n]/g, " "), "DESCRIPTION:Recordatorio de Forma. Sin apuro, cuando puedas.",
-        "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + h.name.replace(/[,;\\\n]/g, " "), "END:VALARM", "END:VEVENT");
-    });
-    var CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"], grp = [], hasWk = Object.keys(S.wk || {}).some(function (k) { return S.wk[k] && S.wk[k].ans; });
-    if (!hasWk) grp.push({ bl: ab, day: day, rule: "FREQ=DAILY", id: "x" });
-    else for (var w = 0; w < 7; w++) { var dd = new Date(); dd.setDate(dd.getDate() + ((w - dd.getDay() + 7) % 7)); grp.push({ bl: armBlocksFor(dd).filter(armCheckable), day: dd.getFullYear() + pad(dd.getMonth() + 1) + pad(dd.getDate()), rule: "FREQ=WEEKLY;BYDAY=" + CODES[dd.getDay()], id: "w" + w }); }
-    grp.forEach(function (g) {
-      g.bl.forEach(function (b, i) {
-        var tm = window.FormaDia.fmt(b.s).replace(":", "") + "00", nm = b.label.replace(/[,;\\\n]/g, " ");
-        L.push("BEGIN:VEVENT", "UID:arm" + g.id + i + "-" + b.s + "@formargentina.com", "DTSTAMP:" + g.day + "T000000Z", "DTSTART:" + g.day + "T" + tm, "DURATION:PT" + Math.max(5, b.e - b.s) + "M", "RRULE:" + g.rule,
-          "SUMMARY:" + nm, "DESCRIPTION:Tu día en Forma. Sin apuro, cuando puedas.", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:" + nm, "END:VALARM", "END:VEVENT");
-      });
-    });
+    rl.forEach(function (x) { L = L.concat(ev("rem" + x.k, day, hh(x.t), 5, "FREQ=DAILY", cl(x.k === "a" ? "Tu día en Forma" : x.n), x.k === "c" ? "Cerrá tu día y dejá armado mañana." : "Recordatorio de Forma.")); });
+    hs.forEach(function (h) { L = L.concat(ev(h.id, day, h.time.replace(":", "") + "00", 15, "FREQ=DAILY", cl(h.name), "Recordatorio de Forma. Sin apuro, cuando puedas.")); });
+    xs.forEach(function (x) { var T = toolById(x.tool); if (!T) return; L = L.concat(ev(x.id, x.d ? x.d.replace(/-/g, "") : day, hh(x.s), T.mins, x.d ? "" : "FREQ=DAILY", cl(T.n), "Tu herramienta en Forma.")); });
+    if (ab.length) {
+      var CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"], grp = [], hasWk = Object.keys(S.wk || {}).some(function (k) { return S.wk[k] && S.wk[k].ans; });
+      if (!hasWk) grp.push({ bl: ab, day: day, rule: "FREQ=DAILY", id: "x" });
+      else for (var w = 0; w < 7; w++) { var dd = new Date(); dd.setDate(dd.getDate() + ((w - dd.getDay() + 7) % 7)); grp.push({ bl: armBlocksFor(dd).filter(armCheckable), day: dd.getFullYear() + pad(dd.getMonth() + 1) + pad(dd.getDate()), rule: "FREQ=WEEKLY;BYDAY=" + CODES[dd.getDay()], id: "w" + w }); }
+      grp.forEach(function (g) { g.bl.forEach(function (b, i) { if (b.xt) return; L = L.concat(ev("arm" + g.id + i + "-" + b.s, g.day, hh(b.s), Math.max(5, b.e - b.s), g.rule, cl(b.label), "Tu día en Forma. Sin apuro, cuando puedas.")); }); });
+    }
     L.push("END:VCALENDAR");
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([L.join("\r\n")], { type: "text/calendar" })); a.download = "forma-recordatorios.ics"; a.click();
   }
@@ -1716,11 +1731,14 @@
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
     if (d.prod) return openProduct(d.prod);
+    if (d.remopen !== undefined) return openRem();
+    if (d.remt) { var rr = remSet(), kk = d.remt; rr[kk] = !rr[kk]; S.rem = { a: rr.a ? 1 : 0, p: rr.p ? 1 : 0, c: rr.c ? 1 : 0, b: rr.b ? 1 : 0 }; save(); openRem(); render(); return; }
     if (d.open === "tools") return openTools();
     if (d.tl) return openTool(d.tl);
     if (d.xtadd) return openXtAdd(d.xtadd);
+    if (d.xtn !== undefined) { xtd.n = !xtd.n; t.setAttribute("aria-pressed", xtd.n ? "true" : "false"); return; }
     if (d.xtw) { xtd.w = d.xtw; [].slice.call(document.querySelectorAll("#sheet [data-xtw]")).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.xtw === d.xtw ? "true" : "false"); }); return; }
-    if (d.xtok !== undefined) { var sel = $("#xts"); if (!sel || !xtd.id || !isProU()) return; S.xt = S.xt || []; S.xt.push({ id: "x" + Date.now(), tool: xtd.id, s: +sel.value, d: xtd.w === "hoy" ? today() : "", at: today() }); save(); close(); render(); return; }
+    if (d.xtok !== undefined) { var sel = $("#xts"); if (!sel || !xtd.id || !isProU()) return; S.xt = S.xt || []; S.xt.push({ id: "x" + Date.now(), tool: xtd.id, s: +sel.value, d: xtd.w === "hoy" ? today() : "", n: xtd.n ? 1 : 0, at: today() }); save(); close(); render(); return; }
     if (d.xtdel) { var xi = (S.xt || []).filter(function (x) { return x.id === d.xtdel; })[0]; if (xi) { xi.del = true; xi.at = today(); save(); } close(); render(); return; }
     if (d.open === "test") return openTest();
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
