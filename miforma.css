@@ -350,3 +350,6 @@ textarea.pgin{resize:vertical;min-height:64px}
 .gpick{width:100%;text-align:left}
 .gpick[aria-pressed=true]{outline:3px solid var(--lima);outline-offset:-3px}
 .goalcard{border-left:6px solid var(--lima)}
+
+.top{padding-top:calc(16px + env(safe-area-inset-top))}
+.full>header{padding-top:calc(10px + env(safe-area-inset-top))}

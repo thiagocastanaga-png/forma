@@ -5,6 +5,7 @@
   // ?nuevo=1 → cuenta de prueba nueva, aislada de tus datos reales (con &pro=1 desbloquea Pro)
   try { var qp = new URLSearchParams(location.search); if (qp.get("prueba") === "1") { NUEVO = true; FLUJO = true; PRUEBA = true; PFREE = qp.get("free") === "1"; KEY = PFREE ? "forma_app_prueba_free" : "forma_app_prueba"; } } catch (e) {}
   try { var qn = new URLSearchParams(location.search); if (!PRUEBA && qn.get("nuevo") === "1" || qn.get("flujo") === "1") { NUEVO = true; FLUJO = qn.get("flujo") === "1"; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
+  var NATIVE = false; try { NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) {}
   var FREE_HABITS = 0;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -599,8 +600,9 @@
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
+    if (NATIVE) link = "";
     if (link) h += '<a class="btn block" target="_blank" rel="noopener" href="' + esc(link) + '" style="margin-top:12px">Pagar con Mercado Pago</a><p class="small muted">Pagá con el mismo email de tu cuenta (' + esc(user && user.email || "") + ") para que se desbloquee solo.</p>";
-    if (CFG.paypal) h += '<a class="btn ghost block" target="_blank" rel="noopener" href="' + esc(CFG.paypal) + '" style="margin-top:8px">Pagar con PayPal</a>';
+    if (CFG.paypal && !NATIVE) h += '<a class="btn ghost block" target="_blank" rel="noopener" href="' + esc(CFG.paypal) + '" style="margin-top:8px">Pagar con PayPal</a>';
     if (!h) h = '<p class="small muted" style="margin-top:12px">Los pagos todavía no están abiertos. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email));
     return h;
   }
@@ -1891,10 +1893,10 @@
   function reminderCard() {
     if (!armBlocks().length && !S.habits.some(function (h) { return !h.del && h.time; })) return "";
     if (!(S.demo || isPro("vida"))) return "";
-    var perm = window.Notification ? Notification.permission : "unsupported", n = remList().length + (remSet().b ? armBlocks().filter(armCheckable).length : 0);
+    var perm = NATIVE ? (nativeOn() ? "granted" : "default") : window.Notification ? Notification.permission : "unsupported", n = remList().length + (remSet().b ? armBlocks().filter(armCheckable).length : 0);
     return '<div class="card" style="margin-top:12px"><div class="row between"><b>Recordatorios</b><button class="linkbtn small" data-remopen>Cambiar</button></div><p class="small muted" style="margin:6px 0 10px">' + (n <= 3 ? "Pocos, a propósito: " : "") + esc(remSummary()) + ".</p>" +
-      '<button class="btn sage block" id="ics">Agregar a mi calendario</button>' +
-      (perm === "default" ? '<button class="btn ghost block" id="notif" style="margin-top:8px">Avisarme con la app abierta</button>' : perm === "granted" ? '<p class="small muted" style="margin:8px 0 0">Avisos con la app abierta: activados.</p>' : "") + "</div>";
+      (NATIVE ? "" : '<button class="btn sage block" id="ics">Agregar a mi calendario</button>') +
+      (perm === "default" ? '<button class="btn sage block" id="notif" style="margin-top:8px">' + (NATIVE ? "Activar avisos en este celular" : "Avisarme con la app abierta") + "</button>" : perm === "granted" ? '<p class="small muted" style="margin:8px 0 0">' + (NATIVE ? "Avisos del celular: activados." : "Avisos con la app abierta: activados.") + "</p>" : "") + "</div>";
   }
   function openRem() {
     var R = remSet(), F = window.FormaDia, pid = pgCur(), nb = armBlocks().filter(armCheckable).length;
@@ -1906,7 +1908,20 @@
       row("b", R.b, "Un aviso por cada momento", nb + " avisos por día. Puede ser mucho: activalo solo si lo necesitás.") +
       '<p class="small muted" style="margin:10px 0 0">Después de cambiar algo, volvé a tocar "Agregar a mi calendario": el calendario no se actualiza solo, y conviene borrar el evento anterior.</p><button class="btn ghost block" data-close style="margin-top:12px">Listo</button>');
   }
+  function nativeLN() { return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications; }
+  function nativeOn() { try { return localStorage.getItem("forma_nat_notif") === "1"; } catch (e) { return false; } }
+  var natSig = "";
+  function nativeRemSync() {
+    var LN = nativeLN(); if (!LN || !nativeOn() || !S.profile || !(S.demo || isPro("vida"))) return;
+    var F = window.FormaDia; if (!F) return; var L = remList(); if (remSet().b) { /* por momento: no se programan nativamente para no saturar */ }
+    var sig = JSON.stringify(L.map(function (x) { return [x.k, x.t, x.body]; })); if (sig === natSig) return; natSig = sig;
+    LN.getPending().then(function (r) { return (r.notifications && r.notifications.length) ? LN.cancel({ notifications: r.notifications }) : null; }).then(function () {
+      var ns = L.map(function (x, i) { var m = x.t % 1440; return { id: 100 + i, title: "Forma", body: x.k === "a" ? "Tu día está armado. Mirá qué viene primero." : x.body, schedule: { on: { hour: Math.floor(m / 60), minute: m % 60 }, allowWhileIdle: true } }; });
+      if (ns.length) LN.schedule({ notifications: ns });
+    }).catch(function () {});
+  }
   function enableNotif() {
+    if (NATIVE) { var LN = nativeLN(); if (!LN) { alert("No se pudieron activar los avisos."); return; } LN.requestPermissions().then(function (r) { if (r.display === "granted") { try { localStorage.setItem("forma_nat_notif", "1"); } catch (e) {} natSig = ""; nativeRemSync(); } render(); }); return; }
     if (!window.Notification) { alert("Tu navegador no permite avisos. Usá el calendario."); return; }
     Notification.requestPermission().then(function () { render(); });
   }
@@ -1918,6 +1933,7 @@
     else new Notification("Forma", o);
   }
   function checkReminders() {
+    if (NATIVE) { nativeRemSync(); return; }
     if (!window.Notification || Notification.permission !== "granted" || !S.profile || !(S.demo || isPro("vida"))) return;
     var hm = nowHM(), t = today(), F = window.FormaDia; if (!F) return;
     remList().forEach(function (x) {
@@ -2175,5 +2191,5 @@
     sb.auth.onAuthStateChange(function (ev) { if (ev === "PASSWORD_RECOVERY") { mode = "recovery"; render(); } });
     sb.auth.getSession().then(function (r) { if (r && r.data && r.data.session && mode !== "recovery") return onSession(r.data.session); }).catch(function () {});
   }
-  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) { navigator.serviceWorker.register("sw.js").catch(function () {}); }
+  if (!NATIVE && "serviceWorker" in navigator && location.protocol.indexOf("http") === 0) { navigator.serviceWorker.register("sw.js").catch(function () {}); }
 })();
