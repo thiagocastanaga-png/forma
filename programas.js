@@ -120,6 +120,31 @@
         { t: "Cerrar el día en calma", a: "Antes de dormir, 10 minutos sin pantallas. Hacé el cierre guiado.", w: "Un cierre tranquilo cambia cómo arrancás mañana.", when: "pm", f: [AC("cierre", "Cierre del día guiado")] },
         { t: "Tu kit", a: "Elegí tus 3 herramientas favoritas. Ese es tu kit para cuando llegue la tensión.", w: "Tener un plan a mano hace que cuesten menos los días difíciles.", f: [LS("Mi kit", 3, "Una herramienta que me sirvió")] }
       ]
+    },
+    {
+      id: "estudio", n: "Estudiar mejor", tag: "Estudio", reminder: "17:00",
+      intro: "14 días para estudiar mejor y rendir más. Aprendés técnicas que funcionan de verdad, las practicás dentro de la app y registrás cuánto estudiás de forma efectiva.",
+      q: "¿Qué tan seguro te sentís con lo que estudiás?", lo: "Nada seguro", hi: "Muy seguro", better: "up",
+      note: "Esto es un apoyo de hábitos de estudio. Si la ansiedad antes de rendir te afecta mucho, hablalo con un profesional o con tu institución.",
+      log: [NU("Minutos de estudio efectivo hoy (sin celular)", "min", 0, 900)], logKeys: ["est"],
+      ml: "Estudio por día", up: true,
+      metric: function (v) { return +v.est; }, fmt: function (m) { return Math.round(m) + " min"; },
+      days: [
+        { t: "Mirá qué tenés por delante", a: "Anotá hasta 3 materias o exámenes que tenés que preparar. Todavía no cambies nada: primero ordenamos.", w: "Sin ver el panorama completo, se estudia lo que menos cuesta y no lo que más importa.", f: [LS("Materias o exámenes por delante", 3, "Materia o examen")] },
+        { t: "Fechas a la vista", a: "Escribí la fecha de cada examen o entrega. Después elegí cuál es el primero.", w: "Una fecha clara convierte \u00abtengo que estudiar\u00bb en un plan.", f: [LS("Examen o entrega y su fecha", 3, "Materia, día/mes"), T("¿Cuál es el primero y qué tema es lo más urgente?", 8, "Lo primero es…")] },
+        { t: "Un lugar y una hora", a: "Elegí un horario fijo y un lugar donde estudiar. Dejá el celular fuera de tu vista.", w: "Con lugar y hora fijos, arrancar no requiere decidir.", f: [TM("Mi horario fijo de estudio"), CK(["Elegí mi lugar de estudio", "Dejé el celular lejos, fuera de la vista", "Tengo a mano lo que necesito"])] },
+        { t: "25 minutos de foco", a: "Un bloque de 25 minutos con una sola materia. Cuando termina, anotá cuánto hiciste.", w: "Un tiempo corto y con final es más fácil de empezar y de sostener.", f: [AC("foco", "Bloque de foco guiado")] },
+        { t: "Recordar sin mirar", a: "Estudiá un tema 15 minutos. Después cerrá el material y escribí todo lo que te acuerdes.", w: "Intentar recordar fija mucho más que releer.", f: [T("Tema que estudié", 4, "Tema"), TR(900, "15 minutos estudiando"), LS("Lo que recuerdo sin mirar", 3, "Algo que recuerdo"), CH("¿Cuánto recordaste?", ["Poco", "Bastante", "Casi todo"])] },
+        { t: "Armá tus preguntas", a: "Escribí 5 preguntas que podrían tomarte sobre el tema de hoy. Respondelas sin mirar.", w: "Pensar como el que toma el examen te enseña qué importa.", f: [LS("Preguntas que podrían tomar", 5, "Una pregunta")] },
+        { t: "Repasá lo de hace dos días", a: "Repasá hoy, sin releer todo, el tema que viste hace dos días. Mirá cuánto se te quedó.", w: "Repasar justo cuando empezás a olvidar es lo que más rinde.", f: [T("¿Qué tema repasé?", 4, "Tema"), CH("¿Cuánto se me quedó?", ["Poco", "Bastante", "Casi todo"]), CK(["Repasé sin mirar primero", "Anoté lo que no recordé"])] },
+        { t: "Explicalo simple", a: "Explicá en 3 frases un tema como si se lo contaras a un amigo que no sabe nada.", w: "Si lo podés explicar simple, lo entendiste de verdad.", f: [T("Mi explicación en 3 frases", 40, "Se trata de…")] },
+        { t: "Mezclá temas", a: "Hacé dos bloques de 25 minutos con dos temas distintos, uno después del otro.", w: "Alternar temas cuesta más pero se aprende mejor.", f: [CK(["Bloque del tema A (25 min)", "Pausa de 5 minutos", "Bloque del tema B (25 min)"]), T("Temas que mezclé", 6, "A y B")] },
+        { t: "Un examen de práctica", a: "Resolvé ejercicios o un parcial anterior en 30 minutos, sin mirar el material.", w: "Practicar en condiciones de examen te saca los nervios y muestra tus huecos.", f: [TR(1800, "30 minutos de práctica"), LS("Lo que no supe resolver", 2, "Tema o ejercicio"), CH("¿Cómo te fue?", ["Mal", "Más o menos", "Bien"])] },
+        { t: "Pausas de verdad", a: "Entre bloques, hacé una pausa de 5 minutos: caminar o tomar agua, sin celular.", w: "Descansar bien es parte de estudiar bien.", f: [AC("foco", "Bloque de foco guiado"), CK(["Hice una pausa real sin celular", "Me levanté y me moví"])] },
+        { t: "Dormir antes de rendir", a: "Elegí a qué hora te acostás hoy. Dormir bien fija lo que estudiaste.", w: "El cerebro guarda lo aprendido mientras dormís.", when: "pm", f: [TM("¿A qué hora me acuesto hoy?"), CK(["Corté el estudio a tiempo", "Dejé todo listo para mañana"])] },
+        { t: "Qué te distrae", a: "Anotá lo que más te distrae al estudiar y qué vas a hacer para evitarlo.", w: "Es más fácil sacar la distracción que resistirla.", f: [LS("Lo que más me distrae", 3, "Una distracción"), T("Lo que voy a hacer para evitarlo", 10, "Voy a…")] },
+        { t: "Tu método", a: "Elegí las 3 técnicas que más te funcionaron. Ese es tu método para los próximos exámenes.", w: "Lo que te funciona a vos es lo que queda.", f: [LS("Mis 3 técnicas", 3, "Una técnica")] }
+      ]
     }
   ];
   var by = {}; L.forEach(function (p) { by[p.id] = p; });

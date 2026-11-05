@@ -19,7 +19,13 @@
     dormir: '<svg viewBox="0 0 44 44"><path d="M30 3 A20 20 0 1 0 41 31 A17 17 0 0 1 30 3 Z" fill="#4C7DFF"/></svg>',
     celular: '<svg viewBox="0 0 44 44"><rect x="10" y="3" width="24" height="38" rx="8" fill="#FF8A4C"/></svg>',
     arrancar: '<svg viewBox="0 0 44 44"><path d="M8 4 L40 22 L8 40 Z" fill="#FFC83D"/></svg>',
-    calma: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="16" fill="none" stroke="#B9A7F0" stroke-width="9"/></svg>'
+    calma: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="16" fill="none" stroke="#B9A7F0" stroke-width="9"/></svg>',
+    estudio: '<svg viewBox="0 0 44 44"><path d="M3 8 H20 V40 H3 Z M24 8 H41 V40 H24 Z" fill="#5FC4B0"/></svg>',
+    plata: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="#C6F432"/><rect x="19" y="10" width="6" height="24" fill="#111"/></svg>',
+    movimiento: '<svg viewBox="0 0 44 44"><path d="M4 36 L22 6 L40 36 Z" fill="#FF8A4C"/></svg>',
+    comer: '<svg viewBox="0 0 44 44"><path d="M22 40 A18 18 0 1 1 22 4 A18 18 0 0 1 22 40 Z" fill="#FFC83D"/><circle cx="22" cy="22" r="6" fill="#111"/></svg>',
+    laburo: '<svg viewBox="0 0 44 44"><rect x="4" y="12" width="36" height="26" rx="6" fill="#4C7DFF"/><rect x="15" y="4" width="14" height="8" rx="3" fill="#4C7DFF"/></svg>',
+    viajes: '<svg viewBox="0 0 44 44"><path d="M4 24 L40 6 L30 40 L22 26 Z" fill="#B9A7F0"/></svg>'
   };
   var AREAS = [
     ["cuerpo", "Cuerpo", "Energía, sueño, movimiento y comida"],
@@ -58,30 +64,38 @@
 
   // Planes: cada uno es como un "curso". Gratis para empezar, Pro para todo el plan.
   var PLANS = [
-    { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, price: "",
+    { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "",
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
       free: ["Tu día armado con 12 preguntas, fijo en la pantalla de Hoy", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
-      pros: ["Tildar tu día y seguir tu constancia semanal", "Cambiar tu día cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
-    { id: "dormir", n: "Dormir de verdad", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", price: "",
+      pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Cambiar tu día cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
+    { id: "dormir", n: "Dormir de verdad", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", inc: true, grp: "Vida diaria", price: "",
       d: "14 días para ordenar tu sueño: cargás tus horarios, hacés un paso por día y al final ves tus datos reales.",
-      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tus horarios con gráfico", "Rutina guiada para dormir y respiración", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
-    { id: "celular", n: "Celular bajo control", c: "#FF8A4C", pro: "plan-celular", live: true, prog: "celular", price: "",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tus horarios con gráfico", "Rutina guiada para dormir y respiración", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
+    { id: "celular", n: "Celular bajo control", c: "#FF8A4C", pro: "plan-celular", live: true, prog: "celular", inc: true, grp: "Vida diaria", price: "",
       d: "14 días para usar el celular vos y que no te use a vos. Medís tu pantalla y ves cuánto la bajás.",
-      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tu tiempo de pantalla con gráfico", "Temporizadores y desafíos dentro de la app", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
-    { id: "arrancar", n: "Arrancar", c: "#FFC83D", pro: "plan-arrancar", live: true, prog: "arrancar", price: "",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tu tiempo de pantalla con gráfico", "Temporizadores y desafíos dentro de la app", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
+    { id: "arrancar", n: "Arrancar", c: "#FFC83D", pro: "plan-arrancar", live: true, prog: "arrancar", inc: true, grp: "Vida diaria", price: "",
       d: "14 días para dejar de postergar: pasos diminutos, foco de 25 minutos y un registro de lo que lográs.",
-      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Bloques de foco guiados", "Registro de minutos de foco con gráfico", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
-    { id: "calma", n: "Calmar la cabeza", c: "#B9A7F0", pro: "plan-calma", live: true, prog: "calma", price: "",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Bloques de foco guiados", "Registro de minutos de foco con gráfico", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
+    { id: "calma", n: "Calmar la cabeza", c: "#B9A7F0", pro: "plan-calma", live: true, prog: "calma", inc: true, grp: "Vida diaria", price: "",
       d: "14 días con herramientas simples para bajar la tensión de todos los días y armar tu propio kit.",
-      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Respiraciones y ejercicios guiados", "Registro de tu tensión con gráfico", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
-    { id: "tenis", n: "Tenis", c: "#C6F432", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Respiraciones y ejercicios guiados", "Registro de tu tensión con gráfico", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
+    { id: "estudio", n: "Estudiar mejor", c: "#5FC4B0", pro: "plan-estudio", live: true, prog: "estudio", grp: "Estudio y trabajo", price: "",
+      d: "Para estudiantes: organizá tu estudio, aprendé técnicas que funcionan y rendí mejor en tus exámenes. 14 días, dentro de la app.",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Técnicas probadas: recordar sin mirar, repaso espaciado, práctica de examen", "Bloques de foco guiados", "Registro de tus minutos de estudio con gráfico", "Tu método final, armado con lo que te funcionó", "Vida diaria Pro incluido"] },
+    { id: "laburo", n: "Buscar trabajo", c: "#4C7DFF", pro: "plan-laburo", live: false, grp: "Estudio y trabajo", d: "Armá tu CV, practicá entrevistas y organizá tu búsqueda con un plan diario." },
+    { id: "plata", n: "Plata en orden", c: "#C6F432", pro: "plan-plata", live: false, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés." },
+    { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: false, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada." },
+    { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo." },
+    { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: false, grp: "Servicios extras", d: "Servicio extra: contanos adónde querés ir y te armamos el itinerario, los días y el presupuesto." },
+    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
       pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
-    { id: "futbol", n: "Fútbol", c: "#4C7DFF", pro: "plan-futbol", live: false, d: "Rutinas para futbolistas: antes y después del partido, movilidad y fuerza." },
-    { id: "voley", n: "Vóley", c: "#FFC83D", pro: "plan-voley", live: false, d: "Rutinas para vóley: saltos, hombros y recuperación." },
-    { id: "basquet", n: "Básquet", c: "#FF8A4C", pro: "plan-basquet", live: false, d: "Rutinas para básquet: explosividad, tobillos y recuperación." },
-    { id: "handball", n: "Handball", c: "#B9A7F0", pro: "plan-handball", live: false, d: "Rutinas para handball: lanzamiento, hombros y recuperación." }
+    { id: "futbol", n: "Fútbol", grp: "Deportes", c: "#4C7DFF", pro: "plan-futbol", live: false, d: "Rutinas para futbolistas: antes y después del partido, movilidad y fuerza." },
+    { id: "voley", n: "Vóley", grp: "Deportes", c: "#FFC83D", pro: "plan-voley", live: false, d: "Rutinas para vóley: saltos, hombros y recuperación." },
+    { id: "basquet", n: "Básquet", grp: "Deportes", c: "#FF8A4C", pro: "plan-basquet", live: false, d: "Rutinas para básquet: explosividad, tobillos y recuperación." },
+    { id: "handball", n: "Handball", grp: "Deportes", c: "#B9A7F0", pro: "plan-handball", live: false, d: "Rutinas para handball: lanzamiento, hombros y recuperación." }
   ];
   function planOf(id) { return PLANS.filter(function (p) { return p.id === id; })[0]; }
 
@@ -490,7 +504,7 @@
   function recIds() { return ((S.test && S.test.rec) || []).map(function (r) { return r.id; }); }
   function planCard(p) {
     var pro = p.live ? (p.prog ? pgOwns(p.id) : isPro(p.id)) : false, rec = recIds().indexOf(p.id) >= 0, items = inPlan(p.id), got = items.filter(owns).length;
-    var tag = !p.live ? '<span class="tag">Próximamente</span>' : pro ? '<span class="tag ok">Activo</span>' : rec ? '<span class="tag rec">Para vos</span>' : "";
+    var tag = !p.live ? '<span class="tag">Próximamente</span>' : pro ? '<span class="tag ok">Activo</span>' : rec ? '<span class="tag rec">Para vos</span>' : p.inc ? '<span class="tag">Incluido en Pro</span>' : "";
     var sub = !p.live ? esc(p.d) : (p.prog ? esc(p.d) : (items.length ? got + " de " + items.length + " productos desbloqueados" : esc(p.d)));
     return '<button class="plancard" data-plan="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + SHAPES[p.id] + "</span><span style='flex:1;min-width:0'><b>" + esc(p.n) + "</b><small>" + sub + "</small>" +
       (p.live && !p.prog && items.length ? '<span class="bar"><i style="width:' + Math.round(got * 100 / items.length) + '%"></i></span>' : "") + "</span>" + tag + "</button>";
@@ -499,13 +513,16 @@
     var rec = recIds(), head = "";
     if (rec.length) head = '<div class="sec">Para vos</div>' + rec.map(function (id) { return planCard(planOf(id)); }).join("") + '<button class="linkbtn small" data-open="test" style="margin:4px 0 8px">Rehacer el test</button>';
     else head = '<div class="card testcta"><b>¿Qué plan te conviene?</b><p class="small muted" style="margin:6px 0 12px">Un test de 1 minuto, gratis. Te mostramos los planes que van con lo que necesitás.</p><button class="btn sage" data-open="test">Hacer el test</button></div>';
-    var rest = function (live) { return PLANS.filter(function (p) { return !!p.live === live && rec.indexOf(p.id) < 0; }).map(planCard).join(""); };
-    return "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto. Cualquiera que elijas desbloquea también Vida diaria Pro.</p>" + head +
-      '<div class="sec">Todos los planes</div>' + rest(true) + (rest(false) ? '<div class="sec">Próximamente</div>' + rest(false) : "");
+    var GR = ["Vida diaria", "Estudio y trabajo", "Deportes", "Servicios extras"], out = "";
+    GR.forEach(function (g) {
+      var L = PLANS.filter(function (p) { return p.grp === g && rec.indexOf(p.id) < 0; }).sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); });
+      if (L.length) out += '<div class="sec">' + g + "</div>" + (g === "Vida diaria" ? '<p class="small muted" style="margin:0 0 8px">Los planes de todos los días vienen incluidos en Vida diaria Pro.</p>' : g === "Servicios extras" ? '<p class="small muted" style="margin:0 0 8px">Cosas puntuales que se piden aparte.</p>' : "") + L.map(planCard).join("");
+    });
+    return "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto, con un programa de 14 días dentro de la app.</p>" + head + out;
   }
   function openPlan(id) {
     var p = planOf(id); if (!p) return;
-    var pro = isPro(id), h = '<div class="row"><span class="shape">' + SHAPES[p.id] + '</span><div><h2 style="font-size:24px">' + esc(p.n) + '</h2><span class="small muted">' + (!p.live ? "Próximamente" : pro ? "Plan Pro activo" : "Plan completo (Pro)") + "</span></div></div><p style='margin:14px 0'>" + esc(p.d) + "</p>";
+    var pro = p.prog ? pgOwns(id) : isPro(id), pp = p.inc ? planOf("vida") : p, h = '<div class="row"><span class="shape">' + SHAPES[p.id] + '</span><div><h2 style="font-size:24px">' + esc(p.n) + '</h2><span class="small muted">' + (!p.live ? "Próximamente" : pro ? "Plan activo" : p.inc ? "Incluido en Vida diaria Pro" : "Plan completo (Pro)") + "</span></div></div><p style='margin:14px 0'>" + esc(p.d) + "</p>";
     if (!p.live) {
       h += '<div class="card"><b>Todavía no está disponible</b><p class="small muted" style="margin:6px 0 0">Dejá tu email y te avisamos cuando abra.</p></div>' + notifyForm(p.n, S.profile && S.profile.email);
     } else {
@@ -515,8 +532,8 @@
       var items = inPlan(id);
       if (items.length) h += '<div class="sec" style="margin-top:6px">Productos del plan</div>' + items.map(prodRow).join("");
       if (pro) h += '<div class="card"><b>Tenés este plan.</b><p class="small muted" style="margin:6px 0 0">Todo lo del plan es tuyo, incluidos los productos que se sumen.</p></div>';
-      else h += '<div class="card dark" style="margin-top:12px"><div class="row between"><b>Forma ' + esc(p.n) + " Pro</b>" + (p.price ? "<span><b style='font-size:22px'>" + esc(p.price) + "</b>" + (p.was ? " <s class='small' style='opacity:.7'>" + esc(p.was) + "</s>" : "") + "</span>" : "<span class='small'>Precio a definir</span>") + "</div>" +
-        (p.promo ? "<p class='small' style='margin:6px 0 0;opacity:.85'>" + esc(p.promo) + ".</p>" : "") + "</div>" + payButtons(p.pro, "Forma " + p.n + " Pro");
+      else h += (p.inc ? '<p class="small muted" style="margin:12px 0 0">Este plan viene incluido en Vida diaria Pro, junto con los otros planes de todos los días.</p>' : "") + '<div class="card dark" style="margin-top:12px"><div class="row between"><b>Forma ' + esc(pp.n) + " Pro</b>" + (pp.price ? "<span><b style='font-size:22px'>" + esc(pp.price) + "</b>" + (pp.was ? " <s class='small' style='opacity:.7'>" + esc(pp.was) + "</s>" : "") + "</span>" : "<span class='small'>Precio a definir</span>") + "</div>" +
+        (pp.promo ? "<p class='small' style='margin:6px 0 0;opacity:.85'>" + esc(pp.promo) + ".</p>" : "") + "</div>" + payButtons(pp.pro, "Forma " + pp.n + " Pro");
     }
     sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
@@ -619,7 +636,7 @@
   // ---------- programas de 14 días ----------
   var PG = window.FormaProg || { list: [], byId: {} };
   function pgOf(id) { return PG.byId[id]; }
-  function pgOwns(id) { return hasProduct("plan-" + id); }
+  function pgOwns(id) { var p = planOf(id); if (!p) return false; return p.inc ? hasProduct(planOf("vida").pro) : hasProduct(p.pro); }
   function pgItem(id) { return S.prog && S.prog.items && S.prog.items[id]; }
   function pgCount(id) { var it = pgItem(id); return it && it.done ? Object.keys(it.done).length : 0; }
   function pgCur() { var id = S.prog && S.prog.cur; return id && pgOf(id) && pgOwns(id) ? id : null; }
@@ -764,33 +781,42 @@
   function openPgTry(id) {
     var P = pgOf(id); if (!P) return; var st = P.days[0];
     sheet('<span class="badge">Prueba gratis · paso 1 de 14</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(st.t) + '</h2><div class="card"><p style="margin:0 0 8px">' + esc(st.a) + '</p><p class="small muted" style="margin:0">' + esc(st.w) + '</p></div>' +
-      '<div class="card dark"><b>Quedan 13 pasos más</b><p class="small" style="margin:6px 0 12px;opacity:.9">Con Vida Pro seguís los 14 pasos, medís tu antes y después y se suma a tu constancia.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>' +
+      '<div class="card dark"><b>Quedan 13 pasos más</b><p class="small" style="margin:6px 0 12px;opacity:.9">' + (planOf(id) && planOf(id).inc ? "Con Vida diaria Pro seguís" : "Con este plan seguís") + ' los 14 pasos, medís tu antes y después y se suma a tu constancia.</p><button class="btn sage" data-plan="' + (planOf(id) && planOf(id).inc ? "vida" : id) + '">' + (planOf(id) && planOf(id).inc ? "Ver Vida diaria Pro" : "Ver el plan") + '</button></div>' +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
   // ---------- test de planes ----------
   var TESTQ = [
-    { k: "sleep", q: "¿Cómo estás durmiendo últimamente?", o: ["Bien", "A veces me cuesta", "Mal, casi siempre"] },
-    { k: "phone", q: "¿Cuánto tiempo perdés en el celular sin querer?", o: ["Poco", "Bastante", "Muchísimo"] },
-    { k: "proc", q: "¿Postergás lo importante?", o: ["Casi nunca", "A veces", "Seguido"] },
-    { k: "stress", q: "¿Cómo está tu tensión o ansiedad?", o: ["Estoy tranquilo/a", "Por momentos tenso/a", "Seguido tenso/a"] },
-    { k: "sport", q: "¿Practicás algún deporte con regularidad?", o: ["Tenis", "Fútbol", "Vóley", "Básquet", "Handball", "Otro o ninguno"] },
-    { k: "top", q: "Si pudieras mejorar una sola cosa en 14 días, ¿cuál elegirías?", o: ["Dormir mejor", "Usar menos el celular", "Dejar de postergar", "Estar más tranquilo/a", "Ninguna en particular"] }
+    { k: "occ", q: "¿A qué te dedicás hoy?", o: ["Estudio", "Trabajo", "Estudio y trabajo", "Otra cosa"], w: [{}, {}, {}, {}] },
+    { k: "study", q: "¿Cómo te va con el estudio?", o: ["Bien", "Me cuesta organizarme", "Me cuesta concentrarme y rindo menos de lo que podría"], w: [{}, { estudio: 2 }, { estudio: 2 }], when: function (a) { return a.occ === 0 || a.occ === 2; } },
+    { k: "exams", q: "¿Tenés exámenes o entregas en las próximas semanas?", o: ["No por ahora", "Sí, algunos", "Sí, muchos"], w: [{}, { estudio: 1 }, { estudio: 2 }], when: function (a) { return a.occ === 0 || a.occ === 2; } },
+    { k: "sleep", q: "¿Cómo estás durmiendo últimamente?", o: ["Bien", "A veces me cuesta", "Mal, casi siempre"], w: [{}, { dormir: 1 }, { dormir: 2 }] },
+    { k: "sleep2", q: "¿Cómo te levantás a la mañana?", o: ["Con energía", "Cansado/a, pero funciono", "Muy cansado/a, me cuesta mucho"], w: [{}, { dormir: 1 }, { dormir: 2 }] },
+    { k: "phone", q: "¿Cuántas horas de pantalla de celular tenés por día?", o: ["Menos de 2", "Entre 2 y 4", "Entre 4 y 6", "Más de 6"], w: [{}, { celular: 1 }, { celular: 2 }, { celular: 2 }] },
+    { k: "phone2", q: "Cuando querés dejar el celular…", o: ["Lo dejo sin problema", "Me cuesta", "Vuelvo enseguida sin darme cuenta"], w: [{}, { celular: 1 }, { celular: 2 }] },
+    { k: "proc", q: "¿Postergás lo importante?", o: ["Casi nunca", "A veces", "Seguido"], w: [{}, { arrancar: 1 }, { arrancar: 2 }] },
+    { k: "proc2", q: "Cuando tenés que empezar algo difícil…", o: ["Arranco", "Me cuesta arrancar, pero lo hago", "Lo dejo para último momento"], w: [{}, { arrancar: 1 }, { arrancar: 2 }] },
+    { k: "stress", q: "¿Cómo está tu tensión o ansiedad?", o: ["Estoy tranquilo/a", "Por momentos tenso/a", "Seguido tenso/a"], w: [{}, { calma: 1 }, { calma: 2 }] },
+    { k: "stress2", q: "¿Se te acelera la cabeza o te cuesta frenar los pensamientos?", o: ["Casi nunca", "A veces", "Seguido"], w: [{}, { calma: 1 }, { calma: 2 }] },
+    { k: "sport", q: "¿Practicás algún deporte con regularidad?", o: ["Tenis", "Fútbol", "Vóley", "Básquet", "Handball", "Otro o ninguno"], w: [{ tenis: 3 }, { futbol: 3 }, { voley: 3 }, { basquet: 3 }, { handball: 3 }, {}] },
+    { k: "extra", q: "¿Hay otra cosa que te gustaría ordenar?", o: ["Mi plata", "Moverme más o entrenar", "Comer más ordenado", "Buscar trabajo", "Nada más"], w: [{ plata: 2 }, { movimiento: 2 }, { comer: 2 }, { laburo: 2 }, {}] },
+    { k: "top", q: "Si pudieras mejorar una sola cosa en 14 días, ¿cuál elegirías?", o: ["Dormir mejor", "Usar menos el celular", "Dejar de postergar", "Estar más tranquilo/a", "Estudiar mejor", "Ninguna en particular"], w: [{ dormir: 2 }, { celular: 2 }, { arrancar: 2 }, { calma: 2 }, { estudio: 2 }, {}] },
+    { k: "time", q: "¿Cuánto tiempo por día podés dedicarle a mejorar?", o: ["5 a 10 minutos", "15 a 20 minutos", "30 minutos o más"], w: [{}, {}, {}] }
   ];
   var tst = null;
+  function testVisible(a) { return TESTQ.filter(function (q) { return !q.when || q.when(a); }); }
   function testRecs(a) {
-    var ids = ["dormir", "celular", "arrancar", "calma"], sc = {}, why = {}, out = [], sp = ["tenis", "futbol", "voley", "basquet", "handball"];
-    sc.dormir = a.sleep || 0; sc.celular = a.phone || 0; sc.arrancar = a.proc || 0; sc.calma = a.stress || 0;
-    if (a.top !== undefined && a.top < 4) sc[ids[a.top]] += 2;
-    why.dormir = a.sleep === 2 ? "Dijiste que dormís mal casi siempre" : a.sleep === 1 ? "Dijiste que a veces te cuesta dormir" : "Elegiste mejorar tu sueño";
-    why.celular = a.phone === 2 ? "Dijiste que perdés muchísimo tiempo en el celular" : a.phone === 1 ? "Dijiste que perdés bastante tiempo en el celular" : "Elegiste usar menos el celular";
-    why.arrancar = a.proc === 2 ? "Dijiste que postergás seguido" : a.proc === 1 ? "Dijiste que a veces postergás" : "Elegiste dejar de postergar";
-    why.calma = a.stress === 2 ? "Dijiste que sentís tensión seguido" : a.stress === 1 ? "Dijiste que por momentos te sentís tenso/a" : "Elegiste estar más tranquilo/a";
-    if (a.sport !== undefined && a.sport < 5) out.push({ id: sp[a.sport], sc: 3, why: "Practicás " + TESTQ[4].o[a.sport].toLowerCase() + " con regularidad" });
-    ids.forEach(function (id) { if (sc[id] >= 2) out.push({ id: id, sc: sc[id], why: why[id] }); });
+    var sc = {}, why = {};
+    TESTQ.forEach(function (q) {
+      if (a[q.k] === undefined || (q.when && !q.when(a))) return;
+      var w = q.w[a[q.k]] || {};
+      Object.keys(w).forEach(function (pid) { sc[pid] = (sc[pid] || 0) + w[pid]; if (!why[pid] || w[pid] > why[pid].p) why[pid] = { p: w[pid], t: "Respondiste «" + q.o[a[q.k]] + "» a «" + q.q.replace(/[¿?]/g, "").replace(/…$/, "") + "»" }; });
+    });
+    var out = Object.keys(sc).filter(function (id) { return planOf(id) && sc[id] >= 2; }).map(function (id) { return { id: id, sc: sc[id], why: why[id].t }; });
     out.sort(function (x, y) { return y.sc - x.sc; });
-    if (!out.length) ids.forEach(function (id) { if (sc[id] >= 1 && !out.length) out.push({ id: id, sc: sc[id], why: why[id] }); });
-    if (!out.length) out.push({ id: "vida", sc: 1, why: "Te ayuda a sostener tu día y tu constancia" });
-    return out.slice(0, 3).map(function (r) { return { id: r.id, why: r.why }; });
+    if (!out.length) Object.keys(sc).forEach(function (id) { if (planOf(id) && sc[id] >= 1 && !out.length) out.push({ id: id, sc: sc[id], why: why[id].t }); });
+    var maxLive = a.time === 0 ? 1 : a.time === 1 ? 2 : 3, live = out.filter(function (r) { return planOf(r.id).live; }).slice(0, maxLive), soon = out.filter(function (r) { return !planOf(r.id).live; }).slice(0, 1), res = live.concat(soon);
+    if (!res.length) res.push({ id: "vida", why: "Te ayuda a sostener tu día y tu constancia" });
+    return res.map(function (r) { return { id: r.id, why: r.why }; });
   }
   function openTest() {
     close(); var old = $("#full"); if (old) old.remove();
@@ -798,15 +824,16 @@
   }
   function drawTest() {
     var el = $("#full"); if (!el || !tst) return;
-    if (tst.i >= TESTQ.length) return finishTest();
-    var q = TESTQ[tst.i];
-    el.innerHTML = '<header><button class="btn ghost sm" data-tstexit>Salir</button><b>¿Qué plan te conviene?</b></header><div class="actbar"><i style="width:' + Math.round(tst.i * 100 / TESTQ.length) + '%"></i></div><div class="dbody"><span class="badge">Pregunta ' + (tst.i + 1) + " de " + TESTQ.length + '</span><h2 style="font-size:24px;margin:8px 0 6px">' + esc(q.q) + '</h2><div class="stack" style="margin-top:16px">' +
+    var V = testVisible(tst.a);
+    if (tst.i >= V.length) return finishTest();
+    var q = V[tst.i];
+    el.innerHTML = '<header><button class="btn ghost sm" data-tstexit>Salir</button><b>¿Qué plan te conviene?</b></header><div class="actbar"><i style="width:' + Math.round(tst.i * 100 / V.length) + '%"></i></div><div class="dbody"><span class="badge">Pregunta ' + (tst.i + 1) + " de " + V.length + '</span><h2 style="font-size:24px;margin:8px 0 6px">' + esc(q.q) + '</h2><div class="stack" style="margin-top:16px">' +
       q.o.map(function (x, j) { return '<button class="btn ghost block tstopt" data-tstpick="' + j + '">' + esc(x) + "</button>"; }).join("") + '</div></div><div class="dfoot">' + (tst.i ? '<button class="btn ghost" data-tstback>Atrás</button>' : "") + "</div>";
   }
   function finishTest() {
     var rec = testRecs(tst.a); S.test = { a: tst.a, rec: rec, at: today() }; save();
     var el = $("#full"); if (!el) return; tst = null;
-    el.innerHTML = '<header><b>Tus planes</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Esto es lo que te conviene</h2><p class="muted small">Según lo que respondiste. Cualquiera que elijas también desbloquea Vida diaria Pro.</p>' +
+    el.innerHTML = '<header><b>Tus planes</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Esto es lo que te conviene</h2><p class="muted small">Según lo que respondiste. Los de vida diaria vienen incluidos en Vida diaria Pro.</p>' +
       rec.map(function (r) { var pl = planOf(r.id); return '<div class="card"><div class="row"><span class="shape">' + SHAPES[r.id] + "</span><div><b>" + esc(pl.n) + '</b><span class="small muted" style="display:block">' + esc(r.why) + '</span></div></div><button class="btn sage block" data-tstplan="' + r.id + '" style="margin-top:10px">' + (pl.live ? "Ver plan" : "Avisarme cuando salga") + "</button></div>"; }).join("") + '</div><div class="dfoot"><button class="btn ghost block" data-tstclose>Cerrar</button></div>';
   }
   function testCard() {
@@ -1590,7 +1617,7 @@
     if (d.prod) return openProduct(d.prod);
     if (d.open === "test") return openTest();
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
-    if (d.tstpick !== undefined) { if (tst) { tst.a[TESTQ[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
+    if (d.tstpick !== undefined) { if (tst) { tst.a[testVisible(tst.a)[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
     if (d.tstback !== undefined) { if (tst && tst.i) { tst.i--; drawTest(); } return; }
     if (d.tstclose !== undefined) { var tf2 = $("#full"); if (tf2) tf2.remove(); render(); return; }
     if (d.tstplan) { var tf3 = $("#full"); if (tf3) tf3.remove(); tab = "planes"; render(); return openPlan(d.tstplan); }
