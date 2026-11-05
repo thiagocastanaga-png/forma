@@ -1,6 +1,8 @@
 // Configuración central de Forma. Se completa a medida que se abren las cuentas.
 // Dejá un valor vacío ("") para que el botón o formulario aparezca como "todavía no conectado".
 window.FORMA = {
+  // Versión de prueba: las compras son simuladas (no se cobra nada). Poné false para abrir los pagos reales.
+  beta: true,
   instagram: "https://www.instagram.com/formargentina/",
   // Endpoint del formulario de lista de espera (por ejemplo https://formspree.io/f/xxxxxxx)
   formEndpoint: "",

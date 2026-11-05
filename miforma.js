@@ -172,7 +172,7 @@
   function touchBest() { var n = streakNow(); if (n > S.best) S.best = n; }
 
   // permisos
-  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo; }
+  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo || !!(CFG.beta && S.betaOwned && S.betaOwned[id]); }
   function isPro(planId) {
     var p = planOf(planId); if (!p) return false;
     if (hasProduct(p.pro)) return true;
@@ -226,7 +226,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal", "betaOwned"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -250,7 +250,7 @@
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.dd = Object.assign({}, remote.dd || {}); Object.keys(local.dd || {}).forEach(function (k) { var r = out.dd[k], l = local.dd[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.dd[k] = l; });
     var xm = {}; (remote.xt || []).forEach(function (x) { xm[x.id] = x; }); (local.xt || []).forEach(function (x) { var r = xm[x.id]; if (!r || (x.at || "") >= (r.at || "")) xm[x.id] = x; }); out.xt = Object.keys(xm).map(function (k) { return xm[k]; });
-    out.rem = local.rem || remote.rem || null; out.goal = local.goal || remote.goal || null;
+    out.rem = local.rem || remote.rem || null; out.goal = local.goal || remote.goal || null; out.betaOwned = Object.assign({}, remote.betaOwned || {}, local.betaOwned || {});
     out.cierreAt = local.cierreAt != null ? local.cierreAt : remote.cierreAt;
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
@@ -584,7 +584,7 @@
       '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
       '<div class="card stack"><b>Tus datos</b><p class="small muted" style="margin:0">' + (user ? "Tus datos se guardan en tu cuenta. Podés descargar una copia o borrar tu cuenta cuando quieras." : "Todo se guarda solo en este dispositivo. Si cambiás de teléfono o borrás los datos del navegador, se pierde.") + "</p>" +
       '<div class="grid2"><button class="btn ghost" id="export">Descargar copia</button><button class="btn ghost" id="wipe">' + (user ? "Borrar mi cuenta" : "Borrar todo") + "</button></div>" +
-      (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
+      (CFG.beta && S.betaOwned && Object.keys(S.betaOwned).length ? '<button class="btn ghost block" data-betareset>Volver a Gratis (borrar compras de prueba)</button>' : "") + (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
       '<div class="card small"><a data-link="instagram" href="' + esc(CFG.instagram || "#") + '" target="_blank" rel="noopener">Instagram @formargentina</a> · <a href="privacidad">Privacidad</a> · <a href="terminos">Términos</a> · <a href="./">Sitio de Forma</a></div>';
     return html;
   }
@@ -601,6 +601,7 @@
   }
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
+    if (CFG.beta) return '<div class="card" style="margin-top:12px"><span class="tag">Versión de prueba</span><p class="small" style="margin:8px 0 10px">Podés "comprar" para probar cómo se vería. <b>No se cobra nada</b>: es una compra simulada.</p><button class="btn block" data-betabuy="' + esc(id) + '">Probar compra sin pagar</button></div>';
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
     if (NATIVE) link = "";
     if (link) h += '<a class="btn block" target="_blank" rel="noopener" href="' + esc(link) + '" style="margin-top:12px">Pagar con Mercado Pago</a><p class="small muted">Pagá con el mismo email de tu cuenta (' + esc(user && user.email || "") + ") para que se desbloquee solo.</p>";
@@ -2222,6 +2223,8 @@
     if (d.gapply) { applyGoalChange(d.gapply); return; }
     if (d.grev) { goalReviewDo(d.grev); return; }
     if (d.gtoggle !== undefined) { goalOpen = !goalOpen; render(); return; }
+    if (d.betabuy) { S.betaOwned = S.betaOwned || {}; S.betaOwned[d.betabuy] = 1; save(); close(); render(); return; }
+    if (d.betareset !== undefined) { S.betaOwned = {}; save(); render(); return; }
     if (d.open === "prog") return openProg();
     if (d.gchk) { if (S.goal) { S.goal.chk = S.goal.chk || {}; S.goal.chk[today()] = +d.gchk; save(); openProg(); } return; }
     if (d.open === "wsum") return openWeekSum();
