@@ -951,7 +951,7 @@
   ];
   function goalById(id) { return GOALS.filter(function (g) { return g.id === id; })[0]; }
   var gs = null;
-  function goalStage() { var G = S.goal; if (!G || !G.start) return 1; return Math.max(1, Math.min(3, 1 + Math.floor(daysSince(G.start) / 7))); }
+  function goalStage() { var G = S.goal; return Math.max(1, Math.min(3, (G && G.st) || 1)); }
   function goalChanges() {
     var G = S.goal; if (!G || !S.arm || !S.arm.ans) return [];
     var base = S.arm.ans0 || S.arm.ans, out = [];
@@ -995,7 +995,7 @@
   function gFinish() {
     var oldAns = S.arm && S.arm.ans ? JSON.stringify(S.arm.ans) : null;
     var ids = gs.sel.slice(), a = gs.a, other = gs.other; gs = null;
-    S.goal = { ids: ids, a: a, other: other, at: today(), start: today(), ap: {} };
+    S.goal = { ids: ids, a: a, other: other, at: today(), start: today(), rev: today(), st: 1, ap: {} };
     if (S.arm && S.arm.ans) {
       if (!S.arm.ans0) S.arm.ans0 = JSON.parse(oldAns);
       S.goal.apd = {}; goalChanges().forEach(function (c) { if (c.s === 1 && c.patch) { c.patch(S.arm.ans); } if (c.s === 1) { S.goal.ap[c.id] = 1; S.goal.apd[c.id] = today(); } });
@@ -1021,9 +1021,38 @@
     if (other) html += '<p class="small muted">Anotamos lo que nos contaste: «' + esc(other) + '».</p>';
     el.innerHTML = html + '</div><div class="dfoot"><button class="btn sage block" data-gdone>Ver mi día</button></div>';
   }
+  function goalStats() {
+    var G = S.goal, n = 0, d = 0; if (!G || !S.arm) return { n: 0, d: 0 };
+    for (var i = 0; i < 7; i++) {
+      var dt = new Date(); dt.setDate(dt.getDate() - i); var k = today(dt); if (G.rev && k < G.rev) continue;
+      armBlocksFor(dt).forEach(function (b) { if (b.goalact) { d++; if (S.ad && S.ad[k] && S.ad[k][armKey(b)]) n++; } });
+    }
+    return { n: n, d: d };
+  }
+  function goalDue() { var G = S.goal; return !!(G && !G.fin && G.ids && G.ids.some(function (id) { var g = goalById(id); return g && g.build; }) && daysSince(G.rev || G.start) >= 7); }
+  function goalReview() {
+    var G = S.goal, st = goalStage(), x = goalStats(), pct = x.d ? x.n / x.d : 1, pro = isProU(), last = st >= 3;
+    var msg = !x.d ? "Esta semana no tuviste acciones programadas del objetivo." : "Esta semana hiciste <b>" + x.n + " de " + x.d + "</b> acciones de tu objetivo.";
+    var adv = pct >= 0.6 ? "Muy buen ritmo. Estás listo para seguir." : "Está bien: es mejor repetir la semana y que se sostenga, que acelerar y abandonar.";
+    return '<div class="card goalcard"><span class="small muted">Revisión de tu objetivo · semana ' + st + " de 3</span><b style=\"display:block;font-size:19px;margin:2px 0 6px\">¿Cómo te fue?</b><p class=\"small\" style=\"margin:0 0 4px\">" + msg + '</p><p class="small muted" style="margin:0 0 12px">' + adv + "</p>" +
+      (pro ? '<button class="btn sage block" data-grev="next">' + (last ? "Terminé el plan inicial" : "Pasar a la semana " + (st + 1)) + '</button>' : '<button class="btn block" data-plan="vida">Con Pro seguís con la semana ' + Math.min(3, st + 1) + "</button>") +
+      '<button class="btn ghost block" data-grev="hold" style="margin-top:8px">Repetir esta semana</button></div>';
+  }
+  function goalReviewDo(w) {
+    var G = S.goal; if (!G) return; G.rev = today();
+    if (w === "next" && isProU()) {
+      if (goalStage() >= 3) G.fin = true; else {
+        G.st = goalStage() + 1; var a = Object.assign({}, S.arm.ans); G.ap = G.ap || {}; G.apd = G.apd || {};
+        goalChanges().forEach(function (c) { if (c.s === G.st) { if (c.patch) c.patch(a); G.ap[c.id] = 1; G.apd[c.id] = today(); } }); S.arm.ans = a;
+      }
+    }
+    save(); render();
+  }
   function goalCard() {
     if (!S.arm) return "";
     var G = S.goal;
+    if (G && G.fin) return '<div class="card goalcard"><b style="font-size:19px">¡Terminaste tu plan inicial!</b><p class="small muted" style="margin:6px 0 10px">Tu día ya incluye todos los cambios. ¿Querés sumar otro objetivo?</p><button class="btn sage sm" data-open="test">Elegir otro objetivo</button></div>';
+    if (G && goalDue()) return goalReview();
     if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
     var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
     var cur = ch.filter(function (c) { return c.s === st; }).sort(function (x, y) { return (x.tip ? 1 : 0) - (y.tip ? 1 : 0); }).slice(0, 4), tbl = armBlocks(), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && (c.patch || c.act); });
@@ -1234,7 +1263,8 @@
         var best = -1, bs = 0, bd = 1e9;
         out.forEach(function (b, i) { if (!xtFree(b) || b.e - b.s < x.m) return; var st = Math.max(b.s, Math.min(t0, b.e - x.m)), d = Math.abs(st - t0); if (d < bd) { bd = d; best = i; bs = st; } });
         if (best < 0 || bd > 180) return;
-        var f = out[best], parts = []; if (f.s < bs) parts.push(Object.assign({}, f, { e: bs }));
+        var f = out[best], parts = [], lb = bs - f.s, la = f.e - bs - x.m; if (lb > 0 && lb < 10) bs = f.s; else if (la > 0 && la < 10) bs = f.e - x.m;
+        if (f.s < bs) parts.push(Object.assign({}, f, { e: bs }));
         parts.push({ s: bs, e: bs + x.m, kind: "habit", label: x.l, note: x.note, goalact: c.id + "|" + ai }); if (f.e > bs + x.m) parts.push(Object.assign({}, f, { s: bs + x.m }));
         out.splice.apply(out, [best, 1].concat(parts));
       });
@@ -2021,6 +2051,7 @@
     if (d.gback !== undefined) { if (gs) gBack(); return; }
     if (d.gdone !== undefined) { var gf2 = $("#full"); if (gf2) gf2.remove(); tab = "hoy"; render(); window.scrollTo(0, 0); return; }
     if (d.gapply) { applyGoalChange(d.gapply); return; }
+    if (d.grev) { goalReviewDo(d.grev); return; }
     if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
     if (d.tstpick !== undefined) { if (tst) { tst.a[testVisible(tst.a)[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
     if (d.tstback !== undefined) { if (tst && tst.i) { tst.i--; drawTest(); } return; }
