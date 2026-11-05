@@ -15,7 +15,11 @@
     voley: '<svg viewBox="0 0 44 44"><rect x="3" y="3" width="38" height="38" fill="#FFC83D"/></svg>',
     basquet: '<svg viewBox="0 0 44 44"><path d="M22 3 L41 41 H3 Z" fill="#FF8A4C"/></svg>',
     handball: '<svg viewBox="0 0 44 44"><path d="M2 36 A20 20 0 0 1 42 36 Z" fill="#B9A7F0"/></svg>',
-    vida: '<svg viewBox="0 0 44 44"><path d="M3 22 A19 19 0 0 1 22 3 H41 V22 A19 19 0 0 1 22 41 H3 Z" fill="#86A892"/></svg>'
+    vida: '<svg viewBox="0 0 44 44"><path d="M3 22 A19 19 0 0 1 22 3 H41 V22 A19 19 0 0 1 22 41 H3 Z" fill="#86A892"/></svg>',
+    dormir: '<svg viewBox="0 0 44 44"><path d="M30 3 A20 20 0 1 0 41 31 A17 17 0 0 1 30 3 Z" fill="#4C7DFF"/></svg>',
+    celular: '<svg viewBox="0 0 44 44"><rect x="10" y="3" width="24" height="38" rx="8" fill="#FF8A4C"/></svg>',
+    arrancar: '<svg viewBox="0 0 44 44"><path d="M8 4 L40 22 L8 40 Z" fill="#FFC83D"/></svg>',
+    calma: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="16" fill="none" stroke="#B9A7F0" stroke-width="9"/></svg>'
   };
   var AREAS = [
     ["cuerpo", "Cuerpo", "Energía, sueño, movimiento y comida"],
@@ -58,6 +62,18 @@
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
       free: ["Tu día armado con 12 preguntas, fijo en la pantalla de Hoy", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
       pros: ["Tildar tu día y seguir tu constancia semanal", "Cambiar tu día cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
+    { id: "dormir", n: "Dormir de verdad", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", price: "",
+      d: "14 días para ordenar tu sueño: cargás tus horarios, hacés un paso por día y al final ves tus datos reales.",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tus horarios con gráfico", "Rutina guiada para dormir y respiración", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
+    { id: "celular", n: "Celular bajo control", c: "#FF8A4C", pro: "plan-celular", live: true, prog: "celular", price: "",
+      d: "14 días para usar el celular vos y que no te use a vos. Medís tu pantalla y ves cuánto la bajás.",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tu tiempo de pantalla con gráfico", "Temporizadores y desafíos dentro de la app", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
+    { id: "arrancar", n: "Arrancar", c: "#FFC83D", pro: "plan-arrancar", live: true, prog: "arrancar", price: "",
+      d: "14 días para dejar de postergar: pasos diminutos, foco de 25 minutos y un registro de lo que lográs.",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Bloques de foco guiados", "Registro de minutos de foco con gráfico", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
+    { id: "calma", n: "Calmar la cabeza", c: "#B9A7F0", pro: "plan-calma", live: true, prog: "calma", price: "",
+      d: "14 días con herramientas simples para bajar la tensión de todos los días y armar tu propio kit.",
+      free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Respiraciones y ejercicios guiados", "Registro de tu tensión con gráfico", "Tu resultado final con datos reales", "Vida diaria Pro incluido"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
@@ -71,12 +87,11 @@
 
   // Productos sueltos (no son el plan completo)
   var PRODUCTS = [
-    { id: "dormir", g: "Cuerpo", s: "vida", n: "Dormir de verdad", d: "Programa de 14 días para ordenar tu sueño, con una rutina guiada para bajar el ritmo. Un cambio chico por día.", area: "cuerpo", act: "dormir", prog: "dormir" },
+    { id: "dormir", g: "Cuerpo", s: "vida", n: "Rutina para dormir", d: "Rutina guiada de 10 minutos para bajar el ritmo antes de dormir.", area: "cuerpo", act: "dormir" },
     { id: "energia", g: "Cuerpo", s: "vida", n: "Energía y movimiento", d: "Pausa de movimiento guiada de 5 minutos, sin gimnasio ni equipamiento.", area: "cuerpo", act: "movimiento" },
     { id: "comidas", g: "Cuerpo", s: "vida", n: "Comidas ordenadas", d: "Organizar horarios y compras. No es una dieta.", area: "cuerpo", soon: true },
-    { id: "ansiedad", g: "Mente", s: "vida", n: "Calmar la cabeza", d: "Programa de 14 días con herramientas simples para bajar la tensión de todos los días. No reemplaza a un profesional.", area: "mente", act: "calma", prog: "calma" },
-    { id: "foco", g: "Mente", s: "vida", n: "Arrancar", d: "Programa de 14 días para dejar de postergar: pasos diminutos, foco de 25 minutos y una prioridad por día.", area: "trabajo", act: "foco", prog: "arrancar" },
-    { id: "celular", g: "Mente", s: "vida", n: "Celular bajo control", d: "Programa de 14 días para usar el celular vos y que no te use a vos. Sin prohibirte nada.", area: "mente", prog: "celular" },
+    { id: "ansiedad", g: "Mente", s: "vida", n: "Respiración para calmar", d: "Respiración guiada de 3 minutos para bajar la tensión del día. No reemplaza a un profesional.", area: "mente", act: "calma" },
+    { id: "foco", g: "Mente", s: "vida", n: "Bloque de foco", d: "Bloque de foco de 25 minutos con intención y cierre.", area: "trabajo", act: "foco" },
     { id: "tiempo", g: "Mente", s: "vida", n: "Tiempo para vos", d: "Espacios para descansar y hacer lo que te gusta.", area: "tiempo", soon: true },
     { id: "cierre", g: "Mente", s: "vida", n: "Cierre del día", d: "Repasá tu día, soltá lo pendiente y dejá armado mañana. 5 minutos guiados.", area: "mente", act: "cierre" },
     { id: "habitos-pro", g: "Orden", s: "vida", n: "Hábitos que se quedan", d: "Método para sostener hábitos en 21 días.", area: "mente", soon: true },
@@ -191,7 +206,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "wk", "tm", "prog"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "wk", "tm", "prog", "test"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -215,6 +230,7 @@
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
+    out.test = local.test || remote.test || null;
     (function () {
       var r = remote.prog || { items: {} }, l = local.prog || { items: {} }, it = {};
       Object.keys(Object.assign({}, r.items, l.items)).forEach(function (id) {
@@ -272,7 +288,8 @@
     if (needAuth()) return renderAuth();
     if (!S.profile || S.profile.done === false) return renderOnboard();
     touchBest();
-    var body = { hoy: vHoy, planes: vPlanes, catalogo: vCatalogo, perfil: vPerfil }[tab]();
+    if (tab === "catalogo") tab = "planes";
+    var body = { hoy: vHoy, planes: vPlanes, perfil: vPerfil }[tab]();
     var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
     $app.innerHTML =
       '<div class="top"><div class="logo">forma<i></i></div><div class="row" style="gap:8px">' +
@@ -281,7 +298,7 @@
       (topPro ? '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" : "") + "</div></div>" +
       "<main>" + body + "</main>" +
       '<nav class="tabs" aria-label="Principal"><div>' +
-      [["hoy", "Hoy"], ["planes", "Planes"], ["catalogo", "Catálogo"], ["perfil", "Perfil"]].map(function (t) {
+      [["hoy", "Hoy"], ["planes", "Planes"], ["perfil", "Perfil"]].map(function (t) {
         return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' aria-current="page"' : "") + ">" + ICON[t[0]] + "<span>" + t[1] + "</span></button>";
       }).join("") + "</div></nav>";
   }
@@ -410,12 +427,16 @@
     if (S.demo || isPro("vida")) return '<div class="card sage"><b>Es momento de tu revisión semanal</b><p class="small" style="margin:6px 0 12px">10 minutos para ver qué funcionó, soltar lo que no y ajustar tu ritmo.</p><button class="btn" id="review">Hacer mi revisión</button></div>';
     return '<div class="card"><b>Revisión semanal (Pro)</b><p class="small muted" style="margin:6px 0 10px">Cada semana ves qué funcionó, qué soltar y cómo ajustar tu ritmo, con tu progreso a la vista.</p><button class="btn ghost" data-plan="vida">Ver Vida diaria Pro</button></div>';
   }
+  function vArmar() {
+    return '<div class="armhero"><span class="badge">12 preguntas · 2 minutos · gratis</span><h1>Armá tu día</h1><p>Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage block" id="armgo">Armar mi día</button></div>';
+  }
   function vHoy() {
+    if (!S.arm) return vArmar();
     if (S.demo || isPro("vida")) return vHoyPro();
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -459,19 +480,21 @@
   }
 
   // --- Planes (como los cursos) ---
+  function recIds() { return ((S.test && S.test.rec) || []).map(function (r) { return r.id; }); }
   function planCard(p) {
-    var pro = p.live ? isPro(p.id) : false, items = inPlan(p.id), got = items.filter(owns).length;
-    var tag = !p.live ? '<span class="tag">Próximamente</span>' : pro ? '<span class="tag ok">Pro activo</span>' : '<span class="tag">Plan gratis</span>';
-    var sub = !p.live ? esc(p.d) : (items.length ? got + " de " + items.length + " productos desbloqueados" : esc(p.d));
+    var pro = p.live ? (p.prog ? pgOwns(p.id) : isPro(p.id)) : false, rec = recIds().indexOf(p.id) >= 0, items = inPlan(p.id), got = items.filter(owns).length;
+    var tag = !p.live ? '<span class="tag">Próximamente</span>' : pro ? '<span class="tag ok">Activo</span>' : rec ? '<span class="tag rec">Para vos</span>' : "";
+    var sub = !p.live ? esc(p.d) : (p.prog ? esc(p.d) : (items.length ? got + " de " + items.length + " productos desbloqueados" : esc(p.d)));
     return '<button class="plancard" data-plan="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + SHAPES[p.id] + "</span><span style='flex:1;min-width:0'><b>" + esc(p.n) + "</b><small>" + sub + "</small>" +
-      (p.live && items.length ? '<span class="bar"><i style="width:' + Math.round(got * 100 / items.length) + '%"></i></span>' : "") + "</span>" + tag + "</button>";
+      (p.live && !p.prog && items.length ? '<span class="bar"><i style="width:' + Math.round(got * 100 / items.length) + '%"></i></span>' : "") + "</span>" + tag + "</button>";
   }
   function vPlanes() {
-    return "<h1 class='hello'>Tus planes</h1>" +
-      "<p class='muted small'>Vida diaria es la base: organiza tu día y tu constancia. Cualquier plan Pro la desbloquea completa, y además te suma sus propios productos para agregar a tu día. Los productos sueltos están aparte, en el Catálogo.</p>" +
-      '<div class="sec">Disponibles</div>' + PLANS.filter(function (p) { return p.live; }).map(planCard).join("") +
-      '<div class="sec">Próximamente</div>' + PLANS.filter(function (p) { return !p.live; }).map(planCard).join("") +
-      '<div class="card small" style="margin-top:14px">¿Querés planes como Estoico, Estudiante o Emprendedor? Estamos armándolos. Los vas a ver acá.</div>';
+    var rec = recIds(), head = "";
+    if (rec.length) head = '<div class="sec">Para vos</div>' + rec.map(function (id) { return planCard(planOf(id)); }).join("") + '<button class="linkbtn small" data-open="test" style="margin:4px 0 8px">Rehacer el test</button>';
+    else head = '<div class="card testcta"><b>¿Qué plan te conviene?</b><p class="small muted" style="margin:6px 0 12px">Un test de 1 minuto, gratis. Te mostramos los planes que van con lo que necesitás.</p><button class="btn sage" data-open="test">Hacer el test</button></div>';
+    var rest = function (live) { return PLANS.filter(function (p) { return !!p.live === live && rec.indexOf(p.id) < 0; }).map(planCard).join(""); };
+    return "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto. Cualquiera que elijas desbloquea también Vida diaria Pro.</p>" + head +
+      '<div class="sec">Todos los planes</div>' + rest(true) + (rest(false) ? '<div class="sec">Próximamente</div>' + rest(false) : "");
   }
   function openPlan(id) {
     var p = planOf(id); if (!p) return;
@@ -481,9 +504,10 @@
     } else {
       h += '<div class="cols"><div class="card"><b>Gratis</b><ul class="ticks">' + p.free.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" +
         '<div class="card pro"><b>Pro</b><ul class="ticks">' + p.pros.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div></div>";
+      if (p.prog) h += pgOwns(id) ? '<button class="btn block" data-pgopen="' + id + '" style="margin-top:12px">Abrir mi programa</button>' : '<button class="btn sage block" data-pgtry="' + id + '" style="margin-top:12px">Probar el paso 1 gratis</button>';
       var items = inPlan(id);
       if (items.length) h += '<div class="sec" style="margin-top:6px">Productos del plan</div>' + items.map(prodRow).join("");
-      if (pro) h += '<div class="card"><b>Tenés este plan Pro.</b><p class="small muted" style="margin:6px 0 0">Todo lo del plan es tuyo, incluidos los productos que se sumen.</p></div>';
+      if (pro) h += '<div class="card"><b>Tenés este plan.</b><p class="small muted" style="margin:6px 0 0">Todo lo del plan es tuyo, incluidos los productos que se sumen.</p></div>';
       else h += '<div class="card dark" style="margin-top:12px"><div class="row between"><b>Forma ' + esc(p.n) + " Pro</b>" + (p.price ? "<span><b style='font-size:22px'>" + esc(p.price) + "</b>" + (p.was ? " <s class='small' style='opacity:.7'>" + esc(p.was) + "</s>" : "") + "</span>" : "<span class='small'>Precio a definir</span>") + "</div>" +
         (p.promo ? "<p class='small' style='margin:6px 0 0;opacity:.85'>" + esc(p.promo) + ".</p>" : "") + "</div>" + payButtons(p.pro, "Forma " + p.n + " Pro");
     }
@@ -588,8 +612,7 @@
   // ---------- programas de 14 días ----------
   var PG = window.FormaProg || { list: [], byId: {} };
   function pgOf(id) { return PG.byId[id]; }
-  function pgProd(id) { return PRODUCTS.filter(function (p) { return p.prog === id; })[0]; }
-  function pgOwns(id) { var p = pgProd(id); return !!(p && owns(p)); }
+  function pgOwns(id) { return hasProduct("plan-" + id); }
   function pgItem(id) { return S.prog && S.prog.items && S.prog.items[id]; }
   function pgCount(id) { var it = pgItem(id); return it && it.done ? Object.keys(it.done).length : 0; }
   function pgCur() { var id = S.prog && S.prog.cur; return id && pgOf(id) && pgOwns(id) ? id : null; }
@@ -666,7 +689,7 @@
   }
   function openProgram(id) {
     var P = pgOf(id); if (!P) return;
-    if (!pgOwns(id)) { var pp = pgProd(id); return pp ? openProduct(pp.id) : undefined; }
+    if (!pgOwns(id)) return openPlan(id);
     var it = pgItem(id), n = pgCount(id), h = '<span class="badge">Programa de 14 días</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(P.n) + "</h2>";
     if (!it) {
       h += '<p>' + esc(P.intro) + '</p><div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
@@ -737,6 +760,57 @@
       '<div class="card dark"><b>Quedan 13 pasos más</b><p class="small" style="margin:6px 0 12px;opacity:.9">Con Vida Pro seguís los 14 pasos, medís tu antes y después y se suma a tu constancia.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>' +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
+  // ---------- test de planes ----------
+  var TESTQ = [
+    { k: "sleep", q: "¿Cómo estás durmiendo últimamente?", o: ["Bien", "A veces me cuesta", "Mal, casi siempre"] },
+    { k: "phone", q: "¿Cuánto tiempo perdés en el celular sin querer?", o: ["Poco", "Bastante", "Muchísimo"] },
+    { k: "proc", q: "¿Postergás lo importante?", o: ["Casi nunca", "A veces", "Seguido"] },
+    { k: "stress", q: "¿Cómo está tu tensión o ansiedad?", o: ["Estoy tranquilo/a", "Por momentos tenso/a", "Seguido tenso/a"] },
+    { k: "sport", q: "¿Practicás algún deporte con regularidad?", o: ["Tenis", "Fútbol", "Vóley", "Básquet", "Handball", "Otro o ninguno"] },
+    { k: "top", q: "Si pudieras mejorar una sola cosa en 14 días, ¿cuál elegirías?", o: ["Dormir mejor", "Usar menos el celular", "Dejar de postergar", "Estar más tranquilo/a", "Ninguna en particular"] }
+  ];
+  var tst = null;
+  function testRecs(a) {
+    var ids = ["dormir", "celular", "arrancar", "calma"], sc = {}, why = {}, out = [], sp = ["tenis", "futbol", "voley", "basquet", "handball"];
+    sc.dormir = a.sleep || 0; sc.celular = a.phone || 0; sc.arrancar = a.proc || 0; sc.calma = a.stress || 0;
+    if (a.top !== undefined && a.top < 4) sc[ids[a.top]] += 2;
+    why.dormir = a.sleep === 2 ? "Dijiste que dormís mal casi siempre" : a.sleep === 1 ? "Dijiste que a veces te cuesta dormir" : "Elegiste mejorar tu sueño";
+    why.celular = a.phone === 2 ? "Dijiste que perdés muchísimo tiempo en el celular" : a.phone === 1 ? "Dijiste que perdés bastante tiempo en el celular" : "Elegiste usar menos el celular";
+    why.arrancar = a.proc === 2 ? "Dijiste que postergás seguido" : a.proc === 1 ? "Dijiste que a veces postergás" : "Elegiste dejar de postergar";
+    why.calma = a.stress === 2 ? "Dijiste que sentís tensión seguido" : a.stress === 1 ? "Dijiste que por momentos te sentís tenso/a" : "Elegiste estar más tranquilo/a";
+    if (a.sport !== undefined && a.sport < 5) out.push({ id: sp[a.sport], sc: 3, why: "Practicás " + TESTQ[4].o[a.sport].toLowerCase() + " con regularidad" });
+    ids.forEach(function (id) { if (sc[id] >= 2) out.push({ id: id, sc: sc[id], why: why[id] }); });
+    out.sort(function (x, y) { return y.sc - x.sc; });
+    if (!out.length) ids.forEach(function (id) { if (sc[id] >= 1 && !out.length) out.push({ id: id, sc: sc[id], why: why[id] }); });
+    if (!out.length) out.push({ id: "vida", sc: 1, why: "Te ayuda a sostener tu día y tu constancia" });
+    return out.slice(0, 3).map(function (r) { return { id: r.id, why: r.why }; });
+  }
+  function openTest() {
+    close(); var old = $("#full"); if (old) old.remove();
+    tst = { i: 0, a: {} }; var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawTest();
+  }
+  function drawTest() {
+    var el = $("#full"); if (!el || !tst) return;
+    if (tst.i >= TESTQ.length) return finishTest();
+    var q = TESTQ[tst.i];
+    el.innerHTML = '<header><button class="btn ghost sm" data-tstexit>Salir</button><b>¿Qué plan te conviene?</b></header><div class="actbar"><i style="width:' + Math.round(tst.i * 100 / TESTQ.length) + '%"></i></div><div class="dbody"><span class="badge">Pregunta ' + (tst.i + 1) + " de " + TESTQ.length + '</span><h2 style="font-size:24px;margin:8px 0 6px">' + esc(q.q) + '</h2><div class="stack" style="margin-top:16px">' +
+      q.o.map(function (x, j) { return '<button class="btn ghost block tstopt" data-tstpick="' + j + '">' + esc(x) + "</button>"; }).join("") + '</div></div><div class="dfoot">' + (tst.i ? '<button class="btn ghost" data-tstback>Atrás</button>' : "") + "</div>";
+  }
+  function finishTest() {
+    var rec = testRecs(tst.a); S.test = { a: tst.a, rec: rec, at: today() }; save();
+    var el = $("#full"); if (!el) return; tst = null;
+    el.innerHTML = '<header><b>Tus planes</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Esto es lo que te conviene</h2><p class="muted small">Según lo que respondiste. Cualquiera que elijas también desbloquea Vida diaria Pro.</p>' +
+      rec.map(function (r) { var pl = planOf(r.id); return '<div class="card"><div class="row"><span class="shape">' + SHAPES[r.id] + "</span><div><b>" + esc(pl.n) + '</b><span class="small muted" style="display:block">' + esc(r.why) + '</span></div></div><button class="btn sage block" data-tstplan="' + r.id + '" style="margin-top:10px">' + (pl.live ? "Ver plan" : "Avisarme cuando salga") + "</button></div>"; }).join("") + '</div><div class="dfoot"><button class="btn ghost block" data-tstclose>Cerrar</button></div>';
+  }
+  function testCard() {
+    if (!S.arm) return "";
+    if (S.test) return '<div class="card" style="margin-top:12px"><b>Tus planes</b><p class="small muted" style="margin:6px 0 10px">' + recIds().map(function (id) { return planOf(id).n; }).join(", ") + '</p><button class="btn sage sm" data-tab="planes">Ver mis planes</button></div>';
+    return '<div class="card testcta" style="margin-top:12px"><b>¿Qué plan te conviene?</b><p class="small muted" style="margin:6px 0 10px">Test de 1 minuto, gratis.</p><button class="btn sage sm" data-open="test">Hacer el test</button></div>';
+  }
+  function promptTest() {
+    sheet('<h2 style="font-size:24px">¡Tu día está armado!</h2><p class="muted">Lo vas a ver siempre en Hoy. ¿Querés saber qué plan te conviene para sumarle? Es un test de 1 minuto, gratis.</p><button class="btn sage block" data-open="test">Hacer el test</button><button class="btn ghost block" data-close style="margin-top:8px">Ahora no</button>');
+  }
+
   // ---------- armar mañana y prioridad del día ----------
   var showTm = false;
   function tmDate() { var d = new Date(); d.setDate(d.getDate() + 1); return d; }
@@ -800,7 +874,7 @@
   function startAct(key) {
     if (key === "organizar") return openOrganizar();
     var A = ACTS[key]; if (!A) return;
-    if (ACT_REQ[key] && !owns(prodOf(ACT_REQ[key]))) return openProduct(ACT_REQ[key]);
+    if (ACT_REQ[key] && !isProU()) return openPlan("vida");
     close();
     act = { key: key, i: 0, vals: [], tm: null, end: 0 };
     var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el);
@@ -982,7 +1056,7 @@
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
     if (S.arm && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, tildarlo y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
-    window.FormaDia.open({ ans: ans || null, onSave: function (a) { S.arm = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
+    window.FormaDia.open({ ans: ans || null, onSave: function (a) { var first = !S.arm; S.arm = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.test) setTimeout(promptTest, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
@@ -995,7 +1069,7 @@
     bl.forEach(function (b) {
       var k = window.FormaDia.KIND[b.kind], ck = armCheckable(b), dn = armDone(b), isNow = now >= b.s && now < b.e, st = isNow ? "now" : now >= b.e ? "past" : "next", pgw = isNow ? Math.round((now - b.s) * 100 / (b.e - b.s)) : 0, tk = armToolOf(b), tbtn = "";
       if (pro && tk && ck && !dn) {
-        var locked = ACT_REQ[tk] && !owns(prodOf(ACT_REQ[tk]));
+        var locked = ACT_REQ[tk] && !isProU();
         tbtn = '<button class="btn ' + (locked ? "ghost" : "sage") + ' sm" data-armtool="' + tk + '" style="margin-top:8px">' + (locked ? ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Con Pro" : "Hacer ahora") + "</button>";
       }
       html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd" role="button" tabindex="0" data-blkopen="' + bl.indexOf(b) + '"><b>' + esc(b.label) + '</b>' + bchips(b) + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
@@ -1445,6 +1519,12 @@
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
     if (d.prod) return openProduct(d.prod);
+    if (d.open === "test") return openTest();
+    if (d.tstexit !== undefined) { tst = null; var tf = $("#full"); if (tf) tf.remove(); return; }
+    if (d.tstpick !== undefined) { if (tst) { tst.a[TESTQ[tst.i].k] = +d.tstpick; tst.i++; drawTest(); } return; }
+    if (d.tstback !== undefined) { if (tst && tst.i) { tst.i--; drawTest(); } return; }
+    if (d.tstclose !== undefined) { var tf2 = $("#full"); if (tf2) tf2.remove(); render(); return; }
+    if (d.tstplan) { var tf3 = $("#full"); if (tf3) tf3.remove(); tab = "planes"; render(); return openPlan(d.tstplan); }
     if (d.open === "organizar") return openOrganizar();
     if (d.open === "respirar") return openRespirar();
     if (t.id === "orgdone") { completeAct("organizar"); touchBest(); save(); close(); render(); return; }

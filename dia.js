@@ -58,7 +58,7 @@
         }
         return "";
       } },
-    { title: "¿Cuánto tardás en cada traslado?", hint: "Es lo que tardás en llegar a tus horarios fijos y en volver. Elegí un tiempo de la lista o escribí el tuyo. Si no te movés, dejá \"No viajo\".",
+    { skip: function (a) { return a.fixedOn !== "yes"; }, title: "¿Cuánto tardás en cada traslado?", hint: "Es lo que tardás en llegar a tus horarios fijos y en volver. Elegí un tiempo de la lista o escribí el tuyo. Si no te movés, dejá \"No viajo\".",
       fields: [
         { key: "commuteGo", label: "Ida", type: "minutes" },
         { key: "commuteSame", label: "¿La vuelta tarda lo mismo?", type: "chips", opts: [["Sí, igual", "same"], ["No, distinta", "diff"]] },
@@ -155,6 +155,7 @@
       gaps(s, e).forEach(function (g) { if (g[1] - g[0] >= 10) add(g[0], g[1], label, kind, note); });
     }
     function place(dur, from, to, label, kind, note, backward) {
+      to = Math.min(to, sleep - 60); // nunca después de "Desconectar y dormir"
       var fs = [1, 0.75, 0.5];
       for (var i = 0; i < fs.length; i++) {
         var d = Math.max(Math.round(dur * fs[i] / 5) * 5, Math.min(dur, 15));
@@ -193,13 +194,13 @@
     var lunch = null, din = null;
     if (a.lunch !== -1 && a.lunch !== undefined) {
       lunch = Math.max(norm(a.lunch), wake + 60);
-      if (lunch + 45 > sleep - 120) lunch = null;
+      if (lunch + 45 > sleep - 120) { lunch = null; warnings.push("Tu almuerzo (" + fmt(a.lunch) + ") quedó fuera de tu día, entre que te despertás y te dormís. Revisá la hora del almuerzo o tus horarios."); }
     }
     if (a.dinner !== -1) {
       din = (a.dinner === "auto" || a.dinner === undefined)
         ? Math.min(Math.max(sleep - 150, wake + 360), sleep - 105)
         : Math.min(norm(a.dinner), sleep - 105);
-      if (din < wake + 120) din = null;
+      if (din < wake + 120) { din = null; warnings.push("Tu cena quedó muy cerca de que te despertás, así que no la incluimos. Revisá la hora de la cena."); }
     }
     // La cena automática se corre para no pisar horarios fijos
     if (din !== null && (a.dinner === "auto" || a.dinner === undefined) && a.fixedOn === "yes") {
@@ -420,6 +421,8 @@
         return '<div class="blk"><div class="tm">' + fmt(b.s) + "<br>" + fmt(b.e) + '</div><div class="bd"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + durText(b.e - b.s) + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + "</div></div>";
       }).join("") + '<p class="small muted">Es una guía de organización. Si tenés dolor o una lesión, consultá a un profesional de la salud antes de entrenar.</p>';
   }
+  function skipped(i) { var q = STEPS[i - 1]; return !!(q && q.skip && q.skip(st.ans)); }
+  function moveStep(d) { var n = st.step + d; while (n >= 1 && n <= STEPS.length && skipped(n)) n += d; return n; }
   function render() {
     if (!host) return;
     var total = STEPS.length, body = host.querySelector(".dbody"), foot = host.querySelector(".dfoot"), bar = host.querySelector(".actbar i"), html = "", fh = "";
@@ -427,11 +430,11 @@
       html = '<span class="badge">12 preguntas · 2 minutos</span><h2 style="font-size:28px;margin-top:8px">Armemos tu día</h2><p class="muted">Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
       fh = '<button class="btn block" data-da="start">Empezar</button>'; bar.style.width = "0%";
     } else if (st.step <= total) {
-      var s = STEPS[st.step - 1], msg = stepMessage(s);
-      bar.style.width = Math.round((st.step - 1) * 100 / total) + "%";
-      html = '<span class="badge">Pregunta ' + st.step + " de " + total + '</span><h2 style="font-size:24px;margin:8px 0 6px" tabindex="-1" id="dq">' + esc(s.title) + '</h2><p class="muted small">' + esc(s.hint) + '</p><div class="stack" style="margin-top:12px">' + visibleFields(s).map(function (f) { return "<div>" + fieldHtml(f) + "</div>"; }).join("") + "</div>" +
+      var s = STEPS[st.step - 1], msg = stepMessage(s), vt = 0, vn = 0; STEPS.forEach(function (q, qi) { if (!skipped(qi + 1)) { vt++; if (qi + 1 <= st.step) vn++; } });
+      bar.style.width = Math.round((vn - 1) * 100 / vt) + "%";
+      html = '<span class="badge">Pregunta ' + vn + " de " + vt + '</span><h2 style="font-size:24px;margin:8px 0 6px" tabindex="-1" id="dq">' + esc(s.title) + '</h2><p class="muted small">' + esc(s.hint) + '</p><div class="stack" style="margin-top:12px">' + visibleFields(s).map(function (f) { return "<div>" + fieldHtml(f) + "</div>"; }).join("") + "</div>" +
         (msg ? '<div class="card sage" role="alert" style="margin-top:12px">' + esc(msg) + "</div>" : "");
-      fh = '<div class="row"><button class="btn ghost" data-da="back">Atrás</button><button class="btn" style="flex:1" data-da="next"' + (isReady(s) ? "" : " disabled") + ">" + (st.step === total ? "Armar mi día" : "Siguiente") + "</button></div>";
+      fh = '<div class="row"><button class="btn ghost" data-da="back">Atrás</button><button class="btn" style="flex:1" data-da="next"' + (isReady(s) ? "" : " disabled") + ">" + (moveStep(1) > total ? "Armar mi día" : "Siguiente") + "</button></div>";
     } else {
       bar.style.width = "100%"; html = summary(plan(st.ans));
       fh = '<button class="btn block" data-da="save">Listo, usar este día</button><button class="btn ghost block" data-da="edit" style="margin-top:8px">Cambiar mis respuestas</button>';
@@ -475,8 +478,8 @@
     var act = el.getAttribute("data-da");
     if (act === "exit") { if (confirm("¿Salir? Si salís ahora no se guarda tu día. Podés armarlo después desde Hoy.")) { host.remove(); host = null; if (st.opts.onExit) st.opts.onExit(); } return; }
     if (act === "start") st.step = 1;
-    else if (act === "next") st.step += 1;
-    else if (act === "back") st.step = Math.max(st.step - 1, 0);
+    else if (act === "next") st.step = moveStep(1);
+    else if (act === "back") st.step = Math.max(moveStep(-1), 0);
     else if (act === "edit") st.step = 1;
     else if (act === "save") { var a = st.ans, cb = st.opts.onSave; host.remove(); host = null; if (cb) cb(JSON.parse(JSON.stringify(a))); return; }
     else if (act === "addblk") { st.ans.fixed.push(newBlock()); st.focus = { sel: 'select[data-blk="' + (st.ans.fixed.length - 1) + '"][data-prop="s"]' }; return render(); }
