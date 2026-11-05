@@ -827,6 +827,7 @@
   function pcat() { var fs = arguments; return function (a) { for (var i = 0; i < fs.length; i++) fs[i](a); }; }
   function hrsTxt(m) { return (Math.round(m / 6) / 10).toString().replace(".", ",") + " h"; }
   function fmtT(m) { return window.FormaDia ? window.FormaDia.fmt(m) : String(m); }
+  function A_(l, m, at, note, x) { return Object.assign({ l: l, m: m, at: at, note: note }, x || {}); }
   var GOALS = [
     { id: "dormir", n: "Dormir mejor", d: "Acostarte y levantarte mejor, sin darle vueltas", plan: "dormir",
       qs: [
@@ -843,17 +844,19 @@
         function sl(n) { return Math.max(tgt, cur - step * n); }
         var hoy = hrsTxt(1440 - (cur - A.wake));
         if (need) out.push({ s: 1, t: "Acostarte a las " + fmtT(sl(1)) + " (antes: " + fmtT(cur) + ")", why: "Hoy dormís unas " + hoy + " y querés " + H + ". Lo hacemos de a poco, " + step + " minutos por semana.", patch: function (a) { a.sleep = sl(1); } });
-        else out.push({ s: 1, t: "Tu horario ya alcanza para dormir " + H + " horas", why: "Entonces trabajamos la calidad del sueño, no la hora.", patch: null });
-        var tip1 = [["Si no te dormís en 20 minutos, levantate y hacé algo tranquilo con luz baja. Volvé a la cama cuando tengas sueño."], ["Si te despertás de noche, no mires el celular: respirá lento, 4 segundos entrando y 6 saliendo."], ["Tu problema es el horario, no el sueño: por eso movemos la hora de dormir de a poco."], ["Si dormís pero te levantás cansado, puede ser la calidad: sumamos una rutina para bajar el ritmo antes de acostarte."]][g.w];
-        if (tip1) out.push({ s: 1, t: tip1[0], why: "Para tu caso", patch: null });
-        var tl = [["La última hora, el celular lejos: dejalo cargando fuera de la cama."], ["Cortá el trabajo o el estudio una hora antes. Lo dejamos armado en «Desconectar y dormir»."], ["Dejá lo de la casa listo antes, para que la última hora sea solo para vos."], null][g.l];
-        if (tl) out.push({ s: 1, t: tl[0], why: "La última hora cuenta", patch: null });
-        if (g.c === 0) out.push({ s: 1, t: "Último café, mate o energizante antes de las 15:00", why: "La cafeína tarda horas en irse del cuerpo", patch: null });
-        if (g.c === 1) out.push({ s: 2, t: "Probá cortar la cafeína después de las 16:00", why: "La cafeína tarda horas en irse del cuerpo", patch: null });
+        else out.push({ s: 1, t: "Tu horario ya alcanza para dormir " + H + " horas", why: "Entonces trabajamos la calidad del sueño, no la hora.", patch: null, tip: true });
+        var ln = ["Celular a cargar fuera de la cama antes de empezar.", "Si en 20 minutos no te dormís, levantate, hacé algo tranquilo con luz baja y volvé cuando tengas sueño.", "Sin pantallas ni trabajo: luz baja y algo tranquilo.", "Sin pantallas: luz baja, ducha tibia o lectura."][g.l === 0 ? 0 : g.w === 0 ? 1 : g.w === 3 ? 3 : 2];
+        out.push({ s: 1, t: "Rutina de bajada", why: "Una rutina fija antes de acostarte le avisa al cuerpo que viene el sueño.", patch: null, act: A_("Rutina de bajada: sin pantallas", 20, [["sleep", -70]], ln) });
+        if (g.l === 0) out.push({ s: 1, t: "Celular afuera de la cama", why: "Es lo que más sueño le saca a quien lo usa antes de dormir.", patch: null, act: A_("Dejar el celular cargando fuera del cuarto", 5, [["sleep", -75]], "Despertador común o el celular lejos de la cama.") });
+        if (g.l === 1) out.push({ s: 1, t: "Cerrar el trabajo o el estudio", why: "Para que la cabeza deje de resolver cosas en la cama.", patch: null, act: A_("Cerrar el trabajo y anotar pendientes", 10, [["sleep", -100]], "Escribí lo que queda para mañana y cerrá todo.") });
+        if (g.l === 2) out.push({ s: 1, t: "Dejar la casa lista", why: "Para que la última hora sea solo para vos.", patch: null, act: A_("Dejar la casa lista para mañana", 10, [["sleep", -100]], "") });
+        if (g.w === 1) out.push({ s: 1, t: "Respiración si te despertás de noche", why: "Respirar lento baja el ritmo sin mirar el celular.", patch: null, act: A_("Respiración 4-6 antes de acostarte", 5, [["sleep", -15]], "Si te despertás de noche, repetila sin mirar el celular: 4 segundos entrando, 6 saliendo.") });
+        if (g.c === 0) out.push({ s: 1, t: "Último café del día", why: "La cafeína tarda horas en irse del cuerpo.", patch: null, act: A_("Último café, mate o energizante", 5, [["abs", 900]], "Después de esta hora, agua o té sin cafeína.") });
+        if (g.c === 1) out.push({ s: 2, t: "Cortar la cafeína a las 16:00", why: "La cafeína tarda horas en irse del cuerpo.", patch: null, act: A_("Último café o mate del día", 5, [["abs", 960]], "Después de esta hora, agua o té sin cafeína.") });
         if (need && sl(2) < sl(1)) out.push({ s: 2, t: "Acostarte a las " + fmtT(sl(2)), why: "Un paso más hacia tus " + H + " horas", patch: function (a) { a.sleep = sl(2); } });
-        out.push({ s: 2, t: "Sumar 5 minutos de respiración antes de dormir", why: "Ayuda a bajar el ritmo y a dormirte más rápido", patch: ah("breathe") });
-        if (g.f === 0) out.push({ s: 2, t: "Fines de semana: no más de 1 hora de diferencia con tu horario normal", why: "Cambiar mucho el horario desordena todo el reloj del cuerpo", patch: null });
-        if (need && sl(3) < sl(2)) out.push({ s: 3, t: "Acostarte a las " + fmtT(sl(3)), why: need && sl(3) === tgt ? "¡Llegás a tus " + H + " horas!" : "Seguimos acercándonos a tus " + H + " horas", patch: function (a) { a.sleep = sl(3); } });
+        out.push({ s: 2, t: "Respiración antes de dormir", why: "Ayuda a bajar el ritmo y a dormirte más rápido", patch: ah("breathe") });
+        if (g.f === 0) out.push({ s: 2, t: "Mismo horario el fin de semana", why: "Cambiar mucho el horario desordena el reloj del cuerpo.", patch: null, act: A_("Hoy es finde: acostate a tu hora de siempre (máx. 1 h de diferencia)", 5, [["sleep", -60]], "", { dow: [5, 6] }) });
+        if (need && sl(3) < sl(2)) out.push({ s: 3, t: "Acostarte a las " + fmtT(sl(3)), why: sl(3) === tgt ? "¡Llegás a tus " + H + " horas!" : "Seguimos acercándonos a tus " + H + " horas", patch: function (a) { a.sleep = sl(3); } });
         out.push({ s: 3, t: "Dejar anotado lo de mañana antes de dormir", why: "Sacás las cosas de la cabeza y llegás más tranquilo a la cama", patch: ah("plan") });
         return out;
       } },
@@ -867,15 +870,17 @@
       ],
       build: function (g) {
         var out = [];
-        out.push({ s: 1, t: "Sumar «Celular y redes, con límite» a tu día", why: "Un momento elegido para usarlo sin culpa, en vez de miradas sueltas todo el día.", patch: function (a) { a.waste = "phone"; } });
-        var tu = ["Al despertar, no lo agarres los primeros 30 minutos y cargalo lejos de la cama.", "Sacá las apps de redes de la primera pantalla: si cuesta abrirlas, las abrís menos.", "Cuando tengas algo importante, celular en otra habitación o en modo avión.", "De noche, cargalo fuera de la cama y usá un despertador común."][g.u];
-        if (tu) out.push({ s: 1, t: tu, why: "Para tu momento más difícil", patch: null });
-        if (g.a === 0 || g.a === 1) out.push({ s: 1, t: "Poné un límite diario en la app que más usás (en Bienestar digital o Tiempo en pantalla)", why: "Un límite que te avisa es más fácil que la fuerza de voluntad", patch: null });
-        out.push({ s: 2, t: "Sumar pausas sin pantalla durante el día", why: "Para que el celular no ocupe todos los huecos libres", patch: function (a) { a.pauses = Math.max(a.pauses || 0, 2); } });
+        out.push({ s: 1, t: "«Celular y redes, con límite» en tu día", why: "Un momento elegido para usarlo sin culpa, en vez de miradas sueltas todo el día.", patch: function (a) { a.waste = "phone"; } });
+        if (g.u === 0) out.push({ s: 1, t: "Mañana sin celular", why: "Lo primero que mirás define cómo arrancás el día.", patch: null, act: A_("", 0, [], "Primeros 30 minutos sin celular: agua y luz natural.", { into: "first" }) });
+        if (g.u === 0 || g.u === 3) out.push({ s: 1, t: "Celular lejos de la cama", why: "Si no está al alcance, no lo agarrás.", patch: null, act: A_("Dejar el celular cargando fuera del cuarto", 5, [["sleep", -45]], "Usá un despertador común.") });
+        if (g.u === 1) out.push({ s: 1, t: "Redes fuera de la primera pantalla", why: "Si cuesta abrirlas, las abrís menos.", patch: null, act: A_("Sacar las redes de la primera pantalla", 5, [["mid", 0]], "Movelas a una carpeta de la segunda pantalla.", { once: true }) });
+        if (g.u === 2) out.push({ s: 1, t: "Celular lejos cuando hay algo importante", why: "Es el momento donde más te cuesta.", patch: null, act: A_("", 0, [], "Celular en otra habitación o en modo avión.", { into: "focus" }) });
+        out.push({ s: 1, t: "Límite diario en la app que más usás", why: "Un límite que te avisa es más fácil que la fuerza de voluntad.", patch: null, act: A_("Poner límite diario a " + (["tus redes", "tus videos y series", "tus mensajes", "tus juegos"][g.a] || "tu app más usada"), 5, [["mid", 0]], "Ajustes del celular → Bienestar digital o Tiempo en pantalla.", { once: true }) });
+        out.push({ s: 2, t: "Pausas sin pantalla durante el día", why: "Para que el celular no ocupe todos los huecos libres", patch: function (a) { a.pauses = Math.max(a.pauses || 0, 2); } });
         var hb = [["read", "Leer 10 minutos"], ["move", "Moverte y estirar"], ["walk", "Caminar 15 minutos, mejor con alguien"], ["breathe", "Respirar y descansar de verdad"]][g.t] || ["read", "Leer 10 minutos"];
-        out.push({ s: 2, t: "Hábito para reemplazar el tiempo de pantalla: " + hb[1], why: "Lo que dijiste que querés hacer con ese tiempo", patch: ah(hb[0]) });
-        out.push({ s: 3, t: "Probá una tarde entera sin redes", why: ["Sirve para ver cuánto cambia cómo te sentís.", "Con la mitad ya hay un cambio enorme. Esto te muestra que se puede.", "Si querés llegar lejos, hay que probar qué se siente."][g.m] || "Sirve para ver cómo te sentís.", patch: null });
-        out.push({ s: 3, t: "Dejar listo mañana antes de dormir, con el celular fuera del cuarto", why: "Así arrancás sin pantalla", patch: ah("plan") });
+        out.push({ s: 2, t: "Hábito para reemplazar la pantalla: " + hb[1], why: "Es lo que dijiste que querés hacer con ese tiempo", patch: ah(hb[0]) });
+        out.push({ s: 3, t: "Un sábado a la tarde sin redes", why: ["Sirve para ver cuánto cambia cómo te sentís.", "Con la mitad ya hay un cambio enorme. Esto te muestra que se puede.", "Si querés llegar lejos, hay que probar qué se siente."][g.m] || "Sirve para ver cómo te sentís.", patch: null, act: A_("Tarde sin redes (probá hasta la noche)", 60, [["abs", 960]], "Dejalas cerradas y fijate cómo te sentís.", { dow: [6] }) });
+        out.push({ s: 3, t: "Dejar listo mañana antes de dormir", why: "Así arrancás sin pantalla", patch: ah("plan") });
         return out;
       } },
     { id: "estudio", n: "Estudiar y rendir mejor", d: "Organizar tu estudio y mejorar tus notas", plan: "estudio",
@@ -889,12 +894,14 @@
       build: function (g) {
         var out = [], hrs = [60, 120, 180, 240][g.h] || 120, en = ["am", "pm", "night", "any"][g.r] || "any";
         out.push({ s: 1, t: "Reservar " + hrsTxt(hrs) + " por día para estudiar, en tu mejor momento", why: "Estudiar pasa a ser una prioridad de tu día, con horario.", patch: function (a) { var p = (a.prios || []).slice(); if (p.indexOf("study") < 0) { if (p.length >= 3) p.pop(); p.unshift("study"); } a.prios = p; a.free = Math.max(a.free || 0, hrs); a.energy = en; } });
-        var td = [["Empezar es lo más difícil: prometé solo 10 minutos y después decidís si seguís.", function (a) { if (!a.waste || a.waste === "none") a.waste = "procrastinate"; }], ["Para concentrarte: celular en otra habitación mientras estudiás.", null], ["Al cerrar el día, anotá qué vas a estudiar mañana.", ah("plan")], ["Para retener: al terminar, cerrá el cuaderno y escribí de memoria lo que recordás.", null]][g.d];
-        if (td) out.push({ s: 1, t: td[0], why: "Para lo que más te cuesta", patch: td[1] });
-        out.push({ s: 2, t: "Estudiar en tandas de 25 a 50 minutos con una pausa corta", why: "El cerebro rinde más con pausas que con una maratón", patch: function (a) { a.pauses = Math.max(a.pauses || 0, 2); } });
-        if (g.x === 0) out.push({ s: 2, t: "Examen cerca: repasá 30 minutos por día lo que ya viste y hacé un simulacro la semana previa", why: "Repasar de a poco rinde más que todo junto", patch: null });
-        else if (g.x === 1) out.push({ s: 2, t: "Armá un calendario hacia el examen: temas por semana y un repaso final", why: "Con tiempo, la clave es repartir", patch: null });
-        out.push({ s: 3, t: "Un repaso semanal de 20 minutos con todo lo de la semana", why: "Repasar espaciado es lo que más ayuda a recordar", patch: ah("read") });
+        if (g.d === 0) out.push({ s: 1, t: "Empezar con 10 minutos", why: "Empezar es lo más difícil, no seguir.", patch: function (a) { if (!a.waste || a.waste === "none") a.waste = "procrastinate"; }, act: A_("", 0, [], "Regla de 10 minutos: empezá solo 10 y después decidís si seguís.", { into: "focus" }) });
+        if (g.d === 1) out.push({ s: 1, t: "Celular lejos mientras estudiás", why: "Cada vez que lo mirás perdés el hilo.", patch: null, act: A_("", 0, [], "Celular en otra habitación mientras estudiás.", { into: "focus" }) });
+        if (g.d === 2) out.push({ s: 1, t: "Anotar qué estudiar mañana", why: "Así sabés qué hacer apenas te sentás.", patch: ah("plan"), act: A_("Anotar qué estudiar mañana", 5, [["sleep", -150]], "Materia, tema y cuántos minutos.") });
+        if (g.d === 3) out.push({ s: 1, t: "Cerrar el cuaderno y escribir lo que recordás", why: "Recordar sin mirar es lo que más fija lo que estudiás.", patch: null, act: A_("", 0, [], "Al terminar, cerrá el cuaderno y escribí de memoria lo que recordás.", { into: "focus" }) });
+        out.push({ s: 2, t: "Estudiar en tandas con pausa corta", why: "El cerebro rinde más con pausas que con una maratón", patch: function (a) { a.pauses = Math.max(a.pauses || 0, 2); }, act: A_("", 0, [], "Tandas de 25 a 50 minutos con una pausa de 5.", { into: "focus" }) });
+        if (g.x === 0) out.push({ s: 2, t: "Repaso diario para el examen", why: "Repasar de a poco rinde más que todo junto.", patch: null, act: A_("Repasar lo que ya viste (examen cerca)", 30, [["mid", 0]], "Sin material nuevo: solo lo que ya estudiaste. Hacé un simulacro la semana previa.") });
+        if (g.x === 1) out.push({ s: 2, t: "Calendario hacia el examen", why: "Con tiempo, la clave es repartir.", patch: null, act: A_("Armar el calendario hacia el examen", 20, [["mid", 0]], "Temas por semana y un repaso final.", { once: true }) });
+        out.push({ s: 3, t: "Repaso semanal", why: "Repasar espaciado es lo que más ayuda a recordar", patch: ah("read"), act: A_("Repaso semanal de todo lo de la semana", 20, [["mid", 0]], "Mirá los temas de la semana y probate sin mirar.", { dow: [0] }) });
         return out;
       } },
     { id: "calma", n: "Bajar la ansiedad", d: "Estar más tranquilo y manejar la tensión", plan: "calma",
@@ -907,14 +914,15 @@
       ],
       build: function (g) {
         var out = [];
-        out.push({ s: 1, t: "Sumar respiración y pausas a tu día", why: "Son herramientas simples que funcionan mejor cuando las usás todos los días, no solo cuando estás mal.", patch: pcat(ah("breathe"), function (a) { a.pauses = Math.max(a.pauses || 0, 2); }) });
-        var tc = ["Al despertar, antes del celular, hacé 5 respiraciones lentas.", "Durante el día: pausa de 2 minutos cada 2 horas, soltando los hombros.", "A la noche: anotá lo que te preocupa en un papel para sacarlo de la cabeza.", "Cuando aparezca, nombrá lo que sentís y respirá lento: 4 segundos entrando, 6 saliendo."][g.c];
-        if (tc) out.push({ s: 1, t: tc, why: "Para tu momento más difícil", patch: null });
+        out.push({ s: 1, t: "Respiración y pausas en tu día", why: "Son herramientas simples que funcionan mejor cuando las usás todos los días, no solo cuando estás mal.", patch: pcat(ah("breathe"), function (a) { a.pauses = Math.max(a.pauses || 0, 2); }) });
+        if (g.c === 0) out.push({ s: 1, t: "5 respiraciones al despertar", why: "Antes del celular, para arrancar más tranquilo.", patch: null, act: A_("", 0, [], "Antes de mirar el celular: 5 respiraciones lentas.", { into: "first" }) });
+        if (g.c === 1 || g.c === 3) out.push({ s: 1, t: "Pausas de 2 minutos en el día", why: "Cortan la tensión antes de que se acumule.", patch: null, act: A_("Pausa de 2 minutos: soltá hombros y respirá", 5, [["abs", 660], ["abs", 900]], "4 segundos entrando, 6 saliendo.") });
+        if (g.c === 2 || g.c === 3) out.push({ s: 1, t: "Anotar lo que te preocupa", why: "Sacarlo de la cabeza antes de dormir ayuda.", patch: null, act: A_("Anotar lo que te preocupa", 10, [["sleep", -100]], "Un papel: qué me preocupa y qué puedo hacer mañana.") });
         out.push({ s: 2, t: "Caminar 15 minutos por día", why: g.a === 0 ? "Dijiste que moverte te ayuda: lo sumamos a tu día." : "Moverse baja la tensión del cuerpo.", patch: ah("walk") });
-        if (g.a === 1) out.push({ s: 2, t: "Elegí una persona con quien hablar esta semana, aunque sea 10 minutos", why: "Dijiste que hablar te ayuda", patch: null });
-        if (g.a === 3) out.push({ s: 2, t: "Probá una cosa distinta por día: caminar, respirar, escribir o hablar. Anotá cuál te hace bien", why: "Todavía no sabés cuál te sirve, así que lo descubrimos probando", patch: null });
-        out.push({ s: 3, t: "Escribir 3 líneas antes de dormir: cómo te fue y qué te preocupa", why: "Escribirlo ayuda a soltarlo", patch: ah("write") });
-        out.push({ s: 3, t: "Si en 3 semanas sigue igual o te frena en tu vida, hablalo con un profesional", why: "Forma ordena tus hábitos, pero no reemplaza un tratamiento", patch: null });
+        if (g.a === 1) out.push({ s: 2, t: "Hablar con alguien", why: "Dijiste que hablar te ayuda.", patch: null, act: A_("Hablar con alguien que te hace bien (aunque sean 10 minutos)", 10, [["mid", 0]], "Un llamado o un mensaje de voz.", { dow: [3, 6] }) });
+        if (g.a === 3) out.push({ s: 2, t: "Probar algo distinto cada día", why: "Todavía no sabés qué te sirve: lo descubrimos probando.", patch: null, act: A_("Probar algo distinto: caminar, respirar, escribir o hablar", 10, [["mid", 0]], "Anotá cuál te hizo bien.") });
+        out.push({ s: 3, t: "Escribir 3 líneas antes de dormir", why: "Escribirlo ayuda a soltarlo", patch: ah("write") });
+        out.push({ s: 3, t: "Si en 3 semanas sigue igual o te frena en tu vida, hablalo con un profesional", why: "Forma ordena tus hábitos, pero no reemplaza un tratamiento", patch: null, tip: true });
         return out;
       } },
     { id: "arrancar", n: "Arrancar el día con energía", d: "Mañanas ordenadas y dejar de postergar", plan: "arrancar",
@@ -926,12 +934,11 @@
       ],
       build: function (g) {
         var out = [];
-        out.push({ s: 1, t: "Un primer paso fijo cada mañana: agua, luz natural y un primer paso chico", why: "Arrancar siempre igual saca la decisión y baja la pereza.", patch: pcat(ah("plan"), function (a) { if (g.c === 1 || g.c === 3) a.waste = "procrastinate"; }) });
-        if (g.p === 0) out.push({ s: 1, t: "Los primeros 20 minutos, sin celular", why: "Lo primero que mirás define cómo arrancás", patch: null });
-        if (g.c === 0) out.push({ s: 1, t: "Dejá el despertador lejos de la cama y levantate al primer sonido", why: "Para lo que más te cuesta", patch: null });
+        out.push({ s: 1, t: "Un primer paso fijo cada mañana", why: "Arrancar siempre igual saca la decisión y baja la pereza.", patch: pcat(ah("plan"), function (a) { if (g.c === 1 || g.c === 3) a.waste = "procrastinate"; }), act: A_("", 0, [], "Agua, luz natural y un primer paso chico." + (g.p === 0 ? " Primeros 20 minutos sin celular." : ""), { into: "first" }) });
+        if (g.c === 0) out.push({ s: 1, t: "Despertador lejos de la cama", why: "Para lo que más te cuesta: levantarte.", patch: null, act: A_("Dejar el despertador lejos de la cama", 2, [["sleep", -40]], "Levantate al primer sonido.") });
         out.push({ s: 2, t: "Moverte 5 minutos apenas te levantás", why: "Despierta el cuerpo y sube la energía", patch: ah("move") });
-        if (g.c === 1 || g.c === 3) out.push({ s: 2, t: "Regla de 10 minutos: empezá solo 10 y después decidís", why: "Empezar es lo más difícil, no seguir", patch: null });
-        out.push({ s: 3, t: "Dejar la mañana de mañana preparada la noche anterior", why: "Ropa, mochila y lo primero que vas a hacer", patch: ah("write") });
+        if (g.c === 1 || g.c === 3) out.push({ s: 2, t: "Regla de 10 minutos", why: "Empezar es lo más difícil, no seguir.", patch: null, act: A_("", 0, [], "Regla de 10 minutos: empezá solo 10 y después decidís.", { into: "focus" }) });
+        out.push({ s: 3, t: "Dejar la mañana preparada la noche anterior", why: "Ropa, mochila y lo primero que vas a hacer", patch: ah("write"), act: A_("Dejar lista la ropa y lo primero de mañana", 10, [["sleep", -100]], "") });
         return out;
       } },
     { id: "deporte", n: "Mejorar en mi deporte", d: "Entrenar mejor y rendir más", plan: "tenis", go: "planes" },
@@ -946,7 +953,7 @@
   function goalChanges() {
     var G = S.goal; if (!G || !S.arm || !S.arm.ans) return [];
     var base = S.arm.ans0 || S.arm.ans, out = [];
-    (G.ids || []).forEach(function (id) { var g = goalById(id); if (!g || !g.build) return; var ga = (G.a && G.a[id]) || {}; g.build(ga, base).forEach(function (c, i) { out.push({ id: id + "_" + i, goal: id, s: c.s, t: c.t, why: c.why, patch: c.patch || null }); }); });
+    (G.ids || []).forEach(function (id) { var g = goalById(id); if (!g || !g.build) return; var ga = (G.a && G.a[id]) || {}; g.build(ga, base).forEach(function (c, i) { out.push({ id: id + "_" + i, goal: id, s: c.s, t: c.t, why: c.why, patch: c.patch || null, act: c.act || null, tip: !!c.tip }); }); });
     return out;
   }
   function openGoals() {
@@ -989,7 +996,7 @@
     S.goal = { ids: ids, a: a, other: other, at: today(), start: today(), ap: {} };
     if (S.arm && S.arm.ans) {
       if (!S.arm.ans0) S.arm.ans0 = JSON.parse(oldAns);
-      goalChanges().forEach(function (c) { if (c.s === 1 && c.patch) { c.patch(S.arm.ans); } if (c.s === 1) S.goal.ap[c.id] = 1; });
+      S.goal.apd = {}; goalChanges().forEach(function (c) { if (c.s === 1 && c.patch) { c.patch(S.arm.ans); } if (c.s === 1) { S.goal.ap[c.id] = 1; S.goal.apd[c.id] = today(); } });
     }
     var rec = []; ids.forEach(function (id) { var g = goalById(id); if (g && g.plan && planOf(g.plan) && rec.map(function (r) { return r.id; }).indexOf(g.plan) < 0) rec.push({ id: g.plan, why: "Para tu objetivo: " + g.n.toLowerCase() }); });
     S.test = { a: {}, rec: rec, at: today() }; save(); render();
@@ -1017,18 +1024,18 @@
     var G = S.goal;
     if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
     var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).join(" y ");
-    var cur = ch.filter(function (c) { return c.s === st; }).slice(0, 3), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && c.patch; });
+    var cur = ch.filter(function (c) { return c.s === st; }).sort(function (x, y) { return (x.tip ? 1 : 0) - (y.tip ? 1 : 0); }).slice(0, 4), tbl = armBlocks(), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && (c.patch || c.act); });
     var pro = isProU();
     var h = '<div class="card goalcard"><span class="small muted">Tu objetivo · semana ' + st + ' de 3</span><b style="display:block;font-size:19px;margin:2px 0 8px">' + esc(names || "Mi objetivo") + "</b>";
-    h += cur.map(function (c) { var ap = G.ap && G.ap[c.id], p = !!c.patch; return '<div class="row" style="align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line)"><span style="flex:1"><b class="small">' + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></span>" + (p ? (ap ? '<span class="tag ok">En tu día</span>' : pro ? '<button class="btn sage sm" data-gapply="' + c.id + '">Sumar</button>' : "") : "") + "</div>"; }).join("");
+    h += cur.map(function (c) { var ap = G.ap && G.ap[c.id], p = !!(c.patch || c.act), tb = null; tbl.forEach(function (b) { if (b.goalact && b.goalact.split("|")[0] === c.id && !tb) tb = b; }); return '<div class="row" style="align-items:flex-start;gap:10px;padding:7px 0;border-top:1px solid var(--line)"><span style="flex:1"><b class="small">' + (tb ? fmtT(tb.s) + " · " : "") + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></span>" + (p ? (ap ? '<span class="tag ok">En tu día</span>' : pro ? '<button class="btn sage sm" data-gapply="' + c.id + '">Sumar</button>' : "") : "") + "</div>"; }).join("");
     if (pend.length && !pro) h += '<button class="btn ghost block" data-plan="vida" style="margin-top:10px">Con Pro tu día se ajusta cada semana</button>';
     h += '<button class="linkbtn small" data-open="test" style="margin-top:8px">Cambiar mi objetivo</button></div>';
     return h;
   }
   function applyGoalChange(id) {
     if (!isProU()) { return; }
-    var c = goalChanges().filter(function (x) { return x.id === id; })[0]; if (!c || !c.patch || !S.arm || !S.arm.ans) return;
-    var a = Object.assign({}, S.arm.ans); c.patch(a); S.arm.ans = a; S.goal.ap = S.goal.ap || {}; S.goal.ap[id] = 1; save(); render();
+    var c = goalChanges().filter(function (x) { return x.id === id; })[0]; if (!c || !(c.patch || c.act) || !S.arm || !S.arm.ans) return;
+    var a = Object.assign({}, S.arm.ans); if (c.patch) c.patch(a); S.arm.ans = a; S.goal.ap = S.goal.ap || {}; S.goal.apd = S.goal.apd || {}; S.goal.ap[id] = 1; S.goal.apd[id] = today(); save(); render();
   }
   function openTest() { return openGoals(); }
   function openTestOld() {
@@ -1209,7 +1216,31 @@
     sheet('<h2 style="font-size:22px">Agregar a mi día</h2><p class="muted small">' + esc(T.n) + " · reservamos " + T.mins + ' minutos en un horario libre. No se agrega solo: lo elegís vos.</p><label class="field"><span>¿A qué hora?</span><select id="xts" style="' + fieldCss() + '">' + sl.map(function (t) { return '<option value="' + t + '">' + F.fmt(t) + "</option>"; }).join("") + '</select></label>' +
       '<div class="chips" style="margin:6px 0 14px"><button class="chip" data-xtw="hoy" aria-pressed="true">Solo hoy</button><button class="chip" data-xtw="todos" aria-pressed="false">Todos los días</button></div><p class="small muted" style="margin:0 0 10px">Si elegís todos los días, aparece los días en que ese horario esté libre.</p><button class="chip" data-xtn aria-pressed="false" style="margin-bottom:12px">Avisarme a esa hora</button><button class="btn sage block" data-xtok>Agregar</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
   }
-  function xtApply(bl, dt) {
+  function goalApply(bl, dt) {
+    var G = S.goal; if (!G || !G.ap || !bl.length) return bl;
+    var k = today(dt), dow = dt.getDay(), out = bl.slice(), wake = bl[0].s, sleep = bl[bl.length - 1].e;
+    goalChanges().forEach(function (c) {
+      if (!c.act || !G.ap[c.id]) return; var x = c.act;
+      if (x.dow && x.dow.indexOf(dow) < 0) return;
+      if (x.once) { var ad = G.apd && G.apd[c.id]; if (!ad) return; var df = Math.round((new Date(k + "T00:00:00") - new Date(ad + "T00:00:00")) / 864e5); if (df < 0 || df > 2) return; }
+      if (x.into) {
+        var ix = -1; out.forEach(function (b, i) { if (ix < 0 && (x.into === "first" ? i === 0 : b.kind === x.into)) ix = i; }); if (ix < 0) return;
+        var b0 = out[ix]; if ((b0.note || "").indexOf(x.note) >= 0) return; out[ix] = Object.assign({}, b0, { note: (b0.note ? b0.note + " " : "") + x.note }); return;
+      }
+      (x.at || []).forEach(function (at, ai) {
+        var t0 = at[0] === "wake" ? wake + at[1] : at[0] === "sleep" ? sleep + at[1] : at[0] === "mid" ? Math.round((wake + sleep) / 10) * 5 + at[1] : at[1];
+        var best = -1, bs = 0, bd = 1e9;
+        out.forEach(function (b, i) { if (!xtFree(b) || b.e - b.s < x.m) return; var st = Math.max(b.s, Math.min(t0, b.e - x.m)), d = Math.abs(st - t0); if (d < bd) { bd = d; best = i; bs = st; } });
+        if (best < 0 || bd > 180) return;
+        var f = out[best], parts = []; if (f.s < bs) parts.push(Object.assign({}, f, { e: bs }));
+        parts.push({ s: bs, e: bs + x.m, kind: "habit", label: x.l, note: x.note, goalact: c.id + "|" + ai }); if (f.e > bs + x.m) parts.push(Object.assign({}, f, { s: bs + x.m }));
+        out.splice.apply(out, [best, 1].concat(parts));
+      });
+    });
+    return out;
+  }
+  function xtApply(bl, dt) { return goalApply(xtApply0(bl, dt), dt); }
+  function xtApply0(bl, dt) {
     var k = today(dt), xs = (S.xt || []).filter(function (x) { return !x.del && (!x.d || x.d === k); }).sort(function (a, b) { return a.s - b.s; });
     if (!xs.length) return bl; var out = bl.slice();
     xs.forEach(function (x) {
