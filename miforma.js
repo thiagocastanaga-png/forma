@@ -1525,7 +1525,7 @@
     sb.rpc("username_available", { u: uname }).then(function (r) {
       if (r.error) throw r.error;
       if (r.data === false) { btn.disabled = false; return setMsg("Ese nombre de usuario ya está en uso. Elegí otro."); }
-      return sb.auth.signUp({ email: email, password: pass, options: { data: { username: uname, name: name } } }).then(function (res) {
+      return sb.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: "https://formargentina.com/miforma", data: { username: uname, name: name } } }).then(function (res) {
         if (res.error) { btn.disabled = false; return setMsg(authMsg(res.error)); }
         acct.username = uname;
         S.profile = { name: name, email: email, username: uname, areas: [], sports: [], created: today(), done: false };
