@@ -1,9 +1,9 @@
 (function () {
   "use strict";
   var CFG = window.FORMA || {};
-  var KEY = "forma_app_v1", NUEVO = false;
+  var KEY = "forma_app_v1", NUEVO = false, FLUJO = false;
   // ?nuevo=1 → cuenta de prueba nueva, aislada de tus datos reales (con &pro=1 desbloquea Pro)
-  try { var qn = new URLSearchParams(location.search); if (qn.get("nuevo") === "1") { NUEVO = true; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
+  try { var qn = new URLSearchParams(location.search); if (qn.get("nuevo") === "1" || qn.get("flujo") === "1") { NUEVO = true; FLUJO = qn.get("flujo") === "1"; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
   var FREE_HABITS = 0;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -132,7 +132,7 @@
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
     if (user && sb) { sync.state = "pending"; clearTimeout(pushT); pushT = setTimeout(push, 900); }
   }
-  try { if (NUEVO && !S.profile) { var qq = new URLSearchParams(location.search); S = blank(); S.profile = { name: "Prueba", email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = qq.get("pro") === "1"; localStorage.setItem(KEY, JSON.stringify(S)); } } catch (e) {}
+  try { if (NUEVO && !FLUJO && !S.profile) { var qq = new URLSearchParams(location.search); S = blank(); S.profile = { name: "Prueba", email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = qq.get("pro") === "1"; localStorage.setItem(KEY, JSON.stringify(S)); } } catch (e) {}
   try { if (new URLSearchParams(location.search).get("demo") === "1") { S.demo = true; S.guest = true; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} } } catch (e) {}
 
   function today(d) { d = d || new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
@@ -286,7 +286,11 @@
   function render() {
     if (mode === "recovery") return renderRecovery();
     if (needAuth()) return renderAuth();
-    if (!S.profile || S.profile.done === false) return renderOnboard();
+    if (!S.profile || S.profile.done === false) {
+      var nm0 = ((S.profile && S.profile.name) || draft.name || "").trim();
+      if (user || nm0) { S.profile = Object.assign({ name: nm0, email: (user && user.email) || "", areas: [], sports: [], created: today() }, S.profile || {}, { done: true }); if (!S.profile.name) S.profile.name = nm0; save(); if (!S.arm) setTimeout(armOpen, 300); }
+      else return renderOnboard();
+    }
     touchBest();
     if (tab === "catalogo") tab = "planes";
     var body = { hoy: vHoy, planes: vPlanes, perfil: vPerfil }[tab]();
@@ -308,11 +312,11 @@
     var reg = mode === "register", forgot = mode === "forgot";
     var html = '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack">' +
       '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>";
-    if (!sb) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
-    if (sb && !forgot) {
+    if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
+    if ((sb || FLUJO) && !forgot) {
       html += '<div class="seg" role="tablist"><button data-mode="register" aria-pressed="' + reg + '">Crear cuenta</button><button data-mode="login" aria-pressed="' + !reg + '">Ya tengo cuenta</button></div>';
     }
-    if (sb) {
+    if (sb || FLUJO) {
       if (forgot) {
         html += '<p class="muted small">Escribí tu email y te mandamos un link para elegir una contraseña nueva.</p>' +
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
@@ -346,10 +350,8 @@
   function renderOnboard() {
     $app.innerHTML =
       '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack">' +
-      '<h1 class="hello" style="font-size:30px">Un último paso</h1><p class="muted">Después te vamos a hacer unas preguntas para armar tu mapa de vida y encontrar el orden que vos querés. Sin apuro y sin respuestas correctas.</p>' +
-      (user ? "" : '<label class="field"><span>¿Cómo te llamás?</span><input id="f-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>') +
-      '<div><span class="small" style="font-weight:600">¿Hacés algún deporte? (opcional)</span><div class="chips" style="margin-top:8px">' +
-      SPORTS.map(function (a) { return '<button class="chip" data-sport="' + a[0] + '" aria-pressed="' + (draft.sports.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
+      '<h1 class="hello" style="font-size:30px">¿Cómo te llamás?</h1><p class="muted">Después armamos tu día en 2 minutos.</p>' +
+      '<label class="field"><span>Tu nombre</span><input id="f-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
       '<button class="btn block" id="create">Empezar</button><div class="msg" id="wmsg"></div></main>';
   }
 
@@ -949,6 +951,7 @@
     readAuthDraft();
     var name = draft.name.trim(), uname = draft.username.trim().replace(/^@/, "").toLowerCase(), email = draft.email.trim(), pass = val("a-pass");
     if (!name) return setMsg("Escribí tu nombre.");
+    if (FLUJO) { S.profile = { name: name, email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = new URLSearchParams(location.search).get("pro") === "1"; save(); tab = "hoy"; render(); if (!S.arm) armOpen(); return; }
     if (!/^[a-z0-9_]{3,20}$/.test(uname)) return setMsg("El usuario tiene que tener de 3 a 20 caracteres: letras sin tilde, números o guion bajo.");
     if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg("Revisá el email.");
     if (pass.length < 8) return setMsg("La contraseña tiene que tener al menos 8 caracteres.");
