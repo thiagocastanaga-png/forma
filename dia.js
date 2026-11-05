@@ -101,6 +101,10 @@
     { title: "¿Querés pausas con respiración durante el día?", hint: "Son de 5 minutos y se acomodan dentro de los bloques más largos.",
       fields: [
         { key: "pauses", label: "", type: "chips", opts: [["No, gracias", 0], ["Sí, 2 pausas", 2], ["Sí, 3 pausas", 3], ["Sí, 4 pausas", 4]] }
+      ] },
+    { title: "¿A qué hora querés cerrar tu día?", hint: "A esa hora te aparece el cierre: repasás cómo te fue y te llevás tu forma de hoy. Lo podés cambiar cuando quieras.",
+      fields: [
+        { key: "closeAt", label: "Cierro mi día a las", type: "select", placeholder: "Elegí una hora (opcional)", opts: times(1020, 1410, false), req: false }
       ] }
   ];
 

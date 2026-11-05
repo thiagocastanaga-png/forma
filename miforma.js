@@ -1200,7 +1200,8 @@
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
     if (S.arm && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, tildarlo y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
-    window.FormaDia.open({ ans: ans || null, onSave: function (a) { var first = !S.arm; S.arm = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.test) setTimeout(promptTest, 350); } });
+    var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
+    window.FormaDia.open({ ans: pre, onSave: function (a) { var first = !S.arm; if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.test) setTimeout(promptTest, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
