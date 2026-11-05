@@ -186,6 +186,7 @@
     hoy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
     planes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V8l8-5 8 5v11"/><path d="M9 19v-6h6v6"/></svg>',
     catalogo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><circle cx="17" cy="6.8" r="3.7"/><path d="M6.7 14l3.7 7H3z"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="3"/></svg>',
+    tools: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>',
     perfil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
     ok: '<svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
     flame: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.5 1 2.3 1.8 2.5C10.5 7 11 4.5 12 2z" fill="currentColor"/></svg>',
@@ -313,7 +314,7 @@
     }
     touchBest();
     if (tab === "catalogo") tab = "planes";
-    var body = { hoy: vHoy, planes: vPlanes, perfil: vPerfil }[tab]();
+    var body = { hoy: vHoy, tools: vTools, planes: vPlanes, perfil: vPerfil }[tab]();
     var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
     $app.innerHTML =
       '<div class="top"><div class="logo">forma<i></i></div><div class="row" style="gap:8px">' +
@@ -322,7 +323,7 @@
       (topPro ? '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" : "") + "</div></div>" +
       "<main>" + body + "</main>" +
       '<nav class="tabs" aria-label="Principal"><div>' +
-      [["hoy", "Hoy"], ["planes", "Planes"], ["perfil", "Perfil"]].map(function (t) {
+      [["hoy", "Hoy"], ["tools", "Herramientas"], ["planes", "Planes"], ["perfil", "Perfil"]].map(function (t) {
         return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' aria-current="page"' : "") + ">" + ICON[t[0]] + "<span>" + t[1] + "</span></button>";
       }).join("") + "</div></nav>";
   }
@@ -450,7 +451,7 @@
   }
   function vArmar() {
     var nm = (S.profile && S.profile.name) || "";
-    return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1><p>Forma te ayuda a darle forma a tu día: que sepas qué hacer y a qué hora, sin pensarlo de más. Empezamos por lo más importante.</p>' +
+    return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1>' +
       '<ol class="armsteps"><li><b>Contanos cómo es tu día</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Te lo armamos</b><span>En bloques con horarios, listo para usar.</span></li><li><b>Descubrí qué plan te conviene</b><span>Un test corto, opcional.</span></li></ol>' +
       '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
@@ -460,7 +461,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? testCard() + toolsCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -473,29 +474,14 @@
     var html = gr +
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
-    html += quoteCard();
     if (S.intencion) html += '<div class="card small"><span class="muted">Tu intención de la semana</span><br><b>' + esc(S.intencion) + "</b></div>";
-    html += sportCta() + reviewCard() + "@@ARM@@" + winsCard() + todoCard();
-    html += '<div class="sec">Mis hábitos</div>';
-    if (!hs.length) {
-      html += '<div class="card empty"><b>Todavía no tenés hábitos</b><p class="muted small">Elegí unos pocos del menú o escribí el tuyo. Mejor pocos y que se sostengan.</p><button class="btn" id="menu">Elegir del menú</button></div>';
-    } else html += dayList(hs, t, light);
-    var paused = activeHabits().filter(function (h) { return h.paused; });
-    if (paused.length) html += '<div class="daypart">En pausa</div><div class="card" style="padding:4px 14px">' + paused.map(function (h) { return '<div class="habit"><button class="hinfo" data-edithabit="' + h.id + '"><b>' + esc(h.name) + '</b><span class="htime none">Tocá para reanudar</span></button></div>'; }).join("") + "</div>";
-    if (activeHabits().length >= habitLimit()) {
-      html += '<div class="card sage"><b>Llegaste al límite del plan gratis (' + FREE_HABITS + " hábitos)</b><p class='small' style='margin:6px 0 12px'>Con Vida diaria Pro tenés hábitos sin límite, tu ritmo armado y la revisión semanal.</p><button class='btn' data-plan='vida'>Ver Vida diaria Pro</button></div>";
-    } else {
-      html += '<form id="addh" class="row" style="margin-top:8px"><input id="hname" placeholder="Mi propio hábito" maxlength="60" style="flex:1;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"><input id="htime" type="time" aria-label="Horario (opcional)" style="width:110px;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:var(--surf)"><button class="btn sage">Agregar</button></form><button class="btn ghost block" id="menu" style="margin-top:8px">Elegir del menú de hábitos</button><p class="small muted" style="margin:6px 0 0">El horario es un recordatorio, no una obligación.</p>';
-    }
-    html += dayCta() + reminderCard();
-    html += toolsCard();
+    html += reviewCard() + "@@ARM@@";
+    html += reminderCard() + cierreCard() + mananaCard();
     if (armBlocks().length) {
       if (viewMode() === "now") {
-        var rest = html.slice(gr.length).replace("@@ARM@@", "");
-        return gr + viewToggle() + prioCard() + cierreCard() + mananaCard() + nowSection() + toolsCard() + progCard() + compCard() + weekCard() +
-          '<button class="btn ghost block" id="more" style="margin-top:6px">' + (moreOpen ? "Ocultar" : "Más para hoy") + "</button>" + (moreOpen ? rest : "");
+        return gr + viewToggle() + nowSection() + prioCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
       }
-      return html.replace("@@ARM@@", viewToggle() + prioCard() + progCard() + weekCard() + armSection());
+      return html.replace("@@ARM@@", viewToggle() + prioCard() + weekCard() + armSection());
     }
     return html.replace("@@ARM@@", armSection());
   }
@@ -981,6 +967,11 @@
     var n = TOOLS.filter(toolOk).length;
     return '<button class="prod toolscard" data-open="tools"><span class="shape">' + SHAPES.calma + '</span><span style="flex:1;min-width:0"><b>Herramientas</b><small>Para usar cuando las necesites · ' + n + " disponibles</small></span></button>";
   }
+  function vTools() {
+    var h = '<h1 class="hello">Herramientas</h1><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>';
+    PLANS.forEach(function (p) { var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
+    return h;
+  }
   function openTools() {
     var h = '<h2 style="font-size:24px;margin:0 0 4px">Herramientas</h2><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>';
     PLANS.forEach(function (p) { var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
@@ -1227,7 +1218,7 @@
     if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 12 preguntas rápidas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
-    var html = cierreCard() + mananaCard() + compCard() + '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
+    var html = '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
       (pro && tr.length ? '<p class="small muted" style="margin:0 0 6px">' + n + " de " + tr.length + " momentos hechos hoy</p>" : "") +
       '<div class="legend"><span><i class="lg past"></i>Ya pasó</span><span><i class="lg now"></i>Ahora</span><span><i class="lg next"></i>Lo que sigue</span></div><div class="tl">';
     bl.forEach(function (b) {
@@ -1302,7 +1293,7 @@
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), th = tmThreshold(), t = today(), st = cierreStats();
     if (S.cierre && S.cierre[t]) {
-      return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (st.done ? "Hoy cumpliste " + st.done + " de " + st.tot + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + ' Mañana seguimos.</p><button class="linkbtn small" data-cmes style="margin-top:6px">Ver mi mes</button></div>';
+      return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (st.done ? "Hoy cumpliste " + st.done + " de " + st.tot + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + ' Mañana seguimos.</p>'+((S.wins&&S.wins[t]&&S.wins[t].length)?'<p class="small" style="margin:8px 0 0"><b>Lo que hiciste bien hoy:</b> '+S.wins[t].slice(0,4).map(esc).join(" · ")+"</p>":"")+'<button class="linkbtn small" data-cmes style="margin-top:6px">Ver mi mes</button></div>';
     }
     if (now < th && now >= 360) return '<div class="card"><div class="row between"><span class="small muted">Cierre del día a las ' + window.FormaDia.fmt(th) + '</span><button class="linkbtn small" data-cierreat>Cambiar hora</button></div></div>';
     return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.85">Mirá cómo te fue y llevate tu forma de hoy.</p><button class="btn sage" id="cierre">Cerrar mi día</button> <button class="linkbtn small" data-tmshow style="margin-left:8px">Dejar armado mañana</button><div style="margin-top:8px"><button class="linkbtn small" data-cierreat>Cambiar hora del cierre</button></div></div>';
@@ -1389,7 +1380,9 @@
     while (more) { more = false; groups.forEach(function (g) { if (g[i] !== undefined) { more = true; if (out.indexOf(g[i]) < 0) out.push(g[i]); } }); i++; }
     return out;
   }
-  function compToday() {
+  function compToday() { return [];
+  }
+  function compToday_old() {
     var c = S.comp && S.comp[today()]; if (c && c.length) return c.slice(0, 3);
     return compPool().slice(0, 3);
   }
