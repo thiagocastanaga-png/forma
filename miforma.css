@@ -318,3 +318,14 @@ textarea.pgin{resize:vertical;min-height:64px}
 .tstopt{text-align:left;padding:16px;font-size:16px}
 .tag.rec{background:var(--lima);color:#111}
 .testcta{border-left:4px solid var(--lima)}
+
+/* ---- cierre ---- */
+.cring{position:relative;display:inline-block;margin-top:8px;width:150px;height:150px}.cring svg{display:block}.cring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px}
+.ringfill{transition:stroke-dashoffset 1s ease-out}
+.rwd{display:inline-block;animation:rwdpop .7s cubic-bezier(.2,1.4,.4,1) both}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;justify-items:center;align-items:center}.mgrid small{opacity:.6;font-size:11px}
+.mcell i{display:block;width:6px;height:6px;border-radius:50%;background:rgba(128,128,128,.35)}.mcell i.fut{background:rgba(128,128,128,.15)}
+.mcell.pop svg{animation:rwdpop .8s .3s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes rwdpop{0%{transform:scale(0) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.rwd,.mcell.pop svg{animation:none}.ringfill{transition:none}}
+.mcell{display:flex;align-items:center;justify-content:center;width:100%;height:28px}

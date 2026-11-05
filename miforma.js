@@ -206,7 +206,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "wk", "tm", "prog", "test"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -225,9 +225,11 @@
     out.ad = Object.assign({}, remote.ad || {});
     Object.keys(local.ad || {}).forEach(function (k) { out.ad[k] = Object.assign({}, out.ad[k] || {}, local.ad[k]); });
     out.wins = Object.assign({}, remote.wins || {}, local.wins || {});
-    out.actn = Math.max(local.actn || 0, remote.actn || 0); out.cierre = Object.assign({}, remote.cierre || {}, local.cierre || {});
+    out.actn = Math.max(local.actn || 0, remote.actn || 0); out.cierre = Object.assign({}, remote.cierre || {}, local.cierre || {}); out.cierreL = Object.assign({}, remote.cierreL || {}, local.cierreL || {});
     out.comp = Object.assign({}, remote.comp || {}, local.comp || {}); out.bn = Object.assign({}, remote.bn || {}, local.bn || {});
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
+    out.dd = Object.assign({}, remote.dd || {}); Object.keys(local.dd || {}).forEach(function (k) { var r = out.dd[k], l = local.dd[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.dd[k] = l; });
+    out.cierreAt = local.cierreAt != null ? local.cierreAt : remote.cierreAt;
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
     out.tm = Object.assign({}, remote.tm || {}, local.tm || {});
     out.test = local.test || remote.test || null;
@@ -816,7 +818,8 @@
   // ---------- armar mañana y prioridad del día ----------
   var showTm = false;
   function tmDate() { var d = new Date(); d.setDate(d.getDate() + 1); return d; }
-  function tmThreshold() { var a = dayAns(new Date()) || {}, sl = a.sleep || 1380; return Math.max(1080, Math.min(sl - 180, 1260)); }
+  function cierreDef() { var a = dayAns(new Date()) || {}, sl = a.sleep || 1380; return Math.max(1080, Math.min(sl - 180, 1260)); }
+  function tmThreshold() { return typeof S.cierreAt === "number" ? S.cierreAt : cierreDef(); }
   function mananaCard() {
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(); if (now < tmThreshold()) return "";
@@ -1014,30 +1017,39 @@
 
   // ---------- armado del día (el mismo de la página) ----------
   var ARMTOOL = { "Pausa y respiración": "respirar", "Desconectar y dormir": "dormir", "Meditar y respirar": "calma", "Moverme y estirar": "movimiento", "Planificar el día siguiente": "cierre", "Escribir un diario": "cierre" };
-  function dayAns(dt) { dt = dt || new Date(); var w = S.wk && S.wk[dt.getDay()]; return w && w.ans ? w.ans : (S.arm && S.arm.ans) || null; }
+  function dayAns(dt) { dt = dt || new Date(); var dd = S.dd && S.dd[today(dt)]; if (dd && dd.ans) return dd.ans; var w = S.wk && S.wk[dt.getDay()]; return w && w.ans ? w.ans : (S.arm && S.arm.ans) || null; }
   function armBlocksFor(dt) { try { var a = dayAns(dt); return a && window.FormaDia ? window.FormaDia.plan(a).blocks : []; } catch (e) { return []; } }
   function armBlocks() { return armBlocksFor(new Date()); }
   // ---------- mi semana ----------
   var DNL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], DNS = ["D", "L", "M", "M", "J", "V", "S"];
   function weekDates() { var d = new Date(), k = (d.getDay() + 6) % 7, m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - k); return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return new Date(m.getFullYear(), m.getMonth(), m.getDate() + i); }); }
+  function ddCustom(dt) { var k = today(dt), x = S.dd && S.dd[k]; return !!(x && x.ans); }
   function wkCustom(dow) { return !!(S.wk && S.wk[dow] && S.wk[dow].ans); }
   function weekCard() {
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
     return '<div class="card weekc"><div class="row between"><b>Mi semana</b></div><div class="wkstrip">' +
-      weekDates().map(function (d) { var c = wkCustom(d.getDay()); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" aria-label="' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
+      weekDates().map(function (d) { var c = wkCustom(d.getDay()) || ddCustom(d); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" data-wkdt="' + today(d) + '" aria-label=""' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
       '</div></div>';
   }
   function wkDate(dow) { return weekDates().filter(function (d) { return d.getDay() === dow; })[0]; }
   function openWeekDay(dow, dt) {
-    var F = window.FormaDia, d = dt || wkDate(dow), bl = armBlocksFor(d), cu = wkCustom(dow);
-    sheet('<span class="badge">' + (cu ? "Armado para este día" : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">Se repite todos los ' + DNL[dow].toLowerCase() + (dow === 3 ? "" : "s") + ".</p>" +
+    var F = window.FormaDia, d = dt || wkDate(dow), k = today(d), bl = armBlocksFor(d), one = ddCustom(d), cu = wkCustom(dow), pl = DNL[dow].toLowerCase() + (/s$/.test(DNL[dow]) ? "" : "s");
+    sheet('<span class="badge">' + (one ? "Cambiado solo para este día" : cu ? "Armado para los " + pl : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">' + (one ? "El resto de los " + pl + " no cambia." : cu ? "Se repite todos los " + pl + "." : "Es el día que armaste con el test.") + "</p>" +
       '<div class="wklist">' + bl.map(function (b) { var K = F.KIND[b.kind]; return '<div class="wkrow"><span class="wkt">' + F.fmt(b.s) + '</span><i style="background:' + K.dot + '"></i><span>' + esc(b.label) + "</span></div>"; }).join("") + "</div>" +
-      '<button class="btn sage block" data-wkedit="' + dow + '" style="margin-top:14px">' + (cu ? "Cambiar este día" : "Armar este día distinto") + "</button>" +
-      (cu ? '<button class="btn ghost block" data-wkreset="' + dow + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
+      '<button class="btn sage block" data-ddedit="' + k + '" style="margin-top:14px">Cambiar solo este día</button>' +
+      (one ? '<button class="btn ghost block" data-ddreset="' + k + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
+      '<button class="btn ghost block" data-wkedit="' + dow + '" style="margin-top:8px">' + (cu ? "Cambiar todos los " + pl : "Armar todos los " + pl + " distinto") + "</button>" +
+      (cu ? '<button class="btn ghost block" data-wkreset="' + dow + '" style="margin-top:8px">Todos los ' + pl + ' vuelven al día base</button>' : "") +
       '<div class="sec" style="margin-top:16px">Copiar este día a</div><div class="wkto">' + [1, 2, 3, 4, 5, 6, 0].filter(function (x) { return x !== dow; }).map(function (x) { return '<button class="chip" data-wkto="' + x + '" aria-pressed="false">' + DNL[x].slice(0, 3) + "</button>"; }).join("") + '</div>' +
       '<button class="btn ghost block" data-wkcopy="' + dow + '" style="margin-top:8px">Copiar</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }
+  function ddEdit(k) {
+    if (!window.FormaDia || !isProU()) return;
+    var q = k.split("-"), dt = new Date(+q[0], +q[1] - 1, +q[2]), base = dayAns(dt); close();
+    window.FormaDia.open({ title: "Armá " + (k === today() ? "tu día de hoy" : DNL[dt.getDay()].toLowerCase() + " " + dt.getDate()), ans: base, onSave: function (a) { S.dd = S.dd || {}; S.dd[k] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
+  }
+  function ddReset(k) { S.dd = S.dd || {}; S.dd[k] = { ans: null, at: today() }; save(); close(); render(); }
   function wkEdit(dow) {
     if (!window.FormaDia || !isProU()) return;
     var base = dayAns(wkDate(dow)); close();
@@ -1122,17 +1134,68 @@
       '<p class="small muted" style="margin:6px 0 0">Suben las semanas con 3 o más días de constancia (' + L.gw + ') y las actividades guiadas que hacés completas (' + L.acts + "). Tildar no suma por sí solo.</p>" +
       (pro ? "" : '<p class="small" style="margin:8px 0 0"><button class="linkbtn" data-plan="vida">Con Vida diaria Pro empezás a subir de nivel</button></p>') + "</div>";
   }
+  var CIERRE_MSG = [
+    ["Hoy fue un día tranquilo. Lo importante es que volviste.", "Un día suave también cuenta. Mañana seguimos.", "No siempre se puede todo. Hoy sumaste igual."],
+    ["Buen día. Hiciste lo que pudiste y eso se nota.", "Avanzaste. Un paso chico por día es como se arma lo grande.", "Día cumplido. Descansá tranquilo."],
+    ["¡Qué día! Casi todo en su lugar.", "Hoy le diste forma a tu día de verdad.", "Día redondo. Esto es lo que se repite y cambia la vida."]
+  ];
+  function cierreStats() {
+    var list = compToday(), n = list.filter(compDone).length, bl = armBlocks().filter(armCheckable), nb = bl.filter(armDone).length, tot = list.length + bl.length, done = n + nb, pct = tot ? Math.round(done * 100 / tot) : 0;
+    var pr = S.tm && S.tm[today()], pd = !!(pr && pr.t && pr.d);
+    return { n: n, nl: list.length, nb: nb, nbl: bl.length, tot: tot, done: done, pct: pct, lvl: pct >= 80 ? 3 : pct >= 40 ? 2 : 1, prio: pr && pr.t ? pr : null, pd: pd };
+  }
+  function cierreStreak() {
+    var c = 0, d = new Date(); if (!(S.cierre && S.cierre[today(d)])) d.setDate(d.getDate() - 1);
+    while (S.cierre && S.cierre[today(d)] && c < 400) { c++; d.setDate(d.getDate() - 1); }
+    return c;
+  }
   function cierreCard() {
     if (!isProU() || !S.arm || !S.arm.ans) return "";
-    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), sl = S.arm.ans.sleep || 1380, th = Math.max(1080, Math.min(sl - 180, 1260)), t = today();
-    var list = compToday(), n = list.filter(compDone).length, bl = armBlocks().filter(armCheckable), nb = bl.filter(armDone).length;
+    var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), th = tmThreshold(), t = today(), st = cierreStats();
     if (S.cierre && S.cierre[t]) {
-      return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (n ? "Hoy cumpliste " + n + " de " + list.length + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + " Mañana seguimos.</p></div>";
+      return '<div class="card sage"><b>Día cerrado</b><p class="small" style="margin:6px 0 0">' + (st.done ? "Hoy cumpliste " + st.done + " de " + st.tot + ". Eso cuenta, y mucho." : "Hoy fue un día más tranquilo. Lo importante es que volviste.") + ' Mañana seguimos.</p><button class="linkbtn small" data-cmes style="margin-top:6px">Ver mi mes</button></div>';
     }
-    if (now < th && now >= 360) return "";
-    return '<div class="card dark"><b>Cierre del día</b><div style="height:10px"></div><button class="btn sage" id="cierre">Cerrar mi día</button> <button class="linkbtn small" data-tmshow style="margin-left:8px">Dejar armado mañana</button></div>';
+    if (now < th && now >= 360) return '<div class="card"><div class="row between"><span class="small muted">Cierre del día a las ' + window.FormaDia.fmt(th) + '</span><button class="linkbtn small" data-cierreat>Cambiar hora</button></div></div>';
+    return '<div class="card dark"><b>Cierre del día</b><p class="small" style="margin:6px 0 10px;opacity:.85">Mirá cómo te fue y llevate tu forma de hoy.</p><button class="btn sage" id="cierre">Cerrar mi día</button> <button class="linkbtn small" data-tmshow style="margin-left:8px">Dejar armado mañana</button><div style="margin-top:8px"><button class="linkbtn small" data-cierreat>Cambiar hora del cierre</button></div></div>';
   }
-
+  function openCierreAt() {
+    var th = tmThreshold(), v = ("0" + Math.floor(th / 60)).slice(-2) + ":" + ("0" + (th % 60)).slice(-2);
+    sheet('<h2 style="font-size:22px">¿A qué hora querés cerrar tu día?</h2><p class="muted small">A esa hora te aparece el cierre y te llega el aviso. Elegí un momento en que ya estés más tranquilo.</p><input id="cat" type="time" value="' + v + '" style="width:100%;margin:8px 0 14px;' + fieldCss() + '"><button class="btn sage block" data-cierreok>Guardar</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+  }
+  function shapeSvg(lvl, c, sz) {
+    var b = '<svg viewBox="0 0 24 24" width="' + sz + '" height="' + sz + '" aria-hidden="true">';
+    return b + (lvl >= 3 ? '<circle cx="12" cy="12" r="11" fill="' + c + '"/>' : lvl === 2 ? '<rect x="2" y="2" width="20" height="20" rx="7" fill="' + c + '"/>' : '<path d="M2 12 A10 10 0 0 1 22 12 Z" fill="' + c + '"/>') + "</svg>";
+  }
+  var SHCOL = ["#86A892", "#C6F432", "#4C7DFF", "#FFC83D", "#FF8A4C", "#B9A7F0"];
+  function monthGrid(hl) {
+    var n = new Date(), y = n.getFullYear(), m = n.getMonth(), first = new Date(y, m, 1), off = (first.getDay() + 6) % 7, dim = new Date(y, m + 1, 0).getDate(), cnt = 0, h = "";
+    for (var i = 0; i < off; i++) h += "<span></span>";
+    for (var dd = 1; dd <= dim; dd++) {
+      var k = today(new Date(y, m, dd)), v = S.cierre && S.cierre[k], fut = dd > n.getDate();
+      if (v) cnt++;
+      h += '<span class="mcell' + (hl && dd === n.getDate() ? " pop" : "") + '">' + (v ? shapeSvg(v === 1 && !(S.cierreL && S.cierreL[k]) ? 1 : (S.cierreL && S.cierreL[k]) || 1, SHCOL[dd % 6], 26) : '<i class="' + (fut ? "fut" : "") + '"></i>') + "</span>";
+    }
+    return { html: '<div class="mgrid">' + ["L", "M", "M", "J", "V", "S", "D"].map(function (x) { return "<small>" + x + "</small>"; }).join("") + h + "</div>", n: cnt };
+  }
+  function openCierre(ph) {
+    var old = $("#full"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el);
+    var st = cierreStats(), msgs = CIERRE_MSG[st.lvl - 1], msg = msgs[new Date().getDate() % msgs.length], C = 2 * Math.PI * 52;
+    if (ph === "reward") {
+      var g = monthGrid(true), sk = cierreStreak();
+      el.innerHTML = '<header><b>Tu forma de hoy</b></header><div class="dbody" style="text-align:center"><div class="rwd">' + shapeSvg(st.lvl, SHCOL[new Date().getDate() % 6], 110) + '</div><h2 style="font-size:26px;margin:14px 0 6px">' + (sk > 1 ? sk + " días cerrados seguidos" : "Día cerrado") + '</h2><p class="muted">' + esc(msg) + '</p><div class="card" style="text-align:left;margin-top:16px"><b>Tu mes en formas</b><span class="small muted" style="display:block;margin:2px 0 10px">' + g.n + (g.n === 1 ? " día cerrado" : " días cerrados") + ' este mes</span>' + g.html + '</div></div><div class="dfoot"><button class="btn sage block" data-cierrefin>Listo</button><button class="btn ghost block" data-cierrefin="tm" style="margin-top:8px">Dejar armado mañana</button></div>';
+      return;
+    }
+    el.innerHTML = '<header><button class="btn ghost sm" data-cierrefin="x">Volver</button><b>Cierre del día</b></header><div class="dbody" style="text-align:center"><div class="cring"><svg viewBox="0 0 120 120" width="150" height="150"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--sage)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - st.pct / 100)).toFixed(1) + '" transform="rotate(-90 60 60)" class="ringfill"/></svg><b>' + st.pct + '%</b></div>' +
+      '<h2 style="font-size:24px;margin:12px 0 4px">' + esc(msg) + '</h2><div class="chips" style="justify-content:center;margin:12px 0">' + (st.nbl ? '<span class="chip on">Tu día: ' + st.nb + "/" + st.nbl + "</span>" : "") + (st.nl ? '<span class="chip on">Compromisos: ' + st.n + "/" + st.nl + "</span>" : "") + (st.prio ? '<span class="chip on">Prioridad: ' + (st.pd ? "hecha" : "pendiente") + "</span>" : "") + '</div>' +
+      '<label class="field" style="text-align:left"><span>Una cosa que salió bien hoy <small class="muted" style="font-weight:400">(opcional)</small></span><input id="cwin" maxlength="80" placeholder="Aunque sea algo chiquito" style="' + fieldCss() + '"></label></div><div class="dfoot"><button class="btn sage block" data-cierreok2>Cerrar mi día</button></div>';
+  }
+  function doCierre() {
+    var tdz = today(), st = cierreStats(); S.wins = S.wins || {}; var wl = S.wins[tdz] = S.wins[tdz] || [];
+    compToday().filter(compDone).forEach(function (x) { if (wl.indexOf(x) < 0 && wl.length < 8) wl.push(x); });
+    var w = $("#cwin"); if (w && w.value.trim() && wl.length < 8) wl.push(w.value.trim());
+    S.cierre = S.cierre || {}; S.cierre[tdz] = 1; S.cierreL = S.cierreL || {}; S.cierreL[tdz] = st.lvl; save(); render(); openCierre("reward");
+  }
 
   // ---------- vista "Ahora" (bloque actual en grande) ----------
   var moreOpen = false;
@@ -1575,7 +1638,9 @@
     if (d.tmshow !== undefined) { showTm = true; render(); return; }
     if (d.tmedit !== undefined) { if (S.tm) delete S.tm[today(tmDate())]; save(); render(); return; }
     if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0 && isProU()) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
-    if (d.wkday !== undefined) return openWeekDay(+d.wkday);
+    if (d.ddedit) return ddEdit(d.ddedit);
+    if (d.ddreset) { if (isProU()) ddReset(d.ddreset); return; }
+    if (d.wkday !== undefined && d.wkday !== "") { var wd2 = null; if (d.wkdt) { var q2 = d.wkdt.split("-"); wd2 = new Date(+q2[0], +q2[1] - 1, +q2[2]); } return openWeekDay(+d.wkday, wd2); }
     if (d.wkedit !== undefined) return wkEdit(+d.wkedit);
     if (d.wkreset !== undefined) { if (isProU()) wkReset(+d.wkreset); return; }
     if (d.wkto !== undefined) { t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") === "true" ? "false" : "true"); return; }
@@ -1590,11 +1655,12 @@
     if (d.settheme) return setTheme(d.settheme);
     if (d.setview) { try { localStorage.setItem("forma_view", d.setview); } catch (e) {} render(); window.scrollTo(0, 0); return; }
     if (t.id === "more") { moreOpen = !moreOpen; render(); return; }
-    if (t.id === "cierre") {
-      var tdz = today(); S.wins = S.wins || {}; var wl2 = S.wins[tdz] = S.wins[tdz] || [];
-      compToday().filter(compDone).forEach(function (x) { if (wl2.indexOf(x) < 0 && wl2.length < 8) wl2.push(x); });
-      S.cierre = S.cierre || {}; S.cierre[tdz] = 1; save(); render(); return;
-    }
+    if (t.id === "cierre") return openCierre();
+    if (d.cierreat !== undefined) return openCierreAt();
+    if (d.cierreok !== undefined) { var cv = ($("#cat") || {}).value || ""; var mm = cv.match(/^(\d{1,2}):(\d{2})$/); if (mm) { S.cierreAt = Math.max(0, Math.min(1439, +mm[1] * 60 + +mm[2])); save(); } close(); render(); return; }
+    if (d.cierreok2 !== undefined) return doCierre();
+    if (d.cmes !== undefined) { S.cierreL = S.cierreL || {}; return openCierre("reward"); }
+    if (d.cierrefin !== undefined) { var fe = $("#full"); if (fe) fe.remove(); if (d.cierrefin === "tm") { showTm = true; } render(); window.scrollTo(0, 0); return; }
     if (t.id === "armgo") return armOpen();
     if (t.id === "armedit") return armOpen(S.arm && S.arm.ans);
     if (d.ack) { if (!(S.demo || isPro("vida"))) return; S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
