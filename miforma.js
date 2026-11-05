@@ -290,7 +290,7 @@
     if (needAuth()) return renderAuth();
     if (!S.profile || S.profile.done === false) {
       var nm0 = ((S.profile && S.profile.name) || draft.name || "").trim();
-      if (user || nm0) { S.profile = Object.assign({ name: nm0, email: (user && user.email) || "", areas: [], sports: [], created: today() }, S.profile || {}, { done: true }); if (!S.profile.name) S.profile.name = nm0; save(); if (!S.arm) setTimeout(armOpen, 300); }
+      if (user || nm0) { S.profile = Object.assign({ name: nm0, email: (user && user.email) || "", areas: [], sports: [], created: today() }, S.profile || {}, { done: true }); if (!S.profile.name) S.profile.name = nm0; save(); }
       else return renderOnboard();
     }
     touchBest();
@@ -432,7 +432,10 @@
     return '<div class="card"><b>Revisión semanal (Pro)</b><p class="small muted" style="margin:6px 0 10px">Cada semana ves qué funcionó, qué soltar y cómo ajustar tu ritmo, con tu progreso a la vista.</p><button class="btn ghost" data-plan="vida">Ver Vida diaria Pro</button></div>';
   }
   function vArmar() {
-    return '<div class="armhero"><span class="badge">12 preguntas · 2 minutos · gratis</span><h1>Armá tu día</h1><p>Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage block" id="armgo">Armar mi día</button></div>';
+    var nm = (S.profile && S.profile.name) || "";
+    return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1><p>Forma te ayuda a darle forma a tu día: que sepas qué hacer y a qué hora, sin pensarlo de más. Empezamos por lo más importante.</p>' +
+      '<ol class="armsteps"><li><b>Contanos cómo es tu día</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Te lo armamos</b><span>En bloques con horarios, listo para usar.</span></li><li><b>Descubrí qué plan te conviene</b><span>Un test corto, opcional.</span></li></ol>' +
+      '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">Es gratis y tu día queda siempre acá, en Hoy.</p></div>';
   }
   function vHoy() {
     if (!S.arm) return vArmar();
@@ -954,7 +957,7 @@
     readAuthDraft();
     var name = draft.name.trim(), uname = draft.username.trim().replace(/^@/, "").toLowerCase(), email = draft.email.trim(), pass = val("a-pass");
     if (!name) return setMsg("Escribí tu nombre.");
-    if (FLUJO) { S.profile = { name: name, email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = new URLSearchParams(location.search).get("pro") === "1"; save(); tab = "hoy"; render(); if (!S.arm) armOpen(); return; }
+    if (FLUJO) { S.profile = { name: name, email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = new URLSearchParams(location.search).get("pro") === "1"; save(); tab = "hoy"; render(); return; }
     if (!/^[a-z0-9_]{3,20}$/.test(uname)) return setMsg("El usuario tiene que tener de 3 a 20 caracteres: letras sin tilde, números o guion bajo.");
     if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg("Revisá el email.");
     if (pass.length < 8) return setMsg("La contraseña tiene que tener al menos 8 caracteres.");
@@ -1606,7 +1609,7 @@
       if (!nameV && !user) { $("#wmsg").textContent = "Escribí tu nombre para continuar."; return; }
       S.profile = Object.assign({ name: nameV, email: (user && user.email) || "", created: today() }, S.profile || {}, { areas: draft.areas.slice(), sports: draft.sports.slice(), done: true });
       if (!S.profile.name) S.profile.name = nameV;
-      save(); tab = "hoy"; render(); if (!S.arm) armOpen(); return;
+      save(); tab = "hoy"; render(); return;
     }
     if (d.check) {
       var h = S.habits.filter(function (x) { return x.id === d.check; })[0];

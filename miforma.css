@@ -329,3 +329,9 @@ textarea.pgin{resize:vertical;min-height:64px}
 @keyframes rwdpop{0%{transform:scale(0) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
 @media (prefers-reduced-motion:reduce){.rwd,.mcell.pop svg{animation:none}.ringfill{transition:none}}
 .mcell{display:flex;align-items:center;justify-content:center;width:100%;height:28px}
+
+.armsteps{list-style:none;margin:6px 0 10px;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:n}
+.armsteps li{counter-increment:n;display:flex;flex-direction:column;padding-left:42px;position:relative;line-height:1.25}
+.armsteps li::before{content:counter(n);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--sage);color:#111;font-weight:700;display:flex;align-items:center;justify-content:center}
+.armsteps li span{opacity:.7;font-size:14px}
+.armhero .badge{align-self:flex-start}
