@@ -331,7 +331,7 @@
   function renderAuth() {
     var reg = mode === "register", forgot = mode === "forgot";
     var html = '<div class="top"><div class="logo">forma<i></i></div></div><main class="stack">' +
-      '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>";
+      (reg ? '<p class="welk">Bienvenido</p>' : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Dale forma a la vida que querés" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
     if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
     if ((sb || FLUJO) && !forgot) {
       html += '<div class="seg" role="tablist"><button data-mode="register" aria-pressed="' + reg + '">Crear cuenta</button><button data-mode="login" aria-pressed="' + !reg + '">Ya tengo cuenta</button></div>';
@@ -342,8 +342,7 @@
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<button class="btn block" id="a-forgot">Enviar link</button><button class="btn ghost block" data-mode="login">Volver</button>';
       } else if (reg) {
-        html += '<p class="muted small">Creá tu cuenta gratis: tu racha, tus hábitos y lo que compres quedan guardados y los ves desde cualquier dispositivo.</p>' +
-          '<label class="field"><span>¿Cómo te llamás?</span><input id="a-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
+        html += '<label class="field"><span>¿Cómo te llamás?</span><input id="a-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
           '<label class="field"><span>Nombre de usuario <small class="muted" style="font-weight:400">(único; podés cambiarlo)</small></span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21" placeholder="te proponemos uno" value="' + esc(draft.username) + '"></label>' +
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<label class="field"><span>Contraseña (mínimo 8 caracteres)</span><input id="a-pass" type="password" autocomplete="new-password"></label>' +

@@ -343,3 +343,7 @@ textarea.pgin{resize:vertical;min-height:64px}
 
 #fbtab{position:fixed;right:0;top:46%;z-index:40;writing-mode:vertical-rl;transform:rotate(180deg);background:var(--lima,#C6F432);color:#111;border:0;border-radius:0 10px 10px 0;padding:14px 7px;font:600 12px/1 inherit;font-family:inherit;letter-spacing:.04em;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 #sheet textarea{font-family:inherit}
+
+.welk{margin:6px 0 0;font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-d,#4f7a60)}
+.welk+.hello{margin-top:4px}
+.freepill{align-self:flex-start;display:inline-block;background:var(--lima);color:#111;font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:5px 14px;margin:2px 0 6px}
