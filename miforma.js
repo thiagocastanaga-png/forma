@@ -599,7 +599,7 @@
   function animIn(els, o) {
     if (REDUCE) return; o = o || {};
     Array.prototype.forEach.call(els, function (e, i) {
-      if (e && e.animate) e.animate([{ opacity: 0, transform: "translate(" + (o.dx || 0) + "px," + (o.dy === undefined ? 14 : o.dy) + "px)" }, { opacity: 1, transform: "none" }], { duration: o.d || 420, delay: (o.stag === undefined ? 40 : o.stag) * Math.min(i, 8), easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+      if (e && e.animate) e.animate([{ opacity: 0, transform: "translate(" + (o.dx || 0) + "px," + (o.dy === undefined ? 14 : o.dy) + "px)" }, { opacity: 1, transform: "none" }], { duration: o.d || 620, delay: (o.stag === undefined ? 60 : o.stag) * Math.min(i, 8), easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
     });
   }
   var lastAnim = "";
@@ -607,7 +607,7 @@
     close();
     var el = document.createElement("div"); el.className = "sheet"; el.id = "sheet";
     el.innerHTML = "<div>" + html + "</div>"; document.body.appendChild(el);
-    if (!REDUCE && el.animate) { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 360, stag: 0 }); }
+    if (!REDUCE && el.animate) { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 540, stag: 0 }); }
   }
   function close() { var s = $("#sheet"); if (s) s.remove(); var f = $("#full"); if (f) f.remove(); stopBreath(); }
   function notifyForm(label, email) {
@@ -1091,7 +1091,7 @@
   function drawGoals() {
     drawGoals0();
     var el = $("#full"); if (!el || !gs) return; var k = gs.st + ":" + gs.gi + ":" + gs.qi;
-    if (k !== gAnimKey) { gAnimKey = k; var b = el.querySelector(".dbody"); if (b) animIn([b], { dx: 28, dy: 0, d: 380, stag: 0 }); }
+    if (k !== gAnimKey) { gAnimKey = k; var b = el.querySelector(".dbody"); if (b) animIn([b], { dx: 28, dy: 0, d: 560, stag: 0 }); }
   }
   function drawGoals0() {
     var el = $("#full"); if (!el || !gs) return;

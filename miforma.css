@@ -373,12 +373,12 @@ html[data-theme=dark] #splash svg{color:#F5F1E8}
 .pspark{display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:12px}.pspark i{flex:1;background:#86A892;border-radius:3px}
 .pspark i{flex:0 0 18px!important}
 
-.actbar i{transition:width .55s cubic-bezier(.2,.8,.2,1)}
-.chip,.btn,.plancard,.card[data-open],button.pill{transition:transform .16s cubic-bezier(.2,.8,.2,1),background-color .25s,border-color .25s,opacity .25s}
+.actbar i{transition:width .85s cubic-bezier(.2,.8,.2,1)}
+.chip,.btn,.plancard,.card[data-open],button.pill{transition:transform .24s cubic-bezier(.2,.8,.2,1),background-color .25s,border-color .25s,opacity .25s}
 .chip:active,.btn:active,.plancard:active{transform:scale(.965)}
-.chip[aria-pressed=true]{animation:chipPop .28s cubic-bezier(.2,.9,.3,1.4)}
+.chip[aria-pressed=true]{animation:chipPop .42s cubic-bezier(.2,.9,.3,1.4)}
 @keyframes chipPop{0%{transform:scale(.92)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
-.gbar i,.pspark i{transition:width .6s cubic-bezier(.2,.8,.2,1),height .6s}
-.sring path{transition:opacity .6s}
+.gbar i,.pspark i{transition:width .9s cubic-bezier(.2,.8,.2,1),height .9s}
+.sring path{transition:opacity .9s}
 .exact{margin-top:10px}.exact input{width:100%}
 @media (prefers-reduced-motion:reduce){.chip[aria-pressed=true]{animation:none}.chip,.btn,.plancard,.actbar i{transition:none}}
