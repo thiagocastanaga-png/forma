@@ -446,7 +446,7 @@
     body.innerHTML = html; foot.innerHTML = fh;
     if (host._ls !== st.step) {
       var back = host._ls !== undefined && st.step < host._ls; host._ls = st.step;
-      if (body.animate && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) body.animate([{ opacity: 0, transform: "translateX(" + (back ? -28 : 28) + "px)" }, { opacity: 1, transform: "none" }], { duration: 560, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+      if (body.animate && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) body.animate([{ opacity: 0, transform: "translateX(" + (back ? -28 : 28) + "px)" }, { opacity: 1, transform: "none" }], { duration: 720, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
     }
     if (st.focus) {
       var el = st.focus.sel ? body.querySelector(st.focus.sel) : body.querySelector('[data-key="' + st.focus.key + '"]' + (st.focus.o !== undefined ? '[data-o="' + st.focus.o + '"]' : ""));
