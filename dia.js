@@ -27,8 +27,8 @@
   var STEPS = [
     { title: "¿A qué hora te despertás y a qué hora te dormís?", hint: "Elegí tus horarios reales, aunque sean distintos cada día: usá los más habituales.",
       fields: [
-        { key: "wake", label: "Me despierto", type: "select", placeholder: "Elegí una hora", opts: times(180, 960, true) },
-        { key: "sleep", label: "Me duermo", type: "select", placeholder: "Elegí una hora", opts: times(1200, 1920, false) }
+        { key: "wake", label: "Me despierto", type: "select", placeholder: "Elegí una hora", opts: times(180, 960, true), ex: [180, 960, true] },
+        { key: "sleep", label: "Me duermo", type: "select", placeholder: "Elegí una hora", opts: times(1200, 1920, false), ex: [1200, 1920, false] }
       ],
       check: function (a) {
         if (a.wake === undefined || a.sleep === undefined) return "";
@@ -91,8 +91,8 @@
       ] },
     { title: "¿A qué hora comés?", hint: "La hora del almuerzo y de la cena. Si no almorzás o no cenás, elegilo.",
       fields: [
-        { key: "lunch", label: "Almuerzo", type: "select", placeholder: "Elegí una hora", opts: times(600, 1020, true).concat([["No almuerzo", -1]]) },
-        { key: "dinner", label: "Cena", type: "select", opts: [["Que la elija Forma", "auto"]].concat(times(1080, 1440, true)).concat([["No ceno", -1]]) }
+        { key: "lunch", label: "Almuerzo", type: "select", placeholder: "Elegí una hora", opts: times(600, 1020, true).concat([["No almuerzo", -1]]), ex: [600, 1020, true] },
+        { key: "dinner", label: "Cena", type: "select", opts: [["Que la elija Forma", "auto"]].concat(times(1080, 1440, true)).concat([["No ceno", -1]]), ex: [1080, 1440, true] }
       ] },
     { title: "¿Plan estricto o flexible?", hint: "Estricto asigna todo el día. Flexible deja margen libre a propósito.",
       fields: [
@@ -104,7 +104,7 @@
       ] },
     { title: "¿A qué hora querés cerrar tu día?", hint: "A esa hora te aparece el cierre: repasás cómo te fue y te llevás tu forma de hoy. Lo podés cambiar cuando quieras.",
       fields: [
-        { key: "closeAt", label: "Cierro mi día a las", type: "select", placeholder: "Elegí una hora (opcional)", opts: times(1020, 1410, false), req: false }
+        { key: "closeAt", label: "Cierro mi día a las", type: "select", placeholder: "Elegí una hora (opcional)", opts: times(1020, 1410, false), req: false, ex: [1020, 1410, false] }
       ] }
   ];
 
@@ -405,7 +405,7 @@
     }
     if (f.type === "select") {
       return '<label class="field"><span>' + esc(f.label) + '</span><select data-key="' + f.key + '">' + (f.placeholder ? '<option value=""' + (val === undefined ? " selected" : "") + " disabled>" + esc(f.placeholder) + "</option>" : "") +
-        f.opts.map(function (o, oi) { return '<option value="' + oi + '"' + (val === o[1] ? " selected" : "") + ">" + esc(o[0]) + "</option>"; }).join("") + "</select></label>";
+        f.opts.map(function (o, oi) { return '<option value="' + oi + '"' + (val === o[1] ? " selected" : "") + ">" + esc(o[0]) + "</option>"; }).join("") + "</select></label>" + exactHtml(f, val);
     }
     if (f.label) h += '<div class="small" style="font-weight:600;margin-bottom:6px">' + esc(f.label) + "</div>";
     h += '<div class="chips">' + f.opts.map(function (o, oi) {
@@ -444,10 +444,29 @@
       fh = '<button class="btn block" data-da="save">Listo, usar este día</button><button class="btn ghost block" data-da="edit" style="margin-top:8px">Cambiar mis respuestas</button>';
     }
     body.innerHTML = html; foot.innerHTML = fh;
+    if (host._ls !== st.step) {
+      var back = host._ls !== undefined && st.step < host._ls; host._ls = st.step;
+      if (body.animate && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) body.animate([{ opacity: 0, transform: "translateX(" + (back ? -28 : 28) + "px)" }, { opacity: 1, transform: "none" }], { duration: 380, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+    }
     if (st.focus) {
       var el = st.focus.sel ? body.querySelector(st.focus.sel) : body.querySelector('[data-key="' + st.focus.key + '"]' + (st.focus.o !== undefined ? '[data-o="' + st.focus.o + '"]' : ""));
       if (el) el.focus(); st.focus = null;
     } else { body.scrollTop = 0; }
+  }
+  // Hora exacta (cualquier minuto) para las preguntas de horarios
+  function exactHtml(f, val) {
+    if (!f.ex) return "";
+    var v = typeof val === "number" && val >= 0 ? fmt(val) : "", err = st.exErr && st.exErr[f.key];
+    return '<label class="field exact"><span class="small muted">¿Otra hora? Escribila exacta (opcional)</span><input type="time" data-key="' + f.key + '" data-exact="1" value="' + v + '"></label>' + (err ? '<p class="small" style="color:var(--naranja,#FF8A4C);margin:4px 0 0">' + esc(err) + "</p>" : "");
+  }
+  function exactSet(f, raw) {
+    var mm = /^(\d\d):(\d\d)$/.exec(raw || ""); st.exErr = st.exErr || {}; delete st.exErr[f.key]; if (!mm) return;
+    var m = +mm[1] * 60 + +mm[2], lo = f.ex[0], hi = f.ex[1], c = null;
+    [m, m + 1440].forEach(function (x) { if (c === null && x >= lo && x <= hi) c = x; });
+    if (c === null) { st.exErr[f.key] = "Elegí una hora entre " + fmt(lo) + " y " + fmt(hi) + "."; return; }
+    var val = f.ex[2] ? c % 1440 : c, has = f.opts.some(function (o) { return o[1] === val; });
+    if (!has) { var at = f.opts.length; for (var i = 0; i < f.opts.length; i++) { var ov = f.opts[i][1]; if (typeof ov === "number" && ov >= 0 && ov > val && ((f.ex[2] ? ov % 1440 : ov) > val)) { at = i; break; } } f.opts.splice(at, 0, [fmt(val), val]); }
+    st.ans[f.key] = val;
   }
   function fieldOf(key) { var fs = STEPS[st.step - 1].fields; for (var i = 0; i < fs.length; i++) if (fs[i].key === key) return fs[i]; return null; }
   function refreshNext() { var b = host.querySelector('[data-da="next"]'); if (b) b.disabled = !isReady(STEPS[st.step - 1]); }
@@ -463,6 +482,7 @@
   }
   function onChange(ev) {
     var el = ev.target;
+    if (el.hasAttribute("data-exact")) { var xf = fieldOf(el.getAttribute("data-key")); if (xf) { exactSet(xf, el.value); st.focus = { key: xf.key }; render(); } return; }
     if (el.tagName !== "SELECT") return;
     if (el.hasAttribute("data-blk")) {
       var bi = +el.getAttribute("data-blk"), prop = el.getAttribute("data-prop");
@@ -475,7 +495,7 @@
     }
     var f = fieldOf(el.getAttribute("data-key"));
     if (!f || el.value === "") return;
-    st.ans[f.key] = f.opts[+el.value][1]; st.focus = { key: f.key }; render();
+    if (st.exErr) delete st.exErr[f.key]; st.ans[f.key] = f.opts[+el.value][1]; st.focus = { key: f.key }; render();
   }
   function onClick(ev) {
     var el = ev.target.closest("button"); if (!el || el.disabled) return;

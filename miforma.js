@@ -308,6 +308,11 @@
   var draft = { name: "", username: "", email: "", areas: [], sports: [], news: true, terms: false };
   function needAuth() { return !user && !S.guest && (PRUEBA || !S.demo); }
   function render() {
+    render0();
+    var key = (needAuth() ? "auth" + mode : tab);
+    if (key !== lastAnim) { lastAnim = key; var m = $app.querySelector("main"); animIn(m ? m.children : $app.children, {}); }
+  }
+  function render0() {
     if (mode === "recovery") return renderRecovery();
     if (needAuth()) return renderAuth();
     if (!S.profile || S.profile.done === false) {
@@ -590,10 +595,19 @@
   }
 
   // ---------- hojas / pantallas ----------
+  var REDUCE = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  function animIn(els, o) {
+    if (REDUCE) return; o = o || {};
+    Array.prototype.forEach.call(els, function (e, i) {
+      if (e && e.animate) e.animate([{ opacity: 0, transform: "translate(" + (o.dx || 0) + "px," + (o.dy === undefined ? 14 : o.dy) + "px)" }, { opacity: 1, transform: "none" }], { duration: o.d || 420, delay: (o.stag === undefined ? 40 : o.stag) * Math.min(i, 8), easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+    });
+  }
+  var lastAnim = "";
   function sheet(html) {
     close();
     var el = document.createElement("div"); el.className = "sheet"; el.id = "sheet";
     el.innerHTML = "<div>" + html + "</div>"; document.body.appendChild(el);
+    if (!REDUCE && el.animate) { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 360, stag: 0 }); }
   }
   function close() { var s = $("#sheet"); if (s) s.remove(); var f = $("#full"); if (f) f.remove(); stopBreath(); }
   function notifyForm(label, email) {
@@ -1073,7 +1087,13 @@
     var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawGoals();
   }
   function gLive() { return gs.sel.map(goalById).filter(function (g) { return g && g.qs; }); }
+  var gAnimKey = "";
   function drawGoals() {
+    drawGoals0();
+    var el = $("#full"); if (!el || !gs) return; var k = gs.st + ":" + gs.gi + ":" + gs.qi;
+    if (k !== gAnimKey) { gAnimKey = k; var b = el.querySelector(".dbody"); if (b) animIn([b], { dx: 28, dy: 0, d: 380, stag: 0 }); }
+  }
+  function drawGoals0() {
     var el = $("#full"); if (!el || !gs) return;
     if (gs.st === "pick") {
       var cards = GOALS.map(function (g) {
