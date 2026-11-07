@@ -382,6 +382,14 @@
     opts.forEach(function (o, i) { h += '<option value="' + i + '"' + (selFn(o, i) ? " selected" : "") + ">" + esc(o[0]) + "</option>"; });
     return h + "</select></label>";
   }
+  // horarios fijos: lista cada 30 min + hora exacta (cualquier minuto)
+  function blkSel(label, i, prop, val) {
+    var has = typeof val === "number" && CLOCK.some(function (o) { return o[1] === val; }), opts = CLOCK.slice();
+    if (typeof val === "number" && !has) { opts.push([fmt(val), val]); opts.sort(function (a, c) { return ((a[1] - 300 + 1440) % 1440) - ((c[1] - 300 + 1440) % 1440); }); }
+    var h = '<label class="field"><span>' + esc(label) + '</span><select data-blk="' + i + '" data-prop="' + prop + '"><option value=""' + (typeof val === "number" ? "" : " selected") + " disabled>Hora</option>";
+    opts.forEach(function (o) { h += '<option value="' + o[1] + '"' + (o[1] === val ? " selected" : "") + ">" + esc(o[0]) + "</option>"; });
+    return h + '</select></label><label class="field exact"><span class="small muted">Hora exacta</span><input type="time" data-blkx="' + i + '" data-prop="' + prop + '" value="' + (typeof val === "number" ? fmt(val) : "") + '"></label>';
+  }
   function fieldHtml(f) {
     var val = st.ans[f.key], h = "";
     if (f.type === "blocks") {
@@ -389,7 +397,7 @@
       list.forEach(function (b, i) {
         h += '<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><b>Horario fijo ' + (i + 1) + '</b>' + (list.length > 1 ? '<button type="button" class="btn ghost sm" data-da="rmblk" data-i="' + i + '">Quitar</button>' : "") + '</div>' +
           '<label class="field"><span>Nombre (opcional)</span><input type="text" maxlength="40" data-blk="' + i + '" data-prop="name" value="' + esc(b.name || "") + '" placeholder="Trabajo, facultad, clases..."></label>' +
-          '<div class="row" style="align-items:flex-start;margin-top:10px"><div style="flex:1">' + selectHtml("Empieza", 'data-blk="' + i + '" data-prop="s"', CLOCK, function (o) { return b.s === o[1]; }, "Hora") + '</div><div style="flex:1">' + selectHtml("Termina", 'data-blk="' + i + '" data-prop="e"', CLOCK, function (o) { return b.e === o[1]; }, "Hora") + '</div></div>' +
+          '<div class="row" style="align-items:flex-start;margin-top:10px"><div style="flex:1">' + blkSel("Empieza", i, "s", b.s) + '</div><div style="flex:1">' + blkSel("Termina", i, "e", b.e) + '</div></div>' + (st.exErr && st.exErr["blk" + i] ? '<p class="small" style="color:var(--naranja,#FF8A4C);margin:6px 0 0">' + esc(st.exErr["blk" + i]) + "</p>" : "") +
           '<div style="margin-top:10px"><span class="small" style="font-weight:600">¿Tenés que trasladarte?</span><div class="chips" style="margin-top:6px">' + [["Sí", "yes"], ["No", "no"]].map(function (o) {
             return '<button type="button" class="chip" aria-pressed="' + (b.travel === o[1]) + '" data-blk="' + i + '" data-prop="travel" data-val="' + o[1] + '">' + o[0] + "</button>";
           }).join("") + "</div></div></div>";
@@ -482,11 +490,17 @@
   }
   function onChange(ev) {
     var el = ev.target;
+    if (el.hasAttribute("data-blkx")) {
+      var xi = +el.getAttribute("data-blkx"), xp = el.getAttribute("data-prop"), xm = /^(\d\d):(\d\d)$/.exec(el.value || "");
+      st.exErr = st.exErr || {}; delete st.exErr["blk" + xi];
+      if (xm) st.ans.fixed[xi][xp] = +xm[1] * 60 + +xm[2];
+      st.focus = { sel: 'input[data-blkx="' + xi + '"][data-prop="' + xp + '"]' }; render(); return;
+    }
     if (el.hasAttribute("data-exact")) { var xf = fieldOf(el.getAttribute("data-key")); if (xf) { exactSet(xf, el.value); st.focus = { key: xf.key }; render(); } return; }
     if (el.tagName !== "SELECT") return;
     if (el.hasAttribute("data-blk")) {
       var bi = +el.getAttribute("data-blk"), prop = el.getAttribute("data-prop");
-      st.ans.fixed[bi][prop] = CLOCK[+el.value][1]; st.focus = { sel: 'select[data-blk="' + bi + '"][data-prop="' + prop + '"]' }; return render();
+      st.ans.fixed[bi][prop] = +el.value; st.focus = { sel: 'select[data-blk="' + bi + '"][data-prop="' + prop + '"]' }; return render();
     }
     if (el.getAttribute("data-kind") === "minutes") {
       var mk = el.getAttribute("data-key");

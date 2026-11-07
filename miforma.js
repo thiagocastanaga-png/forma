@@ -1839,6 +1839,7 @@
       (pro && ck && tk && !dn ? '<button class="btn block" data-armtool="' + tk + '">Hacer ahora</button>' : "") +
       (pro && ck ? '<button class="btn ' + (dn ? "ghost" : "") + ' block" data-ackb="' + i + '">' + (dn ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
       '<button class="linkbtn bdet" data-blkopen="' + i + '">' + (pro ? "Detalles" : "Ver detalle") + "</button></div></div>";
+    html += deployHtml(b, i);
     var nb = bl[i + 1];
     if (nb) html += '<button class="nextprev" data-blkopen="' + (i + 1) + '"><span class="small muted">Sigue</span><b>' + F.fmt(nb.s) + " · " + esc(nb.label) + "</b></button>";
     return html;
@@ -1890,6 +1891,51 @@
       '<form id="compf" class="row"><input id="compown" maxlength="80" placeholder="O escribí el tuyo" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form><div class="msg" id="compmsg"></div>' +
       '<button class="btn block" id="compsave">Guardar (' + cd.sel.length + " de 3)</button><button class=\"btn ghost block\" data-close style=\"margin-top:8px\">Cancelar</button>");
     cd.all = all;
+  }
+  // ---------- despliegue de cada momento: herramientas, consejos, objetivo y detalles ----------
+  var deployOpen = true;
+  var TIPS = {
+    sleep: ["Si en 20 minutos no te dormís, levantate, hacé algo tranquilo con luz baja y volvé.", "Cuarto fresco y oscuro: ayuda más de lo que parece.", "Evitá café y energizantes desde la tarde.", "Dejá anotado lo pendiente para que no te dé vueltas en la cabeza."],
+    wake: ["Luz natural en los primeros 30 minutos: te ordena el reloj del cuerpo.", "Tomá agua antes del café.", "Sin redes los primeros minutos: arrancás vos, no el celular.", "Elegí una sola cosa que hoy sí o sí querés hacer."],
+    meal: ["Comer sin pantallas: notás mejor cuándo estás lleno.", "Tomá agua con la comida.", "Si venís con apuro, igual sentate 10 minutos.", "Sumá algo de proteína: te sostiene la energía."],
+    train: ["Hacé entrada en calor siempre, aunque tengas poco tiempo.", "Hidratate antes, durante y después.", "Si estás muy cansado, bajá la intensidad pero no lo saltees.", "Si sentís dolor (no cansancio), pará y consultá a un profesional."],
+    focus: ["Una sola tarea. Anotá lo que se te ocurre y seguí.", "Celular en otra habitación o en modo avión.", "Bloques de 25 minutos y 5 de descanso.", "Empezá por lo más difícil mientras tenés energía."],
+    pause: ["Soltá los hombros y la mandíbula.", "Mirá lejos 20 segundos: descansás los ojos.", "Tomá agua y movete un poco.", "Que sea una pausa real, sin celular."],
+    habit: ["Hacelo chico, pero hacelo: la constancia le gana a la intensidad.", "Si hoy te cuesta, la versión mínima también cuenta.", "Dejá a mano lo que necesitás antes de empezar.", "Tildalo apenas termines: así se refuerza el hábito."],
+    free: ["Es tu margen: no lo llenes de obligaciones.", "Un rato sin pantalla te recarga más que scrollear.", "Si hay algo pendiente de 5 minutos, este es el momento.", "Salí a tomar aire aunque sea 5 minutos."],
+    fixed: ["Antes de empezar, dejá a mano agua y lo que necesitás.", "Anotá lo que te va surgiendo para después, así no te distrae.", "Si podés, hacé una pausa corta al terminar."],
+    commute: ["Aprovechá para escuchar algo que te guste o para no hacer nada.", "Evitá abrir el trabajo en el celular durante el viaje.", "Salir unos minutos antes evita llegar apurado."],
+    rest: ["Descansar también es parte del plan.", "Bajá luces y pantallas de a poco.", "Hacé algo que te guste, sin culpa."]
+  };
+  var BTOOLS = { sleep: ["dormir", "descarga", "respirar", "calma"], wake: ["antesabrir", "respirar"], meal: ["pausacel", "respirar"], train: ["movimiento"], focus: ["foco", "dosmin", "estudio", "pausacel"], pause: ["respirar", "calma", "grounding", "movimiento"], habit: ["respirar", "calma"], free: ["pausacel", "respirar", "dosmin"], fixed: ["antesabrir", "respirar", "pausacel"], commute: ["antesabrir", "respirar"], rest: ["respirar", "pausacel"] };
+  function bTipKind(b) { return b.label === "Desconectar y dormir" ? "sleep" : b.label.indexOf("Despertar") === 0 ? "wake" : TIPS[b.kind] ? b.kind : "habit"; }
+  function blockTools(b) {
+    var ids = [], tk = armToolOf(b), T0 = tk ? toolByAct(tk) : null; if (T0) ids.push(T0.id);
+    (BTOOLS[bTipKind(b)] || []).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+    return ids.map(toolById).filter(Boolean).sort(function (a, c) { return (toolOk(c) ? 1 : 0) - (toolOk(a) ? 1 : 0); }).slice(0, 4);
+  }
+  function blockTips(b) {
+    var k = bTipKind(b), pool = TIPS[k] || TIPS.habit, doy = dayOfYear(), out = [];
+    if (b.note) out.push(b.note);
+    for (var j = 0; j < pool.length && out.length < 3; j++) { var t = pool[(doy + j) % pool.length]; if (out.indexOf(t) < 0) out.push(t); }
+    return out.slice(0, 3);
+  }
+  function deployGroup(cls, title, sub, body) {
+    return '<div class="dgrp ' + cls + '"><div class="dhd"><i></i><b>' + title + "</b>" + (sub ? '<span class="small muted">' + sub + "</span>" : "") + "</div>" + body + "</div>";
+  }
+  function deployBody(b, i) {
+    var h = "", pro = isProU(), tl = blockTools(b), tips = blockTips(b), det = bdetails(b), steps = blockSteps(b), gst = (b.steps || []).length, G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null;
+    if (tl.length) h += deployGroup("tools", "Herramientas", "para este momento", tl.map(function (T) {
+      var ok = toolOk(T), pl = planOf(T.plan);
+      return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" data-act="' + T.act + '">Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con ' + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n) + '">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
+    }).join(""));
+    if (tips.length) h += deployGroup("tips", "Para tener en cuenta", "", "<ul>" + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>");
+    if (G && gst) h += deployGroup("goal", "Tu objetivo", "", '<p class="small" style="margin:0">«' + esc(G.n) + "»: en este momento sumás " + gst + (gst === 1 ? " paso" : " pasos") + " de tu plan de hoy. Están tildables arriba, en el paso a paso.</p>");
+    h += deployGroup("mine", "Tus detalles", "", (det.length ? '<div class="bchips">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todavía no agregaste nada para este momento.</p>') + (pro ? '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis detalles" : "Agregar un detalle") + "</button>" : ""));
+    return h;
+  }
+  function deployHtml(b, i) {
+    return '<div class="deploy"><button class="dtog" data-deploy aria-expanded="' + deployOpen + '"><span>Todo para este momento</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="dwrap"' + (deployOpen ? "" : " hidden") + ">" + deployBody(b, i) + "</div></div>";
   }
   var STEPDEF = {
     "Desconectar y dormir": [["Dejar el celular lejos de la cama", -50, /celular|despertador/i], ["Apagar las pantallas", -40], ["Lavarte los dientes y dejar la cama lista", -30], ["Bajar las luces", -10]],
@@ -2357,6 +2403,7 @@
     if (d.compsel !== undefined && compDraft) { var ct = compDraft.all[+d.compsel], ci2 = compDraft.sel.indexOf(ct); if (ci2 >= 0) compDraft.sel.splice(ci2, 1); else if (compDraft.sel.length < 3) compDraft.sel.push(ct); else { var cm = $("#compmsg"); if (cm) cm.textContent = "Hasta 3. Sacá uno para elegir otro."; return; } drawComp(); return; }
     if (t.id === "compsave" && compDraft) { S.comp = S.comp || {}; S.comp[today()] = compDraft.sel.slice(0, 3); compDraft = null; save(); close(); render(); return; }
     if (d.cack !== undefined) { if (!isProU()) return; var ctx = compToday()[+d.cack]; if (ctx !== undefined) { S.ad = S.ad || {}; var tdc = today(); S.ad[tdc] = S.ad[tdc] || {}; if (S.ad[tdc]["c|" + ctx]) delete S.ad[tdc]["c|" + ctx]; else S.ad[tdc]["c|" + ctx] = 1; touchBest(); save(); render(); } return; }
+    if (d.deploy !== undefined) { deployOpen = !deployOpen; t.setAttribute("aria-expanded", deployOpen); var dw = t.parentNode.querySelector(".dwrap"); if (dw) { dw.hidden = !deployOpen; if (deployOpen) animIn(dw.children, { dy: 12, d: 600, stag: 90 }); } return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
     if (d.ackb !== undefined) { if (!isProU()) return; var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2 && isProU()) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
