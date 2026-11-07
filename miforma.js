@@ -320,7 +320,10 @@
     else hero.classList.add("wplay");
   }
   function render() {
-    render0();
+    try { render0(); } catch (err) {
+      try { console.error(err); } catch (e) {}
+      $app.innerHTML = '<main class="stack" style="padding-top:60px;text-align:center"><h2>Algo salió mal</h2><p class="muted">Tus datos están a salvo. Recargá la pantalla para seguir.</p><button class="btn block" id="reload">Recargar</button><p class="small muted">Si se repite, escribinos por Instagram @formargentina.</p></main>'; return;
+    }
     var key = (needAuth() ? "auth" + mode : tab);
     var hero = $app.querySelector(".armhero");
     if (hero && !S.welcomed) { S.welcomed = 1; save(); if (!REDUCE) { lastAnim = key; welcomeSeq(hero); return; } }
@@ -336,7 +339,7 @@
     }
     touchBest();
     if (tab === "catalogo") tab = "planes";
-    var body = { hoy: vHoy, tools: vTools, planes: vPlanes, perfil: vPerfil }[tab]();
+    var body = { hoy: vHoy, tools: vTools, planes: vPlanes, perfil: vPerfil }[tab]() + (tab === "hoy" ? installCard() : "");
     var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
     $app.innerHTML =
       '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div><div class="row" style="gap:8px">' +
@@ -476,6 +479,18 @@
       '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día para lograrlo</b><span>Con cambios de a poco, para que se sostengan.</span></li></ol>' +
       '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
+  var deferredInstall = null;
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferredInstall = e; });
+  function installCard() {
+    try {
+      if (NATIVE || !S.arm || localStorage.getItem("forma_inst") === "1") return "";
+      if (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)) return "";
+      var ua = navigator.userAgent || "", ios = /iPhone|iPad|iPod/i.test(ua), and = /Android/i.test(ua); if (!ios && !and) return "";
+      return '<div class="card dark" style="margin-top:14px"><b>Tené Forma en tu pantalla de inicio</b><p class="small" style="margin:6px 0 10px;opacity:.85">' +
+        (ios ? "En Safari tocá el botón Compartir y elegí «Agregar a inicio». Se abre como una app, sin barra del navegador." : "Abrila como una app, sin barra del navegador.") + "</p>" +
+        (and && deferredInstall ? '<button class="btn sage" data-install>Instalar app</button> ' : and ? '<p class="small" style="margin:0 0 8px;opacity:.85">En Chrome tocá el menú ⋮ y elegí «Instalar app».</p>' : "") + '<button class="linkbtn small" data-instx>Ahora no</button></div>';
+    } catch (e) { return ""; }
+  }
   function vHoy() {
     if (!S.arm) return vArmar();
     if (S.demo || isPro("vida")) return vHoyPro();
@@ -603,6 +618,7 @@
       '<div class="card stack"><b>Tus datos</b><p class="small muted" style="margin:0">' + (user ? "Tus datos se guardan en tu cuenta. Podés descargar una copia o borrar tu cuenta cuando quieras." : "Todo se guarda solo en este dispositivo. Si cambiás de teléfono o borrás los datos del navegador, se pierde.") + "</p>" +
       '<div class="grid2"><button class="btn ghost" id="export">Descargar copia</button><button class="btn ghost" id="wipe">' + (user ? "Borrar mi cuenta" : "Borrar todo") + "</button></div>" +
       (CFG.beta && S.betaOwned && Object.keys(S.betaOwned).length ? '<button class="btn ghost block" data-betareset>Volver a Gratis (borrar compras de prueba)</button>' : "") + (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
+      '<div class="card"><b>¿Algo no funciona o te falta algo?</b><p class="small muted" style="margin:6px 0 10px">Contanos qué te pasó o qué cambiarías, aunque sea una frase. Lo leemos todo. (Versión ' + esc(BUILD) + ")</p>" + '<a class="btn ghost block" href="https://ig.me/m/formargentina" target="_blank" rel="noopener">Escribirnos por Instagram</a></div>' +
       '<div class="card small"><a data-link="instagram" href="' + esc(CFG.instagram || "#") + '" target="_blank" rel="noopener">Instagram @formargentina</a> · <a href="privacidad">Privacidad</a> · <a href="terminos">Términos</a> · <a href="./">Sitio de Forma</a></div>';
     return html;
   }
@@ -1567,11 +1583,20 @@
           user = res.data.session.user; S.guest = false; save(); render();
           loadRemote().then(function () { render(); });
         } else {
-          btn.disabled = false; setMsg("¡Listo! Te mandamos un mail para confirmar tu cuenta. Después volvé acá e iniciá sesión.", true);
+          btn.disabled = false; setMsg("¡Listo! Te mandamos un mail para confirmar tu cuenta. Tocá el botón del mail (si no lo ves, mirá en Spam o Promociones) y después volvé acá e iniciá sesión.", true); showResend(email);
         }
         postLead(email, "app-cuenta");
       });
     }).catch(function (e) { btn.disabled = false; setMsg(authMsg(e)); });
+  }
+  function showResend(email) {
+    var m = $("#amsg"); if (!m || $("#a-resend")) return; var b = document.createElement("button"); b.type = "button"; b.id = "a-resend"; b.className = "linkbtn small"; b.style.marginTop = "6px"; b.dataset.email = email; b.textContent = "Reenviar el mail de confirmación"; m.parentNode.insertBefore(b, m.nextSibling);
+  }
+  function doResend(btn) {
+    var email = btn.dataset.email || draft.email.trim(); if (!sb || !email) return; btn.disabled = true;
+    sb.auth.resend({ type: "signup", email: email, options: { emailRedirectTo: "https://formargentina.com/miforma" } }).then(function (r) {
+      btn.disabled = false; setMsg(r && r.error ? authMsg(r.error) : "Listo, te lo mandamos de nuevo. Revisá también Spam.", !(r && r.error));
+    }, function (e) { btn.disabled = false; setMsg(authMsg(e)); });
   }
   function doLogin() {
     readAuthDraft();
@@ -1579,7 +1604,7 @@
     if (!/^\S+@\S+\.\S+$/.test(email) || !pass) return setMsg("Completá tu email y tu contraseña.");
     var btn = $("#a-login"); btn.disabled = true; setMsg("Entrando...", true);
     sb.auth.signInWithPassword({ email: email, password: pass }).then(function (res) {
-      if (res.error) { btn.disabled = false; return setMsg(authMsg(res.error)); }
+      if (res.error) { btn.disabled = false; setMsg(authMsg(res.error)); if (/not confirmed/i.test(String(res.error.message || ""))) showResend(email); return; }
       user = res.data.user; return loadRemote().then(function () { tab = "hoy"; render(); });
     }).catch(function (e) { btn.disabled = false; setMsg(authMsg(e)); });
   }
@@ -2302,6 +2327,10 @@
     if (t.id === "a-login") return doLogin();
     if (t.id === "a-forgot") return doForgot();
     if (t.id === "r-save") return doRecovery();
+    if (d.instx !== undefined) { try { localStorage.setItem("forma_inst", "1"); } catch (e) {} render(); return; }
+    if (d.install !== undefined) { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } try { localStorage.setItem("forma_inst", "1"); } catch (e) {} setTimeout(render, 400); return; }
+    if (t.id === "reload") { location.reload(); return; }
+    if (t.id === "a-resend") return doResend(t);
     if (t.id === "a-guest") { S.guest = true; save(); render(); return; }
     if (t.id === "mkacct") { close(); S.guest = false; mode = "register"; draft.name = (S.profile && S.profile.name) || draft.name; render(); return; }
     if (t.id === "logout") return doLogout();

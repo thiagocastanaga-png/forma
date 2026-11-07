@@ -464,3 +464,9 @@ html[data-theme=dark] #splash svg{color:#F5F1E8}
 .dlock{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;border:1px solid var(--line);background:none;color:inherit;border-radius:999px;padding:7px 11px;cursor:pointer}
 .dgrp .bchips{margin-top:0}
 @media (prefers-reduced-motion:reduce){.dtog svg{transition:none}}
+
+/* escritorio: las pantallas completas no se estiran */
+@media (min-width:700px){
+  .full>header,.full>.actbar,.full>.dbody,.full>.dfoot{width:100%;max-width:600px;margin-left:auto;margin-right:auto}
+  .full>header{max-width:none;padding-left:max(14px,calc((100% - 600px)/2 + 14px));padding-right:max(14px,calc((100% - 600px)/2 + 14px))}
+}
