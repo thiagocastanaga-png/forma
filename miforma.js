@@ -307,9 +307,23 @@
   var mode = "register";   // register | login | forgot | recovery
   var draft = { name: "", username: "", email: "", areas: [], sports: [], news: true, terms: false };
   function needAuth() { return !user && !S.guest && (PRUEBA || !S.demo); }
+  function welcomeSeq(hero) {
+    var h = hero.querySelector("h1"), i = 0;
+    if (h) { var nm = (S.profile && S.profile.name) || "", t = h.textContent, at = nm ? t.indexOf(nm) : -1, out = "";
+      t.split(/(\s+)/).forEach(function (w) { if (!w) return; if (/^\s+$/.test(w)) { out += " "; return; } var isN = at >= 0 && t.indexOf(w, 0) >= at, chars = ""; w.split("").forEach(function (c) { chars += '<span class="wch" style="--i:' + (i++) + '">' + esc(c) + "</span>"; }); out += '<span class="wwd' + (nm && w.replace(/[.,]/g, "") === nm.split(/\s+/)[0] ? " wnm" : "") + '">' + chars + "</span>"; });
+      h.setAttribute("aria-label", t); h.innerHTML = out; }
+    [].forEach.call(hero.querySelectorAll(".armsteps li"), function (li, k) { li.style.setProperty("--k", k); });
+    var sh = document.createElement("div"); sh.className = "wsh"; sh.setAttribute("aria-hidden", "true");
+    sh.innerHTML = '<i class="s1"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#C6F432"/></svg></i><i class="s2"><svg viewBox="0 0 44 44"><path d="M2 36 A20 20 0 0 1 42 36 Z" fill="#B9A7F0"/></svg></i><i class="s3"><svg viewBox="0 0 44 44"><rect x="5" y="5" width="34" height="34" rx="3" fill="#FFC83D"/></svg></i><i class="s4"><svg viewBox="0 0 44 44"><path d="M22 3 L41 41 H3 Z" fill="#FF8A4C"/></svg></i><i class="s5"><svg viewBox="0 0 44 44"><path d="M2 2 A40 40 0 0 1 42 42 H2 Z" fill="#4C7DFF"/></svg></i>';
+    hero.insertBefore(sh, hero.firstChild);
+    if (document.getElementById("splash")) { hero.classList.add("wwait"); (function w(n) { if (!document.getElementById("splash") || n > 30) { hero.classList.remove("wwait"); hero.classList.add("wplay"); } else setTimeout(function () { w(n + 1); }, 250); })(0); }
+    else hero.classList.add("wplay");
+  }
   function render() {
     render0();
     var key = (needAuth() ? "auth" + mode : tab);
+    var hero = $app.querySelector(".armhero");
+    if (hero && !S.welcomed) { S.welcomed = 1; save(); if (!REDUCE) { lastAnim = key; welcomeSeq(hero); return; } }
     if (key !== lastAnim) { lastAnim = key; var m = $app.querySelector("main"); animIn(m ? m.children : $app.children, {}); }
   }
   function render0() {

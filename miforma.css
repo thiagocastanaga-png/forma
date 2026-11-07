@@ -404,3 +404,39 @@ html[data-theme=dark] #splash svg{color:#F5F1E8}
 .bignow .bsc{border-color:#111}.bignow .bstep[aria-checked=true] .bsc{background:#111;border-color:#111}.bignow .bstep[aria-checked=true] .bsc svg path{stroke:var(--lima)}
 .bignow .bring{border-color:#111}
 @media (prefers-reduced-motion:reduce){.bring{display:none}}
+
+/* bienvenida: secuencia de entrada la primera vez */
+.armhero>*{position:relative;z-index:1}
+.armhero>.wsh{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:visible}
+.wsh i{position:absolute;display:block;opacity:.32}.wsh svg{display:block;width:100%;height:100%}
+.wsh .s1{width:92px;height:92px;right:-26px;top:-4px;--fx:-120px;--fy:260px}
+.wsh .s2{width:84px;height:84px;left:-24px;bottom:18%;--fx:140px;--fy:-80px}
+.wsh .s3{width:46px;height:46px;right:8%;top:46%;--fx:-80px;--fy:-120px}
+.wsh .s4{width:54px;height:54px;left:6%;top:-6px;--fx:90px;--fy:200px}
+.wsh .s5{width:96px;height:96px;right:-30px;bottom:6%;--fx:-60px;--fy:-220px}
+.wwait>*{opacity:0}
+.wplay .wsh i{animation:wshape 1.5s cubic-bezier(.2,1.25,.4,1) both,wdrift 9s ease-in-out 1.8s infinite alternate}
+.wplay .wsh .s2{animation-delay:.15s,2s}.wplay .wsh .s3{animation-delay:.3s,2.2s}.wplay .wsh .s4{animation-delay:.45s,2.4s}.wplay .wsh .s5{animation-delay:.6s,2.6s}
+@keyframes wshape{from{opacity:0;transform:translate(var(--fx),var(--fy)) scale(.15) rotate(-140deg)}to{opacity:.32;transform:none}}
+@keyframes wdrift{from{transform:translate(0,0) rotate(0)}to{transform:translate(8px,-10px) rotate(6deg)}}
+.wplay .badge{animation:wfade .9s ease .2s both}
+.wwd{display:inline-block;white-space:nowrap}
+.wch{display:inline-block}
+.wplay .wch{animation:wch .95s cubic-bezier(.2,.9,.2,1) both;animation-delay:calc(.45s + var(--i)*.06s)}
+@keyframes wch{from{opacity:0;transform:translateY(60%) rotate(8deg) scale(.85)}60%{opacity:1}to{opacity:1;transform:none}}
+.wnm{position:relative}
+.wplay .wnm::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:7px;border-radius:4px;background:var(--lima);z-index:-1;transform-origin:left;animation:wul .9s cubic-bezier(.2,.8,.2,1) 1.5s both}
+@keyframes wul{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.wplay .armsteps li{animation:wrise .95s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(1.5s + var(--k)*.5s)}
+.wplay .armsteps li::before{animation:wpop .95s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(1.6s + var(--k)*.5s)}
+.armsteps li:not(:last-child)::after{content:"";position:absolute;left:14px;top:34px;bottom:-10px;width:2px;border-radius:1px;background:var(--sage);opacity:.55}
+.wplay .armsteps li:not(:last-child)::after{transform-origin:top;animation:wline .7s ease both;animation-delay:calc(2.0s + var(--k)*.5s)}
+@keyframes wrise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes wpop{from{transform:scale(0) rotate(-90deg)}to{transform:none}}
+@keyframes wline{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes wfade{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.wplay #armgo{animation:wbtn 1s cubic-bezier(.2,1.2,.4,1) 3s both,wpulse 1.6s ease-out 4.1s 2}
+.wplay>p{animation:wfade 1s ease 3.4s both}
+@keyframes wbtn{from{opacity:0;transform:translateY(24px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes wpulse{from{box-shadow:0 0 0 0 rgba(198,244,50,.7)}to{box-shadow:0 0 0 22px rgba(198,244,50,0)}}
+@media (prefers-reduced-motion:reduce){.wsh{display:none}.wplay *{animation:none!important}}
