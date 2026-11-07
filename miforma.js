@@ -355,7 +355,7 @@
     var reg = mode === "register", forgot = mode === "forgot";
     var html = '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div></div><main class="stack">' +
       (reg ? "" : "") + '<h1 class="hello" style="font-size:32px">' + (forgot ? "Recuperar tu contraseña" : reg ? "Bienvenido" : "Qué bueno verte de nuevo") + "</h1>" + (reg ? '<span class="freepill">Gratis</span>' : "");
-    if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Podés usar la app en este dispositivo sin cuenta.</div>';
+    if (!sb && !FLUJO) html += '<div class="card small">Las cuentas no están disponibles ahora. Probá de nuevo en un rato.</div>';
     if ((sb || FLUJO) && !forgot) {
       html += '<div class="seg" role="tablist"><button data-mode="register" aria-pressed="' + reg + '">Crear cuenta</button><button data-mode="login" aria-pressed="' + !reg + '">Ya tengo cuenta</button></div>';
     }
@@ -379,7 +379,6 @@
       }
       html += '<div class="msg" id="amsg" role="status"></div>';
     }
-    if (!forgot) html += '<div class="sep"><span>o</span></div><button class="btn ghost block" id="a-guest">Probar sin cuenta</button><p class="small muted">Sin cuenta, todo queda solo en este dispositivo y no podés guardar compras.</p>';
     $app.innerHTML = html + "</main>";
   }
   function renderRecovery() {
