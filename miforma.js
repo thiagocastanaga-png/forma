@@ -92,7 +92,7 @@
     { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: false, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada." },
     { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo." },
     { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: false, grp: "Servicios extras", d: "Servicio extra: contanos adónde querés ir y te armamos el itinerario, los días y el presupuesto." },
-    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$25.000", was: "$36.000", promo: "Precio de preventa para las primeras 10 compras",
+    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$31.900", was: "$46.000", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
       pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
@@ -116,10 +116,10 @@
     { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "hogar", soon: true },
     { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "plata", soon: true },
     { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "relaciones", soon: true },
-    { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "$6.000", was: "$8.500" },
-    { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "$5.000", was: "$7.500" },
-    { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "$7.500", was: "$10.000" },
-    { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "$12.000", was: "$18.000" }
+    { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "$7.900", was: "$11.100" },
+    { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "$6.300", was: "$9.500" },
+    { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "$9.500", was: "$12.700" },
+    { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "$15.900", was: "$23.800" }
   ];
   function prodOf(id) { return PRODUCTS.filter(function (p) { return p.id === id; })[0]; }
   function inPlan(pid) { return PRODUCTS.filter(function (p) { return p.s === pid; }); }
