@@ -92,7 +92,7 @@
     { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: false, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada." },
     { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo." },
     { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: false, grp: "Servicios extras", d: "Servicio extra: contanos adónde querés ir y te armamos el itinerario, los días y el presupuesto." },
-    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "USD 20", was: "USD 29", promo: "Precio de preventa para las primeras 10 compras",
+    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$25.000", was: "$36.000", promo: "Precio de preventa para las primeras 10 compras",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
       pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
@@ -116,10 +116,10 @@
     { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "hogar", soon: true },
     { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "plata", soon: true },
     { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "relaciones", soon: true },
-    { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "USD 5", was: "USD 7" },
-    { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "USD 4", was: "USD 6" },
-    { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "USD 6", was: "USD 8" },
-    { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "USD 10", was: "USD 15" }
+    { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "$6.000", was: "$8.500" },
+    { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "$5.000", was: "$7.500" },
+    { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "$7.500", was: "$10.000" },
+    { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "$12.000", was: "$18.000" }
   ];
   function prodOf(id) { return PRODUCTS.filter(function (p) { return p.id === id; })[0]; }
   function inPlan(pid) { return PRODUCTS.filter(function (p) { return p.s === pid; }); }
@@ -652,6 +652,7 @@
     if (CFG.beta) return '<div class="card" style="margin-top:12px"><span class="tag">Versión de prueba</span><p class="small" style="margin:8px 0 10px">Podés "comprar" para probar cómo se vería. <b>No se cobra nada</b>: es una compra simulada.</p><button class="btn block" data-betabuy="' + esc(id) + '">Probar compra sin pagar</button></div>';
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
     if (NATIVE) link = "";
+    if (CFG.checkout && !NATIVE && user) return '<button class="btn block" data-checkout="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted" id="ckmsg">Pagás en Mercado Pago y se desbloquea solo en tu cuenta (' + esc(user.email || "") + ").</p>";
     if (link) h += '<a class="btn block" target="_blank" rel="noopener" href="' + esc(link) + '" style="margin-top:12px">Pagar con Mercado Pago</a><p class="small muted">Pagá con el mismo email de tu cuenta (' + esc(user && user.email || "") + ") para que se desbloquee solo.</p>";
     if (CFG.paypal && !NATIVE) h += '<a class="btn ghost block" target="_blank" rel="noopener" href="' + esc(CFG.paypal) + '" style="margin-top:8px">Pagar con PayPal</a>';
     if (!h) h = '<p class="small muted" style="margin-top:12px">Los pagos todavía no están abiertos. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email));
@@ -2409,6 +2410,7 @@
     if (d.gapply) { applyGoalChange(d.gapply); return; }
     if (d.grev) { goalReviewDo(d.grev); return; }
     if (d.gtoggle !== undefined) { goalOpen = !goalOpen; render(); return; }
+    if (d.checkout) { var cm = $("#ckmsg"); if (cm) cm.textContent = "Abriendo Mercado Pago…"; sb.functions.invoke("create-checkout", { body: { product: d.checkout } }).then(function (r) { var u = r && r.data && r.data.url; if (u) location.href = u; else if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }, function () { if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }); return; }
     if (d.betabuy) { S.betaOwned = S.betaOwned || {}; S.betaOwned[d.betabuy] = 1; save(); close(); render(); return; }
     if (d.betareset !== undefined) { S.betaOwned = {}; save(); render(); return; }
     if (d.open === "prog") return openProg();
