@@ -70,7 +70,7 @@
   var PLANS = [
     { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "",
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
-      free: ["Tu día armado con 12 preguntas, fijo en la pantalla de Hoy", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
+      free: ["Tu día armado en 1 minuto, fijo en la pantalla de Hoy", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
       pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Cambiar tu día cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
     { id: "dormir", n: "Dormir de verdad", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", inc: true, grp: "Vida diaria", price: "",
       d: "14 días para ordenar tu sueño: cargás tus horarios, hacés un paso por día y al final ves tus datos reales.",
@@ -479,7 +479,7 @@
   function vArmar() {
     var nm = (S.profile && S.profile.name) || "";
     return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1>' +
-      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>12 preguntas, unos 2 minutos.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día para lograrlo</b><span>Con cambios de a poco, para que se sostengan.</span></li></ol>' +
+      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>Solo 2 preguntas, menos de 1 minuto.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día para lograrlo</b><span>Con cambios de a poco, para que se sostengan.</span></li></ol>' +
       '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
   var deferredInstall = null;
@@ -1762,7 +1762,7 @@
   }
   function armSection() {
     var bl = armBlocks();
-    if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 12 preguntas rápidas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
+    if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 2 preguntas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
     var html = '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
