@@ -190,6 +190,7 @@
     planes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V8l8-5 8 5v11"/><path d="M9 19v-6h6v6"/></svg>',
     catalogo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><circle cx="17" cy="6.8" r="3.7"/><path d="M6.7 14l3.7 7H3z"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="3"/></svg>',
     tools: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>',
+    obj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8" fill="currentColor"/></svg>',
     perfil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
     ok: '<svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
     flame: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.5 1 2.3 1.8 2.5C10.5 7 11 4.5 12 2z" fill="currentColor"/></svg>',
@@ -339,16 +340,17 @@
     }
     touchBest();
     if (tab === "catalogo") tab = "planes";
-    var body = { hoy: vHoy, tools: vTools, planes: vPlanes, perfil: vPerfil }[tab]() + (tab === "hoy" ? installCard() : "");
+    if (tab === "tools") tab = "obj";
+    var body = { hoy: vHoy, obj: vObj, planes: vPlanes, perfil: vPerfil }[tab]() + (tab === "hoy" ? installCard() : "");
     var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
     $app.innerHTML =
       '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div><div class="row" style="gap:8px">' +
       (S.demo ? '<span class="tag">modo prueba</span>' : "") +
       '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? "Pro" : "Gratis") + "</span>" +
-      (topPro ? '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" : "") + "</div></div>" +
+      '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" + "</div></div>" +
       "<main>" + body + "</main>" +
       '<nav class="tabs" aria-label="Principal"><div>' +
-      [["hoy", "Hoy"], ["tools", "Herramientas"], ["planes", "Planes"], ["perfil", "Perfil"]].map(function (t) {
+      [["hoy", "Hoy"], ["obj", "Objetivo"], ["perfil", "Perfil"]].map(function (t) {
         return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' aria-current="page"' : "") + ">" + ICON[t[0]] + "<span>" + t[1] + "</span></button>";
       }).join("") + "</div></nav>";
   }
@@ -378,6 +380,7 @@
         html += '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<label class="field"><span>Contraseña</span><input id="a-pass" type="password" autocomplete="current-password"></label>' +
           '<button class="btn block" id="a-login">Entrar</button>' +
+          '<button class="btn ghost block" id="a-magic">Entrar con un link por mail (sin contraseña)</button>' +
           '<button class="btn ghost block" data-mode="forgot">Olvidé mi contraseña</button>';
       }
       html += '<div class="msg" id="amsg" role="status"></div>';
@@ -491,13 +494,17 @@
         (and && deferredInstall ? '<button class="btn sage" data-install>Instalar app</button> ' : and ? '<p class="small" style="margin:0 0 8px;opacity:.85">En Chrome tocá el menú ⋮ y elegí «Instalar app».</p>' : "") + '<button class="linkbtn small" data-instx>Ahora no</button></div>';
     } catch (e) { return ""; }
   }
+  function refineCard() {
+    if (!S.arm || !S.arm.ans || !S.arm.ans.quick) return "";
+    return '<div class="card sage refine" style="margin-top:12px"><b>Afiná tu día</b><p class="small" style="margin:6px 0 10px">Armamos tu día con valores generales. Respondé 10 preguntas más (comidas, entrenamiento, prioridades, hábitos) y queda a tu medida.</p><button class="btn sm" data-refine>Afinar mi día</button></div>';
+  }
   function vHoy() {
     if (!S.arm) return vArmar();
     if (S.demo || isPro("vida")) return vHoyPro();
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-    return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Tildar lo que vas haciendo y ver tu constancia</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+    return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard() + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
+      (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -506,7 +513,7 @@
     var greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     var head = wc === 0 ? "Esta semana todavía no sumaste nada. Con una cosa chica alcanza." : wc < 3 ? "Vas sumando. Tres días en la semana ya es una gran constancia." : "¡Muy buena semana! Así se construye el orden.";
-    var gr = '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p>" + '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>";
+    var gr = '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p>" + '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard();
     var html = gr +
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
@@ -537,10 +544,10 @@
     else head = '<div class="card testcta"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 12px">Contanos tu objetivo y te mostramos los planes que van con eso. Gratis.</p><button class="btn sage" data-open="test">Elegir mi objetivo</button></div>';
     var GR = ["Vida diaria", "Estudio y trabajo", "Deportes", "Servicios extras"], out = "";
     GR.forEach(function (g) {
-      var L = PLANS.filter(function (p) { return p.grp === g && rec.indexOf(p.id) < 0; }).sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); });
+      var L = PLANS.filter(function (p) { return p.live && p.grp === g && rec.indexOf(p.id) < 0; }).sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); });
       if (L.length) out += '<div class="sec">' + g + "</div>" + (g === "Vida diaria" ? '<p class="small muted" style="margin:0 0 8px">Los planes de todos los días vienen incluidos en Vida diaria Pro.</p>' : g === "Servicios extras" ? '<p class="small muted" style="margin:0 0 8px">Cosas puntuales que se piden aparte.</p>' : "") + L.map(planCard).join("");
     });
-    return "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto, con un programa de 14 días dentro de la app.</p>" + head + out;
+    return '<button class="linkbtn small" data-tab="perfil" style="margin-bottom:6px">← Volver a Perfil</button>' + "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto, con un programa de 14 días dentro de la app.</p>" + head + out;
   }
   function openPlan(id) {
     var p = planOf(id); if (!p) return;
@@ -607,14 +614,12 @@
       levelCard() + themeCard() + progressCard() +
       '<div class="card"><b>Tus planes</b><div style="margin-top:8px">' + PLANS.filter(function (x) { return x.live; }).map(function (x) {
         return '<div class="row between" style="padding:6px 0"><span class="row"><span class="shape" style="width:26px;height:26px">' + SHAPES[x.id] + "</span>" + esc(x.n) + '</span><span class="tag' + (isPro(x.id) ? " ok" : "") + '">' + (isPro(x.id) ? "Pro" : "Gratis") + "</span></div>";
-      }).join("") + "</div></div>";
+      }).join("") + '</div><button class="btn ghost block" data-tab="planes" style="margin-top:10px">Ver planes y compras</button></div>';
     if (PRUEBA) html += '<div class="card"><b>Versión de prueba ' + esc(BUILD) + '</b><p class="small muted" style="margin:6px 0 10px">Tus datos quedan solo en este celular. Usá el botón Comentarios (a la derecha) cuando algo no te cierre.</p><button class="btn ghost sm" data-fbreset>Empezar de cero</button></div>';
     html += '<div class="card stack"><b>Tu cuenta</b>' +
       (user ? '<div class="small muted">' + esc(user.email || "") + " · " + esc(syncTxt) + "</div>" : '<p class="small muted" style="margin:0">Estás usando la app sin cuenta: tus datos están solo en este dispositivo y no podés guardar compras.</p><button class="btn sage block" id="mkacct">Crear cuenta o iniciar sesión</button>') +
       '<label class="field"><span>Nombre</span><input id="p-name" value="' + esc(p.name) + '" maxlength="40"></label>' +
-      '<div><span class="small" style="font-weight:600">Deportes</span><div class="chips" style="margin-top:8px">' +
-      SPORTS.map(function (a) { return '<button class="chip" data-psport="' + a[0] + '" aria-pressed="' + (p.sports.indexOf(a[0]) >= 0) + '">' + a[1] + "</button>"; }).join("") + "</div></div>" +
-      '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
+            '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
       '<div class="card stack"><b>Tus datos</b><p class="small muted" style="margin:0">' + (user ? "Tus datos se guardan en tu cuenta. Podés descargar una copia o borrar tu cuenta cuando quieras." : "Todo se guarda solo en este dispositivo. Si cambiás de teléfono o borrás los datos del navegador, se pierde.") + "</p>" +
       '<div class="grid2"><button class="btn ghost" id="export">Descargar copia</button><button class="btn ghost" id="wipe">' + (user ? "Borrar mi cuenta" : "Borrar todo") + "</button></div>" +
       (CFG.beta && S.betaOwned && Object.keys(S.betaOwned).length ? '<button class="btn ghost block" data-betareset>Volver a Gratis (borrar compras de prueba)</button>' : "") + (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
@@ -1414,9 +1419,18 @@
     var n = TOOLS.filter(toolOk).length;
     return '<button class="prod toolscard" data-open="tools"><span class="shape">' + SHAPES.calma + '</span><span style="flex:1;min-width:0"><b>Herramientas</b><small>Para usar cuando las necesites · ' + n + " disponibles</small></span></button>";
   }
-  function vTools() {
-    var h = '<h1 class="hello">Herramientas</h1><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>';
+  function toolsBody() {
+    var h = "";
     PLANS.forEach(function (p) { var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
+    return h;
+  }
+  function vTools() { return '<h1 class="hello">Herramientas</h1><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody(); }
+  function vObj() {
+    var h = '<h1 class="hello">Tu objetivo</h1>';
+    if (!S.arm) return h + '<div class="card"><p class="muted" style="margin:0 0 10px">Primero armá tu día en Hoy. Después elegís qué querés lograr y acá seguís tu avance.</p><button class="btn sage" data-tab="hoy">Armar mi día</button></div>';
+    h += goalCard(false);
+    if (S.goal && !S.goal.fin) h += '<div class="grid2" style="margin-top:10px"><button class="btn ghost" data-open="prog">Mi progreso</button><button class="btn sage" data-shareprog>Compartir</button></div>';
+    h += '<div class="sec" style="margin-top:22px">Herramientas</div><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody();
     return h;
   }
   function openTools() {
@@ -1608,6 +1622,36 @@
       user = res.data.user; return loadRemote().then(function () { tab = "hoy"; render(); });
     }).catch(function (e) { btn.disabled = false; setMsg(authMsg(e)); });
   }
+  function shareProgress() {
+    var W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H; var x = c.getContext("2d"), n = weekCount(0), ws = weekStreak();
+    var G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null, gn = G ? G.n : "Mi día, con forma";
+    x.fillStyle = "#111111"; x.fillRect(0, 0, W, H);
+    x.fillStyle = "#C6F432"; x.beginPath(); x.arc(930, 250, 220, 0, 7); x.fill();
+    x.fillStyle = "#B9A7F0"; x.beginPath(); x.arc(150, 1560, 250, Math.PI, 0); x.fill();
+    x.fillStyle = "#FFC83D"; x.fillRect(790, 1180, 190, 190);
+    x.fillStyle = "#FF8A4C"; x.beginPath(); x.moveTo(120, 420); x.lineTo(260, 700); x.lineTo(-20, 700); x.fill();
+    x.fillStyle = "#4C7DFF"; x.beginPath(); x.moveTo(1080, 1920); x.lineTo(1080, 1500); x.arc(1080, 1920, 420, -Math.PI / 2, Math.PI, true); x.fill();
+    var F = "Montserrat, Inter, system-ui, sans-serif"; x.textAlign = "left"; x.fillStyle = "#F5F1E8";
+    x.font = "800 84px " + F; x.fillText("forma", 90, 150); x.fillStyle = "#C6F432"; x.fillText(".", 90 + x.measureText("forma").width, 150);
+    x.fillStyle = "#A39F92"; x.font = "600 44px " + F; x.fillText("Mi objetivo", 90, 880);
+    x.fillStyle = "#F5F1E8"; x.font = "800 86px " + F; var words = gn.split(" "), line = "", y = 980; words.forEach(function (w) { var t = line ? line + " " + w : w; if (x.measureText(t).width > 880 && line) { x.fillText(line, 90, y); y += 100; line = w; } else line = t; }); x.fillText(line, 90, y);
+    y += 170; x.fillStyle = "#C6F432"; x.font = "800 240px " + F; x.fillText(String(n), 90, y); var nw = x.measureText(String(n)).width;
+    x.fillStyle = "#F5F1E8"; x.font = "700 52px " + F; x.fillText(n === 1 ? "día con algo hecho" : "días con algo hecho", 90 + nw + 30, y - 110); x.fillText("esta semana", 90 + nw + 30, y - 45);
+    if (ws) { x.fillStyle = "#A39F92"; x.font = "600 46px " + F; x.fillText(ws + (ws === 1 ? " semana seguida" : " semanas seguidas") + " con 3+ días", 90, y + 90); }
+    x.fillStyle = "#F5F1E8"; x.font = "700 50px " + F; x.fillText("Dale forma a la vida que querés", 90, 1700); x.fillStyle = "#A39F92"; x.font = "600 44px " + F; x.fillText("formargentina.com", 90, 1770);
+    c.toBlob(function (b) {
+      if (!b) return; var f = null; try { f = new File([b], "mi-progreso-forma.png", { type: "image/png" }); } catch (e) {}
+      if (f && navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], text: "Dale forma a la vida que querés · formargentina.com" }).catch(function () {}); }
+      else { var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "mi-progreso-forma.png"; document.body.appendChild(a); a.click(); a.remove(); }
+    }, "image/png");
+  }
+  function doMagic() {
+    readAuthDraft(); var email = draft.email.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg("Escribí tu email arriba y volvé a tocar el botón.");
+    var btn = $("#a-magic"); btn.disabled = true; setMsg("Enviando...", true);
+    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: "https://formargentina.com/miforma", shouldCreateUser: false } }).then(function (r) {
+      btn.disabled = false; setMsg(r && r.error ? (/not allowed|signups|not found/i.test(String(r.error.message || "")) ? "No encontramos una cuenta con ese mail. Creala primero en «Crear cuenta»." : authMsg(r.error)) : "Listo: te mandamos un link a tu mail. Tocalo desde este mismo celular para entrar (mirá también en Spam).", !(r && r.error));
+    }, function (e) { btn.disabled = false; setMsg(authMsg(e)); });
+  }
   function doForgot() {
     readAuthDraft();
     var email = draft.email.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg("Revisá el email.");
@@ -1711,10 +1755,10 @@
   function armDone(b) { return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
-    if (S.arm && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, tildarlo y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
+    if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
-    window.FormaDia.open({ ans: pre, onSave: function (a) { var first = !S.arm; if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
+    window.FormaDia.open({ ans: pre, quick: !S.arm && !pre, onSave: function (a) { var first = !S.arm; if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
@@ -1731,7 +1775,7 @@
         tbtn = '<button class="btn ' + (locked ? "ghost" : "sage") + ' sm" data-armtool="' + tk + '" style="margin-top:8px">' + (locked ? ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Con Pro" : "Hacer ahora") + "</button>";
       }
       html += '<div class="blk ' + st + (dn ? " done" : "") + '"><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd" role="button" tabindex="0" data-blkopen="' + bl.indexOf(b) + '"><b>' + esc(b.label) + '</b>' + bchips(b) + (isNow ? '<span class="pg"><i style="width:' + pgw + '%"></i></span>' : "") + tbtn + "</div>" +
-        (pro && ck ? '<button class="check" role="checkbox" aria-checked="' + dn + '" aria-label="' + esc(b.label) + '" data-ack="' + esc(armKey(b)) + '">' + ICON.ok + "</button>" : "") + "</div>";
+        (ck ? '<button class="check" role="checkbox" aria-checked="' + dn + '" aria-label="' + esc(b.label) + '" data-ack="' + esc(armKey(b)) + '">' + ICON.ok + "</button>" : "") + "</div>";
     });
     return html + "</div>";
   }
@@ -1861,7 +1905,7 @@
       stepsHtml(b, i, true) +
       '<div class="bbtns">' +
       (pro && ck && tk && !dn ? '<button class="btn block" data-armtool="' + tk + '">Hacer ahora</button>' : "") +
-      (pro && ck ? '<button class="btn ' + (dn ? "ghost" : "") + ' block" data-ackb="' + i + '">' + (dn ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
+      (ck ? '<button class="btn ' + (dn ? "ghost" : "") + ' block" data-ackb="' + i + '">' + (dn ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
       '<button class="linkbtn bdet" data-blkopen="' + i + '">' + (pro ? "Detalles" : "Ver detalle") + "</button></div></div>";
     html += deployHtml(b, i);
     var nb = bl[i + 1];
@@ -1895,10 +1939,10 @@
   function compCard() {
     var list = compToday(), pro = isProU(); if (!list.length) return "";
     var n = list.filter(compDone).length;
-    return '<div class="card comp"><div class="row between"><b>Tus compromisos de hoy</b>' + (pro ? '<span class="small muted">' + n + "/" + list.length + ' <button class="linkbtn small" id="compedit" style="margin-left:6px">Cambiar</button></span>' : "") + "</div>" +
+    return '<div class="card comp"><div class="row between"><b>Tus compromisos de hoy</b>' + '<span class="small muted">' + n + "/" + list.length + (pro ? ' <button class="linkbtn small" id="compedit" style="margin-left:6px">Cambiar</button>' : "") + "</span>" + "</div>" +
       
       list.map(function (t, i) {
-        return pro ? '<div class="habit" style="padding:8px 0"><button class="check" role="checkbox" aria-checked="' + compDone(t) + '" aria-label="' + esc(t) + '" data-cack="' + i + '">' + ICON.ok + '</button><span style="flex:1;min-width:0' + (compDone(t) ? ";text-decoration:line-through;opacity:.6" : "") + '">' + esc(t) + "</span></div>"
+        return true ? '<div class="habit" style="padding:8px 0"><button class="check" role="checkbox" aria-checked="' + compDone(t) + '" aria-label="' + esc(t) + '" data-cack="' + i + '">' + ICON.ok + '</button><span style="flex:1;min-width:0' + (compDone(t) ? ";text-decoration:line-through;opacity:.6" : "") + '">' + esc(t) + "</span></div>"
           : '<div class="cfree"><i></i><span>' + esc(t) + "</span></div>";
       }).join("") + "</div>";
   }
@@ -1976,12 +2020,12 @@
   function stepKey(b, st) { return "s|" + armKey(b) + "|" + st.l; }
   function stepDone(b, st) { return !!(S.ad && S.ad[today()] && S.ad[today()][stepKey(b, st)]); }
   function stepsHtml(b, i, big) {
-    var ss = blockSteps(b); if (!ss.length) return ""; var pro = isProU(), n = ss.filter(function (x) { return stepDone(b, x); }).length;
+    var ss = blockSteps(b); if (!ss.length) return ""; var pro = true, n = ss.filter(function (x) { return stepDone(b, x); }).length;
     return '<div class="bsteps' + (big ? " big" : "") + '"><div class="bstl"><span>Paso a paso</span><span class="bstn' + (n === ss.length ? " all" : "") + '">' + (n === ss.length ? "¡Completo!" : n + "/" + ss.length) + "</span></div>" +
       ss.map(function (x, j) { var dn = stepDone(b, x); return (pro ? '<button class="bstep" role="checkbox" aria-checked="' + dn + '" data-bstep="' + i + ":" + j + '">' : '<div class="bstep ro">') + '<i class="bsc">' + ICON.ok + "</i><span>" + esc(x.l) + (x.n ? "<small>" + esc(x.n) + "</small>" : "") + "</span>" + (pro ? "</button>" : "</div>"); }).join("") + "</div>";
   }
   function tickStep(el, v) {
-    var p = v.split(":"), bl = armBlocks()[+p[0]]; if (!bl || !isProU()) return; var st = blockSteps(bl)[+p[1]]; if (!st) return;
+    var p = v.split(":"), bl = armBlocks()[+p[0]]; if (!bl) return; var st = blockSteps(bl)[+p[1]]; if (!st) return;
     S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; var k = stepKey(bl, st), on = !S.ad[td][k];
     if (on) S.ad[td][k] = 1; else delete S.ad[td][k]; save();
     el.setAttribute("aria-checked", on ? "true" : "false");
@@ -2326,6 +2370,7 @@
     if (t.id === "a-register") return doRegister();
     if (t.id === "a-login") return doLogin();
     if (t.id === "a-forgot") return doForgot();
+    if (t.id === "a-magic") return doMagic();
     if (t.id === "r-save") return doRecovery();
     if (d.instx !== undefined) { try { localStorage.setItem("forma_inst", "1"); } catch (e) {} render(); return; }
     if (d.install !== undefined) { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } try { localStorage.setItem("forma_inst", "1"); } catch (e) {} setTimeout(render, 400); return; }
@@ -2334,6 +2379,8 @@
     if (t.id === "a-guest") { S.guest = true; save(); render(); return; }
     if (t.id === "mkacct") { close(); S.guest = false; mode = "register"; draft.name = (S.profile && S.profile.name) || draft.name; render(); return; }
     if (t.id === "logout") return doLogout();
+    if (d.shareprog !== undefined) { shareProgress(); return; }
+    if (d.refine !== undefined) { armOpen(S.arm && S.arm.ans); return; }
     if (d.tab) { close(); tab = d.tab; render(); window.scrollTo(0, 0); return; }
     if (d.close !== undefined) { close(); return; }
     if (d.plan) return openPlan(d.plan);
@@ -2430,10 +2477,10 @@
     if (t.id === "compedit") return openComp();
     if (d.compsel !== undefined && compDraft) { var ct = compDraft.all[+d.compsel], ci2 = compDraft.sel.indexOf(ct); if (ci2 >= 0) compDraft.sel.splice(ci2, 1); else if (compDraft.sel.length < 3) compDraft.sel.push(ct); else { var cm = $("#compmsg"); if (cm) cm.textContent = "Hasta 3. Sacá uno para elegir otro."; return; } drawComp(); return; }
     if (t.id === "compsave" && compDraft) { S.comp = S.comp || {}; S.comp[today()] = compDraft.sel.slice(0, 3); compDraft = null; save(); close(); render(); return; }
-    if (d.cack !== undefined) { if (!isProU()) return; var ctx = compToday()[+d.cack]; if (ctx !== undefined) { S.ad = S.ad || {}; var tdc = today(); S.ad[tdc] = S.ad[tdc] || {}; if (S.ad[tdc]["c|" + ctx]) delete S.ad[tdc]["c|" + ctx]; else S.ad[tdc]["c|" + ctx] = 1; touchBest(); save(); render(); } return; }
+    if (d.cack !== undefined) { var ctx = compToday()[+d.cack]; if (ctx !== undefined) { S.ad = S.ad || {}; var tdc = today(); S.ad[tdc] = S.ad[tdc] || {}; if (S.ad[tdc]["c|" + ctx]) delete S.ad[tdc]["c|" + ctx]; else S.ad[tdc]["c|" + ctx] = 1; touchBest(); save(); render(); } return; }
     if (d.deploy !== undefined) { deployOpen = !deployOpen; t.setAttribute("aria-expanded", deployOpen); var dw = t.parentNode.querySelector(".dwrap"); if (dw) { dw.hidden = !deployOpen; if (deployOpen) animIn(dw.children, { dy: 12, d: 600, stag: 90 }); } return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
-    if (d.ackb !== undefined) { if (!isProU()) return; var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
+    if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2 && isProU()) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
     if (d.setview) { try { localStorage.setItem("forma_view", d.setview); } catch (e) {} render(); window.scrollTo(0, 0); return; }
@@ -2446,7 +2493,7 @@
     if (d.cierrefin !== undefined) { var fe = $("#full"); if (fe) fe.remove(); if (d.cierrefin === "tm") { showTm = true; } render(); window.scrollTo(0, 0); return; }
     if (t.id === "armgo") return armOpen();
     if (t.id === "armedit") return armOpen(S.arm && S.arm.ans);
-    if (d.ack) { if (!(S.demo || isPro("vida"))) return; S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
+    if (d.ack) { S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
     if (d.delwin !== undefined) { var wl = S.wins && S.wins[today()]; if (wl) { wl.splice(+d.delwin, 1); save(); render(); } return; }
     if (d.todock) { var ti = (S.todo || []).filter(function (x) { return x.id === d.todock; })[0]; if (ti) { ti.done = !ti.done; ti.doneAt = ti.done ? today() : ""; save(); render(); } return; }
     if (d.tododel) { S.todo = (S.todo || []).filter(function (x) { return x.id !== d.tododel; }); save(); render(); return; }

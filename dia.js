@@ -434,21 +434,24 @@
       }).join("") + '<p class="small muted">Es una guía de organización. Si tenés dolor o una lesión, consultá a un profesional de la salud antes de entrenar.</p>';
   }
   function skipped(i) { var q = STEPS[i - 1]; return !!(q && q.skip && q.skip(st.ans)); }
-  function moveStep(d) { var n = st.step + d; while (n >= 1 && n <= STEPS.length && skipped(n)) n += d; return n; }
+  function nSteps() { return st && st.quick ? 2 : STEPS.length; }
+  var QDEF = { lunch: 780, dinner: "auto", train: 0, prios: ["health"], habits: [], energy: "any", free: 60, waste: "none", style: "flex", pauses: 0 };
+  function withDefaults(a) { var o = JSON.parse(JSON.stringify(a)); Object.keys(QDEF).forEach(function (k) { if (o[k] === undefined) o[k] = JSON.parse(JSON.stringify(QDEF[k])); }); return o; }
+  function moveStep(d) { var n = st.step + d; while (n >= 1 && n <= nSteps() && skipped(n)) n += d; return n; }
   function render() {
     if (!host) return;
-    var total = STEPS.length, body = host.querySelector(".dbody"), foot = host.querySelector(".dfoot"), bar = host.querySelector(".actbar i"), html = "", fh = "";
+    var total = nSteps(), body = host.querySelector(".dbody"), foot = host.querySelector(".dfoot"), bar = host.querySelector(".actbar i"), html = "", fh = "";
     if (st.step === 0) {
-      html = '<span class="badge">12 preguntas · 2 minutos</span><h2 style="font-size:28px;margin-top:8px">Armemos tu día</h2><p class="muted">Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
+      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : "12 preguntas · 2 minutos") + '</span><h2 style="font-size:28px;margin-top:8px">Armemos tu día</h2><p class="muted">Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
       fh = '<button class="btn block" data-da="start">Empezar</button>'; bar.style.width = "0%";
     } else if (st.step <= total) {
-      var s = STEPS[st.step - 1], msg = stepMessage(s), vt = 0, vn = 0; STEPS.forEach(function (q, qi) { if (!skipped(qi + 1)) { vt++; if (qi + 1 <= st.step) vn++; } });
+      var s = STEPS[st.step - 1], msg = stepMessage(s), vt = 0, vn = 0; STEPS.forEach(function (q, qi) { if (qi < total && !skipped(qi + 1)) { vt++; if (qi + 1 <= st.step) vn++; } });
       bar.style.width = Math.round((vn - 1) * 100 / vt) + "%";
       html = '<span class="badge">Pregunta ' + vn + " de " + vt + '</span><h2 style="font-size:24px;margin:8px 0 6px" tabindex="-1" id="dq">' + esc(s.title) + '</h2><p class="muted small">' + esc(s.hint) + '</p><div class="stack" style="margin-top:12px">' + visibleFields(s).map(function (f) { return "<div>" + fieldHtml(f) + "</div>"; }).join("") + "</div>" +
         (msg ? '<div class="card sage" role="alert" style="margin-top:12px">' + esc(msg) + "</div>" : "");
       fh = '<div class="row"><button class="btn ghost" data-da="back">Atrás</button><button class="btn" style="flex:1" data-da="next"' + (isReady(s) ? "" : " disabled") + ">" + (moveStep(1) > total ? "Armar mi día" : "Siguiente") + "</button></div>";
     } else {
-      bar.style.width = "100%"; html = summary(plan(st.ans));
+      bar.style.width = "100%"; html = summary(plan(st.quick ? withDefaults(st.ans) : st.ans));
       fh = '<button class="btn block" data-da="save">Listo, usar este día</button><button class="btn ghost block" data-da="edit" style="margin-top:8px">Cambiar mis respuestas</button>';
     }
     body.innerHTML = html; foot.innerHTML = fh;
@@ -519,7 +522,7 @@
     else if (act === "next") st.step = moveStep(1);
     else if (act === "back") st.step = Math.max(moveStep(-1), 0);
     else if (act === "edit") st.step = 1;
-    else if (act === "save") { var a = st.ans, cb = st.opts.onSave; host.remove(); host = null; if (cb) cb(JSON.parse(JSON.stringify(a))); return; }
+    else if (act === "save") { var a = st.quick ? withDefaults(st.ans) : st.ans; if (st.quick) a.quick = true; else delete a.quick; var cb = st.opts.onSave; host.remove(); host = null; if (cb) cb(JSON.parse(JSON.stringify(a))); return; }
     else if (act === "addblk") { st.ans.fixed.push(newBlock()); st.focus = { sel: 'select[data-blk="' + (st.ans.fixed.length - 1) + '"][data-prop="s"]' }; return render(); }
     else if (act === "rmblk") { st.ans.fixed.splice(+el.getAttribute("data-i"), 1); return render(); }
     else if (el.hasAttribute("data-blk") && el.getAttribute("data-prop") === "travel") {
@@ -536,8 +539,8 @@
   function open(opts) {
     opts = opts || {};
     var old = document.getElementById("full"); if (old) old.remove();
-    st = { step: 0, ans: initial().ans, focus: null, opts: opts };
-    if (opts.ans) { st.ans = JSON.parse(JSON.stringify(opts.ans)); st.step = 1; }
+    st = { step: 0, ans: initial().ans, focus: null, opts: opts, quick: !!opts.quick };
+    if (opts.ans) { st.ans = JSON.parse(JSON.stringify(opts.ans)); st.step = 1; st.quick = false; }
     host = document.createElement("div"); host.className = "full"; host.id = "full";
     host.innerHTML = '<header><button class="btn ghost sm" data-da="exit">Salir</button><b>'+String(opts.title||"Armá tu día").replace(/</g,"")+'</b></header><div class="actbar"><i style="width:0%"></i></div><div class="dbody"></div><div class="dfoot"></div>';
     document.body.appendChild(host);

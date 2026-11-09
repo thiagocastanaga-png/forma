@@ -2,4 +2,10 @@ User-agent: *
 Allow: /
 Disallow: /miforma
 Disallow: /ig
+Disallow: /vida
+Disallow: /secciones
+Disallow: /tenis
+Disallow: /organiza
+Disallow: /app
+Disallow: /probar
 Sitemap: https://formargentina.com/sitemap.xml
