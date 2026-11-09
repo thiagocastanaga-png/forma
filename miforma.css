@@ -470,3 +470,43 @@ html[data-theme=dark] #splash svg{color:#F5F1E8}
   .full>header,.full>.actbar,.full>.dbody,.full>.dfoot{width:100%;max-width:600px;margin-left:auto;margin-right:auto}
   .full>header{max-width:none;padding-left:max(14px,calc((100% - 600px)/2 + 14px));padding-right:max(14px,calc((100% - 600px)/2 + 14px))}
 }
+
+/* ---------- herramientas con memoria ---------- */
+.txc{margin-bottom:12px}
+.txrow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 4px}
+.txf{display:block;margin:10px 0 4px}.txf>span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+.txin{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surf);color:var(--tx);font:inherit;font-size:16px;box-sizing:border-box}
+textarea.txin{resize:vertical;min-height:80px}
+.txchips{margin:8px 0 2px}
+.txbars{display:flex;gap:6px;align-items:flex-end;margin:14px 0 8px}
+.txb{flex:1;text-align:center;min-width:0}
+.txbc{position:relative;height:84px;display:flex;align-items:flex-end;background:var(--chipbg);border-radius:8px;overflow:hidden}
+.txbc i{display:block;width:100%;background:var(--muted);opacity:.55;border-radius:6px 6px 0 0;transition:height .7s cubic-bezier(.2,.7,.2,1)}
+.txbc i.ok{background:var(--sage);opacity:1}.txbc i.warn{background:var(--orange);opacity:1}
+.txline{position:absolute;left:0;right:0;border-top:2px dashed var(--tx);opacity:.45;z-index:1}
+.txb small{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
+.txstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 0}
+.txs{background:var(--chipbg);border-radius:12px;padding:10px 8px;text-align:center}
+.txs b{display:block;font-size:17px}.txs small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.25}
+.txli{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.txli:first-of-type{border-top:0}
+.txli.done>span:not(.txacts){text-decoration:line-through;opacity:.55}
+.txacts{display:flex;gap:6px;flex-shrink:0}
+.txmini{border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer;white-space:nowrap}
+.txq b{font-size:15px}
+.txfoco{background:var(--dcard);color:var(--dk-tx)}.txfoco .txli{border-color:rgba(255,255,255,.14)}.txfoco .txmini{background:transparent;color:inherit;border-color:rgba(255,255,255,.3)}
+.txbig{font-size:54px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.txring{position:relative;width:220px;height:220px;margin:10px auto}
+.txcirc{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--sage),var(--sage-d));opacity:.9;transform:scale(.5);transition:transform .12s linear}
+.txringt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink)}
+.txringt b{font-size:22px}.txringt span{font-size:34px;font-weight:800}
+.txopt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:14px;padding:12px 14px;margin:8px 0;cursor:pointer}
+.txopt small{display:block;color:var(--muted);margin-top:2px}
+.txopt[aria-pressed=true]{border-color:var(--sage);box-shadow:0 0 0 2px var(--sage) inset}
+.txdeck{width:100%}
+.txfc{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:20px;gap:10px;margin:12px 0;padding:14px;background:var(--chipbg);border-radius:16px}
+.txfc hr{width:60%;border:0;border-top:1px solid var(--line)}.txans{font-weight:700}
+.txdet{margin-top:12px}.txdet summary{cursor:pointer;font-size:14px;color:var(--muted)}
+.txcheck{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:var(--surf);color:var(--ink);font-weight:800;cursor:pointer;flex-shrink:0}
+.txcheck[aria-pressed=true]{background:var(--sage);border-color:var(--sage)}
+.txrev{padding:10px 0;border-top:1px solid var(--line)}.txrev:first-of-type{border-top:0}

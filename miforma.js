@@ -227,7 +227,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal", "betaOwned"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal", "betaOwned", "tl"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -251,6 +251,7 @@
     var tmap = {}; (remote.todo || []).concat(local.todo || []).forEach(function (x) { tmap[x.id] = x; }); out.todo = Object.keys(tmap).map(function (k) { return tmap[k]; });
     out.dd = Object.assign({}, remote.dd || {}); Object.keys(local.dd || {}).forEach(function (k) { var r = out.dd[k], l = local.dd[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.dd[k] = l; });
     var xm = {}; (remote.xt || []).forEach(function (x) { xm[x.id] = x; }); (local.xt || []).forEach(function (x) { var r = xm[x.id]; if (!r || (x.at || "") >= (r.at || "")) xm[x.id] = x; }); out.xt = Object.keys(xm).map(function (k) { return xm[k]; });
+    out.tl = Object.assign({}, remote.tl || {}); Object.keys(local.tl || {}).forEach(function (k) { var r = out.tl[k], l = local.tl[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.tl[k] = l; });
     out.rem = local.rem || remote.rem || null; out.goal = local.goal || remote.goal || null; out.betaOwned = Object.assign({}, remote.betaOwned || {}, local.betaOwned || {});
     out.cierreAt = local.cierreAt != null ? local.cierreAt : remote.cierreAt;
     out.wk = Object.assign({}, remote.wk || {}); Object.keys(local.wk || {}).forEach(function (k) { var r = out.wk[k], l = local.wk[k]; if (!r || (l && (l.at || "") >= (r.at || ""))) out.wk[k] = l; });
@@ -1412,6 +1413,8 @@
     { id: "estudio", n: "Bloque de estudio", d: "25 minutos de estudio y recuerdo activo, con pausa.", act: "estudio", plan: "estudio", mins: 35 },
     { id: "repaso", n: "Repaso activo", d: "Repasá recordando sin mirar: lo que te falta es lo que hay que estudiar.", act: "repaso", plan: "estudio", mins: 15 }
   ];
+  if (window.FormaTools && window.FormaTools.defs) TOOLS = TOOLS.concat(window.FormaTools.defs);
+  window.FormaBridge = { S: function () { return S; }, save: function () { save(); }, sheet: function (h) { sheet(h); }, close: close, shape: function (id) { return SHAPES[id] || ""; }, planName: function (id) { var p = planOf(id); return p ? p.n : ""; }, weekCount: function (o) { try { return weekCount(o || 0); } catch (e) { return null; } } };
   function toolById(id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }
   function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
   function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
@@ -1447,6 +1450,7 @@
   }
   function openTool(id) {
     var T = toolById(id); if (!T) return; var ok = toolOk(T), pl = planOf(T.plan), A = ACTS[T.act];
+    if (T.app) { if (ok && window.FormaTools) return window.FormaTools.open(T.id); A = { steps: [{ t: "Se usa cuando quieras, desde Hoy u Objetivo" }, { t: "Guarda tu historial en tu cuenta" }, { t: "Te muestra tu progreso con gráficos simples" }] }; }
     sheet('<div class="row"><span class="shape">' + SHAPES[T.plan] + '</span><div><span class="badge">Herramienta · ' + esc(pl.n) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><p style="margin:14px 0">' + esc(T.d) + "</p>" +
       '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>" +
       (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" data-xtadd="' + T.id + '" style="margin-top:8px">Agregar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
@@ -1982,7 +1986,7 @@
     commute: ["Aprovechá para escuchar algo que te guste o para no hacer nada.", "Evitá abrir el trabajo en el celular durante el viaje.", "Salir unos minutos antes evita llegar apurado."],
     rest: ["Descansar también es parte del plan.", "Bajá luces y pantallas de a poco.", "Hacé algo que te guste, sin culpa."]
   };
-  var BTOOLS = { sleep: ["dormir", "descarga", "respirar", "calma"], wake: ["antesabrir", "respirar"], meal: ["pausacel", "respirar"], train: ["movimiento"], focus: ["foco", "dosmin", "estudio", "pausacel"], pause: ["respirar", "calma", "grounding", "movimiento"], habit: ["respirar", "calma"], free: ["pausacel", "respirar", "dosmin"], fixed: ["antesabrir", "respirar", "pausacel"], commute: ["antesabrir", "respirar"], rest: ["respirar", "pausacel"] };
+  var BTOOLS = { sleep: ["dormir", "descarga", "sueno", "ritmos", "calma"], wake: ["antesabrir", "respirar"], meal: ["pausacel", "pantalla", "respirar"], train: ["movimiento"], focus: ["foco", "enfoque", "matriz", "dosmin", "estudio", "tarjetas"], pause: ["respirar", "ritmos", "animo", "grounding", "movimiento"], habit: ["respirar", "rutinas", "calma"], free: ["pausacel", "respirar", "dosmin", "animo", "revision"], fixed: ["antesabrir", "respirar", "pausacel"], commute: ["antesabrir", "respirar"], rest: ["respirar", "pausacel"] };
   function bTipKind(b) { return b.label === "Desconectar y dormir" ? "sleep" : b.label.indexOf("Despertar") === 0 ? "wake" : TIPS[b.kind] ? b.kind : "habit"; }
   function blockTools(b) {
     var ids = [], tk = armToolOf(b), T0 = tk ? toolByAct(tk) : null; if (T0) ids.push(T0.id);
@@ -2002,7 +2006,7 @@
     var h = "", pro = isProU(), tl = blockTools(b), tips = blockTips(b), det = bdetails(b), steps = blockSteps(b), gst = (b.steps || []).length, G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null;
     if (tl.length) h += deployGroup("tools", "Herramientas", "para este momento", tl.map(function (T) {
       var ok = toolOk(T), pl = planOf(T.plan);
-      return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" data-act="' + T.act + '">Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con ' + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n) + '">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
+      return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" ' + (T.app ? 'data-tlapp="' + T.id + '"' : 'data-act="' + T.act + '"') + '>Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con ' + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n) + '">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
     }).join(""));
     if (tips.length) h += deployGroup("tips", "Para tener en cuenta", "", "<ul>" + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>");
     if (G && gst) h += deployGroup("goal", "Tu objetivo", "", '<p class="small" style="margin:0">«' + esc(G.n) + "»: en este momento sumás " + gst + (gst === 1 ? " paso" : " pasos") + " de tu plan de hoy. Están tildables arriba, en el paso a paso.</p>");
@@ -2400,6 +2404,7 @@
     if (d.remopen !== undefined) return openRem();
     if (d.remt) { var rr = remSet(), kk = d.remt; rr[kk] = !rr[kk]; S.rem = { a: rr.a ? 1 : 0, p: rr.p ? 1 : 0, c: rr.c ? 1 : 0, b: rr.b ? 1 : 0 }; save(); openRem(); render(); return; }
     if (d.open === "tools") return openTools();
+    if (d.tlapp) return window.FormaTools && window.FormaTools.open(d.tlapp);
     if (d.tl) return openTool(d.tl);
     if (d.xtadd) return openXtAdd(d.xtadd);
     if (d.xtn !== undefined) { xtd.n = !xtd.n; t.setAttribute("aria-pressed", xtd.n ? "true" : "false"); return; }
