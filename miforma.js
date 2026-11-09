@@ -301,7 +301,13 @@
   function onSession(session) {
     user = session && session.user ? session.user : null;
     if (!user) { sync.state = "off"; return Promise.resolve(); }
-    return loadRemote().then(function () { render(); }, function () { sync.state = "error"; render(); });
+    return loadRemote().then(function () { render(); payPoll(); }, function () { sync.state = "error"; render(); });
+  }
+  // Al volver de Mercado Pago el aviso del pago puede tardar unos segundos: reintentamos un rato
+  var payTries = 0;
+  function payPoll() {
+    if (!/[?&]pago=ok/.test(location.search) || payTries >= 8) return;
+    payTries++; setTimeout(function () { loadRemote().then(function () { render(); payPoll(); }, function () {}); }, 4000);
   }
 
   // ---------- render ----------
