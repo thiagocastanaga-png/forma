@@ -510,3 +510,11 @@ textarea.txin{resize:vertical;min-height:80px}
 .txcheck{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:var(--surf);color:var(--ink);font-weight:800;cursor:pointer;flex-shrink:0}
 .txcheck[aria-pressed=true]{background:var(--sage);border-color:var(--sage)}
 .txrev{padding:10px 0;border-top:1px solid var(--line)}.txrev:first-of-type{border-top:0}
+
+/* ---------- armar el día a mano ---------- */
+.mbrow{border:1px solid var(--line);background:var(--surf);border-radius:14px;padding:10px;margin:0 0 10px}
+.mbt{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.mbt select{flex:1;min-width:0;padding:10px 8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;font-size:15px}
+.mbt span{color:var(--muted);font-size:14px}
+.mbn{display:grid;grid-template-columns:1fr 112px;gap:8px;margin-top:8px}
+.mbn input,.mbn select{min-width:0;padding:11px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;font-size:15px}

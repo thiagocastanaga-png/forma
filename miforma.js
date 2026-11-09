@@ -1694,12 +1694,12 @@
   // ---------- armado del día (el mismo de la página) ----------
   var ARMTOOL = { "Pausa y respiración": "respirar", "Desconectar y dormir": "dormir", "Meditar y respirar": "calma", "Moverme y estirar": "movimiento", "Planificar el día siguiente": "cierre", "Escribir un diario": "cierre" };
   function dayAns(dt) { dt = dt || new Date(); var dd = S.dd && S.dd[today(dt)]; if (dd && dd.ans) return dd.ans; var w = S.wk && S.wk[dt.getDay()]; return w && w.ans ? w.ans : (S.arm && S.arm.ans) || null; }
-  function armBlocksFor(dt) { try { var a = dayAns(dt); return a && window.FormaDia ? xtApply(window.FormaDia.plan(a).blocks, dt || new Date()) : []; } catch (e) { return []; } }
+  function armBlocksFor(dt) { try { var mk = today(dt || new Date()), mb = S.dd && S.dd[mk] && S.dd[mk].blocks; if (mb && mb.length && window.FormaDia) return xtApply(mb.map(function (c) { return Object.assign({}, c); }), dt || new Date()); var a = dayAns(dt); return a && window.FormaDia ? xtApply(window.FormaDia.plan(a).blocks, dt || new Date()) : []; } catch (e) { return []; } }
   function armBlocks() { return armBlocksFor(new Date()); }
   // ---------- mi semana ----------
   var DNL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], DNS = ["D", "L", "M", "M", "J", "V", "S"];
   function weekDates() { var d = new Date(), k = (d.getDay() + 6) % 7, m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - k); return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return new Date(m.getFullYear(), m.getMonth(), m.getDate() + i); }); }
-  function ddCustom(dt) { var k = today(dt), x = S.dd && S.dd[k]; return !!(x && x.ans); }
+  function ddCustom(dt) { var k = today(dt), x = S.dd && S.dd[k]; return !!(x && (x.ans || (x.blocks && x.blocks.length))); }
   function wkCustom(dow) { return !!(S.wk && S.wk[dow] && S.wk[dow].ans); }
   function weekSumData() {
     var days = [], wins = [], tot = 0, DN = ["D", "L", "M", "M", "J", "V", "S"];
@@ -1734,19 +1734,59 @@
     var F = window.FormaDia, d = dt || wkDate(dow), k = today(d), bl = armBlocksFor(d), one = ddCustom(d), cu = wkCustom(dow), pl = DNL[dow].toLowerCase() + (/s$/.test(DNL[dow]) ? "" : "s");
     sheet('<span class="badge">' + (one ? "Cambiado solo para este día" : cu ? "Armado para los " + pl : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">' + (one ? "El resto de los " + pl + " no cambia." : cu ? "Se repite todos los " + pl + "." : "Es el día que armaste con el test.") + "</p>" +
       '<div class="wklist">' + bl.map(function (b) { var K = F.KIND[b.kind]; return '<div class="wkrow"><span class="wkt">' + F.fmt(b.s) + '</span><i style="background:' + K.dot + '"></i><span>' + esc(b.label) + "</span></div>"; }).join("") + "</div>" +
-      '<button class="btn sage block" data-ddedit="' + k + '" style="margin-top:14px">Cambiar solo este día</button>' +
+      '<button class="btn sage block" data-ddedit="' + k + '" style="margin-top:14px">Editar horario por horario</button>' +
       (one ? '<button class="btn ghost block" data-ddreset="' + k + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
       '<button class="btn ghost block" data-wkedit="' + dow + '" style="margin-top:8px">' + (cu ? "Cambiar todos los " + pl : "Armar todos los " + pl + " distinto") + "</button>" +
       (cu ? '<button class="btn ghost block" data-wkreset="' + dow + '" style="margin-top:8px">Todos los ' + pl + ' vuelven al día base</button>' : "") +
       '<div class="sec" style="margin-top:16px">Copiar este día a</div><div class="wkto">' + [1, 2, 3, 4, 5, 6, 0].filter(function (x) { return x !== dow; }).map(function (x) { return '<button class="chip" data-wkto="' + x + '" aria-pressed="false">' + DNL[x].slice(0, 3) + "</button>"; }).join("") + '</div>' +
       '<button class="btn ghost block" data-wkcopy="' + dow + '" style="margin-top:8px">Copiar</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }
-  function ddEdit(k) {
+  // ---------- armar un día a mano, horario por horario ----------
+  var MB = null;
+  function mbClock(m) { var x = ((m % 1440) + 1440) % 1440; return pad(Math.floor(x / 60)) + ":" + pad(x % 60) + (m >= 1440 ? " (+1)" : ""); }
+  function mbOpts(sel) { var o = "", odd = sel % 15 !== 0; for (var m = 0; m <= 1800; m += 15) { if (odd && sel < m && sel > m - 15) o += '<option value="' + sel + '" selected>' + mbClock(sel) + "</option>"; o += '<option value="' + m + '"' + (m === sel ? " selected" : "") + ">" + mbClock(m) + "</option>"; } return o; }
+  function mbDateOf(k) { var q = k.split("-"); return new Date(+q[0], +q[1] - 1, +q[2]); }
+  function ddManual(k) {
+    if (!window.FormaDia || !isProU()) return;
+    var dt = mbDateOf(k), cur = S.dd && S.dd[k] && S.dd[k].blocks, base;
+    if (cur && cur.length) base = cur; else { var a = dayAns(dt); if (!a) return; try { base = window.FormaDia.plan(a).blocks; } catch (e) { return; } }
+    MB = { k: k, dt: dt, bl: base.map(function (b) { return { s: b.s, e: b.e, label: b.label, kind: b.kind, note: b.note || "" }; }), err: "" }; mbDraw();
+  }
+  function mbDraw() {
+    var F = window.FormaDia, K = F.KIND, kinds = ["fixed", "meal", "train", "focus", "habit", "pause", "free", "rest", "commute"];
+    var oldSh = $("#sheet > div"), keep = oldSh ? oldSh.scrollTop : 0;
+    var title = MB.k === today() ? "tu día de hoy" : DNL[MB.dt.getDay()].toLowerCase() + " " + MB.dt.getDate();
+    sheet('<span class="badge">Armar a mano</span><h2 style="font-size:24px;margin:8px 0 2px">' + esc(title.charAt(0).toUpperCase() + title.slice(1)) + '</h2><p class="small muted" style="margin:0 0 12px">Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.</p>' +
+      MB.bl.map(function (b, i) {
+        return '<div class="mbrow"><div class="mbt"><select data-mbf="s" data-mbi="' + i + '" aria-label="Desde">' + mbOpts(b.s) + '</select><span>a</span><select data-mbf="e" data-mbi="' + i + '" aria-label="Hasta">' + mbOpts(b.e) + '</select><button class="txmini" data-mbdel="' + i + '" aria-label="Borrar bloque">Borrar</button></div>' +
+          '<div class="mbn"><input data-mbf="label" data-mbi="' + i + '" maxlength="40" value="' + esc(b.label) + '" placeholder="Qué vas a hacer"><select data-mbf="kind" data-mbi="' + i + '" aria-label="Tipo">' + kinds.map(function (x) { return '<option value="' + x + '"' + (x === b.kind ? " selected" : "") + ">" + esc(K[x].tag) + "</option>"; }).join("") + "</select></div></div>";
+      }).join("") +
+      '<button class="btn ghost block" data-mbadd style="margin-top:10px">Agregar un bloque</button>' +
+      (MB.err ? '<p class="small" style="color:var(--err);margin:10px 0 0">' + esc(MB.err) + "</p>" : "") +
+      '<button class="btn sage block" data-mbsave style="margin-top:12px">Guardar este día</button>' +
+      '<button class="btn ghost block" data-mbq="' + MB.k + '" style="margin-top:8px">Rehacer con preguntas</button>' +
+      (ddCustom(MB.dt) ? '<button class="btn ghost block" data-ddreset="' + MB.k + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
+      '<button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+    var nsh = $("#sheet"); if (nsh && oldSh && MB.drawn) { try { nsh.getAnimations({ subtree: true }).forEach(function (an) { an.cancel(); }); } catch (e) {} var nd = $("#sheet > div"); if (nd) nd.scrollTop = keep; }
+    MB.drawn = true;
+  }
+  function mbSave() {
+    var bl = MB.bl.slice().sort(function (a, b) { return a.s - b.s; }), out = [], i;
+    for (i = 0; i < bl.length; i++) { var b = bl[i]; if (!(b.e > b.s)) { MB.err = "“" + (b.label || "Bloque") + "”: la hora de fin tiene que ser después de la de inicio."; MB.bl = bl; return mbDraw(); }
+      if (!String(b.label || "").trim()) { MB.err = "Todos los bloques necesitan un nombre."; MB.bl = bl; return mbDraw(); }
+      if (i && b.s < bl[i - 1].e) { MB.err = "Se pisan “" + bl[i - 1].label + "” (" + mbClock(bl[i - 1].s) + " a " + mbClock(bl[i - 1].e) + ") y “" + b.label + "” (" + mbClock(b.s) + " a " + mbClock(b.e) + ")."; MB.bl = bl; return mbDraw(); } }
+    bl.forEach(function (b, j) { if (j && b.s > bl[j - 1].e) out.push({ s: bl[j - 1].e, e: b.s, label: "Margen libre", kind: "free", note: "" }); out.push({ s: b.s, e: b.e, label: String(b.label).trim().slice(0, 40), kind: b.kind, note: b.note || "" }); });
+    if (!out.length) { MB.err = "El día no puede quedar vacío."; return mbDraw(); }
+    S.dd = S.dd || {}; var prev = S.dd[MB.k] || {}; S.dd[MB.k] = { ans: prev.ans || null, blocks: out, at: today() };
+    save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0);
+  }
+  function ddEdit(k) { ddManual(k); }
+  function ddQ(k) {
     if (!window.FormaDia || !isProU()) return;
     var q = k.split("-"), dt = new Date(+q[0], +q[1] - 1, +q[2]), base = dayAns(dt); close();
     window.FormaDia.open({ title: "Armá " + (k === today() ? "tu día de hoy" : DNL[dt.getDay()].toLowerCase() + " " + dt.getDate()), ans: base, onSave: function (a) { S.dd = S.dd || {}; S.dd[k] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
   }
-  function ddReset(k) { S.dd = S.dd || {}; S.dd[k] = { ans: null, at: today() }; save(); close(); render(); }
+  function ddReset(k) { S.dd = S.dd || {}; S.dd[k] = { ans: null, blocks: null, at: today() }; save(); close(); render(); }
   function wkEdit(dow) {
     if (!window.FormaDia || !isProU()) return;
     var base = dayAns(wkDate(dow)); close();
@@ -2480,6 +2520,10 @@
     if (d.tmedit !== undefined) { if (S.tm) delete S.tm[today(tmDate())]; save(); render(); return; }
     if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0 && isProU()) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
     if (d.ddedit) return ddEdit(d.ddedit);
+    if (d.mbq) { MB = null; return ddQ(d.mbq); }
+    if (d.mbadd !== undefined && MB) { var last = MB.bl.slice().sort(function (a, b) { return a.e - b.e; }).pop(), s0 = last ? last.e : 480; MB.bl.push({ s: s0, e: s0 + 60, label: "Nueva actividad", kind: "habit", note: "" }); MB.err = ""; return mbDraw(); }
+    if (d.mbdel !== undefined && MB) { MB.bl.splice(+d.mbdel, 1); MB.err = ""; return mbDraw(); }
+    if (d.mbsave !== undefined && MB) return mbSave();
     if (d.ddreset) { if (isProU()) ddReset(d.ddreset); return; }
     if (d.wkday !== undefined && d.wkday !== "") { var wd2 = null; if (d.wkdt) { var q2 = d.wkdt.split("-"); wd2 = new Date(+q2[0], +q2[1] - 1, +q2[2]); } return openWeekDay(+d.wkday, wd2); }
     if (d.wkedit !== undefined) return wkEdit(+d.wkedit);
@@ -2554,6 +2598,10 @@
       }
       return;
     }
+  });
+  document.addEventListener("input", function (e) { var t = e.target; if (MB && t.dataset && t.dataset.mbf === "label") { MB.bl[+t.dataset.mbi].label = t.value; } });
+  document.addEventListener("change", function (e) {
+    var t = e.target; if (MB && t.dataset && t.dataset.mbf) { var bk = MB.bl[+t.dataset.mbi], f = t.dataset.mbf; if (bk) { if (f === "s" || f === "e") bk[f] = +t.value; else if (f === "kind") bk.kind = t.value; else bk.label = t.value; MB.err = ""; if (f !== "label") mbDraw(); } return; }
   });
   document.addEventListener("change", function (e) { if (e.target.getAttribute && e.target.getAttribute("data-fk")) save(); });
   document.addEventListener("submit", function (e) {
