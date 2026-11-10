@@ -1603,6 +1603,7 @@
       if (r.data === false) { btn.disabled = false; return setMsg("Ese nombre de usuario ya está en uso. Elegí otro."); }
       return sb.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: "https://formargentina.com/miforma", data: { username: uname, name: name } } }).then(function (res) {
         if (res.error) { btn.disabled = false; return setMsg(authMsg(res.error)); }
+        if (res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0) { btn.disabled = false; return setMsg("Ya hay una cuenta con ese email, por eso no te mandamos ningún mail nuevo. Tocá \"Iniciar sesión\" y entrá con tu contraseña. Si no te acordás, usá \"Olvidé mi contraseña\"."); }
         acct.username = uname;
         S.profile = { name: name, email: email, username: uname, areas: [], sports: [], created: today(), done: false };
         if (res.data && res.data.session) {
