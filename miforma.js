@@ -487,7 +487,7 @@
   function vArmar() {
     var nm = (S.profile && S.profile.name) || "";
     return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1>' +
-      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>Solo 2 preguntas, menos de 1 minuto.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día para lograrlo</b><span>Con cambios de a poco, para que se sostengan.</span></li></ol>' +
+      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>Solo 2 preguntas, menos de 1 minuto.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día y te damos la guía</b><span>Herramientas y pasos concretos para cumplirlo, de a poco.</span></li></ol>' +
       '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
   var deferredInstall = null;
