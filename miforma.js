@@ -1,6 +1,7 @@
 (function () {
   "use strict";
   var CFG = window.FORMA || {};
+  var SIM = false; try { if (new URLSearchParams(location.search).get("pruebas") === "1") localStorage.setItem("forma_sim", "1"); if (new URLSearchParams(location.search).get("pruebas") === "0") localStorage.removeItem("forma_sim"); SIM = localStorage.getItem("forma_sim") === "1"; } catch (e) {}
   var KEY = "forma_app_v1", NUEVO = false, FLUJO = false, PRUEBA = false, PFREE = false;
   // ?nuevo=1 → cuenta de prueba nueva, aislada de tus datos reales (con &pro=1 desbloquea Pro)
   try { var qp = new URLSearchParams(location.search); if (qp.get("prueba") === "1") { NUEVO = true; FLUJO = true; PRUEBA = true; PFREE = qp.get("free") === "1"; KEY = PFREE ? "forma_app_prueba_free" : "forma_app_prueba"; } } catch (e) {}
@@ -172,7 +173,7 @@
   function touchBest() { var n = streakNow(); if (n > S.best) S.best = n; }
 
   // permisos
-  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo || !!(CFG.beta && S.betaOwned && S.betaOwned[id]); }
+  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo || !!(SIM && S.betaOwned && S.betaOwned[id]); }
   function isPro(planId) {
     var p = planOf(planId); if (!p) return false;
     if (hasProduct(p.pro)) return true;
@@ -629,7 +630,7 @@
             '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
       '<div class="card stack"><b>Tus datos</b><p class="small muted" style="margin:0">' + (user ? "Tus datos se guardan en tu cuenta. Podés descargar una copia o borrar tu cuenta cuando quieras." : "Todo se guarda solo en este dispositivo. Si cambiás de teléfono o borrás los datos del navegador, se pierde.") + "</p>" +
       '<div class="grid2"><button class="btn ghost" id="export">Descargar copia</button><button class="btn ghost" id="wipe">' + (user ? "Borrar mi cuenta" : "Borrar todo") + "</button></div>" +
-      (CFG.beta && S.betaOwned && Object.keys(S.betaOwned).length ? '<button class="btn ghost block" data-betareset>Volver a Gratis (borrar compras de prueba)</button>' : "") + (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
+      (SIM && S.betaOwned && Object.keys(S.betaOwned).length ? '<button class="btn ghost block" data-betareset>Volver a Gratis (borrar compras de prueba)</button>' : "") + (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
       '<div class="card"><b>¿Algo no funciona o te falta algo?</b><p class="small muted" style="margin:6px 0 10px">Contanos qué te pasó o qué cambiarías, aunque sea una frase. Lo leemos todo. (Versión ' + esc(BUILD) + ")</p>" + '<a class="btn ghost block" href="https://ig.me/m/formargentina" target="_blank" rel="noopener">Escribirnos por Instagram</a></div>' +
       '<div class="card small"><a data-link="instagram" href="' + esc(CFG.instagram || "#") + '" target="_blank" rel="noopener">Instagram @formargentina</a> · <a href="privacidad">Privacidad</a> · <a href="terminos">Términos</a> · <a href="./">Sitio de Forma</a></div>';
     return html;
@@ -654,11 +655,24 @@
   function notifyForm(label, email) {
     return '<form id="notify" class="stack" style="margin-top:10px"><input id="n-email" type="email" required placeholder="tu@email.com" value="' + esc(email || "") + '" style="' + fieldCss() + '"><button class="btn block">Avisame</button><div class="msg" id="nmsg"></div></form>';
   }
+  function simPay(id) {
+    var p = prodOf(id) || planOf(id) || {}, nm = p.n || "Forma", pr = p.price || "";
+    sheet('<div style="text-align:center;padding:10px 0"><span class="tag">Pago simulado</span><h2 style="margin:12px 0 4px">' + esc(nm) + '</h2><p class="muted" style="margin:0 0 16px">' + esc(pr) + '</p><div class="card" style="text-align:left"><b>Mercado Pago (prueba)</b><p class="small muted" style="margin:6px 0 12px">Así se ve el paso de pago. Acá no se cobra nada.</p><button class="btn block" id="simgo">Pagar ' + esc(pr) + '</button></div><button class="btn ghost block" style="margin-top:8px" data-close>Cancelar</button></div>');
+    var go = $("#simgo"); if (!go) return;
+    go.onclick = function () {
+      var b = $("#sheet > div"); if (b) b.innerHTML = '<div style="text-align:center;padding:50px 0"><div class="bigflame on" style="margin:0 auto 14px;width:60px;height:60px">' + ICON.flame + '</div><b>Procesando el pago…</b></div>';
+      setTimeout(function () {
+        S.betaOwned = S.betaOwned || {}; S.betaOwned[id] = 1; save();
+        var b2 = $("#sheet > div"); if (b2) b2.innerHTML = '<div style="text-align:center;padding:40px 0"><h2>¡Pago aprobado!</h2><p class="muted">' + esc(nm) + ' ya está desbloqueado en tu cuenta.</p><button class="btn block" id="simok">Listo</button></div>';
+        var ok = $("#simok"); if (ok) ok.onclick = function () { close(); render(); };
+      }, 1800);
+    };
+  }
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
-    if (CFG.beta) return '<div class="card" style="margin-top:12px"><span class="tag">Versión de prueba</span><p class="small" style="margin:8px 0 10px">Podés "comprar" para probar cómo se vería. <b>No se cobra nada</b>: es una compra simulada.</p><button class="btn block" data-betabuy="' + esc(id) + '">Probar compra sin pagar</button></div>';
-    if (!CFG.beta && CFG.checkout && ["t-full", "t-pre", "t-resp", "t-mov", "t-rut"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
+    if (!SIM && CFG.checkout && ["t-full", "t-pre", "t-resp", "t-mov", "t-rut"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
+    if (SIM && !NATIVE) return '<button class="btn block" data-betabuy="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted">Versión de prueba: el pago es simulado y <b>no se cobra nada</b>.</p>';
     if (NATIVE) link = "";
     if (CFG.checkout && !NATIVE && user) return '<button class="btn block" data-checkout="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted" id="ckmsg">Pagás en Mercado Pago y se desbloquea solo en tu cuenta (' + esc(user.email || "") + ").</p>";
     if (link) h += '<a class="btn block" target="_blank" rel="noopener" href="' + esc(link) + '" style="margin-top:12px">Pagar con Mercado Pago</a><p class="small muted">Pagá con el mismo email de tu cuenta (' + esc(user && user.email || "") + ") para que se desbloquee solo.</p>";
@@ -2464,7 +2478,7 @@
     if (d.grev) { goalReviewDo(d.grev); return; }
     if (d.gtoggle !== undefined) { goalOpen = !goalOpen; render(); return; }
     if (d.checkout) { var cm = $("#ckmsg"); if (cm) cm.textContent = "Abriendo Mercado Pago…"; sb.functions.invoke("create-checkout", { body: { product: d.checkout } }).then(function (r) { var u = r && r.data && r.data.url; if (u) location.href = u; else if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }, function () { if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }); return; }
-    if (d.betabuy) { S.betaOwned = S.betaOwned || {}; S.betaOwned[d.betabuy] = 1; save(); close(); render(); return; }
+    if (d.betabuy) { simPay(d.betabuy); return; }
     if (d.betareset !== undefined) { S.betaOwned = {}; save(); render(); return; }
     if (d.open === "prog") return openProg();
     if (d.gchk) { if (S.goal) { S.goal.chk = S.goal.chk || {}; S.goal.chk[today()] = +d.gchk; save(); openProg(); } return; }
