@@ -69,7 +69,7 @@
 
   // Planes: cada uno es como un "curso". Gratis para empezar, Pro para todo el plan.
   var PLANS = [
-    { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "",
+    { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "$14.900",
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
       free: ["Tu día armado en 1 minuto, fijo en la pantalla de Hoy", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
       pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Cambiar tu día cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
@@ -670,7 +670,7 @@
   }
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
-    if (!SIM && CFG.checkout && ["t-full", "t-pre", "t-resp", "t-mov", "t-rut"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
+    if (!SIM && CFG.checkout && ["t-full", "t-pre", "t-resp", "t-mov", "t-rut", "plan-vida"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
     if (SIM && !NATIVE) return '<button class="btn block" data-betabuy="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted">Versión de prueba: el pago es simulado y <b>no se cobra nada</b>.</p>';
     if (NATIVE) link = "";
