@@ -657,6 +657,7 @@
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
     if (CFG.beta) return '<div class="card" style="margin-top:12px"><span class="tag">Versión de prueba</span><p class="small" style="margin:8px 0 10px">Podés "comprar" para probar cómo se vería. <b>No se cobra nada</b>: es una compra simulada.</p><button class="btn block" data-betabuy="' + esc(id) + '">Probar compra sin pagar</button></div>';
+    if (!CFG.beta && CFG.checkout && ["t-full", "t-pre", "t-resp", "t-mov", "t-rut"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
     if (NATIVE) link = "";
     if (CFG.checkout && !NATIVE && user) return '<button class="btn block" data-checkout="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted" id="ckmsg">Pagás en Mercado Pago y se desbloquea solo en tu cuenta (' + esc(user.email || "") + ").</p>";
