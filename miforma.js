@@ -1,6 +1,17 @@
 (function () {
   "use strict";
   var CFG = window.FORMA || {};
+  // ?reset=1 → borra todo lo guardado en este navegador (sesión y datos) y arranca de cero
+  try {
+    var qr = new URLSearchParams(location.search);
+    if (qr.get("reset") === "1") {
+      Object.keys(localStorage).forEach(function (k) { if (/^forma_|^sb-/.test(k)) localStorage.removeItem(k); });
+      try { sessionStorage.clear(); } catch (e) {}
+      qr.delete("reset"); var rest = qr.toString();
+      location.replace(location.pathname + (rest ? "?" + rest : ""));
+      return;
+    }
+  } catch (e) {}
   var SIM = false; try { if (new URLSearchParams(location.search).get("pruebas") === "1") localStorage.setItem("forma_sim", "1"); if (new URLSearchParams(location.search).get("pruebas") === "0") localStorage.removeItem("forma_sim"); SIM = localStorage.getItem("forma_sim") === "1"; } catch (e) {}
   var KEY = "forma_app_v1", NUEVO = false, FLUJO = false, PRUEBA = false, PFREE = false;
   // ?nuevo=1 → cuenta de prueba nueva, aislada de tus datos reales (con &pro=1 desbloquea Pro)
@@ -291,9 +302,12 @@
       if (pr && pr.data) acct.username = pr.data.username || "";
       if (pu && pu.data) { var o = {}; pu.data.forEach(function (r) { o[r.product_id] = 1; }); S.owned = o; }
       var remote = (st && st.data && st.data.state) || null;
+      if (S.uid && S.uid !== user.id) { var ow0 = S.owned; S = blank(); S.owned = ow0 || {}; }
+      S.uid = user.id;
       var local = pushableState();
       var m = remote ? mergeStates(local, remote) : local;
       S.profile = m.profile; S.habits = m.habits; S.best = m.best; EXTRA.forEach(function (k) { if (m[k] !== undefined) S[k] = m[k]; }); S.guest = false;
+      if (!S.profile && user.user_metadata && user.user_metadata.name) S.profile = { name: user.user_metadata.name, email: user.email || "", username: (pr && pr.data && pr.data.username) || user.user_metadata.username || "", areas: [], sports: [], created: today(), done: false };
       if (S.profile && pr && pr.data && !S.profile.username) S.profile.username = pr.data.username;
       try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
       sync.state = "pending";
@@ -1620,6 +1634,7 @@
         if (res.error) { btn.disabled = false; return setMsg(authMsg(res.error)); }
         if (res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0) { btn.disabled = false; return setMsg("Ya hay una cuenta con ese email, por eso no te mandamos ningún mail nuevo. Tocá \"Iniciar sesión\" y entrá con tu contraseña. Si no te acordás, usá \"Olvidé mi contraseña\"."); }
         acct.username = uname;
+        S = blank();
         S.profile = { name: name, email: email, username: uname, areas: [], sports: [], created: today(), done: false };
         if (res.data && res.data.session) {
           user = res.data.session.user; S.guest = false; save(); render();
