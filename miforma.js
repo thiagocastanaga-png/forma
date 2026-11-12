@@ -71,8 +71,8 @@
   var PLANS = [
     { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "$14.900",
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
-      free: ["Tu día armado en 1 minuto, fijo en la pantalla de Hoy", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
-      pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Cambiar tu día cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
+      free: ["Tu día armado en 1 minuto, fijo en la pantalla de Hoy", "Cambiar tu día de hoy y armar mañana cada noche", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
+      pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Organizar tu semana: armá y guardá cada día (tu lunes, tu martes…) y que se repitan solos", "Cambiar tu día base cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
     { id: "dormir", n: "Dormir de verdad", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", inc: true, grp: "Vida diaria", price: "",
       d: "14 días para ordenar tu sueño: cargás tus horarios, hacés un paso por día y al final ves tus datos reales.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tus horarios con gráfico", "Rutina guiada para dormir y respiración", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
@@ -512,7 +512,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard() + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + weekCard() : "") + (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día base cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -1338,7 +1338,7 @@
       (cur && cur.t ? '<p style="margin:0 0 8px">Tu prioridad: <b>' + esc(cur.t) + '</b> <button class="linkbtn small" data-tmedit>Cambiar</button></p>' :
         '<form id="tmf" class="row"><input id="tmi" maxlength="80" placeholder="¿Qué es lo más importante de mañana?" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Dejar</button></form>') +
       (nx ? '<p class="small muted" style="margin:10px 0 0">Mañana arrancás a las ' + window.FormaDia.fmt(nx.s) + ' con "' + esc(nx.label) + '"' + (bl.length > 1 ? " y tenés " + bl.length + " bloques." : ".") + "</p>" : "") +
-      (isProU() ? '<button class="btn ghost block" data-wkday="' + tm.getDay() + '" data-wkdt="' + k + '" style="margin-top:10px">Ver o cambiar mañana</button>' : "") + "</div>";
+      (isProU() ? '<button class="btn ghost block" data-wkday="' + tm.getDay() + '" data-wkdt="' + k + '" style="margin-top:10px">Ver o cambiar mañana</button>' : '<button class="btn ghost block" data-ddedit="' + k + '" style="margin-top:10px">Cambiar mañana a mi gusto</button>') + "</div>";
   }
   function prioCard() {
     var c = S.tm && S.tm[today()]; if (!c || !c.t) return "";
@@ -1740,6 +1740,7 @@
     return '<div class="card"><div class="row between"><div><b>Tu semana</b><span class="small muted" style="display:block">Mirá cómo te fue y qué cerraste.</span></div><button class="btn sage sm" data-open="wsum">Ver resumen</button></div></div>';
   }
   function weekCard() {
+    if (!isProU() && S.arm && S.arm.ans) return '<div class="card weekc"><div class="row between"><b>Mi semana</b><span class="small muted">Pro</span></div><p class="small muted" style="margin:6px 0 10px">Armá y guardá cada día de la semana: tu lunes, tu martes, tu miércoles… y que cada uno se repita solo.</p><button class="btn ghost block" data-plan="vida">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Organizar mi semana con Pro</button></div>";
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
     return '<div class="card weekc"><div class="row between"><b>Mi semana</b><button class="linkbtn small" data-open="wsum">Ver resumen</button></div><div class="wkstrip">' +
@@ -1764,7 +1765,7 @@
   function mbOpts(sel) { var o = "", odd = sel % 15 !== 0; for (var m = 0; m <= 1800; m += 15) { if (odd && sel < m && sel > m - 15) o += '<option value="' + sel + '" selected>' + mbClock(sel) + "</option>"; o += '<option value="' + m + '"' + (m === sel ? " selected" : "") + ">" + mbClock(m) + "</option>"; } return o; }
   function mbDateOf(k) { var q = k.split("-"); return new Date(+q[0], +q[1] - 1, +q[2]); }
   function ddManual(k) {
-    if (!window.FormaDia || !isProU()) return;
+    if (!window.FormaDia || !(isProU() || k === today() || k === today(tmDate()))) return;
     var dt = mbDateOf(k), cur = S.dd && S.dd[k] && S.dd[k].blocks, base;
     if (cur && cur.length) base = cur; else { var a = dayAns(dt); if (!a) return; try { base = window.FormaDia.plan(a, dt.getDay()).blocks; } catch (e) { return; } }
     MB = { k: k, dt: dt, bl: base.map(function (b) { return { s: b.s, e: b.e, label: b.label, kind: b.kind, note: b.note || "" }; }), err: "" }; mbDraw();
@@ -1799,7 +1800,7 @@
   }
   function ddEdit(k) { ddManual(k); }
   function ddQ(k) {
-    if (!window.FormaDia || !isProU()) return;
+    if (!window.FormaDia || !(isProU() || k === today() || k === today(tmDate()))) return;
     var q = k.split("-"), dt = new Date(+q[0], +q[1] - 1, +q[2]), base = dayAns(dt); close();
     window.FormaDia.open({ title: "Armá " + (k === today() ? "tu día de hoy" : DNL[dt.getDay()].toLowerCase() + " " + dt.getDate()), ans: base, dow: dt.getDay(), onSave: function (a) { S.dd = S.dd || {}; S.dd[k] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
   }
@@ -1823,7 +1824,7 @@
   function armDone(b) { return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
-    if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
+    if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { return ddManual(today()); sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
     var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
@@ -1834,7 +1835,7 @@
     if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 2 preguntas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
-    var html = '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + (pro ? '<button class="linkbtn small" id="armedit">Cambiar mis respuestas</button>' : "") + '</div>' +
+    var html = '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + ('<button class="linkbtn small" id="armedit">' + (pro ? "Cambiar mis respuestas" : "Cambiar mi día de hoy") + "</button>") + '</div>' +
       (pro && tr.length ? '<p class="small muted" style="margin:0 0 6px">' + n + " de " + tr.length + " momentos hechos hoy</p>" : "") +
       '<div class="legend"><span><i class="lg past"></i>Ya pasó</span><span><i class="lg now"></i>Ahora</span><span><i class="lg next"></i>Lo que sigue</span></div><div class="tl">';
     bl.forEach(function (b) {
