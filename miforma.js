@@ -1995,11 +1995,11 @@
       (state === "now" ? '<span class="pg big"><i style="width:' + Math.round((now - b.s) * 100 / (b.e - b.s)) + '%"></i></span>' : "") +
       (det.length ? '<div class="bchips big">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : "") +
       stepsHtml(b, i, true) +
+      '<div class="dwrap incard">' + deployBody(b, i) + "</div>" +
       '<div class="bbtns">' +
       (pro && ck && tk && !dn ? '<button class="btn block" data-armtool="' + tk + '">Hacer ahora</button>' : "") +
       (ck ? '<button class="btn ' + (dn ? "ghost" : "") + ' block" data-ackb="' + i + '">' + (dn ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
-      '<button class="linkbtn bdet" data-blkopen="' + i + '">' + (pro ? "Detalles" : "Ver detalle") + "</button></div></div>";
-    html += deployHtml(b, i);
+      "</div></div>";
     var nb = bl[i + 1];
     if (nb) html += '<button class="nextprev" data-blkopen="' + (i + 1) + '"><span class="small muted">Sigue</span><b>' + F.fmt(nb.s) + " · " + esc(nb.label) + "</b></button>";
     return html;

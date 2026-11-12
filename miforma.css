@@ -518,3 +518,8 @@ textarea.txin{resize:vertical;min-height:80px}
 .mbt span{color:var(--muted);font-size:14px}
 .mbn{display:grid;grid-template-columns:1fr 112px;gap:8px;margin-top:8px}
 .mbn input,.mbn select{min-width:0;padding:11px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;font-size:15px}
+
+/* detalles del momento, dentro de la tarjeta grande */
+.bignow .dwrap.incard{display:grid;gap:10px;margin-top:14px}
+.bignow .dgrp{background:var(--card);color:var(--tx);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:14px}
+.bignow .dgrp .small.muted{color:var(--mut,inherit)}
