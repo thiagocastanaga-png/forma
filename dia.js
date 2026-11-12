@@ -25,7 +25,7 @@
 
   // ---------- Preguntas ----------
   var STEPS = [
-    { title: "¿A qué hora te despertás y a qué hora te dormís?", hint: "Elegí tus horarios reales, aunque sean distintos cada día: usá los más habituales.",
+    { title: "¿A qué hora te despertás y a qué hora te dormís?", hint: "Elegí tus horarios reales de ese día. Los otros días los podés armar después.",
       fields: [
         { key: "wake", label: "Me despierto", type: "select", placeholder: "Elegí una hora", opts: times(180, 960, true), ex: [180, 960, true] },
         { key: "sleep", label: "Me duermo", type: "select", placeholder: "Elegí una hora", opts: times(1200, 1920, false), ex: [1200, 1920, false] }
@@ -457,7 +457,7 @@
     if (!host) return;
     var total = nSteps(), body = host.querySelector(".dbody"), foot = host.querySelector(".dfoot"), bar = host.querySelector(".actbar i"), html = "", fh = "";
     if (st.step === 0) {
-      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : "12 preguntas · 2 minutos") + '</span><h2 style="font-size:28px;margin-top:8px">Armemos tu día</h2><p class="muted">Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
+      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : "12 preguntas · 2 minutos") + '</span><h2 style="font-size:28px;margin-top:8px">' + (st.opts.dayName ? "Armemos tu " + st.opts.dayName : "Armemos tu día") + '</h2><p class="muted">' + (st.opts.dayName ? "Pensá en cómo es tu " + st.opts.dayName + " de verdad, no en un día cualquiera. Lo armamos en bloques con horarios y queda guardado como tu " + st.opts.dayName + ". Después armás los demás días." : "Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.") + '</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
       fh = '<button class="btn block" data-da="start">Empezar</button>'; bar.style.width = "0%";
     } else if (st.step <= total) {
       var s = STEPS[st.step - 1], msg = stepMessage(s), vt = 0, vn = 0; STEPS.forEach(function (q, qi) { if (qi < total && !skipped(qi + 1)) { vt++; if (qi + 1 <= st.step) vn++; } });

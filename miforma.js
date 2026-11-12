@@ -379,7 +379,7 @@
           '<button class="btn block" id="a-forgot">Enviar link</button><button class="btn ghost block" data-mode="login">Volver</button>';
       } else if (reg) {
         html += '<label class="field"><span>¿Cómo te llamás?</span><input id="a-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
-          '<label class="field"><span>Nombre de usuario <small class="muted" style="font-weight:400">(único; podés cambiarlo)</small></span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21" placeholder="te proponemos uno" value="' + esc(draft.username) + '"></label>' +
+          '<label class="field"><span>Nombre de usuario <small class="muted" style="font-weight:400">(el que quieras, único)</small></span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21" placeholder="Elegí tu usuario, por ejemplo mica_92" value="' + esc(draft.username) + '"></label>' +
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<label class="field"><span>Contraseña (mínimo 8 caracteres)</span><input id="a-pass" type="password" autocomplete="new-password"></label>' +
           '<label class="row small"><input id="a-terms" type="checkbox" ' + (draft.terms ? "checked" : "") + '> <span>Acepto los <a href="terminos" target="_blank" rel="noopener">términos</a> y la <a href="privacidad" target="_blank" rel="noopener">política de privacidad</a>.</span></label>' +
@@ -1826,7 +1826,8 @@
     if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
-    window.FormaDia.open({ ans: pre, quick: !S.arm && !pre, onSave: function (a) { var first = !S.arm; if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
+    var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    window.FormaDia.open({ ans: pre, quick: !S.arm && !pre, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
@@ -2618,6 +2619,12 @@
   });
   document.addEventListener("input", function (e) { var t = e.target; if (MB && t.dataset && t.dataset.mbf === "label") { MB.bl[+t.dataset.mbi].label = t.value; } });
   document.addEventListener("change", function (e) {
+    if (!e.target || e.target.id !== "a-user" || typeof sb === "undefined" || !sb) return;
+    var un = e.target.value.trim().replace(/^@/, "").toLowerCase();
+    if (!/^[a-z0-9_]{3,20}$/.test(un)) return;
+    try { sb.rpc("username_available", { u: un }).then(function (r) { if (r && r.data === false) setMsg("Ese nombre de usuario ya está en uso. Elegí otro."); else if (r && r.data === true) setMsg("Ese usuario está libre.", true); }); } catch (x) {}
+  });
+  document.addEventListener("change", function (e) {
     var t = e.target; if (MB && t.dataset && t.dataset.mbf) { var bk = MB.bl[+t.dataset.mbi], f = t.dataset.mbf; if (bk) { if (f === "s" || f === "e") bk[f] = +t.value; else if (f === "kind") bk.kind = t.value; else bk.label = t.value; MB.err = ""; if (f !== "label") mbDraw(); } return; }
   });
   document.addEventListener("change", function (e) { if (e.target.getAttribute && e.target.getAttribute("data-fk")) save(); });
@@ -2639,14 +2646,6 @@
     if (!e.target) return;
     if (e.target.id === "act-in") updateNext();
     if (e.target.id === "a-user") draft.userTouched = true;
-    if (e.target.id === "a-name") {
-      var uEl = $("#a-user");
-      if (uEl && !draft.userTouched) {
-        var slug = e.target.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 12);
-        draft.sfx = draft.sfx || String(100 + Math.floor(Math.random() * 900));
-        uEl.value = slug.length >= 2 ? slug + "_" + draft.sfx : "";
-      }
-    }
     if (/^sc-/.test(e.target.id || "")) { var v = +e.target.value, o = e.target.parentNode.querySelector(".rv"); if (o) o.textContent = v + " · " + ["", "Mal", "Flojo", "Más o menos", "Bien", "Muy bien"][v]; }
   });
   document.addEventListener("keydown", function (e) {
