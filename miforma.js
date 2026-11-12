@@ -1330,17 +1330,18 @@
   function cierreDef() { var a = dayAns(new Date()) || {}, sl = a.sleep || 1380; return Math.max(1080, Math.min(sl - 180, 1260)); }
   function tmThreshold() { return typeof S.cierreAt === "number" ? S.cierreAt : cierreDef(); }
   function mananaCard() {
-    if (!isProU() || !S.arm || !S.arm.ans) return "";
+    if (!S.arm || !S.arm.ans) return "";
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(); if (now < tmThreshold()) return "";
     if (!(S.cierre && S.cierre[today()]) && !showTm) return "";
-    var tm = tmDate(), bl = armBlocksFor(tm), k = today(tm), cur = S.tm && S.tm[k]; if (!bl.length) return "";
+    var tm = tmDate(), bl = armBlocksFor(tm), k = today(tm), cur = S.tm && S.tm[k]; if (!bl.length) return ""; var nx = bl.filter(function (b) { return b.kind !== "rest" && b.kind !== "meal"; })[0];
     return '<div class="card manana"><b>Mañana, ' + DNL[tm.getDay()].toLowerCase() + '</b><div style="height:10px"></div>' +
       (cur && cur.t ? '<p style="margin:0 0 8px">Tu prioridad: <b>' + esc(cur.t) + '</b> <button class="linkbtn small" data-tmedit>Cambiar</button></p>' :
         '<form id="tmf" class="row"><input id="tmi" maxlength="80" placeholder="¿Qué es lo más importante de mañana?" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Dejar</button></form>') +
-      '<button class="btn ghost block" data-wkday="' + tm.getDay() + '" data-wkdt="' + k + '" style="margin-top:10px">Ver o cambiar mañana</button></div>';
+      (nx ? '<p class="small muted" style="margin:10px 0 0">Mañana arrancás a las ' + window.FormaDia.fmt(nx.s) + ' con "' + esc(nx.label) + '"' + (bl.length > 1 ? " y tenés " + bl.length + " bloques." : ".") + "</p>" : "") +
+      (isProU() ? '<button class="btn ghost block" data-wkday="' + tm.getDay() + '" data-wkdt="' + k + '" style="margin-top:10px">Ver o cambiar mañana</button>' : "") + "</div>";
   }
   function prioCard() {
-    var c = isProU() && S.tm && S.tm[today()]; if (!c || !c.t) return "";
+    var c = S.tm && S.tm[today()]; if (!c || !c.t) return "";
     return '<div class="card prio' + (c.d ? " done" : "") + '"><button class="pcheck" data-tmdone aria-pressed="' + !!c.d + '" aria-label="Marcar como hecha"></button><div><span class="small muted">Tu prioridad de hoy · la dejaste anoche</span><b style="display:block;font-size:17px">' + esc(c.t) + "</b></div></div>";
   }
 
@@ -1710,7 +1711,7 @@
   // ---------- armado del día (el mismo de la página) ----------
   var ARMTOOL = { "Pausa y respiración": "respirar", "Desconectar y dormir": "dormir", "Meditar y respirar": "calma", "Moverme y estirar": "movimiento", "Planificar el día siguiente": "cierre", "Escribir un diario": "cierre" };
   function dayAns(dt) { dt = dt || new Date(); var dd = S.dd && S.dd[today(dt)]; if (dd && dd.ans) return dd.ans; var w = S.wk && S.wk[dt.getDay()]; return w && w.ans ? w.ans : (S.arm && S.arm.ans) || null; }
-  function armBlocksFor(dt) { try { var mk = today(dt || new Date()), mb = S.dd && S.dd[mk] && S.dd[mk].blocks; if (mb && mb.length && window.FormaDia) return xtApply(mb.map(function (c) { return Object.assign({}, c); }), dt || new Date()); var a = dayAns(dt); return a && window.FormaDia ? xtApply(window.FormaDia.plan(a).blocks, dt || new Date()) : []; } catch (e) { return []; } }
+  function armBlocksFor(dt) { try { var mk = today(dt || new Date()), mb = S.dd && S.dd[mk] && S.dd[mk].blocks; if (mb && mb.length && window.FormaDia) return xtApply(mb.map(function (c) { return Object.assign({}, c); }), dt || new Date()); var a = dayAns(dt); return a && window.FormaDia ? xtApply(window.FormaDia.plan(a, (dt || new Date()).getDay()).blocks, dt || new Date()) : []; } catch (e) { return []; } }
   function armBlocks() { return armBlocksFor(new Date()); }
   // ---------- mi semana ----------
   var DNL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], DNS = ["D", "L", "M", "M", "J", "V", "S"];
@@ -1765,7 +1766,7 @@
   function ddManual(k) {
     if (!window.FormaDia || !isProU()) return;
     var dt = mbDateOf(k), cur = S.dd && S.dd[k] && S.dd[k].blocks, base;
-    if (cur && cur.length) base = cur; else { var a = dayAns(dt); if (!a) return; try { base = window.FormaDia.plan(a).blocks; } catch (e) { return; } }
+    if (cur && cur.length) base = cur; else { var a = dayAns(dt); if (!a) return; try { base = window.FormaDia.plan(a, dt.getDay()).blocks; } catch (e) { return; } }
     MB = { k: k, dt: dt, bl: base.map(function (b) { return { s: b.s, e: b.e, label: b.label, kind: b.kind, note: b.note || "" }; }), err: "" }; mbDraw();
   }
   function mbDraw() {
@@ -1800,13 +1801,13 @@
   function ddQ(k) {
     if (!window.FormaDia || !isProU()) return;
     var q = k.split("-"), dt = new Date(+q[0], +q[1] - 1, +q[2]), base = dayAns(dt); close();
-    window.FormaDia.open({ title: "Armá " + (k === today() ? "tu día de hoy" : DNL[dt.getDay()].toLowerCase() + " " + dt.getDate()), ans: base, onSave: function (a) { S.dd = S.dd || {}; S.dd[k] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
+    window.FormaDia.open({ title: "Armá " + (k === today() ? "tu día de hoy" : DNL[dt.getDay()].toLowerCase() + " " + dt.getDate()), ans: base, dow: dt.getDay(), onSave: function (a) { S.dd = S.dd || {}; S.dd[k] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
   }
   function ddReset(k) { S.dd = S.dd || {}; S.dd[k] = { ans: null, blocks: null, at: today() }; save(); close(); render(); }
   function wkEdit(dow) {
     if (!window.FormaDia || !isProU()) return;
     var base = dayAns(wkDate(dow)); close();
-    window.FormaDia.open({ title: "Armá tu " + DNL[dow].toLowerCase(), ans: base, onSave: function (a) { S.wk = S.wk || {}; S.wk[dow] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
+    window.FormaDia.open({ title: "Armá tu " + DNL[dow].toLowerCase(), ans: base, dow: dow, onSave: function (a) { S.wk = S.wk || {}; S.wk[dow] = { ans: a, at: today() }; save(); tab = "hoy"; render(); window.scrollTo(0, 0); } });
   }
   function wkReset(dow) { S.wk = S.wk || {}; S.wk[dow] = { ans: null, at: today() }; save(); close(); render(); }
   function wkCopy(src) {
@@ -1937,7 +1938,7 @@
     var st = cierreStats(), msgs = CIERRE_MSG[st.lvl - 1], msg = msgs[new Date().getDate() % msgs.length], C = 2 * Math.PI * 52;
     if (ph === "reward") {
       var g = monthGrid(true), sk = cierreStreak();
-      el.innerHTML = '<header><b>Tu forma de hoy</b></header><div class="dbody" style="text-align:center"><div class="rwd">' + shapeSvg(st.lvl, SHCOL[new Date().getDate() % 6], 110) + '</div><h2 style="font-size:26px;margin:14px 0 6px">' + (sk > 1 ? sk + " días cerrados seguidos" : "Día cerrado") + '</h2><p class="muted">' + esc(msg) + '</p><div class="card" style="text-align:left;margin-top:16px"><b>Tu mes en formas</b><span class="small muted" style="display:block;margin:2px 0 10px">' + g.n + (g.n === 1 ? " día cerrado" : " días cerrados") + ' este mes</span>' + g.html + '</div></div><div class="dfoot"><button class="btn sage block" data-cierrefin>Listo</button><button class="btn ghost block" data-cierrefin="tm" style="margin-top:8px">Dejar armado mañana</button></div>';
+      el.innerHTML = '<header><b>Tu forma de hoy</b></header><div class="dbody" style="text-align:center"><div class="rwd">' + shapeSvg(st.lvl, SHCOL[new Date().getDate() % 6], 110) + '</div><h2 style="font-size:26px;margin:14px 0 6px">' + (sk > 1 ? sk + " días cerrados seguidos" : "Día cerrado") + '</h2><p class="muted">' + esc(msg) + '</p><div class="card" style="text-align:left;margin-top:16px"><b>Tu mes en formas</b><span class="small muted" style="display:block;margin:2px 0 10px">' + g.n + (g.n === 1 ? " día cerrado" : " días cerrados") + ' este mes</span>' + g.html + '</div></div><div class="dfoot"><p class="small muted" style="margin:0 0 10px">Falta un paso: dejá armado mañana y cerrás el día de verdad.</p><button class="btn sage block" data-cierrefin="tm">Dejar armado mañana</button><button class="btn ghost block" data-cierrefin style="margin-top:8px">Ahora no</button></div>';
       return;
     }
     el.innerHTML = '<header><button class="btn ghost sm" data-cierrefin="x">Volver</button><b>Cierre del día</b></header><div class="dbody" style="text-align:center"><div class="cring"><svg viewBox="0 0 120 120" width="150" height="150"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--sage)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - st.pct / 100)).toFixed(1) + '" transform="rotate(-90 60 60)" class="ringfill"/></svg><b>' + st.pct + '%</b></div>' +
@@ -2534,7 +2535,7 @@
     if (d.pgagain) { delete S.prog.items[d.pgagain]; save(); render(); return openProgram(d.pgagain); }
     if (d.tmshow !== undefined) { showTm = true; render(); return; }
     if (d.tmedit !== undefined) { if (S.tm) delete S.tm[today(tmDate())]; save(); render(); return; }
-    if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0 && isProU()) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
+    if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
     if (d.ddedit) return ddEdit(d.ddedit);
     if (d.mbq) { MB = null; return ddQ(d.mbq); }
     if (d.mbadd !== undefined && MB) { var last = MB.bl.slice().sort(function (a, b) { return a.e - b.e; }).pop(), s0 = last ? last.e : 480; MB.bl.push({ s: s0, e: s0 + 60, label: "Nueva actividad", kind: "habit", note: "" }); MB.err = ""; return mbDraw(); }
@@ -2623,7 +2624,7 @@
   document.addEventListener("submit", function (e) {
     if (e.target.id === "compf") { e.preventDefault(); var cv = $("#compown").value.trim(); if (cv && compDraft) { if (compDraft.sel.length >= 3) { $("#compmsg").textContent = "Hasta 3. Sacá uno para sumar otro."; return; } if (compDraft.sel.indexOf(cv) < 0) compDraft.sel.push(cv.slice(0, 80)); drawComp(); } return; }
     if (e.target.id === "bnf") { e.preventDefault(); if (!isProU()) return; var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim(); if (bx && bv) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv.slice(0, 80)); save(); render(); openBlock(bi); } return; }
-    if (e.target.id === "tmf") { e.preventDefault(); if (!isProU()) return; var tv = $("#tmi").value.trim(); if (tv) { S.tm = S.tm || {}; S.tm[today(tmDate())] = { t: tv.slice(0, 80), d: 0 }; save(); render(); } return; }
+    if (e.target.id === "tmf") { e.preventDefault(); var tv = $("#tmi").value.trim(); if (tv) { S.tm = S.tm || {}; S.tm[today(tmDate())] = { t: tv.slice(0, 80), d: 0 }; save(); render(); } return; }
     if (e.target.id === "winf") { e.preventDefault(); var wv = $("#win").value.trim(); if (wv) { S.wins = S.wins || {}; (S.wins[today()] = S.wins[today()] || []).push(wv.slice(0, 120)); save(); render(); } return; }
     if (e.target.id === "todof") { e.preventDefault(); var tv = $("#todo").value.trim(); if (tv && (S.todo || []).length < 60) { S.todo = S.todo || []; S.todo.push({ id: "t" + Date.now(), t: tv.slice(0, 120), done: false, doneAt: "" }); save(); render(); } return; }
     if (e.target.id === "addh") { e.preventDefault(); addHabit($("#hname").value, $("#htime").value); }

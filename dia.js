@@ -37,7 +37,7 @@
         if (d > 1260) return "Entre que te despertás y te dormís hay más de 21 horas. Revisá los horarios.";
         return "";
       } },
-    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, clases o lo que no se mueve. Agregá todos los que necesites y ponele nombre a cada uno. Si terminás después de medianoche, elegí la hora igual (por ejemplo, 06:00).",
+    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, entrenamientos o lo que no se mueve. Agregá todos los que necesites, ponele nombre y elegí los días en que se repite. Si terminás después de medianoche, elegí la hora igual (por ejemplo, 06:00).",
       fields: [
         { key: "fixedOn", label: "", type: "chips", opts: [["No tengo", "no"], ["Sí tengo", "yes"]] },
         { key: "fixed", label: "", type: "blocks", showIf: function (a) { return a.fixedOn === "yes"; } }
@@ -49,16 +49,18 @@
         for (var i = 0; i < list.length; i++) {
           var dur = ((list[i].e - list[i].s) + 1440) % 1440;
           if (dur === 0) return "El horario fijo " + (i + 1) + " empieza y termina a la misma hora.";
+          if (!(list[i].days || ALLD).length) return "Elegí al menos un día para el horario fijo " + (i + 1) + ".";
           var st = list[i].s;
           while (st < a.wake) st += 1440;
-          iv.push([st, st + dur, i + 1]);
+          iv.push([st, st + dur, i + 1, list[i].days || ALLD]);
         }
         for (var x = 0; x < iv.length; x++) for (var y = x + 1; y < iv.length; y++) {
-          if (iv[x][0] < iv[y][1] && iv[y][0] < iv[x][1]) return "Los horarios fijos " + iv[x][2] + " y " + iv[y][2] + " se superponen. Revisá las horas.";
+          var share = iv[x][3].some(function (d) { return iv[y][3].indexOf(d) >= 0; });
+          if (share && iv[x][0] < iv[y][1] && iv[y][0] < iv[x][1]) return "Los horarios fijos " + iv[x][2] + " y " + iv[y][2] + " se superponen un mismo día. Revisá las horas o los días.";
         }
         return "";
       } },
-    { skip: function (a) { return a.fixedOn !== "yes"; }, title: "¿Cuánto tardás en cada traslado?", hint: "Es lo que tardás en llegar a tus horarios fijos y en volver. Elegí un tiempo de la lista o escribí el tuyo. Si no te movés, dejá \"No viajo\".",
+    { skip: function (a) { return true; }, title: "¿Cuánto tardás en cada traslado?", hint: "Es lo que tardás en llegar a tus horarios fijos y en volver. Elegí un tiempo de la lista o escribí el tuyo. Si no te movés, dejá \"No viajo\".",
       fields: [
         { key: "commuteGo", label: "Ida", type: "minutes" },
         { key: "commuteSame", label: "¿La vuelta tarda lo mismo?", type: "chips", opts: [["Sí, igual", "same"], ["No, distinta", "diff"]] },
@@ -120,7 +122,8 @@
     rest: { tag: "Descanso", dot: "#6B6B63" }
   };
 
-  function newBlock() { return { s: undefined, e: undefined, name: "", travel: "yes" }; }
+  var ALLD = [1, 2, 3, 4, 5, 6, 0], DLET = [["L", 1], ["M", 2], ["X", 3], ["J", 4], ["V", 5], ["S", 6], ["D", 0]];
+  function newBlock() { return { s: undefined, e: undefined, name: "", travel: "no", days: ALLD.slice(), go: 15, back: 15 }; }
   var MIN_OPTS = [["No viajo", 0], ["5 minutos", 5], ["10 minutos", 10], ["15 minutos", 15], ["20 minutos", 20], ["30 minutos", 30], ["45 minutos", 45], ["1 hora", 60], ["1 hora 15", 75], ["1 hora 30", 90], ["2 horas", 120], ["2 horas 30", 150], ["3 horas", 180]];
   function initial() {
     return { step: 0, ans: { commuteGo: 0, commuteSame: "same", dinner: "auto", fixedOn: "no", fixed: [newBlock()] }, focus: null };
@@ -128,7 +131,7 @@
   var state = initial();
 
   // ---------- Motor de reglas ----------
-  function plan(a) {
+  function plan(a, dow) {
     var blocks = [], warnings = [];
     var wake = a.wake, sleep = a.sleep;
     var strict = a.style === "strict";
@@ -235,12 +238,12 @@
     // Horarios fijos y traslados
     var cGo = a.commuteGo || 0;
     var cBack = a.commuteSame === "diff" ? (a.commuteBack || 0) : cGo;
-    var fixedList = a.fixedOn === "yes" ? (a.fixed || []).filter(function (b) { return b.s !== undefined && b.e !== undefined; }) : [];
+    var fixedList = a.fixedOn === "yes" ? (a.fixed || []).filter(function (b) { return b.s !== undefined && b.e !== undefined && (dow === undefined || !b.days || b.days.indexOf(dow) >= 0); }) : [];
     fixedList.forEach(function (fx) {
       var dur = ((fx.e - fx.s) + 1440) % 1440;
       if (dur === 0) return;
       var tr = fx.travel !== "no";
-      var ci = tr ? cGo : 0, cb = tr ? cBack : 0;
+      var ci = tr ? (typeof fx.go === "number" ? fx.go : cGo) : 0, cb = tr ? (typeof fx.back === "number" ? fx.back : (typeof fx.go === "number" ? fx.go : cBack)) : 0;
       var s = norm(fx.s), e = s + dur;
       s = Math.max(s, wake + 40 + ci);
       e = Math.min(e, sleep - 60 - cb);
@@ -369,7 +372,7 @@
     var ok = visibleFields(step).every(function (f) {
       if (f.req === false) return true;
       var v = st.ans[f.key];
-      if (f.type === "blocks") return (v || []).length > 0 && v.every(function (b) { return b.s !== undefined && b.e !== undefined; });
+      if (f.type === "blocks") return (v || []).length > 0 && v.every(function (b) { return b.s !== undefined && b.e !== undefined && (b.days || ALLD).length > 0; });
       if (f.type === "minutes") return typeof v === "number" && !isNaN(v) && v >= 0;
       return f.multi ? (v || []).length >= 1 : v !== undefined;
     });
@@ -390,6 +393,11 @@
     opts.forEach(function (o) { h += '<option value="' + o[1] + '"' + (o[1] === val ? " selected" : "") + ">" + esc(o[0]) + "</option>"; });
     return h + '</select></label><label class="field exact"><span class="small muted">Hora exacta</span><input type="time" data-blkx="' + i + '" data-prop="' + prop + '" value="' + (typeof val === "number" ? fmt(val) : "") + '"></label>';
   }
+  function minSel(label, i, prop, val) {
+    var opts = MIN_OPTS.filter(function (o) { return o[1] > 0; });
+    if (!opts.some(function (o) { return o[1] === val; })) { opts.push([val + " minutos", val]); opts.sort(function (a, c) { return a[1] - c[1]; }); }
+    return '<label class="field"><span>' + esc(label) + '</span><select data-blk="' + i + '" data-prop="' + prop + '">' + opts.map(function (o) { return '<option value="' + o[1] + '"' + (o[1] === val ? " selected" : "") + ">" + esc(o[0]) + "</option>"; }).join("") + "</select></label>";
+  }
   function fieldHtml(f) {
     var val = st.ans[f.key], h = "";
     if (f.type === "blocks") {
@@ -398,9 +406,13 @@
         h += '<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><b>Horario fijo ' + (i + 1) + '</b>' + (list.length > 1 ? '<button type="button" class="btn ghost sm" data-da="rmblk" data-i="' + i + '">Quitar</button>' : "") + '</div>' +
           '<label class="field"><span>Nombre (opcional)</span><input type="text" maxlength="40" data-blk="' + i + '" data-prop="name" value="' + esc(b.name || "") + '" placeholder="Trabajo, facultad, clases..."></label>' +
           '<div class="row" style="align-items:flex-start;margin-top:10px"><div style="flex:1">' + blkSel("Empieza", i, "s", b.s) + '</div><div style="flex:1">' + blkSel("Termina", i, "e", b.e) + '</div></div>' + (st.exErr && st.exErr["blk" + i] ? '<p class="small" style="color:var(--naranja,#FF8A4C);margin:6px 0 0">' + esc(st.exErr["blk" + i]) + "</p>" : "") +
+          '<div style="margin-top:10px"><span class="small" style="font-weight:600">¿Qué días?</span><div class="chips" style="margin-top:6px">' + DLET.map(function (o) {
+            return '<button type="button" class="chip" aria-pressed="' + ((b.days || ALLD).indexOf(o[1]) >= 0) + '" data-blk="' + i + '" data-prop="day" data-val="' + o[1] + '" style="flex:1;min-width:0;padding-left:0;padding-right:0;justify-content:center;text-align:center">' + o[0] + "</button>";
+          }).join("") + "</div></div>" +
           '<div style="margin-top:10px"><span class="small" style="font-weight:600">¿Tenés que trasladarte?</span><div class="chips" style="margin-top:6px">' + [["Sí", "yes"], ["No", "no"]].map(function (o) {
             return '<button type="button" class="chip" aria-pressed="' + (b.travel === o[1]) + '" data-blk="' + i + '" data-prop="travel" data-val="' + o[1] + '">' + o[0] + "</button>";
-          }).join("") + "</div></div></div>";
+          }).join("") + "</div></div>" +
+          (b.travel === "yes" ? '<div class="row" style="align-items:flex-start;margin-top:10px"><div style="flex:1">' + minSel("Cuánto tardás en llegar", i, "go", typeof b.go === "number" ? b.go : 15) + '</div><div style="flex:1">' + minSel("Cuánto tardás en volver", i, "back", typeof b.back === "number" ? b.back : (typeof b.go === "number" ? b.go : 15)) + "</div></div>" : "") + "</div>";
       });
       if (list.length < 8) h += '<button type="button" class="btn ghost sm" data-da="addblk">+ Agregar otro horario fijo</button>';
       return h;
@@ -423,9 +435,12 @@
     if (f.multi) h += '<p class="small muted" style="margin:8px 0 0">Elegí hasta ' + f.max + ".</p>";
     return h;
   }
+  function prevDow() { return st.opts && st.opts.dow !== undefined ? st.opts.dow : new Date().getDay(); }
+  function hasDays() { return (st.ans.fixed || []).some(function (b) { return b.days && b.days.length < 7; }); }
   function summary(res) {
     var a = st.ans;
     return '<h2 style="font-size:26px">Tu día, con forma</h2><p class="muted">De ' + fmt(a.wake) + " a " + fmt(a.sleep) + ", repartido en bloques. Va a quedar fijo en tu pantalla de Hoy.</p>" +
+      (st.ans.fixedOn === "yes" && hasDays() ? '<p class="small muted">Esta es la vista de ' + ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"][prevDow()] + ". Cada día usa los horarios fijos que le corresponden.</p>" : "") +
       '<div class="grid3"><div class="card stat"><b>' + durText(res.focus) + '</b><span>de foco</span></div><div class="card stat"><b>' + durText(res.habits) + '</b><span>en hábitos</span></div><div class="card stat"><b>' + durText(res.free) + '</b><span>libres</span></div></div>' +
       (res.warnings.length ? '<div class="card sage"><b>Para tener en cuenta</b>' + res.warnings.map(function (w) { return '<p class="small" style="margin:6px 0 0">' + esc(w) + "</p>"; }).join("") + "</div>" : "") +
       res.blocks.map(function (b) {
@@ -451,7 +466,7 @@
         (msg ? '<div class="card sage" role="alert" style="margin-top:12px">' + esc(msg) + "</div>" : "");
       fh = '<div class="row"><button class="btn ghost" data-da="back">Atrás</button><button class="btn" style="flex:1" data-da="next"' + (isReady(s) ? "" : " disabled") + ">" + (moveStep(1) > total ? "Armar mi día" : "Siguiente") + "</button></div>";
     } else {
-      bar.style.width = "100%"; html = summary(plan(st.quick ? withDefaults(st.ans) : st.ans));
+      bar.style.width = "100%"; html = summary(plan(st.quick ? withDefaults(st.ans) : st.ans, prevDow()));
       fh = '<button class="btn block" data-da="save">Listo, usar este día</button><button class="btn ghost block" data-da="edit" style="margin-top:8px">Cambiar mis respuestas</button>';
     }
     body.innerHTML = html; foot.innerHTML = fh;
@@ -525,7 +540,11 @@
     else if (act === "save") { var a = st.quick ? withDefaults(st.ans) : st.ans; if (st.quick) a.quick = true; else delete a.quick; var cb = st.opts.onSave; host.remove(); host = null; if (cb) cb(JSON.parse(JSON.stringify(a))); return; }
     else if (act === "addblk") { st.ans.fixed.push(newBlock()); st.focus = { sel: 'select[data-blk="' + (st.ans.fixed.length - 1) + '"][data-prop="s"]' }; return render(); }
     else if (act === "rmblk") { st.ans.fixed.splice(+el.getAttribute("data-i"), 1); return render(); }
-    else if (el.hasAttribute("data-blk") && el.getAttribute("data-prop") === "travel") {
+    else if (el.hasAttribute("data-blk") && el.getAttribute("data-prop") === "day") {
+      var db = +el.getAttribute("data-blk"), dv = +el.getAttribute("data-val"), dl = (st.ans.fixed[db].days || ALLD).slice(), di = dl.indexOf(dv);
+      if (di >= 0) dl.splice(di, 1); else dl.push(dv); st.ans.fixed[db].days = dl;
+      st.focus = { sel: 'button[data-blk="' + db + '"][data-prop="day"][data-val="' + dv + '"]' }; return render();
+    } else if (el.hasAttribute("data-blk") && el.getAttribute("data-prop") === "travel") {
       var tb = +el.getAttribute("data-blk"); st.ans.fixed[tb].travel = el.getAttribute("data-val");
       st.focus = { sel: 'button[data-blk="' + tb + '"][data-prop="travel"][data-val="' + el.getAttribute("data-val") + '"]' }; return render();
     } else if (el.hasAttribute("data-o")) {
