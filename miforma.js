@@ -302,7 +302,14 @@
       if (pr && pr.data) acct.username = pr.data.username || "";
       if (pu && pu.data) { var o = {}; pu.data.forEach(function (r) { o[r.product_id] = 1; }); S.owned = o; }
       var remote = (st && st.data && st.data.state) || null;
-      if (S.uid && S.uid !== user.id) { var ow0 = S.owned; S = blank(); S.owned = ow0 || {}; }
+      var stale = false;
+      if (S.uid) stale = S.uid !== user.id;
+      else if (S.profile) {
+        var pe = String(S.profile.email || "").toLowerCase(), ue = String(user.email || "").toLowerCase();
+        if (pe && ue && pe !== ue) stale = true;
+        else if (S.profile.created && user.created_at && new Date(user.created_at).getTime() - 36 * 3600 * 1000 > new Date(S.profile.created + "T12:00:00").getTime()) stale = true;
+      }
+      if (stale) { var ow0 = S.owned; S = blank(); S.owned = ow0 || {}; }
       S.uid = user.id;
       var local = pushableState();
       var m = remote ? mergeStates(local, remote) : local;
