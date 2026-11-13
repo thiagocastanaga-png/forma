@@ -1804,24 +1804,24 @@
   function mbClock(m) { var x = ((m % 1440) + 1440) % 1440; return pad(Math.floor(x / 60)) + ":" + pad(x % 60) + (m >= 1440 ? " (+1)" : ""); }
   function mbOpts(sel) { var o = "", odd = sel % 15 !== 0; for (var m = 0; m <= 1800; m += 15) { if (odd && sel < m && sel > m - 15) o += '<option value="' + sel + '" selected>' + mbClock(sel) + "</option>"; o += '<option value="' + m + '"' + (m === sel ? " selected" : "") + ">" + mbClock(m) + "</option>"; } return o; }
   function mbDateOf(k) { var q = k.split("-"); return new Date(+q[0], +q[1] - 1, +q[2]); }
-  function ddManual(k) {
+  function ddManual(k, first) {
     if (!window.FormaDia || !(isProU() || k === today() || k === today(tmDate()))) return;
     var dt = mbDateOf(k), cur = S.dd && S.dd[k] && S.dd[k].blocks, base;
     if (cur && cur.length) base = cur; else { var a = dayAns(dt); if (!a) return; try { base = window.FormaDia.plan(a, dt.getDay()).blocks; } catch (e) { return; } }
-    MB = { k: k, dt: dt, bl: base.map(function (b) { return { s: b.s, e: b.e, label: b.label, kind: b.kind, note: b.note || "" }; }), err: "" }; mbDraw();
+    MB = { k: k, dt: dt, bl: base.map(function (b) { return { s: b.s, e: b.e, label: b.label, kind: b.kind, note: b.note || "" }; }), err: "", first: !!first }; mbDraw();
   }
   function mbDraw() {
     var F = window.FormaDia, K = F.KIND, kinds = ["fixed", "meal", "train", "focus", "habit", "pause", "free", "rest", "commute"];
     var oldSh = $("#sheet > div"), keep = oldSh ? oldSh.scrollTop : 0;
     var title = MB.k === today() ? "tu día de hoy" : DNL[MB.dt.getDay()].toLowerCase() + " " + MB.dt.getDate();
-    sheet('<span class="badge">Armar a mano</span><h2 style="font-size:24px;margin:8px 0 2px">' + esc(title.charAt(0).toUpperCase() + title.slice(1)) + '</h2><p class="small muted" style="margin:0 0 12px">Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.</p>' +
+    sheet('<span class="badge">' + (MB.first ? "Último paso" : "Armar a mano") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + (MB.first ? "Ajustá tu día momento por momento" : esc(title.charAt(0).toUpperCase() + title.slice(1))) + '</h2><p class="small muted" style="margin:0 0 12px">' + (MB.first ? "Este es tu día armado con tus respuestas. Tocá cualquier bloque para cambiar su horario, su nombre o su tipo, o agregá los que falten. Después te preguntamos qué te está faltando." : "Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.") + '</p>' +
       MB.bl.map(function (b, i) {
         return '<div class="mbrow"><div class="mbt"><select data-mbf="s" data-mbi="' + i + '" aria-label="Desde">' + mbOpts(b.s) + '</select><span>a</span><select data-mbf="e" data-mbi="' + i + '" aria-label="Hasta">' + mbOpts(b.e) + '</select><button class="txmini" data-mbdel="' + i + '" aria-label="Borrar bloque">Borrar</button></div>' +
           '<div class="mbn"><input data-mbf="label" data-mbi="' + i + '" maxlength="40" value="' + esc(b.label) + '" placeholder="Qué vas a hacer"><select data-mbf="kind" data-mbi="' + i + '" aria-label="Tipo">' + kinds.map(function (x) { return '<option value="' + x + '"' + (x === b.kind ? " selected" : "") + ">" + esc(K[x].tag) + "</option>"; }).join("") + "</select></div></div>";
       }).join("") +
       '<button class="btn ghost block" data-mbadd style="margin-top:10px">Agregar un bloque</button>' +
       (MB.err ? '<p class="small" style="color:var(--err);margin:10px 0 0">' + esc(MB.err) + "</p>" : "") +
-      '<button class="btn sage block" data-mbsave style="margin-top:12px">Guardar este día</button>' +
+      '<button class="btn sage block" data-mbsave style="margin-top:12px">' + (MB.first ? "Listo, seguir" : "Guardar este día") + '</button>' +
       (ddCustom(MB.dt) ? '<button class="btn ghost block" data-ddreset="' + MB.k + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
       '<button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
     var nsh = $("#sheet"); if (nsh && oldSh && MB.drawn) { try { nsh.getAnimations({ subtree: true }).forEach(function (an) { an.cancel(); }); } catch (e) {} var nd = $("#sheet > div"); if (nd) nd.scrollTop = keep; }
@@ -1835,7 +1835,7 @@
     bl.forEach(function (b, j) { if (j && b.s > bl[j - 1].e) out.push({ s: bl[j - 1].e, e: b.s, label: "Margen libre", kind: "free", note: "" }); out.push({ s: b.s, e: b.e, label: String(b.label).trim().slice(0, 40), kind: b.kind, note: b.note || "" }); });
     if (!out.length) { MB.err = "El día no puede quedar vacío."; return mbDraw(); }
     S.dd = S.dd || {}; var prev = S.dd[MB.k] || {}; S.dd[MB.k] = { ans: prev.ans || null, blocks: out, at: today() };
-    save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0);
+    var wasFirst = MB.first; save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0); if (wasFirst && !S.goal) setTimeout(openGoals, 350);
   }
   function ddEdit(k) { ddManual(k); }
   function ddQ(k) {
@@ -1867,7 +1867,7 @@
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
     var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-    window.FormaDia.open({ ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
+    window.FormaDia.open({ ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(function () { ddManual(today(), true); }, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
