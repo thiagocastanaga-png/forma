@@ -309,6 +309,7 @@
         if (pe && ue && pe !== ue) stale = true;
         else if (S.profile.created && user.created_at && new Date(user.created_at).getTime() - 36 * 3600 * 1000 > new Date(S.profile.created + "T12:00:00").getTime()) stale = true;
       }
+      if (!S.uid && S.profile && !remote && !S.regAt) stale = true;
       if (stale) { var ow0 = S.owned; S = blank(); S.owned = ow0 || {}; }
       S.uid = user.id;
       var local = pushableState();
@@ -400,7 +401,7 @@
           '<button class="btn block" id="a-forgot">Enviar link</button><button class="btn ghost block" data-mode="login">Volver</button>';
       } else if (reg) {
         html += '<label class="field"><span>¿Cómo te llamás?</span><input id="a-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
-          '<label class="field"><span>Nombre de usuario <small class="muted" style="font-weight:400">(el que quieras, único)</small></span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21" placeholder="Elegí tu usuario, por ejemplo mica_92" value="' + esc(draft.username) + '"></label>' +
+          '<label class="field"><span>Usuario</span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21"  value="' + esc(draft.username) + '"></label>' +
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<label class="field"><span>Contraseña (mínimo 8 caracteres)</span><input id="a-pass" type="password" autocomplete="new-password"></label>' +
           '<label class="row small"><input id="a-terms" type="checkbox" ' + (draft.terms ? "checked" : "") + '> <span>Acepto los <a href="terminos" target="_blank" rel="noopener">términos</a> y la <a href="privacidad" target="_blank" rel="noopener">política de privacidad</a>.</span></label>' +
@@ -533,7 +534,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard() + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + weekCard() : "") + (armBlocks().length ? testCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día base cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + weekCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Programas de 14 días: dormir, celular, foco y calma</li><li>Cambiar tu día base cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -547,11 +548,11 @@
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
     if (S.intencion) html += '<div class="card small"><span class="muted">Tu intención de la semana</span><br><b>' + esc(S.intencion) + "</b></div>";
-    html += goalCard() + reviewCard() + "@@ARM@@";
+    html += reviewCard() + "@@ARM@@";
     html += reminderCard() + cierreCard() + mananaCard();
     if (armBlocks().length) {
       if (viewMode() === "now") {
-        return gr + viewToggle() + nowSection() + prioCard() + goalCard(true) + weekSumCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
+        return gr + viewToggle() + nowSection() + prioCard() + weekSumCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
       }
       return html.replace("@@ARM@@", viewToggle() + prioCard() + weekCard() + armSection());
     }
@@ -1641,7 +1642,7 @@
         if (res.error) { btn.disabled = false; return setMsg(authMsg(res.error)); }
         if (res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0) { btn.disabled = false; return setMsg("Ya hay una cuenta con ese email, por eso no te mandamos ningún mail nuevo. Tocá \"Iniciar sesión\" y entrá con tu contraseña. Si no te acordás, usá \"Olvidé mi contraseña\"."); }
         acct.username = uname;
-        S = blank();
+        S = blank(); S.regAt = Date.now();
         S.profile = { name: name, email: email, username: uname, areas: [], sports: [], created: today(), done: false };
         if (res.data && res.data.session) {
           user = res.data.session.user; S.guest = false; save(); render();
@@ -1804,7 +1805,6 @@
       '<button class="btn ghost block" data-mbadd style="margin-top:10px">Agregar un bloque</button>' +
       (MB.err ? '<p class="small" style="color:var(--err);margin:10px 0 0">' + esc(MB.err) + "</p>" : "") +
       '<button class="btn sage block" data-mbsave style="margin-top:12px">Guardar este día</button>' +
-      '<button class="btn ghost block" data-mbq="' + MB.k + '" style="margin-top:8px">Rehacer con preguntas</button>' +
       (ddCustom(MB.dt) ? '<button class="btn ghost block" data-ddreset="' + MB.k + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
       '<button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
     var nsh = $("#sheet"); if (nsh && oldSh && MB.drawn) { try { nsh.getAnimations({ subtree: true }).forEach(function (an) { an.cancel(); }); } catch (e) {} var nd = $("#sheet > div"); if (nd) nd.scrollTop = keep; }
@@ -2090,7 +2090,6 @@
       return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" ' + (T.app ? 'data-tlapp="' + T.id + '"' : 'data-act="' + T.act + '"') + '>Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con ' + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n) + '">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
     }).join(""));
     if (tips.length) h += deployGroup("tips", "Para tener en cuenta", "", "<ul>" + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>");
-    if (G && gst) h += deployGroup("goal", "Tu objetivo", "", '<p class="small" style="margin:0">«' + esc(G.n) + "»: en este momento sumás " + gst + (gst === 1 ? " paso" : " pasos") + " de tu plan de hoy. Están tildables arriba, en el paso a paso.</p>");
     h += deployGroup("mine", "Tus detalles", "", (det.length ? '<div class="bchips">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todavía no agregaste nada para este momento.</p>') + (pro ? '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis detalles" : "Agregar un detalle") + "</button>" : ""));
     return h;
   }
