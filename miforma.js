@@ -1160,6 +1160,19 @@
     (G.ids || []).forEach(function (id) { var g = goalById(id); if (!g || !g.build) return; var ga = (G.a && G.a[id]) || {}; g.build(ga, base).forEach(function (c, i) { out.push({ id: id + "_" + i, goal: id, s: c.s, t: c.t, why: c.why, patch: c.patch || null, act: c.act || null, tip: !!c.tip }); }); });
     return out;
   }
+  var FALTA = {
+    calma: ["Calma", "Bajar la ansiedad y la tensión del día"],
+    estudio: ["Organización con el estudio", "Estudiar mejor y rendir más"],
+    dormir: ["Mejor sueño", "Acostarte y levantarte mejor"],
+    movimiento: ["Actividad física", "Moverte más, de a poco"],
+    celular: ["Tiempo sin pantalla", "Recuperar horas del celular"],
+    arrancar: ["Arrancar el día con energía", "Mañanas ordenadas, menos postergar"],
+    peso: ["Comer mejor", "Comidas más ordenadas, sin dietas"],
+    plata: ["Plata en orden", "Saber en qué gastás"],
+    deporte: ["Mejorar en mi deporte", "Entrenar mejor y rendir más"],
+    viaje: ["Organizar un viaje", "Armarlo paso a paso"],
+    laburo: ["Buscar trabajo", "CV, entrevistas y búsqueda"]
+  };
   function openGoals() {
     close(); var old = $("#full"); if (old) old.remove();
     gs = { st: "pick", sel: ((S.goal && S.goal.ids) || []).slice(), gi: 0, qi: 0, a: JSON.parse(JSON.stringify((S.goal && S.goal.a) || {})), other: (S.goal && S.goal.other) || "" };
@@ -1177,9 +1190,9 @@
     if (gs.st === "pick") {
       var cards = GOALS.map(function (g) {
         var on = gs.sel.indexOf(g.id) >= 0, pl = planOf(g.plan);
-        return '<button class="plancard gpick" data-gpick="' + g.id + '" aria-pressed="' + on + '" style="--c:' + (pl ? pl.c : "#86A892") + '"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><span style='flex:1;min-width:0'><b>" + esc(g.n) + "</b><small>" + esc(g.d) + "</small></span>" + (g.soon ? '<span class="tag">Próximamente</span>' : "") + (on ? '<span class="tag ok">✓</span>' : "") + "</button>";
+        return '<button class="plancard gpick" data-gpick="' + g.id + '" aria-pressed="' + on + '" style="--c:' + (pl ? pl.c : "#86A892") + '"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><span style='flex:1;min-width:0'><b>" + esc((FALTA[g.id] || [g.n])[0]) + "</b><small>" + esc((FALTA[g.id] || [0, g.d])[1]) + "</small></span>" + (g.soon ? '<span class="tag">Próximamente</span>' : "") + (on ? '<span class="tag ok">✓</span>' : "") + "</button>";
       }).join("");
-      el.innerHTML = '<header><button class="btn ghost sm" data-gexit>Salir</button><b>Tu objetivo</b></header><div class="actbar"><i style="width:8%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">¿Qué querés lograr?</h2><p class="muted small" style="margin:0 0 12px">Elegí hasta 2. Con tu día de hoy como punto de partida, armamos los cambios para llegar ahí, de a poco.</p>' + cards +
+      el.innerHTML = '<header><button class="btn ghost sm" data-gexit>Salir</button><b>Tu día</b></header><div class="actbar"><i style="width:8%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">¿Qué es lo que te está faltando?</h2><p class="muted small" style="margin:0 0 12px">Elegí hasta 2. Con tu día ya armado, le sumamos lo que necesitás, de a poco y sin sacarte lo que ya tenés.</p>' + cards +
         '<label class="field" style="margin-top:12px"><span>¿Otra cosa? <small class="muted" style="font-weight:400">(opcional)</small></span><input id="gother" maxlength="80" placeholder="Contanos qué querés lograr" value="' + esc(gs.other) + '" style="' + fieldCss() + '"></label></div><div class="dfoot"><button class="btn sage block" data-gnext' + (gs.sel.length ? "" : " disabled") + ">Continuar</button></div>";
       return;
     }
@@ -1211,21 +1224,25 @@
     var rec = []; ids.forEach(function (id) { var g = goalById(id); if (g && g.plan && planOf(g.plan) && rec.map(function (r) { return r.id; }).indexOf(g.plan) < 0) rec.push({ id: g.plan, why: "Para tu objetivo: " + g.n.toLowerCase() }); });
     S.test = { a: {}, rec: rec, at: today() }; save(); render();
     var el = $("#full"); if (!el) return;
-    var ch = goalChanges(), hasLive = ids.some(function (id) { var g = goalById(id); return g && g.build; });
-    var html = '<header><b>Tu plan</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Armamos tu día para lograrlo</h2><p class="muted small" style="margin:0 0 12px">Tu día de hoy es el punto de partida. Los cambios llegan por etapas, de a poco, así se sostienen.</p>';
-    ids.forEach(function (id) {
-      var g = goalById(id), pl = planOf(g.plan); if (!g) return;
-      html += '<div class="card"><div class="row"><span class="shape">' + (SHAPES[g.plan] || SHAPES.vida) + "</span><div><b>" + esc(g.n) + '</b><span class="small muted" style="display:block">' + (g.soon ? "Lo estamos armando. Mientras tanto, tu día ordenado ya es un buen comienzo." : g.go ? "Tenés un plan de entrenamiento para vos." : pl && !pl.live ? "El plan «" + esc(pl.n) + "» viene en camino. Mientras tanto, estos cambios ya van en tu día." : "Plan recomendado: " + esc(pl.n)) + "</span></div></div>";
-      if (g.build) {
-        [1, 2, 3].forEach(function (st) {
-          var L = ch.filter(function (c) { return c.goal === id && c.s === st; }); if (!L.length) return;
-          html += '<div class="sec" style="margin:14px 0 4px">' + (st === 1 ? "Esta semana (ya está en tu día)" : "Semana " + st) + "</div>" + L.map(function (c) { return '<div style="padding:6px 0;border-top:1px solid var(--line)"><b class="small">' + esc(c.t) + '</b><span class="small muted" style="display:block">' + esc(c.why) + "</span></div>"; }).join("");
-        });
-      }
-      if (g.plan && planOf(g.plan) && planOf(g.plan).live) html += '<button class="btn ghost block" data-tstplan="' + g.plan + '" style="margin-top:10px">Ver el plan</button>';
-      html += "</div>";
+    var hasLive = ids.some(function (id) { var g = goalById(id); return g && g.build; });
+    var bl = armBlocks(), seen = {}, tools = [], nAdd = 0, tags = {};
+    var html = '<header><b>Tu día</b></header><div class="actbar"><i style="width:100%"></i></div><div class="dbody"><h2 style="font-size:26px;margin:0 0 6px">Esto es lo que Forma te recomienda</h2><p class="muted small" style="margin:0 0 12px">Es tu día, con algunas cosas sumadas. Lo que agregamos está marcado, y lo tuyo quedó donde estaba.</p><div class="legend"><span><i class="lg now"></i>Sumado por Forma</span><span><i class="lg past"></i>Tu día</span></div><div class="tl">';
+    bl.forEach(function (b) {
+      var add = !!b.goalact, g = add ? goalById(b.goalact.split("_")[0]) : null, pl = g ? planOf(g.plan) : null, c = pl ? pl.c : "#C6F432";
+      if (add) { nAdd++; tags[g.id] = 1; blockTools(b).forEach(function (T) { if (!seen[T.id]) { seen[T.id] = 1; tools.push(T); } }); }
+      html += '<div class="blk next"' + (add ? ' style="background:color-mix(in srgb,' + c + ' 22%,transparent);border:2px dashed ' + c + ';border-radius:14px"' : "") + '><div class="tm">' + window.FormaDia.fmt(b.s) + "<br>" + window.FormaDia.fmt(b.e) + '</div><div class="bd"><b>' + (add ? "+ " : "") + esc(b.label) + "</b>" + (add ? '<span class="small" style="display:inline-block;margin-top:4px;padding:2px 8px;border-radius:99px;background:' + c + ';color:#111;font-weight:700;font-size:11px">Forma · ' + esc((FALTA[g.id] || [g.n])[0]) + "</span>" : "") + "</div></div>";
     });
-    if (hasLive && !isProU()) html += '<div class="card dark"><b>Los cambios de las semanas 2 y 3</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Vida diaria Pro tu día se va ajustando solo cada semana, y los pasos de cada plan quedan en tu día.</p><button class="btn sage" data-tstplan="vida">Ver Vida diaria Pro</button></div>';
+    html += "</div>";
+    if (!nAdd) html += '<div class="card"><b>Tu día ya está bien armado</b><p class="small muted" style="margin:6px 0 0">No encontramos huecos libres para sumar nada sin saturarte. Lo vamos a ir ajustando con vos.</p></div>';
+    else html += '<p class="small muted">Sumamos ' + nAdd + (nAdd === 1 ? " momento" : " momentos") + ' en tus huecos libres. Podés cambiarlos cuando quieras desde Hoy.</p>';
+    if (tools.length) {
+      html += '<div class="sec" style="margin:18px 0 6px">Herramientas para tu día</div><p class="small muted" style="margin:0 0 8px">Te sirven en estos momentos. Las gratis ya las podés usar.</p>';
+      tools.slice(0, 6).forEach(function (T) {
+        var ok = toolOk(T);
+        html += '<button class="card dtinfo" data-tl="' + T.id + '" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--tx)"><span style="flex:1;min-width:0"><b>' + esc(T.n) + '</b><small class="muted" style="display:block">' + esc(T.d) + '</small></span><span class="badge" style="' + (ok ? "background:#C6F432;color:#111" : "") + '">' + (ok ? "Gratis" : "Pro") + "</span></button>";
+      });
+    }
+    if (hasLive && !isProU()) html += '<div class="card dark"><b>Más semanas, más cambios</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Vida diaria Pro tu día se va ajustando solo cada semana y tenés todas las herramientas.</p><button class="btn sage" data-tstplan="vida">Ver Vida diaria Pro</button></div>';
     if (other) html += '<p class="small muted">Anotamos lo que nos contaste: «' + esc(other) + '».</p>';
     el.innerHTML = html + '</div><div class="dfoot"><button class="btn sage block" data-gdone>Ver mi día</button></div>';
   }
@@ -1850,7 +1867,7 @@
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
     var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-    window.FormaDia.open({ ans: pre, quick: !S.arm && !pre, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
+    window.FormaDia.open({ ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(openGoals, 350); } });
   }
   function armSection() {
     var bl = armBlocks();
