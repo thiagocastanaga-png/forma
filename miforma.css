@@ -544,3 +544,7 @@ textarea.txin{resize:vertical;min-height:80px}
 
 .emo{font-size:30px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-style:normal}
 .lvshape .emo{font-size:42px}
+
+.mbgrip{background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:6px 4px;cursor:grab;touch-action:none;flex:none}
+.mbrow.mbdrag{opacity:.55;outline:2px dashed var(--sage-d,#86A892)}
+.mbrow.mbover{outline:2px solid var(--lime,#C6F432);outline-offset:2px}

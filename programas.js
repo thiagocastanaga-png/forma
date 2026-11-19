@@ -18,7 +18,7 @@
   var L = [
     {
       id: "dormir", n: "Dormir de verdad", tag: "Sueño", reminder: "21:00",
-      intro: "14 días para ordenar tu sueño. Cargás tus horarios, hacés un paso por día y al final ves tus datos reales: cuánto dormís y qué tan regular sos.",
+      intro: "Subí de nivel para ordenar tu sueño. Cargás tus horarios, hacés un paso por día y al final ves tus datos reales: cuánto dormís y qué tan regular sos.",
       q: "¿Cómo dormiste esta última semana?", lo: "Muy mal", hi: "Muy bien", better: "up",
       note: "Si hace más de tres meses que dormís mal, roncás fuerte con pausas al respirar o estás muy cansado durante el día, consultá con un médico. Esto es un apoyo de hábitos y no reemplaza a un profesional.",
       log: [TM("¿A qué hora te acostaste anoche?"), TM("¿A qué hora te despertaste hoy?")], logKeys: ["bed", "wake"],
@@ -48,7 +48,7 @@
     },
     {
       id: "celular", n: "Celular bajo control", tag: "Atención", reminder: "09:00",
-      intro: "14 días para usar el celular vos y que no te use a vos. Cargás tu tiempo de pantalla cada día y al final ves cuánto lo bajaste.",
+      intro: "Subí de nivel para usar el celular vos y que no te use a vos. Cargás tu tiempo de pantalla cada día y al final ves cuánto lo bajaste.",
       q: "¿Cuánto control sentís que tenés sobre tu celular?", lo: "Nada", hi: "Mucho", better: "up",
       note: "Es un apoyo de hábitos. Si sentís que no podés controlar el uso aunque lo intentes y te afecta mucho, consultá con un profesional.",
       log: [NU("Minutos de pantalla de ayer (mirá Tiempo de uso o Bienestar digital)", "min", 0, 1000)], logKeys: ["scr"],
@@ -73,7 +73,7 @@
     },
     {
       id: "arrancar", n: "Arrancar", tag: "Foco", reminder: "09:00",
-      intro: "14 días para dejar de postergar. Pasos diminutos, foco de 25 minutos y un registro de cuánto lográs cada día.",
+      intro: "Subí de nivel para dejar de postergar. Pasos diminutos, foco de 25 minutos y un registro de cuánto lográs cada día.",
       q: "¿Qué tan fácil te resulta empezar lo que tenés que hacer?", lo: "Muy difícil", hi: "Muy fácil", better: "up",
       note: "Si postergar te viene acompañado de mucho malestar o de un cansancio que no se va, puede haber algo más y vale la pena consultarlo con un profesional.",
       log: [NU("Minutos que estuviste enfocado hoy en tu tarea más importante", "min", 0, 600)], logKeys: ["foco"],
@@ -98,7 +98,7 @@
     },
     {
       id: "calma", n: "Calmar la cabeza", tag: "Calma", reminder: "20:00",
-      intro: "14 días con herramientas simples para bajar la tensión de todos los días. Registrás cómo estás y armás tu propio kit.",
+      intro: "Subí de nivel con herramientas simples para bajar la tensión de todos los días. Registrás cómo estás y armás tu propio kit.",
       q: "¿Cuánta tensión o ansiedad sentiste esta semana?", lo: "Poca", hi: "Mucha", better: "down",
       note: "Es un apoyo de bienestar y no reemplaza a un profesional de la salud mental. Si la ansiedad te impide hacer tu vida o sentís que no podés más, hablá con un profesional. Si es una urgencia, llamá al 911.",
       log: [CH("¿Cuánta tensión sentiste hoy?", ["1 · Poca", "2", "3", "4", "5 · Mucha"])], logKeys: ["ten"],
@@ -123,7 +123,7 @@
     },
     {
       id: "estudio", n: "Estudiar mejor", tag: "Estudio", reminder: "17:00",
-      intro: "14 días para estudiar mejor y rendir más. Aprendés técnicas que funcionan de verdad, las practicás dentro de la app y registrás cuánto estudiás de forma efectiva.",
+      intro: "Subí de nivel para estudiar mejor y rendir más. Aprendés técnicas que funcionan de verdad, las practicás dentro de la app y registrás cuánto estudiás de forma efectiva.",
       q: "¿Qué tan seguro te sentís con lo que estudiás?", lo: "Nada seguro", hi: "Muy seguro", better: "up",
       note: "Esto es un apoyo de hábitos de estudio. Si la ansiedad antes de rendir te afecta mucho, hablalo con un profesional o con tu institución.",
       log: [NU("Minutos de estudio efectivo hoy (sin celular)", "min", 0, 900)], logKeys: ["est"],
@@ -148,7 +148,7 @@
     },
     {
       id: "movimiento", n: "Moverme más", tag: "Cuerpo", reminder: "18:00",
-      intro: "14 días para empezar a moverte de verdad, de a poco y sin lesionarte. Cargás cuántos minutos te movés cada día y al final ves cuánto subiste.",
+      intro: "Subí de nivel para empezar a moverte de verdad, de a poco y sin lesionarte. Cargás cuántos minutos te movés cada día y al final ves cuánto subiste.",
       q: "¿Qué tan seguido te movés hoy?", lo: "Casi nada", hi: "Todos los días", better: "up",
       note: "Si hace mucho que no hacés actividad, tenés una lesión, una condición de salud o sentís dolor o mareos, consultá con un médico antes de empezar. Esto es una guía de hábitos y no reemplaza a un profesional.",
       log: [NU("Minutos que te moviste hoy (caminar, entrenar, bailar, lo que sea)", "min", 0, 600)], logKeys: ["min"],
@@ -173,7 +173,7 @@
     },
     {
       id: "comer", n: "Comer ordenado", tag: "Comida", reminder: "19:00",
-      intro: "14 días para ordenar tus comidas sin dietas raras: horarios, compras y un plan simple. Cargás cuántas comidas te salieron ordenadas cada día.",
+      intro: "Subí de nivel para ordenar tus comidas sin dietas raras: horarios, compras y un plan simple. Cargás cuántas comidas te salieron ordenadas cada día.",
       q: "¿Qué tan ordenadas son tus comidas hoy?", lo: "Nada", hi: "Muy ordenadas", better: "up",
       note: "Esto es organización, no una dieta ni un plan nutricional. Si tenés una condición de salud, tomás medicación o tu relación con la comida te preocupa, consultá con un profesional de la salud.",
       log: [NU("¿Cuántas comidas del día salieron como las planeaste?", "comidas", 0, 8)], logKeys: ["ok"],
@@ -198,7 +198,7 @@
     },
     {
       id: "plata", n: "Plata en orden", tag: "Plata", reminder: "21:00",
-      intro: "14 días para saber en qué gastás y armar un presupuesto simple. Cargás lo que gastás cada día y al final ves tu panorama real.",
+      intro: "Subí de nivel para saber en qué gastás y armar un presupuesto simple. Cargás lo que gastás cada día y al final ves tu panorama real.",
       q: "¿Qué tan claro tenés adónde va tu plata?", lo: "Nada claro", hi: "Muy claro", better: "up",
       note: "Esto es organización personal, no asesoramiento financiero ni de inversión. Para decisiones importantes o deudas grandes, consultá con un profesional.",
       log: [NU("¿Cuánto gastaste hoy? (en pesos, sin contar gastos fijos)", "$", 0, 100000000)], logKeys: ["gasto"],
@@ -223,7 +223,7 @@
     },
     {
       id: "viajes", n: "Armá tu viaje", tag: "Viaje", reminder: "20:00",
-      intro: "14 días para armar el viaje que querés, paso a paso: destino, presupuesto, itinerario, reservas y valija. Cargás cuánto fuiste ahorrando y tu viaje queda listo.",
+      intro: "Subí de nivel para armar el viaje que querés, paso a paso: destino, presupuesto, itinerario, reservas y valija. Cargás cuánto fuiste ahorrando y tu viaje queda listo.",
       q: "¿Qué tan listo sentís tu viaje?", lo: "Nada", hi: "Totalmente", better: "up",
       note: "Chequeá siempre requisitos de ingreso, documentos y recomendaciones de salud en las fuentes oficiales del destino.",
       log: [NU("¿Cuánto tenés ahorrado para el viaje hasta hoy? (en pesos)", "$", 0, 1000000000)], logKeys: ["ah"],
@@ -248,7 +248,7 @@
     },
     {
       id: "laburo", n: "Buscar trabajo", tag: "Trabajo", reminder: "10:00",
-      intro: "14 días para buscar trabajo con orden: CV, perfil, postulaciones y entrevistas. Cargás cuántas acciones de búsqueda hacés por día y ves tu avance.",
+      intro: "Subí de nivel para buscar trabajo con orden: CV, perfil, postulaciones y entrevistas. Cargás cuántas acciones de búsqueda hacés por día y ves tu avance.",
       q: "¿Qué tan preparado te sentís para buscar trabajo?", lo: "Nada", hi: "Muy preparado", better: "up",
       note: "Desconfiá de ofertas que piden dinero por adelantado o datos bancarios. Ninguna oferta seria te cobra por entrevistarte.",
       log: [NU("¿Cuántas acciones de búsqueda hiciste hoy? (postulaciones, mensajes, llamados)", "acciones", 0, 100)], logKeys: ["acc"],
@@ -273,9 +273,9 @@
     },
     {
       id: "deporte", n: "Mejorar en mi deporte", tag: "Deporte", reminder: "17:00",
-      intro: "14 días para rendir más en tu deporte: una meta, práctica con intención, la cabeza y la recuperación. Cargás tus minutos de práctica y ves tu avance.",
+      intro: "Subí de nivel para rendir más en tu deporte: una meta, práctica con intención, la cabeza y la recuperación. Cargás tus minutos de práctica y ves tu avance.",
       q: "¿Qué tan bien sentís que rendís en tu deporte?", lo: "Muy mal", hi: "Muy bien", better: "up",
-      note: "Si tenés dolor o una lesión, consultá con un profesional antes de entrenar más. Esto es una guía de organización y hábitos.",
+      note: "Forma es una guía de organización y hábitos y no reemplaza a un profesional.",
       log: [NU("Minutos de práctica o entrenamiento de hoy", "min", 0, 600)], logKeys: ["min"],
       ml: "Práctica por día", up: true,
       metric: function (v) { return +v.min; }, fmt: function (m) { return Math.round(m) + " min"; },

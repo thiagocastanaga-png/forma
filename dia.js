@@ -446,7 +446,7 @@
       res.blocks.map(function (b) {
         var k = KIND[b.kind];
         return '<div class="blk"><div class="tm">' + fmt(b.s) + "<br>" + fmt(b.e) + '</div><div class="bd"><span class="kd"><i style="background:' + k.dot + '"></i>' + k.tag + " · " + durText(b.e - b.s) + "</span><b>" + esc(b.label) + "</b>" + (b.note ? '<span class="nt">' + esc(b.note) + "</span>" : "") + "</div></div>";
-      }).join("") + '<p class="small muted">Es una guía de organización. Si tenés dolor o una lesión, consultá a un profesional de la salud antes de entrenar.</p>';
+      }).join("") + '<p class="small muted">Forma es una guía de organización y no reemplaza a un profesional.</p>';
   }
   function skipped(i) { var q = STEPS[i - 1]; return !!(q && q.skip && q.skip(st.ans)); }
   function nSteps() { return st && st.quick ? 2 : STEPS.length; }
