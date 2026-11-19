@@ -66,27 +66,27 @@
         { key: "commuteSame", label: "¿La vuelta tarda lo mismo?", type: "chips", opts: [["Sí, igual", "same"], ["No, distinta", "diff"]] },
         { key: "commuteBack", label: "Vuelta", type: "minutes", showIf: function (a) { return a.commuteSame === "diff"; } }
       ] },
-    { title: "¿Cuáles son tus prioridades de esta etapa?", hint: "Las que más querés mover ahora. La primera que elijas es la más importante.",
+    { skip: function (a) { return true; }, title: "¿Cuáles son tus prioridades de esta etapa?", hint: "Las que más querés mover ahora. La primera que elijas es la más importante.",
       fields: [
         { key: "prios", label: "", type: "chips", multi: true, max: 3, opts: [["Salud", "health"], ["Familia y relaciones", "family"], ["Cuidar a otros", "care"], ["Proyectos personales", "projects"], ["Deporte o entrenamiento", "sport"], ["Estudio", "study"], ["Trabajo e ingresos", "income"], ["Casa y tareas", "home"], ["Descanso y ocio", "rest"]] }
       ] },
-    { title: "¿Qué hábitos nuevos querés sumar?", hint: "Mejor pocos y bien hechos. Si no querés sumar ninguno ahora, seguí.",
+    { skip: function (a) { return true; }, title: "¿Qué hábitos nuevos querés sumar?", hint: "Mejor pocos y bien hechos. Si no querés sumar ninguno ahora, seguí.",
       fields: [
         { key: "habits", label: "", type: "chips", multi: true, max: 3, req: false, opts: [["Leer", "read"], ["Meditar y respirar", "breathe"], ["Moverme y estirar", "move"], ["Escribir un diario", "write"], ["Aprender algo nuevo", "learn"], ["Caminar", "walk"], ["Planificar el día siguiente", "plan"]] }
       ] },
-    { title: "¿En qué momento del día tenés más energía?", hint: "Ahí va lo que más te cuesta o más te importa.",
+    { skip: function (a) { return true; }, title: "¿En qué momento del día tenés más energía?", hint: "Ahí va lo que más te cuesta o más te importa.",
       fields: [
         { key: "energy", label: "", type: "chips", opts: [["A la mañana", "am"], ["A la tarde", "pm"], ["A la noche", "night"], ["Va cambiando", "any"]] }
       ] },
-    { title: "¿Cuánto tiempo libre real tenés por día?", hint: "Sin contar trabajo, estudio, comidas ni traslados.",
+    { skip: function (a) { return true; }, title: "¿Cuánto tiempo libre real tenés por día?", hint: "Sin contar trabajo, estudio, comidas ni traslados.",
       fields: [
         { key: "free", label: "", type: "chips", opts: [["Media hora", 30], ["1 hora", 60], ["1 hora y media", 90], ["2 horas", 120], ["3 horas", 180], ["4 horas", 240], ["5 horas o más", 300]] }
       ] },
-    { title: "¿Qué es lo que más te hace perder el tiempo?", hint: "No para prohibirlo: para planificarlo.",
+    { skip: function (a) { return true; }, title: "¿Qué es lo que más te hace perder el tiempo?", hint: "No para prohibirlo: para planificarlo.",
       fields: [
         { key: "waste", label: "", type: "chips", opts: [["El celular y las redes", "phone"], ["Postergar lo importante", "procrastinate"], ["Los imprevistos", "buffer"], ["Nada en particular", "none"]] }
       ] },
-    { title: "¿Entrenás o hacés actividad física?", hint: "Contanos cuánto dura un día de entrenamiento y cuándo te gustaría hacerlo.",
+    { skip: function (a) { return true; }, title: "¿Entrenás o hacés actividad física?", hint: "Contanos cuánto dura un día de entrenamiento y cuándo te gustaría hacerlo.",
       fields: [
         { key: "train", label: "Duración", type: "chips", opts: [["No entreno", 0], ["30 minutos", 30], ["45 minutos", 45], ["1 hora", 60], ["1 hora y media", 90], ["2 horas", 120]] },
         { key: "trainWhen", label: "Momento preferido", type: "chips", opts: [["A la mañana", "am"], ["A la tarde", "pm"], ["A la noche", "night"], ["Me da igual", "any"]], showIf: function (a) { return a.train > 0; } }
@@ -96,11 +96,11 @@
         { key: "lunch", label: "Almuerzo", type: "select", placeholder: "Elegí una hora", opts: times(600, 1020, true).concat([["No almuerzo", -1]]), ex: [600, 1020, true] },
         { key: "dinner", label: "Cena", type: "select", opts: [["Que la elija Forma", "auto"]].concat(times(1080, 1440, true)).concat([["No ceno", -1]]), ex: [1080, 1440, true] }
       ] },
-    { title: "¿Plan estricto o flexible?", hint: "Estricto asigna todo el día. Flexible deja margen libre a propósito.",
+    { skip: function (a) { return true; }, title: "¿Plan estricto o flexible?", hint: "Estricto asigna todo el día. Flexible deja margen libre a propósito.",
       fields: [
         { key: "style", label: "", type: "chips", opts: [["Estricto", "strict"], ["Flexible", "flex"]] }
       ] },
-    { title: "¿Querés pausas con respiración durante el día?", hint: "Son de 5 minutos y se acomodan dentro de los bloques más largos.",
+    { skip: function (a) { return true; }, title: "¿Querés pausas con respiración durante el día?", hint: "Son de 5 minutos y se acomodan dentro de los bloques más largos.",
       fields: [
         { key: "pauses", label: "", type: "chips", opts: [["No, gracias", 0], ["Sí, 2 pausas", 2], ["Sí, 3 pausas", 3], ["Sí, 4 pausas", 4]] }
       ] },
@@ -340,7 +340,7 @@
     // Pausas con respiración
     blocks.filter(function (b) { return (b.kind === "fixed" || b.kind === "focus") && b.e - b.s >= 80; })
       .sort(function (x, y) { return (y.e - y.s) - (x.e - x.s); })
-      .slice(0, a.pauses)
+      .slice(0, a.pauses || 0)
       .forEach(function (b) {
         var mid = Math.round((b.s + b.e) / 2 / 5) * 5, end = b.e;
         b.e = mid;
@@ -441,7 +441,7 @@
     var a = st.ans;
     return '<h2 style="font-size:26px">Tu día, con forma</h2><p class="muted">De ' + fmt(a.wake) + " a " + fmt(a.sleep) + ", repartido en bloques. Va a quedar fijo en tu pantalla de Hoy.</p>" +
       (st.ans.fixedOn === "yes" && hasDays() ? '<p class="small muted">Esta es la vista de ' + ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"][prevDow()] + ". Cada día usa los horarios fijos que le corresponden.</p>" : "") +
-      '<div class="grid3"><div class="card stat"><b>' + durText(res.focus) + '</b><span>de foco</span></div><div class="card stat"><b>' + durText(res.habits) + '</b><span>en hábitos</span></div><div class="card stat"><b>' + durText(res.free) + '</b><span>libres</span></div></div>' +
+      (res.focus || res.habits ? '<div class="grid3"><div class="card stat"><b>' + durText(res.focus) + '</b><span>de foco</span></div><div class="card stat"><b>' + durText(res.habits) + '</b><span>en hábitos</span></div><div class="card stat"><b>' + durText(res.free) + '</b><span>libres</span></div></div>' : '<div class="card stat" style="margin:12px 0"><b>' + durText(res.free) + '</b><span>libres para armar a tu manera</span></div>') +
       (res.warnings.length ? '<div class="card sage"><b>Para tener en cuenta</b>' + res.warnings.map(function (w) { return '<p class="small" style="margin:6px 0 0">' + esc(w) + "</p>"; }).join("") + "</div>" : "") +
       res.blocks.map(function (b) {
         var k = KIND[b.kind];
@@ -450,14 +450,14 @@
   }
   function skipped(i) { var q = STEPS[i - 1]; return !!(q && q.skip && q.skip(st.ans)); }
   function nSteps() { return st && st.quick ? 2 : STEPS.length; }
-  var QDEF = { lunch: 780, dinner: "auto", train: 0, prios: ["health"], habits: [], energy: "any", free: 60, waste: "none", style: "flex", pauses: 0 };
+  var QDEF = { lunch: 780, dinner: "auto", train: 0, prios: [], habits: [], energy: "any", free: 60, waste: "none", style: "flex", pauses: 0 };
   function withDefaults(a) { var o = JSON.parse(JSON.stringify(a)); Object.keys(QDEF).forEach(function (k) { if (o[k] === undefined) o[k] = JSON.parse(JSON.stringify(QDEF[k])); }); return o; }
   function moveStep(d) { var n = st.step + d; while (n >= 1 && n <= nSteps() && skipped(n)) n += d; return n; }
   function render() {
     if (!host) return;
     var total = nSteps(), body = host.querySelector(".dbody"), foot = host.querySelector(".dfoot"), bar = host.querySelector(".actbar i"), html = "", fh = "";
     if (st.step === 0) {
-      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : "12 preguntas · 2 minutos") + '</span><h2 style="font-size:28px;margin-top:8px">' + (st.opts.dayName ? "Armemos tu " + st.opts.dayName : "Armemos tu día") + '</h2><p class="muted">' + (st.opts.dayName ? "Pensá en cómo es tu " + st.opts.dayName + " de verdad, no en un día cualquiera. Lo armamos en bloques con horarios y queda guardado como tu " + st.opts.dayName + ". Después armás los demás días." : "Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.") + '</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
+      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : (STEPS.filter(function (q, qi) { return !skipped(qi + 1); }).length + " preguntas · 1 minuto")) + '</span><h2 style="font-size:28px;margin-top:8px">' + (st.opts.dayName ? "Armemos tu " + st.opts.dayName : "Armemos tu día") + '</h2><p class="muted">' + (st.opts.dayName ? "Pensá en cómo es tu " + st.opts.dayName + " de verdad, no en un día cualquiera. Lo armamos en bloques con horarios y queda guardado como tu " + st.opts.dayName + ". Después armás los demás días." : "Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.") + '</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
       fh = '<button class="btn block" data-da="start">Empezar</button>'; bar.style.width = "0%";
     } else if (st.step <= total) {
       var s = STEPS[st.step - 1], msg = stepMessage(s), vt = 0, vn = 0; STEPS.forEach(function (q, qi) { if (qi < total && !skipped(qi + 1)) { vt++; if (qi + 1 <= st.step) vn++; } });

@@ -26,22 +26,23 @@
   function stageRing(st) { var P = ['M278.7 71.4A186 186 0 0 1 392.0 382.9L323.3 318.7A92 92 0 0 0 267.2 164.7Z', 'M357.3 412.0A186 186 0 0 1 71.4 278.7L164.7 267.2A92 92 0 0 0 306.1 333.2Z', 'M71.4 233.3A186 186 0 0 1 233.3 71.4L244.8 164.7A92 92 0 0 0 164.7 244.8Z'], C = ['#C6F432', '#F5F1E8', '#86A892']; return '<svg class="sring" viewBox="0 0 512 512" aria-hidden="true">' + P.map(function (d, i) { var on = i + 1 <= st; return '<path d="' + d + '" fill="' + C[i] + '" stroke="' + C[i] + '" stroke-width="14" stroke-linejoin="round" opacity="' + (on ? 1 : .22) + '"/>'; }).join('') + '</svg>'; }
   // ---------- catálogo ----------
   var SHAPES = {
-    tenis: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#C6F432"/><path d="M7 12 C17 17 17 27 7 32 M37 12 C27 17 27 27 37 32" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"/><circle cx="22" cy="22" r="3" fill="#111"/></svg>',
-    futbol: '<svg viewBox="0 0 44 44"><path d="M2 2 A40 40 0 0 1 42 42 H2 Z" fill="#4C7DFF"/><path d="M2 14 A28 28 0 0 1 30 42 H2 Z" fill="#8FAAFF"/><circle cx="11" cy="33" r="5" fill="#111"/></svg>',
-    voley: '<svg viewBox="0 0 44 44"><rect x="3" y="3" width="38" height="38" rx="3" fill="#FFC83D"/><circle cx="22" cy="22" r="12" fill="none" stroke="#111" stroke-width="3"/><path d="M22 10 V34 M10 22 H34" stroke="#111" stroke-width="2" opacity=".55"/><circle cx="22" cy="22" r="3.5" fill="#111"/></svg>',
-    basquet: '<svg viewBox="0 0 44 44"><path d="M22 3 L41 41 H3 Z" fill="#FF8A4C"/><path d="M22 17 L31 35 H13 Z" fill="#FFB68A"/><circle cx="22" cy="28" r="3.2" fill="#111"/></svg>',
-    handball: '<svg viewBox="0 0 44 44"><path d="M2 36 A20 20 0 0 1 42 36 Z" fill="#B9A7F0"/><path d="M10 36 A12 12 0 0 1 34 36 Z" fill="#D6CBF7"/><path d="M17 36 A5 5 0 0 1 27 36 Z" fill="#111"/></svg>',
-    vida: '<svg viewBox="0 0 44 44"><path d="M3 22 A19 19 0 0 1 22 3 H41 V22 A19 19 0 0 1 22 41 H3 Z" fill="#86A892"/><path d="M12 22 A10 10 0 0 1 22 12 H32 V22 A10 10 0 0 1 22 32 H12 Z" fill="#C6F432"/><circle cx="22" cy="22" r="3.5" fill="#111"/></svg>',
-    dormir: '<svg viewBox="0 0 44 44"><path d="M30 3 A20 20 0 1 0 41 31 A17 17 0 0 1 30 3 Z" fill="#4C7DFF"/><circle cx="14" cy="27" r="4" fill="#7FA0FF"/><circle cx="21" cy="14" r="2.6" fill="#7FA0FF"/><circle cx="35" cy="12" r="3" fill="#C6F432"/><circle cx="31" cy="23" r="2" fill="#C6F432"/></svg>',
-    celular: '<svg viewBox="0 0 44 44"><rect x="10" y="3" width="24" height="38" rx="8" fill="#FF8A4C"/><rect x="14" y="9" width="16" height="22" rx="4" fill="#FFB68A"/><rect x="19" y="35" width="6" height="2.6" rx="1.3" fill="#111"/></svg>',
-    arrancar: '<svg viewBox="0 0 44 44"><path d="M8 4 L40 22 L8 40 Z" fill="#FFC83D"/><path d="M15 14 L29 22 L15 30 Z" fill="#FFE08A"/><circle cx="17.5" cy="22" r="2.6" fill="#111"/></svg>',
-    calma: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="16" fill="none" stroke="#B9A7F0" stroke-width="9"/><circle cx="22" cy="22" r="21" fill="none" stroke="#D6CBF7" stroke-width="1.5"/><circle cx="22" cy="22" r="4" fill="#B9A7F0"/></svg>',
-    estudio: '<svg viewBox="0 0 44 44"><path d="M3 8 H20 V40 H3 Z M24 8 H41 V40 H24 Z" fill="#5FC4B0"/><path d="M7 16 H16 M7 22 H16 M7 28 H13 M28 16 H37 M28 22 H37 M28 28 H34" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></svg>',
-    plata: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="#C6F432"/><circle cx="22" cy="22" r="14.5" fill="none" stroke="#111" stroke-width="1.8" opacity=".5"/><rect x="19" y="9" width="6" height="26" rx="2" fill="#111"/><rect x="14" y="15" width="16" height="3.4" rx="1.7" fill="#111"/><rect x="14" y="25.6" width="16" height="3.4" rx="1.7" fill="#111"/></svg>',
-    movimiento: '<svg viewBox="0 0 44 44"><path d="M4 36 L22 6 L40 36 Z" fill="#FF8A4C"/><path d="M22 6 L29 17.7 L24.5 15 L22 19 L19.5 15 L15 17.7 Z" fill="#FFE1CC"/><path d="M4 36 L13 21 L22 36 Z" fill="#E8703A"/></svg>',
-    comer: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="#FFC83D"/><circle cx="22" cy="22" r="12.5" fill="#FFE08A"/><circle cx="22" cy="22" r="5.5" fill="#111"/></svg>',
-    laburo: '<svg viewBox="0 0 44 44"><rect x="15" y="5" width="14" height="10" rx="3" fill="none" stroke="#4C7DFF" stroke-width="3.5"/><rect x="4" y="12" width="36" height="27" rx="6" fill="#4C7DFF"/><rect x="4" y="23" width="36" height="2.6" fill="#111" opacity=".25"/><rect x="19" y="20" width="6" height="8" rx="2" fill="#C6F432"/></svg>',
-    viajes: '<svg viewBox="0 0 44 44"><path d="M4 24 L40 6 L30 40 L22 26 Z" fill="#B9A7F0"/><path d="M40 6 L22 26 L30 40 Z" fill="#8F7BDB"/><path d="M40 6 L22 26" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>'
+    tenis: '<span class="emo">🎾</span>',
+    futbol: '<span class="emo">⚽</span>',
+    voley: '<span class="emo">🏐</span>',
+    basquet: '<span class="emo">🏀</span>',
+    handball: '<span class="emo">🤾</span>',
+    vida: '<span class="emo">🌱</span>',
+    dormir: '<span class="emo">😴</span>',
+    celular: '<span class="emo">📵</span>',
+    arrancar: '<span class="emo">🚀</span>',
+    calma: '<span class="emo">🧘</span>',
+    estudio: '<span class="emo">📚</span>',
+    plata: '<span class="emo">💰</span>',
+    movimiento: '<span class="emo">🏃</span>',
+    comer: '<span class="emo">🥗</span>',
+    laburo: '<span class="emo">💼</span>',
+    viajes: '<span class="emo">✈️</span>',
+    deporte: '<span class="emo">🏆</span>'
   };
   var AREAS = [
     ["cuerpo", "Cuerpo", "Energía, sueño, movimiento y comida"],
@@ -99,15 +100,16 @@
     { id: "estudio", n: "Estudiar mejor", c: "#5FC4B0", pro: "plan-estudio", live: true, prog: "estudio", grp: "Estudio y trabajo", price: "",
       d: "Para estudiantes: organizá tu estudio, aprendé técnicas que funcionan y rendí mejor en tus exámenes. 14 días, dentro de la app.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Técnicas probadas: recordar sin mirar, repaso espaciado, práctica de examen", "Bloques de foco guiados", "Registro de tus minutos de estudio con gráfico", "Tu método final, armado con lo que te funcionó", "Vida diaria Pro incluido"] },
-    { id: "laburo", n: "Buscar trabajo", c: "#4C7DFF", pro: "plan-laburo", live: false, grp: "Estudio y trabajo", d: "Armá tu CV, practicá entrevistas y organizá tu búsqueda con un plan diario." },
-    { id: "plata", n: "Plata en orden", c: "#C6F432", pro: "plan-plata", live: false, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés." },
-    { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: false, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada." },
-    { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo." },
-    { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: false, grp: "Servicios extras", d: "Servicio extra: contanos adónde querés ir y te armamos el itinerario, los días y el presupuesto." },
+    { id: "laburo", n: "Buscar trabajo", c: "#4C7DFF", pro: "plan-laburo", live: true, prog: "laburo", inc: true, grp: "Estudio y trabajo", d: "Armá tu CV, practicá entrevistas y organizá tu búsqueda con un plan diario.", free: ["El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "plata", n: "Plata en orden", c: "#C6F432", pro: "plan-plata", live: true, prog: "plata", inc: true, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés.", free: ["El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: true, prog: "movimiento", inc: true, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada.", free: ["El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: true, prog: "comer", inc: true, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo.", free: ["El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: true, prog: "viajes", inc: true, grp: "Vida diaria", d: "Armá tu viaje paso a paso: destino, presupuesto, itinerario, reservas y valija. 14 días, dentro de la app.", free: ["El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$23.900", was: "$31.900", promo: "Precio de lanzamiento",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
       pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
+    { id: "deporte", n: "Mejorar en mi deporte", c: "#C6F432", pro: "plan-deporte", live: true, prog: "deporte", inc: true, grp: "Deportes", price: "", d: "14 días para rendir más en tu deporte: meta, práctica con intención, cabeza y recuperación.", free: ["El paso 1 para probar"], pros: ["Programa de 14 pasos, uno por día", "Registro de tu práctica con gráfico", "5 niveles que vas desbloqueando", "Incluido en Forma Pro"] },
     { id: "futbol", n: "Fútbol", grp: "Deportes", c: "#4C7DFF", pro: "plan-futbol", live: false, d: "Rutinas para futbolistas: antes y después del partido, movilidad y fuerza." },
     { id: "voley", n: "Vóley", grp: "Deportes", c: "#FFC83D", pro: "plan-voley", live: false, d: "Rutinas para vóley: saltos, hombros y recuperación." },
     { id: "basquet", n: "Básquet", grp: "Deportes", c: "#FF8A4C", pro: "plan-basquet", live: false, d: "Rutinas para básquet: explosividad, tobillos y recuperación." },
@@ -133,6 +135,7 @@
     { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "$7.100", was: "$9.500" },
     { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "$11.900", was: "$15.900" }
   ];
+  if (NATIVE) PLANS.concat(PRODUCTS).forEach(function (q) { delete q.price; delete q.was; delete q.promo; });
   function prodOf(id) { return PRODUCTS.filter(function (p) { return p.id === id; })[0]; }
   function inPlan(pid) { return PRODUCTS.filter(function (p) { return p.s === pid; }); }
 
@@ -376,8 +379,8 @@
     $app.innerHTML =
       '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div><div class="row" style="gap:8px">' +
       (S.demo ? '<span class="tag">modo prueba</span>' : "") +
-      '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? "Pro" : "Gratis") + "</span>" +
-      '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" + "</div></div>" +
+      (S.arm ? '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? "Pro" : "Gratis") + "</span>" +
+      '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" : "") + "</div></div>" +
       "<main>" + body + "</main>" +
       '<nav class="tabs" aria-label="Principal"><div>' +
       [["hoy", "Hoy"], ["obj", "Objetivo"], ["perfil", "Perfil"]].map(function (t) {
@@ -569,6 +572,7 @@
       (p.live && !p.prog && items.length ? '<span class="bar"><i style="width:' + Math.round(got * 100 / items.length) + '%"></i></span>' : "") + "</span>" + tag + "</button>";
   }
   function proCard() {
+    if (NATIVE && !hasProduct("forma-pro")) return "";
     if (hasProduct("forma-pro") && !S.demo) return '<div class="card dark" style="margin-bottom:14px"><b>Tenés Forma Pro</b><p class="small" style="margin:6px 0 0;opacity:.85">Todo desbloqueado: los planes, la semana completa y las herramientas.</p></div>';
     return '<button class="card dark" data-openpro style="width:100%;text-align:left;margin-bottom:14px;border:2px solid #C6F432"><span class="badge" style="background:#C6F432;color:#111">Todo incluido</span><div class="row between" style="margin-top:8px"><b style="font-size:20px">Forma Pro</b><span><b style="font-size:22px">$47.900</b><small style="opacity:.8"> / año</small></span></div><p class="small" style="margin:6px 0 0;opacity:.85">Todos los planes, tu semana completa y todas las herramientas, por 12 meses. Un solo pago.</p></button>';
   }
@@ -600,7 +604,7 @@
       var items = inPlan(id);
       if (items.length) h += '<div class="sec" style="margin-top:6px">Productos del plan</div>' + items.map(prodRow).join("");
       if (pro) h += '<div class="card"><b>Tenés este plan.</b><p class="small muted" style="margin:6px 0 0">Todo lo del plan es tuyo, incluidos los productos que se sumen.</p></div>';
-      else h += (p.inc ? '<p class="small muted" style="margin:12px 0 0">Este plan viene incluido en Vida diaria Pro, junto con los otros planes de todos los días.</p>' : "") + '<div class="card dark" style="margin-top:12px"><div class="row between"><b>Forma ' + esc(pp.n) + " Pro</b>" + (pp.price ? "<span><b style='font-size:22px'>" + esc(pp.price) + "</b>" + (pp.was ? " <s class='small' style='opacity:.7'>" + esc(pp.was) + "</s>" : "") + "</span>" : "<span class='small'>Precio a definir</span>") + "</div>" +
+      else h += (p.inc ? '<p class="small muted" style="margin:12px 0 0">Este plan viene incluido en Vida diaria Pro, junto con los otros planes de todos los días.</p>' : "") + '<div class="card dark" style="margin-top:12px"><div class="row between"><b>Forma ' + esc(pp.n) + " Pro</b>" + (pp.price ? "<span><b style='font-size:22px'>" + esc(pp.price) + "</b>" + (pp.was ? " <s class='small' style='opacity:.7'>" + esc(pp.was) + "</s>" : "") + "</span>" : (NATIVE ? "" : "<span class='small'>Precio a definir</span>")) + "</div>" +
         (pp.promo ? "<p class='small' style='margin:6px 0 0;opacity:.85'>" + esc(pp.promo) + ".</p>" : "") + "</div>" + payButtons(pp.pro, "Forma " + pp.n + " Pro");
     }
     sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
@@ -703,7 +707,7 @@
     if (!SIM && CFG.checkout && ["forma-pro", "t-full", "t-pre", "t-resp", "t-mov", "t-rut", "plan-vida"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
     if (SIM && !NATIVE) return '<button class="btn block" data-betabuy="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted">Versión de prueba: el pago es simulado y <b>no se cobra nada</b>.</p>';
-    if (NATIVE) link = "";
+    if (NATIVE) return '<div class="card" style="margin-top:12px"><b>¿Ya tenés ' + esc(label || "este plan") + '?</b><p class="small muted" style="margin:6px 0 0">Iniciá sesión con tu cuenta de Forma y se desbloquea solo.</p></div>';
     if (CFG.checkout && !NATIVE && user) return '<button class="btn block" data-checkout="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted" id="ckmsg">Pagás en Mercado Pago y se desbloquea solo en tu cuenta (' + esc(user.email || "") + ").</p>";
     if (link) h += '<a class="btn block" target="_blank" rel="noopener" href="' + esc(link) + '" style="margin-top:12px">Pagar con Mercado Pago</a><p class="small muted">Pagá con el mismo email de tu cuenta (' + esc(user && user.email || "") + ") para que se desbloquee solo.</p>";
     if (CFG.paypal && !NATIVE) h += '<a class="btn ghost block" target="_blank" rel="noopener" href="' + esc(CFG.paypal) + '" style="margin-top:8px">Pagar con PayPal</a>';
@@ -1081,7 +1085,7 @@
         out.push({ s: 3, t: "Dejar la mañana preparada la noche anterior", why: "Ropa, mochila y lo primero que vas a hacer", patch: ah("write"), act: A_("Dejar lista la ropa y lo primero de mañana", 10, [["sleep", -100]], "") });
         return out;
       } },
-    { id: "deporte", n: "Mejorar en mi deporte", d: "Entrenar mejor y rendir más", plan: "tenis", go: "planes" },
+    { id: "deporte", n: "Mejorar en mi deporte", d: "Entrenar mejor y rendir más", plan: "deporte" },
     { id: "peso", n: "Comer mejor y bajar de peso", d: "Comidas más ordenadas y más movimiento, sin dietas", plan: "comer",
       qs: [
         { k: "m", q: "¿Qué es lo que más te cuesta hoy?", o: ["Picotear entre comidas", "Comer muy tarde o saltearme comidas", "Las porciones grandes", "Comer por ansiedad o aburrimiento", "No sé por dónde empezar"] },
@@ -1215,7 +1219,8 @@
     viaje: ["Organizar un viaje", "Armarlo paso a paso"],
     laburo: ["Buscar trabajo", "CV, entrevistas y búsqueda"]
   };
-  function openGoals() {
+  function openGoals() { close(); var old = $("#full"); if (old) old.remove(); gs = null; tab = "obj"; render(); window.scrollTo(0, 0); }
+  function openGoalsOld() {
     close(); var old = $("#full"); if (old) old.remove();
     gs = { st: "pick", sel: ((S.goal && S.goal.ids) || []).slice(), gi: 0, qi: 0, a: JSON.parse(JSON.stringify((S.goal && S.goal.a) || {})), other: (S.goal && S.goal.other) || "" };
     var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el); drawGoals();
@@ -1327,7 +1332,7 @@
       var nms = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n; }).join(" y ");
       return '<div class="card goalcard"><div class="row" style="gap:12px;align-items:center">' + stageRing(goalStage()) + '<div><span class="small muted">Tu objetivo · semana ' + goalStage() + ' de 3</span><b style="display:block;font-size:18px;margin:2px 0 4px">' + esc(nms || "Mi objetivo") + '</b></div></div><p class="small" style="margin:0 0 8px">' + (nx ? "Próxima acción: <b>" + fmtT(nx.s) + " · " + esc(nx.label) + "</b>" : "Hoy no quedan más acciones de tu objetivo.") + '</p><div class="gbar"><i style="width:' + Math.round(100 * (goalStats().d ? goalStats().n / goalStats().d : 0)) + '%"></i></div><button class="linkbtn small" data-gtoggle>Ver la semana</button> <button class="linkbtn small" data-open="prog" style="margin-left:12px">Mi progreso</button></div>';
     }
-    if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Contanos tu objetivo y ajustamos tu día para llegar ahí, de a poco.</p><button class="btn sage sm" data-open="test">Elegir mi objetivo</button></div>';
+    if (!G) return '<div class="card testcta" style="margin-top:12px"><b>¿Qué querés lograr?</b><p class="small muted" style="margin:6px 0 10px">Elegí un objetivo y seguí un camino paso a paso, dentro de la app.</p><button class="btn sage sm" data-open="test">Ver objetivos</button></div>';
     var st = goalStage(), ch = goalChanges().filter(function (c) { return c.s <= st; }), names = (G.ids || []).map(function (id) { var g = goalById(id); return g ? g.n : ""; }).filter(Boolean).map(function (n, i) { return i ? n.charAt(0).toLowerCase() + n.slice(1) : n; }).join(" y ");
     var cur = ch.filter(function (c) { return c.s === st; }).sort(function (x, y) { return (x.tip ? 1 : 0) - (y.tip ? 1 : 0); }).slice(0, 4), tbl = armBlocks(), pend = ch.filter(function (c) { return !(G.ap && G.ap[c.id]) && (c.patch || c.act); });
     var pro = isProU();
@@ -1544,12 +1549,22 @@
     });
     return h;
   }
+  function goalCardNew(g) {
+    var p = planOf(g.plan), P = p && pgOf(p.id); if (!P) return "";
+    var it = pgItem(p.id), n = pgCount(p.id), ow = pgOwns(p.id), started = !!it, fin = n >= 14, lv = lvOf(Math.min(n, 13));
+    var sub = fin ? "Completado" : started ? "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n : g.d;
+    var tag = fin ? "✓" : started ? Math.round(n * 100 / 14) + "%" : (ow ? "Empezar" : "Paso 1 gratis");
+    return '<button class="plancard" data-pgopen="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + (SHAPES[p.id] || "") + "</span><span style='flex:1;min-width:0'><b>" + esc(g.n) + "</b><small>" + esc(sub) + '</small>' + (started ? '<span class="pgbar" style="display:block;margin-top:6px"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></span>' : "") + '</span><span class="tag">' + tag + "</span></button>";
+  }
   function vObj() {
-    var h = '<h1 class="hello">Tu objetivo</h1>';
-    if (!S.arm) return h + '<div class="card"><p class="muted" style="margin:0 0 10px">Primero armá tu día en Hoy. Después elegís qué querés lograr y acá seguís tu avance.</p><button class="btn sage" data-tab="hoy">Armar mi día</button></div>';
-    h += goalCard(false);
-    if (S.goal && !S.goal.fin) h += '<div class="grid2" style="margin-top:10px"><button class="btn ghost" data-open="prog">Mi progreso</button><button class="btn sage" data-shareprog>Compartir</button></div>';
-    h += caminosSection();
+    var h = '<h1 class="hello">Tus objetivos</h1><p class="small muted" style="margin:0 0 14px">Elegí lo que querés lograr. Cada objetivo es un camino de 5 niveles: un paso por día, todo dentro de la app. Cargás, practicás y subís de nivel haciendo.</p>';
+    var cur = pgCur();
+    if (cur && pgCount(cur) < 14) {
+      var P = pgOf(cur), n = pgCount(cur), dn = pgToday(cur), pl = planOf(cur), lv = lvOf(n);
+      h += '<div class="card pgcard"><span class="small muted">Tu camino de ahora · nivel ' + (lv + 1) + " de 5</span><b style='display:block;font-size:19px;margin:4px 0 4px'>" + esc(P.n) + "</b><span class='small muted' style='display:block;margin-bottom:10px'>" + (dn ? "Listo por hoy ✓. Mañana, el paso siguiente." : "Paso " + (n + 1) + " de 14: " + esc(P.days[n].t)) + '</span><button class="btn ' + (dn ? "ghost" : "sage") + ' sm" data-pgopen="' + cur + '">' + (dn ? "Ver mi camino" : "Hacer el paso de hoy") + "</button></div>";
+    }
+    h += '<div class="sec" style="margin-top:18px">Todos los objetivos</div>' + GOALS.map(goalCardNew).join("");
+    h += '<div class="card" style="margin-top:14px"><b>¿No sabés por dónde empezar?</b><p class="small muted" style="margin:6px 0 10px">Respondé unas preguntas y te recomendamos uno. Después elegís vos.</p><button class="btn ghost sm" data-open="elegir">Que Forma me recomiende</button></div>';
     h += '<div class="sec" style="margin-top:22px">Herramientas</div><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody();
     return h;
   }
@@ -1883,7 +1898,7 @@
     var F = window.FormaDia, K = F.KIND, kinds = ["fixed", "meal", "train", "focus", "habit", "pause", "free", "rest", "commute"];
     var oldSh = $("#sheet > div"), keep = oldSh ? oldSh.scrollTop : 0;
     var title = MB.k === today() ? "tu día de hoy" : DNL[MB.dt.getDay()].toLowerCase() + " " + MB.dt.getDate();
-    sheet('<span class="badge">' + (MB.first ? "Último paso" : "Armar a mano") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + (MB.first ? "Ajustá tu día momento por momento" : esc(title.charAt(0).toUpperCase() + title.slice(1))) + '</h2><p class="small muted" style="margin:0 0 12px">' + (MB.first ? "Este es tu día armado con tus respuestas. Tocá cualquier bloque para cambiar su horario, su nombre o su tipo, o agregá los que falten. Después te preguntamos qué te está faltando." : "Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.") + '</p>' +
+    sheet('<span class="badge">' + (MB.first ? "Último paso" : "Armar a mano") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + (MB.first ? "Ajustá tu día momento por momento" : esc(title.charAt(0).toUpperCase() + title.slice(1))) + '</h2><p class="small muted" style="margin:0 0 12px">' + (MB.first ? "Este es tu día armado con tus respuestas. Tocá cualquier bloque para cambiar su horario, su nombre o su tipo, o agregá los que falten." : "Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.") + '</p>' +
       MB.bl.map(function (b, i) {
         return '<div class="mbrow"><div class="mbt"><select data-mbf="s" data-mbi="' + i + '" aria-label="Desde">' + mbOpts(b.s) + '</select><span>a</span><select data-mbf="e" data-mbi="' + i + '" aria-label="Hasta">' + mbOpts(b.e) + '</select><button class="txmini" data-mbdel="' + i + '" aria-label="Borrar bloque">Borrar</button></div>' +
           '<div class="mbn"><input data-mbf="label" data-mbi="' + i + '" maxlength="40" value="' + esc(b.label) + '" placeholder="Qué vas a hacer"><select data-mbf="kind" data-mbi="' + i + '" aria-label="Tipo">' + kinds.map(function (x) { return '<option value="' + x + '"' + (x === b.kind ? " selected" : "") + ">" + esc(K[x].tag) + "</option>"; }).join("") + "</select></div></div>";
@@ -1904,7 +1919,7 @@
     bl.forEach(function (b, j) { if (j && b.s > bl[j - 1].e) out.push({ s: bl[j - 1].e, e: b.s, label: "Margen libre", kind: "free", note: "" }); out.push({ s: b.s, e: b.e, label: String(b.label).trim().slice(0, 40), kind: b.kind, note: b.note || "" }); });
     if (!out.length) { MB.err = "El día no puede quedar vacío."; return mbDraw(); }
     S.dd = S.dd || {}; var prev = S.dd[MB.k] || {}; S.dd[MB.k] = { ans: prev.ans || null, blocks: out, at: today() };
-    var wasFirst = MB.first; save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0); if (wasFirst && !S.goal) setTimeout(openGoals, 350);
+    var wasFirst = MB.first; save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0); 
   }
   function ddEdit(k) { ddManual(k); }
   function ddQ(k) {
@@ -1977,12 +1992,12 @@
 
   // ---------- nivel de constancia (formas) ----------
   var LEVELS = [
-    { n: "Círculo", at: 0, svg: '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="#C6F432"/></svg>' },
-    { n: "Semicírculo", at: 4, svg: '<svg viewBox="0 0 44 44"><path d="M2 36 A20 20 0 0 1 42 36 Z" fill="#B9A7F0"/></svg>' },
-    { n: "Cuadrado", at: 10, svg: '<svg viewBox="0 0 44 44"><rect x="3" y="3" width="38" height="38" fill="#FFC83D"/></svg>' },
-    { n: "Triángulo", at: 20, svg: '<svg viewBox="0 0 44 44"><path d="M22 3 L41 41 H3 Z" fill="#FF8A4C"/></svg>' },
-    { n: "Cuarto de círculo", at: 35, svg: '<svg viewBox="0 0 44 44"><path d="M2 2 A40 40 0 0 1 42 42 H2 Z" fill="#4C7DFF"/></svg>' },
-    { n: "Forma completa", at: 55, svg: '<svg viewBox="0 0 44 44"><path d="M3 22 A19 19 0 0 1 22 3 H41 V22 A19 19 0 0 1 22 41 H3 Z" fill="#86A892"/></svg>' }
+    { n: "Semilla", at: 0, svg: '<span class="emo">🌱</span>' },
+    { n: "Brote", at: 4, svg: '<span class="emo">🌿</span>' },
+    { n: "Constante", at: 10, svg: '<span class="emo">🔥</span>' },
+    { n: "En racha", at: 20, svg: '<span class="emo">⚡</span>' },
+    { n: "Imparable", at: 35, svg: '<span class="emo">🏅</span>' },
+    { n: "Forma completa", at: 55, svg: '<span class="emo">🏆</span>' }
   ];
   function goodWeeksTotal() { var n = 0; for (var off = 0; off > -104; off--) { if (weekCount(off) >= 3) n++; } return n; }
   function levelInfo() {
@@ -2579,6 +2594,7 @@
     if (d.xtok !== undefined) { var sel = $("#xts"); if (!sel || !xtd.id || !isProU()) return; S.xt = S.xt || []; S.xt.push({ id: "x" + Date.now(), tool: xtd.id, s: +sel.value, d: xtd.w === "hoy" ? today() : "", n: xtd.n ? 1 : 0, at: today() }); save(); close(); render(); return; }
     if (d.xtdel) { var xi = (S.xt || []).filter(function (x) { return x.id === d.xtdel; })[0]; if (xi) { xi.del = true; xi.at = today(); save(); } close(); render(); return; }
     if (d.open === "test") return openTest();
+    if (d.open === "elegir") return openTestOld();
     if (d.gexit !== undefined) { gs = null; var gf = $("#full"); if (gf) gf.remove(); return; }
     if (d.gpick) { if (!gs) return; var go0 = $("#gother"); if (go0) gs.other = go0.value; var gix = gs.sel.indexOf(d.gpick); if (gix >= 0) gs.sel.splice(gix, 1); else { if (gs.sel.length >= 2) gs.sel.shift(); gs.sel.push(d.gpick); } var gfe = $("#full"), gsc = gfe ? gfe.scrollTop : 0, gbd = $("#full .dbody"), gsb = gbd ? gbd.scrollTop : 0; drawGoals(); gfe = $("#full"); if (gfe) gfe.scrollTop = gsc; gbd = $("#full .dbody"); if (gbd) gbd.scrollTop = gsb; return; }
     if (d.gnext !== undefined) { if (!gs || !gs.sel.length) return; var go1 = $("#gother"); if (go1) gs.other = go1.value; if (gLive().length) { gs.st = "q"; gs.gi = 0; gs.qi = 0; drawGoals(); } else gFinish(); return; }
