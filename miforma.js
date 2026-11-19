@@ -1895,10 +1895,7 @@
     var oldSh = $("#sheet > div"), keep = oldSh ? oldSh.scrollTop : 0;
     var title = MB.k === today() ? "tu día de hoy" : DNL[MB.dt.getDay()].toLowerCase() + " " + MB.dt.getDate();
     sheet('<span class="badge">' + (MB.first ? "Último paso" : "Armar a mano") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + (MB.first ? "Ajustá tu día momento por momento" : esc(title.charAt(0).toUpperCase() + title.slice(1))) + '</h2><p class="small muted" style="margin:0 0 12px">' + (MB.first ? "Este es tu día armado con tus respuestas. Tocá cualquier bloque para cambiar su horario, su nombre o su tipo, o agregá los que falten." : "Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.") + '</p>' +
-      MB.bl.map(function (b, i) {
-        return '<div class="mbrow" data-mbrow="' + i + '"><div class="mbt"><button class="mbgrip" data-mbgrip="' + i + '" aria-label="Agarrar y mover este bloque" title="Agarralo y soltalo sobre un margen libre">⠿</button><select data-mbf="s" data-mbi="' + i + '" aria-label="Desde">' + mbOpts(b.s) + '</select><span>a</span><select data-mbf="e" data-mbi="' + i + '" aria-label="Hasta">' + mbOpts(b.e) + '</select><button class="txmini" data-mbdel="' + i + '" aria-label="Borrar bloque">Borrar</button></div>' +
-          '<div class="mbn"><input data-mbf="label" data-mbi="' + i + '" maxlength="40" value="' + esc(b.label) + '" placeholder="Qué vas a hacer"><select data-mbf="kind" data-mbi="' + i + '" aria-label="Tipo">' + kinds.map(function (x) { return '<option value="' + x + '"' + (x === b.kind ? " selected" : "") + ">" + esc(K[x].tag) + "</option>"; }).join("") + "</select></div></div>";
-      }).join("") +
+      mbTimeline(kinds) +
       '<button class="btn ghost block" data-mbadd style="margin-top:10px">Agregar un bloque</button>' +
       (MB.err ? '<p class="small" style="color:var(--err);margin:10px 0 0">' + esc(MB.err) + "</p>" : "") +
       '<button class="btn sage block" data-mbsave style="margin-top:12px">' + (MB.first ? "Listo, seguir" : "Guardar este día") + '</button>' +
@@ -1908,47 +1905,64 @@
     MB.drawn = true;
   }
 
-  // ---- mover bloques agarrándolos ----
-  function mbIsFree(b) { return b.kind === "free" || (b.kind === "rest" && b.label === "Ocio y descanso"); }
-  function mbMove(from, to) {
-    var bl = MB.bl.slice();
-    var B = bl[from], T = bl[to]; if (!B || !T || B === T) return mbDraw();
-    var d = B.e - B.s;
-    if (!mbIsFree(T)) { MB.err = "Soltalo sobre un margen libre: ahí hay lugar. Si querés usar otro horario, primero cambiá o borrá ese bloque."; MB.bl = bl; return mbDraw(); }
-    if (T.e - T.s < d) { MB.err = "“" + B.label + "” dura " + Math.round(d) + " minutos y ahí hay " + Math.round(T.e - T.s) + " libres. Elegí un margen más largo o acortá el bloque."; MB.bl = bl; return mbDraw(); }
-    var out = [];
-    bl.forEach(function (x) {
-      if (x === B) { out.push({ s: B.s, e: B.e, label: "Margen libre", kind: "free", note: "" }); return; }
-      if (x === T) { out.push({ s: T.s, e: T.s + d, label: B.label, kind: B.kind, note: B.note || "" }); if (T.e > T.s + d) out.push({ s: T.s + d, e: T.e, label: "Margen libre", kind: "free", note: "" }); return; }
-      out.push(x);
+  // ---- línea de tiempo: agarrar y soltar bloques donde quieras ----
+  var MBPX = 1.2;
+  function mbAuto(b) { return b.kind === "free" && b.label === "Margen libre"; }
+  function mbNormalize() {
+    var non = MB.bl.filter(function (b) { return !mbAuto(b); }), out = non.slice();
+    MB.bl.filter(mbAuto).forEach(function (f) {
+      var pcs = [[f.s, f.e]];
+      non.forEach(function (n) { var nx = []; pcs.forEach(function (pc) { if (n.e <= pc[0] || n.s >= pc[1]) { nx.push(pc); return; } if (n.s > pc[0]) nx.push([pc[0], n.s]); if (n.e < pc[1]) nx.push([n.e, pc[1]]); }); pcs = nx; });
+      pcs.forEach(function (pc) { if (pc[1] - pc[0] > 0) out.push({ s: pc[0], e: pc[1], label: "Margen libre", kind: "free", note: "" }); });
     });
-    out.sort(function (a, b) { return a.s - b.s; });
-    var m = [];
-    out.forEach(function (x) { var l = m[m.length - 1]; if (l && mbIsFree(l) && mbIsFree(x) && l.label === "Margen libre" && x.label === "Margen libre" && l.e === x.s) l.e = x.e; else m.push(x); });
-    MB.bl = m; MB.err = ""; mbDraw();
+    MB.bl = out;
+  }
+  function mbRange() { var lo = 1e9, hi = 0; MB.bl.forEach(function (b) { lo = Math.min(lo, b.s); hi = Math.max(hi, b.e); }); if (lo > hi) { lo = 360; hi = 1380; } lo = Math.max(0, Math.floor(lo / 60) * 60); hi = Math.min(1800, Math.ceil(hi / 60) * 60); if (hi - lo < 240) hi = lo + 240; return [lo, hi]; }
+  function mbBad() {
+    var bad = {}, bl = MB.bl; bl.forEach(function (b, i) { if (!(b.e > b.s)) bad[i] = 1; bl.forEach(function (c, j) { if (i < j && b.s < c.e && c.s < b.e && !mbAuto(b) && !mbAuto(c)) { bad[i] = 1; bad[j] = 1; } }); }); return bad;
+  }
+  function mbTimeline(kinds) {
+    var F = window.FormaDia, K = F.KIND, R = mbRange(), lo = R[0], hi = R[1], bad = mbBad(), nb = Object.keys(bad).length;
+    if (MB.sel === undefined || !MB.bl[MB.sel]) MB.sel = MB.bl.length ? 0 : undefined;
+    var h = '<p class="small muted" style="margin:0 0 8px">Tocá un bloque para editarlo. Agarralo del <b>⠿</b> y soltalo donde quieras. Lo que dejes vacío queda como margen libre.</p><div class="mbtl" style="height:' + Math.round((hi - lo) * MBPX) + 'px" data-lo="' + lo + '">';
+    for (var m = lo; m <= hi; m += 60) h += '<div class="mbhr" style="top:' + Math.round((m - lo) * MBPX) + 'px"><span>' + mbClock(m).replace(" (+1)", "") + "</span></div>";
+    MB.bl.forEach(function (b, i) {
+      var k = K[b.kind] || K.free, ht = Math.max(Math.round((b.e - b.s) * MBPX) - 2, 24);
+      h += '<div class="mbb' + (mbAuto(b) ? " mbfree" : "") + (i === MB.sel ? " sel" : "") + (bad[i] ? " bad" : "") + '" data-mbsel="' + i + '" data-mbblk="' + i + '" style="top:' + Math.round((b.s - lo) * MBPX) + "px;height:" + ht + "px;--c:" + k.dot + '"><button class="mbgrip" data-mbgrip="' + i + '" aria-label="Agarrar y mover ' + esc(b.label) + '">⠿</button><span class="mbtx"><b>' + esc(b.label || "Sin nombre") + '</b><small>' + mbClock(b.s) + " a " + mbClock(b.e) + "</small></span></div>";
+    });
+    h += "</div>";
+    if (nb) h += '<p class="small" style="color:var(--err);margin:8px 0 0">Hay bloques que se pisan o con horarios que no cierran (marcados en rojo). Podés moverlos igual; para guardar, acomodalos.</p>';
+    var sel = MB.sel, b = MB.bl[sel];
+    if (b) h += '<div class="mbrow" style="margin-top:12px"><span class="small muted">Bloque seleccionado</span><div class="mbt" style="margin-top:6px"><select data-mbf="s" data-mbi="' + sel + '" aria-label="Desde">' + mbOpts(b.s) + '</select><span>a</span><select data-mbf="e" data-mbi="' + sel + '" aria-label="Hasta">' + mbOpts(b.e) + '</select><button class="txmini" data-mbdel="' + sel + '" aria-label="Borrar bloque">Borrar</button></div><div class="mbn"><input data-mbf="label" data-mbi="' + sel + '" maxlength="40" value="' + esc(b.label) + '" placeholder="Qué vas a hacer"><select data-mbf="kind" data-mbi="' + sel + '" aria-label="Tipo">' + kinds.map(function (x) { return '<option value="' + x + '"' + (x === b.kind ? " selected" : "") + ">" + esc(K[x].tag) + "</option>"; }).join("") + "</select></div></div>";
+    return h;
   }
   (function () {
     var dr = null;
-    function rowAt(x, y) { var el = document.elementFromPoint(x, y); return el && el.closest ? el.closest("[data-mbrow]") : null; }
+    function sc() { return $("#sheet > div"); }
     document.addEventListener("pointerdown", function (e) {
-      var g = e.target.closest && e.target.closest("[data-mbgrip]"); if (!g || !MB) return;
-      e.preventDefault(); var row = g.closest("[data-mbrow]");
-      dr = { from: +g.getAttribute("data-mbgrip"), row: row, over: null }; row.classList.add("mbdrag"); try { g.setPointerCapture(e.pointerId); } catch (x) {}
+      if (!MB) return; var g = e.target.closest && e.target.closest("[data-mbgrip]"), blk = e.target.closest && e.target.closest("[data-mbblk]");
+      if (!g && !(blk && e.pointerType === "mouse" && !e.target.closest("button,select,input"))) return;
+      var el = (g || blk).closest("[data-mbblk]"); if (!el) return; var i = +el.getAttribute("data-mbblk"), b = MB.bl[i]; if (!b) return;
+      e.preventDefault(); var S0 = sc();
+      dr = { i: i, el: el, y0: e.clientY, sc0: S0 ? S0.scrollTop : 0, s0: b.s, dur: b.e - b.s, lo: +el.parentNode.getAttribute("data-lo"), moved: false, ns: b.s };
+      el.classList.add("mbdrag"); try { (g || el).setPointerCapture(e.pointerId); } catch (x) {}
     });
     document.addEventListener("pointermove", function (e) {
-      if (!dr) return; var r = rowAt(e.clientX, e.clientY);
-      if (dr.over && dr.over !== r) dr.over.classList.remove("mbover");
-      if (r && r !== dr.row) { r.classList.add("mbover"); dr.over = r; } else dr.over = null;
-      var sc = $("#sheet > div"); if (sc) { var h = window.innerHeight; if (e.clientY < 90) sc.scrollTop -= 14; else if (e.clientY > h - 90) sc.scrollTop += 14; }
+      if (!dr) return; var S0 = sc(), dy = (e.clientY - dr.y0) + (S0 ? S0.scrollTop - dr.sc0 : 0);
+      if (Math.abs(dy) > 3) dr.moved = true;
+      var R = mbRange(), ns = Math.round((dr.s0 + dy / MBPX) / 5) * 5; ns = Math.max(R[0], Math.min(R[1] - dr.dur, ns)); dr.ns = ns;
+      dr.el.style.top = Math.round((ns - dr.lo) * MBPX) + "px";
+      var sm = dr.el.querySelector("small"); if (sm) sm.textContent = mbClock(ns) + " a " + mbClock(ns + dr.dur);
+      if (S0) { var h = window.innerHeight; if (e.clientY < 90) S0.scrollTop -= 12; else if (e.clientY > h - 90) S0.scrollTop += 12; }
     });
-    function end(e) {
-      if (!dr) return; var d = dr; dr = null; d.row.classList.remove("mbdrag"); if (d.over) d.over.classList.remove("mbover");
-      var r = e && e.type === "pointerup" ? rowAt(e.clientX, e.clientY) : null;
-      if (r && MB) mbMove(d.from, +r.getAttribute("data-mbrow"));
+    function end() {
+      if (!dr) return; var d = dr; dr = null; d.el.classList.remove("mbdrag");
+      if (MB && MB.bl[d.i]) { var b = MB.bl[d.i]; if (d.moved) { b.s = d.ns; b.e = d.ns + d.dur; MB.err = ""; } MB.sel = d.i; mbDraw(); }
     }
     document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end);
   })();
   function mbSave() {
+    mbNormalize();
     var bl = MB.bl.slice().sort(function (a, b) { return a.s - b.s; }), out = [], i;
     for (i = 0; i < bl.length; i++) { var b = bl[i]; if (!(b.e > b.s)) { MB.err = "“" + (b.label || "Bloque") + "”: la hora de fin tiene que ser después de la de inicio."; MB.bl = bl; return mbDraw(); }
       if (!String(b.label || "").trim()) { MB.err = "Todos los bloques necesitan un nombre."; MB.bl = bl; return mbDraw(); }
@@ -2593,7 +2607,7 @@
 
   // ---------- eventos ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("button,a,[data-prod],[data-blkopen]"); if (!t) return;
+    var t = e.target.closest("button,a,[data-prod],[data-blkopen],[data-mbsel]"); if (!t) return;
     var d = t.dataset;
     if (d.mode) { readAuthDraft(); mode = d.mode; render(); return; }
     if (t.id === "a-register") return doRegister();
@@ -2701,8 +2715,9 @@
     if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
     if (d.ddedit) return ddEdit(d.ddedit);
     if (d.mbq) { MB = null; return ddQ(d.mbq); }
-    if (d.mbadd !== undefined && MB) { var last = MB.bl.slice().sort(function (a, b) { return a.e - b.e; }).pop(), s0 = last ? last.e : 480; MB.bl.push({ s: s0, e: s0 + 60, label: "Nueva actividad", kind: "habit", note: "" }); MB.err = ""; return mbDraw(); }
-    if (d.mbdel !== undefined && MB) { MB.bl.splice(+d.mbdel, 1); MB.err = ""; return mbDraw(); }
+    if (d.mbadd !== undefined && MB) { var gp = null, srt = MB.bl.slice().sort(function (a, b) { return a.s - b.s; }); for (var gi = 1; gi < srt.length && !gp; gi++) { if (srt[gi].s - srt[gi - 1].e >= 30) gp = srt[gi - 1].e; } var s0 = gp !== null ? gp : (srt.length ? srt[srt.length - 1].e : 480), dur0 = gp !== null ? Math.min(60, srt.filter(function (z) { return z.s >= gp; })[0].s - gp) : 60; MB.bl.push({ s: s0, e: s0 + dur0, label: "Nueva actividad", kind: "habit", note: "" }); MB.sel = MB.bl.length - 1; MB.err = ""; return mbDraw(); }
+    if (d.mbdel !== undefined && MB) { MB.bl.splice(+d.mbdel, 1); MB.sel = undefined; MB.err = ""; return mbDraw(); }
+    if (d.mbsel !== undefined && MB) { MB.sel = +d.mbsel; return mbDraw(); }
     if (d.mbsave !== undefined && MB) return mbSave();
     if (d.ddreset) { if (isProU()) ddReset(d.ddreset); return; }
     if (d.wkday !== undefined && d.wkday !== "") { var wd2 = null; if (d.wkdt) { var q2 = d.wkdt.split("-"); wd2 = new Date(+q2[0], +q2[1] - 1, +q2[2]); } return openWeekDay(+d.wkday, wd2); }
