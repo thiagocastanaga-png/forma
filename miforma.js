@@ -80,7 +80,7 @@
 
   // Planes: cada uno es como un "curso". Gratis para empezar, Pro para todo el plan.
   var PLANS = [
-    { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "$14.900",
+    { id: "vida", n: "Vida diaria", c: "#86A892", pro: "plan-vida", live: true, grp: "Vida diaria", price: "$10.900", was: "$14.900",
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
       free: ["Tu día armado en 1 minuto, fijo en la pantalla de Hoy", "Cambiar tu día de hoy y armar mañana cada noche", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
       pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Organizar tu semana: armá y guardá cada día (tu lunes, tu martes…) y que se repitan solos", "Cambiar tu día base cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
@@ -104,7 +104,7 @@
     { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: false, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada." },
     { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo." },
     { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: false, grp: "Servicios extras", d: "Servicio extra: contanos adónde querés ir y te armamos el itinerario, los días y el presupuesto." },
-    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$31.900", was: "$46.000", promo: "Precio de preventa para las primeras 10 compras",
+    { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$23.900", was: "$31.900", promo: "Precio de lanzamiento",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
       pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
@@ -128,10 +128,10 @@
     { id: "casa", g: "Orden", s: "vida", n: "Casa en orden", d: "Rutinas simples para tener la casa al día.", area: "hogar", soon: true },
     { id: "plata", g: "Orden", s: "vida", n: "Plata en orden", d: "Organización de gastos. No es asesoramiento financiero.", area: "plata", soon: true },
     { id: "familia", g: "Orden", s: "vida", n: "Tiempo con los tuyos", d: "Planear momentos con familia y amigos.", area: "relaciones", soon: true },
-    { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "$7.900", was: "$11.100" },
-    { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "$6.300", was: "$9.500" },
-    { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "$9.500", was: "$12.700" },
-    { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "$15.900", was: "$23.800" }
+    { id: "t-pre", g: "Tenis", s: "tenis", n: "Pre y post partido", d: "Rutina antes y después de jugar.", price: "$5.900", was: "$7.900" },
+    { id: "t-resp", g: "Tenis", s: "tenis", n: "Respiración y enfoque", d: "Para manejar los nervios antes, durante y después del partido.", price: "$4.700", was: "$6.300" },
+    { id: "t-mov", g: "Tenis", s: "tenis", n: "Movilidad", d: "Sesiones cortas para días de descanso o antes de entrenar.", price: "$7.100", was: "$9.500" },
+    { id: "t-rut", g: "Tenis", s: "tenis", n: "Rutina física", d: "Plan físico semanal para jugadores.", price: "$11.900", was: "$15.900" }
   ];
   function prodOf(id) { return PRODUCTS.filter(function (p) { return p.id === id; })[0]; }
   function inPlan(pid) { return PRODUCTS.filter(function (p) { return p.s === pid; }); }
@@ -184,7 +184,7 @@
   function touchBest() { var n = streakNow(); if (n > S.best) S.best = n; }
 
   // permisos
-  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo || !!(SIM && S.betaOwned && S.betaOwned[id]); }
+  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo || !!S.owned["forma-pro"] || !!(SIM && S.betaOwned && S.betaOwned[id]); }
   function isPro(planId) {
     var p = planOf(planId); if (!p) return false;
     if (hasProduct(p.pro)) return true;
@@ -568,6 +568,14 @@
     return '<button class="plancard" data-plan="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + SHAPES[p.id] + "</span><span style='flex:1;min-width:0'><b>" + esc(p.n) + "</b><small>" + sub + "</small>" +
       (p.live && !p.prog && items.length ? '<span class="bar"><i style="width:' + Math.round(got * 100 / items.length) + '%"></i></span>' : "") + "</span>" + tag + "</button>";
   }
+  function proCard() {
+    if (hasProduct("forma-pro") && !S.demo) return '<div class="card dark" style="margin-bottom:14px"><b>Tenés Forma Pro</b><p class="small" style="margin:6px 0 0;opacity:.85">Todo desbloqueado: los planes, la semana completa y las herramientas.</p></div>';
+    return '<button class="card dark" data-openpro style="width:100%;text-align:left;margin-bottom:14px;border:2px solid #C6F432"><span class="badge" style="background:#C6F432;color:#111">Todo incluido</span><div class="row between" style="margin-top:8px"><b style="font-size:20px">Forma Pro</b><span><b style="font-size:22px">$47.900</b><small style="opacity:.8"> / año</small></span></div><p class="small" style="margin:6px 0 0;opacity:.85">Todos los planes, tu semana completa y todas las herramientas, por 12 meses. Un solo pago.</p></button>';
+  }
+  function openPro() {
+    var li = ["Organizar toda tu semana, día por día", "Todos los planes de vida diaria, estudio y los que vengan", "Los planes de Tenis y deportes", "Todas las herramientas de la app", "Recordatorios y revisión semanal", "12 meses, un solo pago (no se renueva solo)"];
+    sheet('<span class="badge">Forma Pro</span><h2 style="font-size:24px;margin:8px 0 2px">Todo Forma, por un año</h2><p class="muted small" style="margin:0 0 10px">USD 30 al año, en pesos: <b>$47.900</b>.</p><ul class="small" style="padding-left:18px;margin:0 0 6px">' + li.map(function (x) { return "<li style='margin-bottom:6px'>" + x + "</li>"; }).join("") + '</ul><p class="small muted">Si solo querés un tema, podés comprar los planes por separado, más baratos.</p>' + payButtons("forma-pro", "Forma Pro") + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
   function vPlanes() {
     var rec = recIds(), head = "";
     if (rec.length) head = '<div class="sec">Para vos</div>' + rec.map(function (id) { return planCard(planOf(id)); }).join("") + '<button class="linkbtn small" data-open="test" style="margin:4px 0 8px">Rehacer el test</button>';
@@ -577,7 +585,7 @@
       var L = PLANS.filter(function (p) { return p.live && p.grp === g && rec.indexOf(p.id) < 0; }).sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); });
       if (L.length) out += '<div class="sec">' + g + "</div>" + (g === "Vida diaria" ? '<p class="small muted" style="margin:0 0 8px">Los planes de todos los días vienen incluidos en Vida diaria Pro.</p>' : g === "Servicios extras" ? '<p class="small muted" style="margin:0 0 8px">Cosas puntuales que se piden aparte.</p>' : "") + L.map(planCard).join("");
     });
-    return '<button class="linkbtn small" data-tab="perfil" style="margin-bottom:6px">← Volver a Perfil</button>' + "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto, con un programa de 14 días dentro de la app.</p>" + head + out;
+    return '<button class="linkbtn small" data-tab="perfil" style="margin-bottom:6px">← Volver a Perfil</button>' + "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto, con un programa de 14 días dentro de la app.</p>" + proCard() + head + out;
   }
   function openPlan(id) {
     var p = planOf(id); if (!p) return;
@@ -692,7 +700,7 @@
   }
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
-    if (!SIM && CFG.checkout && ["t-full", "t-pre", "t-resp", "t-mov", "t-rut", "plan-vida"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
+    if (!SIM && CFG.checkout && ["forma-pro", "t-full", "t-pre", "t-resp", "t-mov", "t-rut", "plan-vida"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
     if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
     if (SIM && !NATIVE) return '<button class="btn block" data-betabuy="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted">Versión de prueba: el pago es simulado y <b>no se cobra nada</b>.</p>';
     if (NATIVE) link = "";
@@ -797,6 +805,39 @@
     if (st.f && st.f.length) html += '<div class="sec" style="margin-top:14px">Tu paso</div>' + st.f.map(function (f, i) { return pgFieldHtml(f, "F" + i, it); }).join("");
     return html;
   }
+  // ---------- Camino: niveles sobre los programas de 14 pasos ----------
+  var LVS = [
+    { n: "Punto de partida", f: 0, t: 2, g: "Entendés dónde estás hoy y empezás a medirlo.", e: "🧭" },
+    { n: "Primer cambio", f: 3, t: 5, g: "Cambiás un hábito concreto, chico y real.", e: "🌱" },
+    { n: "Hacerlo costumbre", f: 6, t: 8, g: "Repetís hasta que deja de costar.", e: "🔁" },
+    { n: "Subir un escalón", f: 9, t: 11, g: "Subís la exigencia con más confianza.", e: "🪜" },
+    { n: "Tu nueva rutina", f: 12, t: 13, g: "Cerrás con tu resultado y tu método propio.", e: "🏆" }
+  ];
+  function lvOf(n) { for (var i = 0; i < LVS.length; i++) if (n <= LVS[i].t) return i; return LVS.length - 1; }
+  function lvXp(n) { var x = n * 10; LVS.forEach(function (l) { if (n > l.t) x += 20; }); return x; }
+  function pgMap(P, n, started) {
+    var cur = lvOf(Math.min(n, 13)), h = '<div class="lvmap">';
+    LVS.forEach(function (L, i) {
+      var done = n > L.t, now = started && !done && i === cur, st = done ? "done" : now ? "now" : "lock";
+      h += '<div class="lvc ' + st + '"><div class="lvh"><span class="lve">' + (done ? "✓" : L.e) + '</span><span style="flex:1;min-width:0"><b>Nivel ' + (i + 1) + " · " + esc(L.n) + '</b><small>' + esc(L.g) + '</small></span>' + (now ? '<span class="lvtag">Estás acá</span>' : "") + "</div>";
+      h += '<ol class="lvsteps" start="' + (L.f + 1) + '">';
+      for (var k = L.f; k <= L.t; k++) { if (!P.days[k]) continue; h += '<li class="' + (k < n ? "ok" : k === n && started ? "cur" : "") + '">' + (k < n ? "✓ " : "") + esc(P.days[k].t) + "</li>"; }
+      h += "</ol></div>";
+    });
+    return h + "</div>";
+  }
+  function pgHead(P, n) {
+    var cur = lvOf(Math.min(n, 13)), L = LVS[cur], inL = Math.max(0, Math.min(n, L.t + 1) - L.f), tot = L.t - L.f + 1;
+    return '<div class="lvhead"><div class="row between"><b>Nivel ' + (cur + 1) + " de 5 · " + esc(L.n) + '</b><span class="lvxp">' + lvXp(n) + ' XP</span></div><div class="pgbar"><i style="width:' + Math.round(inL * 100 / tot) + '%"></i></div><p class="small muted" style="margin:6px 0 0">' + inL + " de " + tot + " pasos del nivel · " + n + " de 14 en total</p></div>";
+  }
+  function openLevelUp(id, li) {
+    var P = pgOf(id), L = LVS[li], nx = LVS[li + 1], it = pgItem(id), rep = [];
+    try { rep = pgReport(P, it) || []; } catch (e) {}
+    sheet('<div style="text-align:center;padding:6px 0"><div class="lvbadge">' + L.e + '</div><span class="badge">Nivel ' + (li + 1) + " completado</span><h2 style='font-size:26px;margin:10px 0 4px'>" + esc(L.n) + "</h2><p class='muted' style='margin:0'>" + esc(P.n) + " · " + lvXp(pgCount(id)) + " XP</p></div>" +
+      '<div class="card sage"><b>Lo que lograste</b><p class="small" style="margin:6px 0 0">' + esc(L.g) + "</p>" + (rep.length ? '<ul class="ticks" style="margin:8px 0 0">' + rep.slice(0, 2).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") + "</div>" +
+      (nx ? '<div class="card"><b>Lo que viene: Nivel ' + (li + 2) + " · " + esc(nx.n) + '</b><p class="small muted" style="margin:6px 0 0">' + esc(nx.g) + " Tu próximo paso te espera mañana y aparece en tu día.</p></div>" : "") +
+      '<button class="btn sage block" data-pgopen="' + id + '">Seguir mi camino</button>');
+  }
   function openProgram(id) {
     var P = pgOf(id); if (!P) return;
     if (!pgOwns(id)) return openPlan(id);
@@ -805,7 +846,7 @@
       h += '<p>' + esc(P.intro) + '</p><div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
         '<div class="card"><b>Tu razón</b><p class="small muted" style="margin:4px 0 8px">Escribila: te la vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
         '<label class="pgl">¿A qué hora querés hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + (P.reminder || "20:00") + '"><p class="small muted" style="margin:6px 0 0">Te avisamos a esa hora si tenés la app abierta o el aviso activado.</p></div>' +
-        '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn sage block" data-pgstart="' + id + '">Empezar programa</button><div class="sec" style="margin-top:16px">Los 14 pasos</div>' + pgPreview(P) + '<p class="small muted">' + esc(P.note) + "</p>";
+        '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn sage block" data-pgstart="' + id + '">Empezar programa</button><div class="sec" style="margin-top:16px">Tu camino: 5 niveles</div>' + pgMap(P, 0, false) + '<p class="small muted">' + esc(P.note) + "</p>";
     } else if (n >= 14) {
       var b = it.before, a = it.after, rep = pgReport(P, it);
       h += '<div class="card' + (a ? " sage" : "") + '"><b>¡Terminaste los 14 pasos!</b>' + (a ? '<p style="margin:8px 0 0">' + esc(P.q) + "<br><b>Antes: " + b + " · Después: " + a + "</b></p><p class=\"small\" style=\"margin:6px 0 0\">" + (P.better === "up" ? (a > b ? "Mejoraste. Mantené tus pasos favoritos." : "Todavía no se nota el cambio. Es normal: repetí los pasos que más te sirvieron.") : (a < b ? "Bajó la tensión. Usá tu kit cuando haga falta." : "Todavía no bajó. Repetí lo que más te sirvió y, si sigue, hablalo con un profesional.")) + "</p>" :
@@ -814,11 +855,11 @@
         '<button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:12px">Repetir el programa</button><button class="btn ghost block" data-pgall style="margin-top:8px">Elegir otro programa</button>';
     } else {
       var st = P.days[n], done = pgToday(id), ok = pgWhenOk(st);
-      h += '<div class="pgbar"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></div><p class="small muted" style="margin:6px 0 4px">Paso ' + (n + 1) + " de 14 · " + n + " hechos</p>" + (it.why ? '<p class="small pgwhy">Tu razón: «' + esc(it.why) + "»</p>" : "");
+      h += pgHead(P, n) + (it.why ? '<p class="small pgwhy">Tu razón: «' + esc(it.why) + "»</p>" : "");
       if (done) h += '<div class="card sage"><b>Listo por hoy</b><p class="small" style="margin:4px 0 0">Mañana te espera el paso siguiente. Una cosa por día alcanza.</p></div>';
       else if (!ok) h += '<div class="card"><b style="font-size:18px">' + esc(st.t) + '</b><p class="small muted" style="margin:8px 0 0">' + pgWhenTxt(st) + "</p></div>";
       else h += '<div class="card"><b style="font-size:18px">' + esc(st.t) + "</b><p style='margin:8px 0'>" + esc(st.a) + "</p><p class='small muted' style='margin:0'>" + esc(st.w) + "</p>" + pgStepForm(P, id, n, it) + '<p class="small" id="pgmsg" style="margin:12px 0 0;color:var(--err)"></p><button class="btn block" data-pgdone="' + id + '" style="margin-top:10px">Completar paso</button></div>';
-      h += pgChart(P, it) + '<div class="sec" style="margin-top:16px">Tu camino</div><ol class="small pgprev">' + P.days.map(function (x, i) { return '<li class="' + (i < n ? "ok" : i === n ? "cur" : "") + '">' + (i < n ? "✓ " : "") + esc(x.t) + "</li>"; }).join("") + "</ol>" +
+      h += pgChart(P, it) + '<div class="sec" style="margin-top:16px">Tu camino</div>' + pgMap(P, n, true) +
         (S.prog.cur === id ? '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este programa</button>' : '<button class="btn ghost block" data-pgresume="' + id + '">Retomar este programa</button>') + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
     }
     sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
@@ -857,7 +898,8 @@
     it.fl = it.fl || {}; it.fl[n] = data.f;
     it.done[n] = today(); it.last = today(); it.dr = {}; it.st = null;
     S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render();
-    openProgram(id);
+    var nn = n + 1, li = lvOf(n);
+    if (nn > LVS[li].t && nn < 14) openLevelUp(id, li); else openProgram(id);
   }
   setInterval(function () {
     var e = document.getElementById("pgtmr"); if (!e) return;
@@ -1490,11 +1532,24 @@
     return h;
   }
   function vTools() { return '<h1 class="hello">Herramientas</h1><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody(); }
+  function caminosSection() {
+    var L = PLANS.filter(function (p) { return p.live && p.prog && pgOf(p.id); });
+    if (!L.length) return "";
+    var h = '<div class="sec" style="margin-top:22px">Tus caminos</div><p class="small muted" style="margin:0 0 8px">Cada camino son 5 niveles, un paso por día. Subís de nivel haciendo, y tu día se va armando con cada paso.</p>';
+    L.forEach(function (p) {
+      var P = pgOf(p.id), it = pgItem(p.id), n = pgCount(p.id), ow = pgOwns(p.id), started = !!it, fin = n >= 14, lv = lvOf(Math.min(n, 13));
+      var sub = fin ? "Completado" : started ? "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n : "5 niveles · 14 pasos";
+      var tag = fin ? "✓" : started ? Math.round(n * 100 / 14) + "%" : (ow ? "Empezar" : "Nivel 1 gratis");
+      h += '<button class="plancard" data-pgopen="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + (SHAPES[p.id] || "") + "</span><span style='flex:1;min-width:0'><b>" + esc(p.n) + "</b><small>" + esc(sub) + '</small><span class="pgbar" style="display:block;margin-top:6px"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></span></span><span class="tag">' + tag + "</span></button>";
+    });
+    return h;
+  }
   function vObj() {
     var h = '<h1 class="hello">Tu objetivo</h1>';
     if (!S.arm) return h + '<div class="card"><p class="muted" style="margin:0 0 10px">Primero armá tu día en Hoy. Después elegís qué querés lograr y acá seguís tu avance.</p><button class="btn sage" data-tab="hoy">Armar mi día</button></div>';
     h += goalCard(false);
     if (S.goal && !S.goal.fin) h += '<div class="grid2" style="margin-top:10px"><button class="btn ghost" data-open="prog">Mi progreso</button><button class="btn sage" data-shareprog>Compartir</button></div>';
+    h += caminosSection();
     h += '<div class="sec" style="margin-top:22px">Herramientas</div><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody();
     return h;
   }
@@ -1550,7 +1605,21 @@
     });
     return out;
   }
-  function xtApply(bl, dt) { return goalApply(xtApply0(bl, dt), dt); }
+  function pgApply(bl, dt) {
+    var id = pgCur(); if (!id || !bl.length || today(dt) !== today()) return bl;
+    var it = pgItem(id), P = pgOf(id), n = pgCount(id); if (!it || n >= 14) return bl;
+    var st = P.days[n], m = 15, am = st.when === "am", pm = st.when === "pm", at = it.at ? (+it.at.slice(0, 2)) * 60 + (+it.at.slice(3, 5)) : (pm ? 1200 : 540);
+    if (am && at >= 840) at = 600; if (pm && at < 1080) at = 1200;
+    var out = bl.slice(), best = -1, bs = 0, bd = 1e9, lv = lvOf(n);
+    out.forEach(function (b, i) { if (!xtFree(b) || b.e - b.s < m) return; var s0 = Math.max(b.s, Math.min(at, b.e - m)), d = Math.abs(s0 - at); if (d < bd) { bd = d; best = i; bs = s0; } });
+    if (best < 0 || bd > 240) return bl;
+    var f = out[best], parts = [];
+    if (f.s < bs) parts.push(Object.assign({}, f, { e: bs }));
+    parts.push({ s: bs, e: bs + m, kind: "habit", label: "Camino · " + st.t, note: "Nivel " + (lv + 1) + " · " + P.n + ". Paso " + (n + 1) + " de 14.", pgstep: id, tool: "__pg" });
+    if (f.e > bs + m) parts.push(Object.assign({}, f, { s: bs + m }));
+    out.splice.apply(out, [best, 1].concat(parts)); return out;
+  }
+  function xtApply(bl, dt) { return pgApply(goalApply(xtApply0(bl, dt), dt), dt); }
   function xtApply0(bl, dt) {
     var k = today(dt), xs = (S.xt || []).filter(function (x) { return !x.del && (!x.d || x.d === k); }).sort(function (a, b) { return a.s - b.s; });
     if (!xs.length) return bl; var out = bl.slice();
@@ -1860,7 +1929,7 @@
   function armCheckable(b) { return b.kind === "train" || b.kind === "focus" || b.kind === "habit" || b.kind === "pause" || (b.kind === "rest" && b.label.indexOf("Desconectar") === 0); }
   function bchips(b) { var d = bdetails(b); if (!d.length) return ""; return '<span class="bchips">' + d.slice(0, 3).map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + (d.length > 3 ? "<em>+" + (d.length - 3) + "</em>" : "") + "</span>"; }
   function armToolOf(b) { return b.tool || ARMTOOL[b.label] || (b.kind === "train" ? "movimiento" : b.kind === "focus" ? "foco" : ""); }
-  function armDone(b) { return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
+  function armDone(b) { if (b.pgstep) return pgToday(b.pgstep); return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
     if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { return ddManual(today()); sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
@@ -2491,6 +2560,7 @@
     if (d.refine !== undefined) { armOpen(S.arm && S.arm.ans); return; }
     if (d.tab) { close(); tab = d.tab; render(); window.scrollTo(0, 0); return; }
     if (d.close !== undefined) { close(); return; }
+    if (d.openpro !== undefined) return openPro();
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
     if (d.prod) return openProduct(d.prod);
@@ -2611,6 +2681,7 @@
     if (d.delwin !== undefined) { var wl = S.wins && S.wins[today()]; if (wl) { wl.splice(+d.delwin, 1); save(); render(); } return; }
     if (d.todock) { var ti = (S.todo || []).filter(function (x) { return x.id === d.todock; })[0]; if (ti) { ti.done = !ti.done; ti.doneAt = ti.done ? today() : ""; save(); render(); } return; }
     if (d.tododel) { S.todo = (S.todo || []).filter(function (x) { return x.id !== d.tododel; }); save(); render(); return; }
+    if (d.armtool === "__pg") { var pc = pgCur(); if (pc) openProgram(pc); return; }
     if (d.armtool) { if (!(S.demo || isPro("vida"))) return; return startAct(d.armtool); }
     if (t.id === "notif") return enableNotif();
     if (t.id === "dayquiz") return openQuiz();

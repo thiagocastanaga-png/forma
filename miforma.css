@@ -523,3 +523,21 @@ textarea.txin{resize:vertical;min-height:80px}
 .bignow .dwrap.incard{display:grid;gap:10px;margin-top:14px}
 .bignow .dgrp{background:var(--card);color:var(--tx);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:14px}
 .bignow .dgrp .small.muted{color:var(--mut,inherit)}
+
+.lvmap{display:grid;gap:10px;margin:8px 0}
+.lvc{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--card)}
+.lvc.lock{opacity:.55}
+.lvc.now{border:2px solid #C6F432}
+.lvc.done{border-color:#86A892}
+.lvh{display:flex;gap:10px;align-items:center}
+.lvh small{display:block;opacity:.7;font-size:12px}
+.lve{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:18px;flex:none}
+.lvc.done .lve{background:#86A892;color:#111;font-weight:800}
+.lvtag{font-size:11px;font-weight:700;background:#C6F432;color:#111;border-radius:99px;padding:3px 9px}
+.lvsteps{margin:8px 0 0;padding-left:22px;font-size:13px}
+.lvsteps li{margin:3px 0;opacity:.75}
+.lvsteps li.ok{opacity:1}
+.lvsteps li.cur{opacity:1;font-weight:700}
+.lvhead{margin:6px 0 10px}
+.lvxp{font-weight:800;color:#C6F432}
+.lvbadge{width:84px;height:84px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;font-size:42px;background:radial-gradient(circle,#C6F432 0%,#86A892 100%)}
