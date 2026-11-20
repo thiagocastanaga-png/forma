@@ -1997,7 +1997,7 @@
   }
   function armKey(b) { return b.kind + "|" + b.label + "|" + b.s; }
   function armCheckable(b) { return b.kind === "train" || b.kind === "focus" || b.kind === "habit" || b.kind === "pause" || (b.kind === "rest" && b.label.indexOf("Desconectar") === 0); }
-  function bchips(b) { var d = bdetails(b); if (!d.length) return ""; var n = bdDoneN(b); return '<span class="bchips"><em>' + (n === d.length ? "\u2713 " : "") + n + "/" + d.length + " para hacer</em></span>"; }
+  function bchips(b) { return ""; }
   function armToolOf(b) { return b.tool || ARMTOOL[b.label] || (b.kind === "train" ? "movimiento" : b.kind === "focus" ? "foco" : ""); }
   function armDone(b) { if (b.pgstep) return pgToday(b.pgstep); return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
@@ -2241,7 +2241,7 @@
   }
   function deployBody(b, i) {
     var h = "", pro = isProU(), tl = blockTools(b), tips = blockTips(b), det = bdetails(b), steps = blockSteps(b), gst = (b.steps || []).length, G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null;
-    h += deployGroup("mine", "Para hacer en este momento", "", (det.length ? '<div class="bdlist">' + det.map(function (x, j) { return bdItem(b, i, j, x); }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todav\u00eda no agregaste nada para hacer en este momento.</p>') + '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis acciones" : "Agregar una acci\u00f3n") + "</button>");
+    h += '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:6px">Agregar al paso a paso</button>';
     return h;
   }
   function deployHtml(b, i) {
@@ -2257,7 +2257,9 @@
   function blockSteps(b) {
     var out = (b.steps || []).slice(), def = STEPDEF[b.label] || [];
     def.forEach(function (x) { if (x[2] && out.some(function (z) { return x[2].test(z.l); })) return; if (out.some(function (z) { return z.l === x[0]; })) return; out.push({ l: x[0], o: x[1] }); });
-    return out.sort(function (a, c) { return (a.o || 0) - (c.o || 0); });
+    out = out.sort(function (a, c) { return (a.o || 0) - (c.o || 0); });
+    bdetails(b).forEach(function (x) { if (!out.some(function (z) { return z.l === x; })) out.push({ l: x, u: 1 }); });
+    return out;
   }
   function stepKey(b, st) { return "s|" + armKey(b) + "|" + st.l; }
   function stepDone(b, st) { return !!(S.ad && S.ad[today()] && S.ad[today()][stepKey(b, st)]); }
@@ -2293,11 +2295,11 @@
     var bl = armBlocks(), b = bl[i]; if (!b) return;
     var k = window.FormaDia.KIND[b.kind], pro = isProU(), det = bdetails(b), tk = armToolOf(b), ck = armCheckable(b);
     sheet('<span class="badge">' + k.tag + " · " + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + '</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(b.label) + "</h2>" + (b.note ? '<p class="muted">' + esc(b.note) + "</p>" : "") +
-      stepsHtml(b, i, false) +
-      '<div class="sec" style="margin-top:14px">Para hacer en este momento</div>' +
-      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1">' + bdItem(b, i, j, x) + '<small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
-      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px;flex-wrap:wrap"><input id="bn" maxlength="80" placeholder="Agregar una acci\u00f3n" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button><select id="bnw" aria-label="Cu\u00e1ndo se repite" style="flex-basis:100%;margin-top:8px;' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s") + (pro ? "" : " (Forma Pro)") + '</option></select></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 detalles. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
-      '<p class="small muted" style="margin:8px 0 0">Cada acción se repite según lo que elijas y la tildás cada día.</p>' +
+      (blockSteps(b).length ? stepsHtml(b, i, false) : '<div class="sec" style="margin-top:14px">Paso a paso</div><p class="small muted" style="margin:0 0 6px">Este momento todavía no tiene pasos. Armalo vos: lo que agregues acá se tilda cada día.</p>') +
+      (det.length ? '<div class="sec" style="margin-top:14px">Los pasos que agregaste</div>' : "") +
+      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(x) + '</span> <small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
+      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px;flex-wrap:wrap"><input id="bn" maxlength="80" placeholder="Agregar un paso" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button><select id="bnw" aria-label="Cu\u00e1ndo se repite" style="flex-basis:100%;margin-top:8px;' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s") + (pro ? "" : " (Forma Pro)") + '</option></select></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 pasos propios. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
+      '<p class="small muted" style="margin:8px 0 0">Cada paso que agregás se suma al paso a paso, se repite según lo que elijas y lo tildás cada día.</p>' +
       (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
       (ck && tk && !armDone(b) ? '<button class="btn sage block" data-armtool="' + tk + '" style="margin-top:12px">Hacer ahora (actividad guiada)</button>' : "") +
       (ck ? '<button class="btn block" data-ackb="' + i + '" style="margin-top:8px">' + (armDone(b) ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
