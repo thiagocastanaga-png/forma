@@ -2243,7 +2243,7 @@
   }
   function deployBody(b, i) {
     var h = "", pro = isProU(), tl = blockTools(b), tips = blockTips(b), det = bdetails(b), steps = blockSteps(b), gst = (b.steps || []).length, G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null;
-    h += '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:6px">Agregar al paso a paso</button>';
+    h += '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:6px">Agregar un paso</button>';
     return h;
   }
   function deployHtml(b, i) {
