@@ -2006,7 +2006,9 @@
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
     var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-    window.FormaDia.open({ ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(function () { ddManual(today(), true); }, 350); } });
+    var OPA = { ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(function () { ddManual(today(), true); }, 350); } };
+    if (/[?&]dia=1/.test(location.search)) return OPA.onSave({ wake: 420, sleep: 1380, fixedOn: "no", fixed: [], lunch: 780, dinner: "auto" });
+    window.FormaDia.open(OPA);
   }
   function armSection() {
     var bl = armBlocks();
