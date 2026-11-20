@@ -507,7 +507,7 @@
   function reviewCard() {
     if (!reviewDue()) return "";
     if (S.demo || isPro("vida")) return '<div class="card sage"><b>Es momento de tu revisión semanal</b><p class="small" style="margin:6px 0 12px">10 minutos para ver qué funcionó, soltar lo que no y ajustar tu ritmo.</p><button class="btn" id="review">Hacer mi revisión</button></div>';
-    return '<div class="card"><b>Revisión semanal (Pro)</b><p class="small muted" style="margin:6px 0 10px">Cada semana ves qué funcionó, qué soltar y cómo ajustar tu ritmo, con tu progreso a la vista.</p><button class="btn ghost" data-plan="vida">Ver Vida diaria Pro</button></div>';
+    return '<div class="card"><b>Revisión semanal (Forma Pro)</b><p class="small muted" style="margin:6px 0 10px">Cada semana ves qué funcionó, qué soltar y cómo ajustar tu ritmo, con tu progreso a la vista.</p><button class="btn ghost" data-openpro>Ver Forma Pro</button></div>';
   }
   function vArmar() {
     var nm = (S.profile && S.profile.name) || "";
@@ -537,7 +537,7 @@
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard() + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + weekCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Tus objetivos: dormir, celular, foco y calma</li><li>Cambiar tu día base cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-plan="vida">Ver Vida diaria Pro</button></div>' : "");
+      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + weekCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Forma Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Tus objetivos: dormir, celular, foco y calma</li><li>Cambiar tu día base cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-openpro>Ver Forma Pro</button></div>' : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -618,7 +618,7 @@
   }
   function vCatalogo() {
     var html = "<h1 class='hello'>Catálogo</h1>" +
-      "<div class='card small'><b>Productos sueltos.</b> Comprás solo lo que necesitás y es tuyo para siempre. Si querés todo de una sección, el <button class='linkbtn' data-tab='planes'>plan Pro</button> sale mejor.</div>" +
+      "<div class='card small'><b>Productos sueltos.</b> Comprás solo lo que necesitás y es tuyo para siempre. Si querés todo de una sección, <button class='linkbtn' data-openpro>Forma Pro</button> sale mejor.</div>" +
       '<div class="chips" style="margin:14px 0">' + [["todos", "Todos"]].concat(PLANS.filter(function (p) { return inPlan(p.id).length; }).map(function (p) { return [p.id, p.n]; })).map(function (c) {
         return '<button class="chip" data-cat="' + c[0] + '" aria-pressed="' + (catFilter === c[0]) + '">' + esc(c[1]) + "</button>";
       }).join("") + "</div>";
@@ -1285,7 +1285,7 @@
         html += '<button class="card dtinfo" data-tl="' + T.id + '" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--tx)"><span style="flex:1;min-width:0"><b>' + esc(T.n) + '</b><small class="muted" style="display:block">' + esc(T.d) + '</small></span><span class="badge" style="' + (ok ? "background:#C6F432;color:#111" : "") + '">' + (ok ? "Gratis" : "Pro") + "</span></button>";
       });
     }
-    if (hasLive && !isProU()) html += '<div class="card dark"><b>Más semanas, más cambios</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Vida diaria Pro tu día se va ajustando solo cada semana y tenés todas las herramientas.</p><button class="btn sage" data-tstplan="vida">Ver Vida diaria Pro</button></div>';
+    if (hasLive && !isProU()) html += '<div class="card dark"><b>Más semanas, más cambios</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro tu día se va ajustando solo cada semana y tenés todas las herramientas.</p><button class="btn sage" data-openpro>Ver Forma Pro</button></div>';
     if (other) html += '<p class="small muted">Anotamos lo que nos contaste: «' + esc(other) + '».</p>';
     el.innerHTML = html + '</div><div class="dfoot"><button class="btn sage block" data-gdone>Ver mi día</button></div>';
   }
@@ -1362,7 +1362,7 @@
     var day = Math.max(1, daysSince(G.start || today()) + 1);
     var h = '<div class="row" style="gap:14px;align-items:center;margin-bottom:6px"><span class="progring">' + stageRing(G.fin ? 3 : st) + '</span><div><span class="small muted">Día ' + day + " de tu objetivo</span><h2 style=\"font-size:22px;margin:2px 0 0\">" + esc(names || "Mi objetivo") + "</h2></div></div>";
     h += '<div class="row" style="gap:8px;margin:12px 0"><div class="card pstat"><b>' + P.total + '</b><span class="small muted">acciones hechas</span></div><div class="card pstat"><b>' + P.daysAct + '</b><span class="small muted">días con avance</span></div><div class="card pstat"><b>' + P.best + '</b><span class="small muted">mejor racha</span></div></div>';
-    if (!pro) h += '<div class="card"><b class="small">Con Pro registrás cada acción que hacés</b><p class="small muted" style="margin:4px 0 8px">Así ves tu avance real hacia el objetivo.</p><button class="btn sage sm" data-plan="vida">Ver Pro</button></div>';
+    if (!pro) h += '<div class="card"><b class="small">Con Forma Pro registrás cada acción que hacés</b><p class="small muted" style="margin:4px 0 8px">Así ves tu avance real hacia el objetivo.</p><button class="btn sage sm" data-openpro>Ver Forma Pro</button></div>';
     h += '<div class="card"><b>Últimos 14 días</b><div class="pstrip">' + P.strip.map(function (p) { var lv = p.before ? "off" : !p.d ? "none" : p.n >= p.d ? "full" : p.n ? "part" : "zero"; return '<div class="pday ' + lv + '"><i></i><span>' + p.dn + "</span></div>"; }).join("") + '</div><p class="small muted" style="margin:8px 0 0">Lleno: hiciste todas las acciones del día. Medio: hiciste algunas.</p></div>';
     var ch = goalChanges(), stages = [1, 2, 3].map(function (n) { var c = ch.filter(function (z) { return z.s === n && !z.tip; }), state = G.fin || n < st ? "done" : n === st ? "now" : "next"; return '<div class="pstage ' + state + '"><span class="pdot">' + (state === "done" ? "✓" : n) + '</span><div><b class="small">Semana ' + n + (state === "now" ? " · ahora" : "") + '</b><span class="small muted" style="display:block">' + (c.length ? esc(c.slice(0, 2).map(function (z) { return z.t; }).join(" · ")) : "Un paso más") + "</span></div></div>"; }).join("");
     h += '<div class="card"><b>Tu camino</b><div class="pstages">' + stages + "</div></div>";
@@ -1520,7 +1520,7 @@
   function toolsOf(pid) { return TOOLS.filter(function (t) { return t.plan === pid; }); }
   function toolRow(T) {
     var ok = toolOk(T), pl = planOf(T.plan);
-    return '<button class="prod" data-tl="' + T.id + '"><span class="shape">' + SHAPES[T.plan] + "</span><span style='flex:1;min-width:0'><b>" + esc(T.n) + "</b><small>" + esc(T.d) + '</small></span><span class="tag' + (ok ? " ok" : "") + '">' + (ok ? (T.free ? "Gratis" : "Tuya") : "Con " + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n)) + "</span></button>";
+    return '<button class="prod" data-tl="' + T.id + '"><span class="shape">' + SHAPES[T.plan] + "</span><span style='flex:1;min-width:0'><b>" + esc(T.n) + "</b><small>" + esc(T.d) + '</small></span><span class="tag' + (ok ? " ok" : "") + '">' + (ok ? (T.free ? "Gratis" : "Tuya") : "Con Forma Pro") + "</span></button>";
   }
   function toolsCard() {
     if (!S.arm) return "";
@@ -1575,7 +1575,7 @@
     sheet('<div class="row"><span class="shape">' + SHAPES[T.plan] + '</span><div><span class="badge">Herramienta · ' + esc(pl.n) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><p style="margin:14px 0">' + esc(T.d) + "</p>" +
       '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>" +
       (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" data-xtadd="' + T.id + '" style="margin-top:8px">Agregar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
-        : '<div class="card dark" style="margin-top:12px"><b>' + (T.gate === "vida" ? "Es parte de Vida diaria Pro" : "Es parte del plan " + esc(pl.n)) + '</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con el plan la usás cuando quieras y la sumás a tu día.</p><button class="btn sage" data-plan="' + (T.gate === "vida" ? "vida" : pl.id) + '">Ver el plan</button></div>') +
+        : '<div class="card dark" style="margin-top:12px"><b>' + 'Es parte de Forma Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro la usás cuando quieras y la sumás a tu día. También la podés conseguir con ' + (T.gate === "vida" ? "Vida diaria Pro" : "el plan " + esc(pl.n)) + '.</p><button class="btn sage" data-openpro>Ver Forma Pro</button> <button class="btn ghost" data-plan="' + (T.gate === "vida" ? "vida" : pl.id) + '">Ver el plan</button></div>') +
       '<button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }
   function xtFree(b) { return b.kind === "free" || (b.kind === "rest" && b.label === "Ocio y descanso"); }
@@ -1860,7 +1860,7 @@
     return '<div class="card"><div class="row between"><div><b>Tu semana</b><span class="small muted" style="display:block">Mirá cómo te fue y qué cerraste.</span></div><button class="btn sage sm" data-open="wsum">Ver resumen</button></div></div>';
   }
   function weekCard() {
-    if (!isProU() && S.arm && S.arm.ans) return '<div class="card weekc"><div class="row between"><b>Mi semana</b><span class="small muted">Pro</span></div><p class="small muted" style="margin:6px 0 10px">Armá y guardá cada día de la semana: tu lunes, tu martes, tu miércoles… y que cada uno se repita solo.</p><button class="btn ghost block" data-plan="vida">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Organizar mi semana con Pro</button></div>";
+    if (!isProU() && S.arm && S.arm.ans) return '<div class="card weekc"><div class="row between"><b>Mi semana</b><span class="small muted">Pro</span></div><p class="small muted" style="margin:6px 0 10px">Armá y guardá cada día de la semana: tu lunes, tu martes, tu miércoles… y que cada uno se repita solo.</p><button class="btn ghost block" data-plan="vida">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Organizar mi semana con Forma Pro</button></div>";
     if (!isProU() || !S.arm || !S.arm.ans) return "";
     var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
     return '<div class="card weekc"><div class="row between"><b>Mi semana</b><button class="linkbtn small" data-open="wsum">Ver resumen</button></div><div class="wkstrip">' +
@@ -2001,7 +2001,7 @@
   function armDone(b) { if (b.pgstep) return pgToday(b.pgstep); return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
     if (!window.FormaDia) { alert("No se pudo cargar el armado. Revisá tu conexión y recargá."); return; }
-    if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { return ddManual(today()); sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Vida diaria Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-plan="vida">Ver Vida diaria Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
+    if (S.arm && !(S.arm.ans && S.arm.ans.quick) && !(S.demo || isPro("vida"))) { return ddManual(today()); sheet('<h2 style="font-size:22px">Cambiar tu día es Pro</h2><p class="muted">Tu día gratis queda fijo como lo armaste. Con Forma Pro lo podés cambiar cuando cambie tu vida, armar cada día distinto, usar herramientas y recibir avisos.</p><button class="btn block" data-openpro>Ver Forma Pro</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>'); return; }
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
     var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
@@ -2242,7 +2242,7 @@
     var h = "", pro = isProU(), tl = blockTools(b), tips = blockTips(b), det = bdetails(b), steps = blockSteps(b), gst = (b.steps || []).length, G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null;
     if (tl.length) h += deployGroup("tools", "Herramientas", "para este momento", tl.map(function (T) {
       var ok = toolOk(T), pl = planOf(T.plan);
-      return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" ' + (T.app ? 'data-tlapp="' + T.id + '"' : 'data-act="' + T.act + '"') + '>Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con ' + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n) + '">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
+      return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" ' + (T.app ? 'data-tlapp="' + T.id + '"' : 'data-act="' + T.act + '"') + '>Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con Forma Pro">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
     }).join(""));
     if (tips.length) h += deployGroup("tips", "Para tener en cuenta", "", "<ul>" + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>");
     h += deployGroup("mine", "Tus detalles", "", (det.length ? '<div class="bchips">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todavía no agregaste nada para este momento.</p>') + '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis detalles" : "Agregar un detalle") + "</button>");
@@ -2340,7 +2340,7 @@
       if (!S.day) return '<div class="card"><b>Armemos tu ritmo</b><p class="small muted" style="margin:6px 0 12px">Contanos tus horarios y armamos una propuesta con lo que elegiste trabajar. Después la ajustás a tu manera.</p><button class="btn" id="dayquiz">Armar mi ritmo</button></div>';
       return '<div class="row between small" style="margin:0 0 10px"><span class="muted">Ritmo armado a tu medida</span><button class="linkbtn" id="dayquiz">Rehacer</button></div>';
     }
-    return '<div class="card dark"><b>Tu ritmo, armado a tu medida</b><p class="small" style="margin:6px 0 12px;opacity:.85">Con Vida diaria Pro armamos tu ritmo con tus horarios, las actividades guiadas y una revisión semanal para ajustarlo.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>';
+    return '<div class="card dark"><b>Tu ritmo, armado a tu medida</b><p class="small" style="margin:6px 0 12px;opacity:.85">Con Forma Pro armamos tu ritmo con tus horarios, las actividades guiadas y una revisión semanal para ajustarlo.</p><button class="btn sage" data-openpro>Ver Forma Pro</button></div>';
   }
   function mm(t) { var a = t.split(":"); return (+a[0]) * 60 + (+a[1]); }
   function hmFrom(m) { m = Math.max(0, Math.min(1439, Math.round(m / 5) * 5)); return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
@@ -2369,7 +2369,7 @@
   function hasTpl(id) { return S.habits.some(function (h) { return !h.del && h.tpl === id; }); }
   function addTpl(id) {
     var tp = TPL.filter(function (x) { return x.id === id; })[0]; if (!tp || hasTpl(id)) return;
-    if (activeHabits().length >= habitLimit()) { var m = $("#mmsg"); if (m) m.innerHTML = 'Los hábitos propios son parte de Vida diaria Pro. <button class="linkbtn" data-plan="vida">Ver Vida diaria Pro</button>'; return; }
+    if (activeHabits().length >= habitLimit()) { var m = $("#mmsg"); if (m) m.innerHTML = 'Los hábitos propios son parte de Forma Pro. <button class="linkbtn" data-openpro>Ver Forma Pro</button>'; return; }
     S.habits.push(tplHabit(tp, S.day && S.day.quiz)); save(); openMenu(menuAreas); render();
   }
   var menuAreas = null;
