@@ -2245,7 +2245,7 @@
       return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" ' + (T.app ? 'data-tlapp="' + T.id + '"' : 'data-act="' + T.act + '"') + '>Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con ' + esc(T.gate === "vida" ? "Vida diaria Pro" : pl.n) + '">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
     }).join(""));
     if (tips.length) h += deployGroup("tips", "Para tener en cuenta", "", "<ul>" + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>");
-    h += deployGroup("mine", "Tus detalles", "", (det.length ? '<div class="bchips">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todavía no agregaste nada para este momento.</p>') + (pro ? '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis detalles" : "Agregar un detalle") + "</button>" : ""));
+    h += deployGroup("mine", "Tus detalles", "", (det.length ? '<div class="bchips">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todavía no agregaste nada para este momento.</p>') + '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis detalles" : "Agregar un detalle") + "</button>");
     return h;
   }
   function deployHtml(b, i) {
@@ -2287,13 +2287,12 @@
     sheet('<span class="badge">' + k.tag + " · " + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + '</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(b.label) + "</h2>" + (b.note ? '<p class="muted">' + esc(b.note) + "</p>" : "") +
       stepsHtml(b, i, false) +
       '<div class="sec" style="margin-top:14px">Tus detalles para este momento</div>' +
-      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:7px 0;border-top:1px solid var(--line)"><span>' + esc(x) + "</span>" + (pro ? '<button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button>' : "") + "</div>"; }).join("") : '<p class="small muted" style="margin:0 0 6px">' + (pro ? "Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien." : "Todavía no hay detalles.") + "</p>") +
-      (pro ? (det.length < 8 ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px"><input id="bn" maxlength="80" placeholder="Agregar un detalle" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form>' : "") +
-        '<p class="small muted" style="margin:8px 0 0">Se repite todos los días en este momento.</p>' +
-        (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
-        (ck && tk && !armDone(b) ? '<button class="btn sage block" data-armtool="' + tk + '" style="margin-top:12px">Hacer ahora (actividad guiada)</button>' : "") +
-        (ck ? '<button class="btn block" data-ackb="' + i + '" style="margin-top:8px">' + (armDone(b) ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "")
-        : '<div class="card dark" style="margin-top:12px"><b>Poné tus propios detalles con Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Agregá a cada momento lo que querés que no se te olvide.</p><button class="btn sage" data-plan="vida">Ver Vida diaria Pro</button></div>') +
+      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:7px 0;border-top:1px solid var(--line)"><span>' + esc(x) + '</span><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
+      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px"><input id="bn" maxlength="80" placeholder="Agregar un detalle" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 detalles. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
+      '<p class="small muted" style="margin:8px 0 0">Se repite todos los días en este momento.</p>' +
+      (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
+      (ck && tk && !armDone(b) ? '<button class="btn sage block" data-armtool="' + tk + '" style="margin-top:12px">Hacer ahora (actividad guiada)</button>' : "") +
+      (ck ? '<button class="btn block" data-ackb="' + i + '" style="margin-top:8px">' + (armDone(b) ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
 
@@ -2736,7 +2735,7 @@
     if (d.deploy !== undefined) { deployOpen = !deployOpen; t.setAttribute("aria-expanded", deployOpen); var dw = t.parentNode.querySelector(".dwrap"); if (dw) { dw.hidden = !deployOpen; if (deployOpen) animIn(dw.children, { dy: 12, d: 600, stag: 90 }); } return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
     if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
-    if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2 && isProU()) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
+    if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
     if (d.setview) { try { localStorage.setItem("forma_view", d.setview); } catch (e) {} render(); window.scrollTo(0, 0); return; }
     if (t.id === "more") { moreOpen = !moreOpen; render(); return; }
@@ -2811,7 +2810,7 @@
   document.addEventListener("change", function (e) { if (e.target.getAttribute && e.target.getAttribute("data-fk")) save(); });
   document.addEventListener("submit", function (e) {
     if (e.target.id === "compf") { e.preventDefault(); var cv = $("#compown").value.trim(); if (cv && compDraft) { if (compDraft.sel.length >= 3) { $("#compmsg").textContent = "Hasta 3. Sacá uno para sumar otro."; return; } if (compDraft.sel.indexOf(cv) < 0) compDraft.sel.push(cv.slice(0, 80)); drawComp(); } return; }
-    if (e.target.id === "bnf") { e.preventDefault(); if (!isProU()) return; var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim(); if (bx && bv) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv.slice(0, 80)); save(); render(); openBlock(bi); } return; }
+    if (e.target.id === "bnf") { e.preventDefault(); var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim(); if (bx && bv && (S.bn && S.bn[bkey(bx)] ? S.bn[bkey(bx)].length : 0) < (isProU() ? 8 : 3)) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv.slice(0, 80)); save(); render(); openBlock(bi); } return; }
     if (e.target.id === "tmf") { e.preventDefault(); var tv = $("#tmi").value.trim(); if (tv) { S.tm = S.tm || {}; S.tm[today(tmDate())] = { t: tv.slice(0, 80), d: 0 }; save(); render(); } return; }
     if (e.target.id === "winf") { e.preventDefault(); var wv = $("#win").value.trim(); if (wv) { S.wins = S.wins || {}; (S.wins[today()] = S.wins[today()] || []).push(wv.slice(0, 120)); save(); render(); } return; }
     if (e.target.id === "todof") { e.preventDefault(); var tv = $("#todo").value.trim(); if (tv && (S.todo || []).length < 60) { S.todo = S.todo || []; S.todo.push({ id: "t" + Date.now(), t: tv.slice(0, 120), done: false, doneAt: "" }); save(); render(); } return; }
