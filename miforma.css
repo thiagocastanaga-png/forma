@@ -560,3 +560,11 @@ textarea.txin{resize:vertical;min-height:80px}
 .mbb .mbgrip{order:2;margin-left:auto;font-size:20px;padding:0 6px;height:100%}
 .mbb.mbfree{background:transparent;border:1px dashed var(--line);border-left:5px solid var(--line);z-index:0;opacity:.75}
 .mbb:not(.mbfree){z-index:1}
+
+.mbrow.bad{border-color:var(--err,#e5484d);box-shadow:0 0 0 1px var(--err,#e5484d)}
+.mbrow.mbfreeR{opacity:.8}
+.mbrow.mbdrag{opacity:.5;outline:2px dashed var(--tx)}
+.mbrow.mbins{outline:3px solid var(--lime,#C6F432);outline-offset:2px}
+.mbrow.mbinsb{box-shadow:0 -4px 0 0 var(--lime,#C6F432)}
+.mbrow.mbinsa{box-shadow:0 4px 0 0 var(--lime,#C6F432)}
+.mbgrip{background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:6px 6px 6px 0;cursor:grab;touch-action:none;flex:none}

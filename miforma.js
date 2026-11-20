@@ -1895,7 +1895,11 @@
     var oldSh = $("#sheet > div"), keep = oldSh ? oldSh.scrollTop : 0;
     var title = MB.k === today() ? "tu día de hoy" : DNL[MB.dt.getDay()].toLowerCase() + " " + MB.dt.getDate();
     sheet('<span class="badge">' + (MB.first ? "Último paso" : "Armar a mano") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + (MB.first ? "Ajustá tu día momento por momento" : esc(title.charAt(0).toUpperCase() + title.slice(1))) + '</h2><p class="small muted" style="margin:0 0 12px">' + (MB.first ? "Este es tu día armado con tus respuestas. Tocá cualquier bloque para cambiar su horario, su nombre o su tipo, o agregá los que falten." : "Cambiá el horario, el nombre o el tipo de cada bloque. Si queda un hueco, lo llenamos con margen libre.") + '</p>' +
-      mbTimeline(kinds) +
+      (mbBadSet = mbBad(), Object.keys(mbBadSet).length ? '<p class="small" style="color:var(--err);margin:0 0 10px">Hay bloques que se pisan o con horarios que no cierran (marcados en rojo). Podés moverlos igual; para guardar, acomodalos.</p>' : '<p class="small muted" style="margin:0 0 10px">Agarrá un bloque del <b>⠿</b> y soltalo donde quieras.</p>') +
+      MB.bl.map(function (b, i) {
+        return '<div class="mbrow' + (mbBadSet[i] ? " bad" : "") + (mbAuto(b) ? " mbfreeR" : "") + '" data-mbrow="' + i + '"><div class="mbt"><button class="mbgrip" data-mbgrip="' + i + '" aria-label="Agarrar y mover este bloque" title="Agarralo y soltalo donde quieras">⠿</button><select data-mbf="s" data-mbi="' + i + '" aria-label="Desde">' + mbOpts(b.s) + '</select><span>a</span><select data-mbf="e" data-mbi="' + i + '" aria-label="Hasta">' + mbOpts(b.e) + '</select><button class="txmini" data-mbdel="' + i + '" aria-label="Borrar bloque">Borrar</button></div>' +
+          '<div class="mbn"><input data-mbf="label" data-mbi="' + i + '" maxlength="40" value="' + esc(b.label) + '" placeholder="Qué vas a hacer"><select data-mbf="kind" data-mbi="' + i + '" aria-label="Tipo">' + kinds.map(function (x) { return '<option value="' + x + '"' + (x === b.kind ? " selected" : "") + ">" + esc(K[x].tag) + "</option>"; }).join("") + "</select></div></div>";
+      }).join("") +
       '<button class="btn ghost block" data-mbadd style="margin-top:10px">Agregar un bloque</button>' +
       (MB.err ? '<p class="small" style="color:var(--err);margin:10px 0 0">' + esc(MB.err) + "</p>" : "") +
       '<button class="btn sage block" data-mbsave style="margin-top:12px">' + (MB.first ? "Listo, seguir" : "Guardar este día") + '</button>' +
@@ -1906,7 +1910,7 @@
   }
 
   // ---- línea de tiempo: agarrar y soltar bloques donde quieras ----
-  var MBPX = 1.2;
+  var MBPX = 1.2, mbBadSet = {};
   function mbAuto(b) { return b.kind === "free" && b.label === "Margen libre"; }
   function mbNormalize() {
     var non = MB.bl.filter(function (b) { return !mbAuto(b); }), out = non.slice();
@@ -1938,26 +1942,25 @@
   }
   (function () {
     var dr = null;
-    function sc() { return $("#sheet > div"); }
+    function rowAt(x, y) { var el = document.elementFromPoint(x, y); return el && el.closest ? el.closest("[data-mbrow]") : null; }
+    function clear() { [].slice.call(document.querySelectorAll(".mbins,.mbinsa,.mbinsb")).forEach(function (r) { r.classList.remove("mbins", "mbinsa", "mbinsb"); }); }
     document.addEventListener("pointerdown", function (e) {
-      if (!MB) return; var g = e.target.closest && e.target.closest("[data-mbgrip]"), blk = e.target.closest && e.target.closest("[data-mbblk]");
-      if (!g && !(blk && e.pointerType === "mouse" && !e.target.closest("button,select,input"))) return;
-      var el = (g || blk).closest("[data-mbblk]"); if (!el) return; var i = +el.getAttribute("data-mbblk"), b = MB.bl[i]; if (!b) return;
-      e.preventDefault(); var S0 = sc();
-      dr = { i: i, el: el, y0: e.clientY, sc0: S0 ? S0.scrollTop : 0, s0: b.s, dur: b.e - b.s, lo: +el.parentNode.getAttribute("data-lo"), moved: false, ns: b.s };
-      el.classList.add("mbdrag"); try { (g || el).setPointerCapture(e.pointerId); } catch (x) {}
+      var g = e.target.closest && e.target.closest("[data-mbgrip]"); if (!g || !MB) return; e.preventDefault();
+      var row = g.closest("[data-mbrow]"); dr = { i: +g.getAttribute("data-mbgrip"), row: row, tgt: null, after: false }; row.classList.add("mbdrag"); try { g.setPointerCapture(e.pointerId); } catch (x) {}
     });
     document.addEventListener("pointermove", function (e) {
-      if (!dr) return; var S0 = sc(), dy = (e.clientY - dr.y0) + (S0 ? S0.scrollTop - dr.sc0 : 0);
-      if (Math.abs(dy) > 3) dr.moved = true;
-      var R = mbRange(), ns = Math.round((dr.s0 + dy / MBPX) / 5) * 5; ns = Math.max(R[0], Math.min(R[1] - dr.dur, ns)); dr.ns = ns;
-      dr.el.style.top = Math.round((ns - dr.lo) * MBPX) + "px";
-      var sm = dr.el.querySelector("small"); if (sm) sm.textContent = mbClock(ns) + " a " + mbClock(ns + dr.dur);
-      if (S0) { var h = window.innerHeight; if (e.clientY < 90) S0.scrollTop -= 12; else if (e.clientY > h - 90) S0.scrollTop += 12; }
+      if (!dr) return; clear(); var r = rowAt(e.clientX, e.clientY);
+      if (r && r !== dr.row) { var bb = r.getBoundingClientRect(), idx = +r.getAttribute("data-mbrow"), blk = MB.bl[idx]; dr.tgt = idx; dr.after = !mbAuto(blk) && e.clientY > bb.top + bb.height / 2; r.classList.add(mbAuto(blk) ? "mbins" : dr.after ? "mbinsa" : "mbinsb"); } else dr.tgt = null;
+      var sc = $("#sheet > div"); if (sc) { var h = window.innerHeight; if (e.clientY < 90) sc.scrollTop -= 14; else if (e.clientY > h - 90) sc.scrollTop += 14; }
     });
-    function end() {
-      if (!dr) return; var d = dr; dr = null; d.el.classList.remove("mbdrag");
-      if (MB && MB.bl[d.i]) { var b = MB.bl[d.i]; if (d.moved) { b.s = d.ns; b.e = d.ns + d.dur; MB.err = ""; } MB.sel = d.i; mbDraw(); }
+    function end(e) {
+      if (!dr) return; var d = dr; dr = null; d.row.classList.remove("mbdrag"); clear();
+      if (!MB || d.tgt === null || e.type !== "pointerup") return;
+      var B = MB.bl[d.i], T = MB.bl[d.tgt]; if (!B || !T) return;
+      var dur = B.e - B.s, ns = mbAuto(T) ? T.s : (d.after ? T.e : T.s);
+      MB.bl.push({ s: B.s, e: B.e, label: "Margen libre", kind: "free", note: "" });
+      B.s = ns; B.e = ns + dur; MB.err = "";
+      mbNormalize(); MB.bl.sort(function (a, b) { return a.s - b.s || a.e - b.e; }); mbDraw();
     }
     document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end);
   })();
