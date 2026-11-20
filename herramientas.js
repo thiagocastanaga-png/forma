@@ -413,6 +413,314 @@
     }
   };
 
+  // ================= HERRAMIENTAS POR OBJETIVO (deporte, comer, movimiento, plata, viajes, laburo) =================
+  function setF(a, x, y) { if (a === "set") { F[x] = y; return true; } return false; }
+  function money(n) { return "$" + Math.round(n || 0).toLocaleString("es-AR"); }
+  function wkKeys() { var o = [], d = new Date(mondayKey() + "T12:00:00"); for (var i = 0; i < 7; i++) { var x = new Date(d); x.setDate(d.getDate() + i); o.push(dk(x)); } return o; }
+  function sumWeek(L, f) { return wkKeys().reduce(function (s, k) { return s + (L[k] ? f(L[k]) : 0); }, 0); }
+  function ck(on, a, x, txt) { return '<button class="txck' + (on ? " on" : "") + '" data-tx="' + a + '" data-ta="' + esc(x) + '"><i>' + (on ? "✓" : "") + "</i><span>" + esc(txt) + "</span></button>"; }
+  function dm(k) { return k.slice(8) + "/" + k.slice(5, 7); }
+  function mins(a) { return (a || []).reduce(function (s, x) { return s + (x.min || x.m || 0); }, 0); }
+
+  // ---------- DEPORTE: rutina de entrenamiento ----------
+  var ETPL = {
+    casa: ["Fuerza general", [["Sentadillas", 3, "12"], ["Flexiones (rodillas apoyadas si hace falta)", 3, "8"], ["Puente de glúteos", 3, "12"], ["Estocadas alternadas", 3, "10 por pierna"], ["Plancha", 3, "30 s"]]],
+    prev: ["Prevención y movilidad", [["Movilidad de cadera", 2, "10"], ["Rotación de hombros con toalla o banda", 2, "12"], ["Equilibrio en un pie", 2, "30 s por pie"], ["Elevación de talones", 3, "15"], ["Plancha lateral", 2, "20 s por lado"]]],
+    vacia: ["Mi rutina", []]
+  };
+  APPS.entreno = {
+    view: function () {
+      var h = H("entreno", { r: [], log: {} }), R = h.r, L = h.log; F.v = F.v || "list";
+      var cr = R.filter(function (r) { return r.id === F.id; })[0];
+      if (F.v === "fin" && cr) {
+        if (F.min == null || F.min === "") F.min = F.t0 ? Math.max(1, Math.round((Date.now() - F.t0) / 60000)) : 30;
+        return card("<b>¡Terminaste «" + esc(cr.n) + "»!</b>" + field("¿Cuántos minutos entrenaste?", inp("min", "number", 'min="1" max="300" inputmode="numeric"')) +
+          '<span class="small muted">¿Qué tan exigente fue? 1 muy fácil · 10 al máximo</span>' + chips("rpe", [[3, "3"], [4, "4"], [5, "5"], [6, "6"], [7, "7"], [8, "8"], [9, "9"], [10, "10"]], F.rpe) +
+          field("Nota (opcional)", inp("nt", "text", 'maxlength="100" placeholder="Cómo te sentiste, qué subir la próxima"')) + btn("Guardar sesión", "save") + btn("Volver a la rutina", "r", cr.id, null, "ghost"));
+      }
+      if (F.v === "r" && cr) {
+        F.sd = F.sd || {}; var tot = 0, dn = 0;
+        var rows = cr.ex.map(function (e) {
+          var c = F.sd[e.id] || 0, b = ""; tot += e.s; dn += Math.min(c, e.s);
+          for (var i = 0; i < e.s; i++) b += '<button class="txset' + (i < c ? " on" : "") + '" data-tx="sr" data-ta="' + e.id + '" data-tb="' + (i + 1) + '">' + (i < c ? "✓" : i + 1) + "</button>";
+          return '<div class="txex"><div class="row between"><b>' + esc(e.n) + "</b>" + mini("✕", "de", e.id) + '</div><small class="muted">' + e.s + " series × " + esc(e.rep) + '</small><div class="txsets">' + b + "</div></div>";
+        }).join("");
+        var out = card("<b>" + esc(cr.n) + "</b>" + (cr.ex.length ? '<p class="small muted" style="margin:4px 0 8px">Tocá cada serie cuando la terminás · ' + dn + "/" + tot + "</p>" + rows + btn(dn >= tot ? "Terminar sesión" : "Terminar sesión (" + dn + "/" + tot + ")", "end") : '<p class="small muted" style="margin:6px 0 0">Todavía no tiene ejercicios. Agregá el primero abajo.</p>'));
+        out += card("<b>Agregar ejercicio</b>" + field("Ejercicio", inp("en", "text", 'maxlength="50" placeholder="Ej: sentadilla con mancuerna"')) + '<div class="txrow2">' + field("Series", inp("es", "number", 'min="1" max="10" inputmode="numeric" placeholder="3"')) + field("Repeticiones o tiempo", inp("er", "text", 'maxlength="20" placeholder="10 o 30 s"')) + "</div>" + btn("Agregar", "ae", null, null, "ghost"));
+        return out + btn("Borrar esta rutina", "dr", cr.id, null, "ghost") + btn("Volver a mis rutinas", "list", null, null, "ghost");
+      }
+      if (F.v === "new") return card("<b>¿Cómo querés empezar?</b>" + Object.keys(ETPL).map(function (k) { return '<button class="prod txdeck" data-tx="mk" data-ta="' + k + '"><span style="flex:1"><b>' + esc(ETPL[k][0]) + "</b><small>" + (ETPL[k][1].length ? ETPL[k][1].length + " ejercicios para arrancar, los cambiás a tu gusto" : "La armás de cero") + "</small></span></button>"; }).join("")) + btn("Volver", "list", null, null, "ghost");
+      var ses = wkKeys().reduce(function (s, k) { return s + (L[k] || []).length; }, 0), wm = sumWeek(L, mins), load = sumWeek(L, function (a) { return a.reduce(function (s, x) { return s + x.min * (x.rpe || 5); }, 0); });
+      var out2 = card("<b>Esta semana</b>" + stats([[ses, ses === 1 ? "sesión" : "sesiones"], [wm + " min", "entrenados"], [load, "carga"]]) + bars(lastN(7).map(function (k) { var m = mins(L[k]); return { l: lbl(k), v: m, c: m ? "ok" : "" }; })) + note("Carga = minutos × exigencia. Si sube mucho de una semana a la otra, cuidá el descanso."));
+      out2 += card("<b>Mis rutinas</b>" + (R.length ? "" : '<p class="small muted" style="margin:6px 0 0">Armá tu rutina con ejercicios, series y repeticiones. La hacés acá, serie por serie, y cada sesión queda guardada.</p>') + R.map(function (r) { return '<button class="prod txdeck" data-tx="r" data-ta="' + r.id + '"><span style="flex:1"><b>' + esc(r.n) + "</b><small>" + r.ex.length + " ejercicios</small></span><span class='tag'>Entrenar</span></button>"; }).join("") + btn("Nueva rutina", "new", null, null, R.length ? "ghost" : "sage"));
+      var last = Object.keys(L).sort().reverse().slice(0, 5);
+      if (last.length) out2 += card("<b>Últimas sesiones</b>" + last.map(function (k) { return L[k].map(function (x) { return '<div class="txli"><span>' + esc(lbl(k) + " " + dm(k)) + " · " + esc(x.r) + " · <b>" + x.min + " min</b>" + (x.rpe ? " · exigencia " + x.rpe : "") + "</span></div>"; }).join(""); }).join(""));
+      return out2 + note("Si sentís dolor (no cansancio), pará ese ejercicio. Ante una lesión, consultá con un profesional.");
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("entreno", { r: [], log: {} }), R = h.r, cr = R.filter(function (r) { return r.id === F.id; })[0];
+      if (a === "list") { F.v = "list"; F.sd = {}; F.t0 = null; return; }
+      if (a === "new") { F.v = "new"; return; }
+      if (a === "mk") { var t = ETPL[x], id = uid(); R.push({ id: id, n: t[0], ex: t[1].map(function (e) { return { id: uid(), n: e[0], s: e[1], rep: e[2] }; }) }); F.id = id; F.v = "r"; F.sd = {}; F.t0 = Date.now(); commit("entreno"); return; }
+      if (a === "r") { if (F.id !== x) { F.sd = {}; F.t0 = Date.now(); } F.id = x; F.v = "r"; F.min = null; return; }
+      if (!cr) return false;
+      if (a === "sr") { F.sd = F.sd || {}; if (!F.t0) F.t0 = Date.now(); var n = +y; F.sd[x] = (F.sd[x] || 0) >= n ? n - 1 : n; return; }
+      if (a === "ae") { var en = (F.en || "").trim(); if (!en) return false; cr.ex.push({ id: uid(), n: en.slice(0, 50), s: Math.max(1, Math.min(10, Math.round(+F.es) || 3)), rep: (F.er || "10").trim().slice(0, 20) || "10" }); F.en = ""; F.es = ""; F.er = ""; commit("entreno"); return; }
+      if (a === "de") { cr.ex = cr.ex.filter(function (e) { return e.id !== x; }); commit("entreno"); return; }
+      if (a === "dr") { if (!confirm("¿Borrar esta rutina?")) return false; h.r = R.filter(function (r) { return r.id !== x; }); F.v = "list"; commit("entreno"); return; }
+      if (a === "end") { F.v = "fin"; F.min = null; return; }
+      if (a === "save") { var m = Math.round(+F.min); if (!m || m < 1 || m > 300) return false; (h.log[K(0)] = h.log[K(0)] || []).push({ r: cr.n, min: m, rpe: +F.rpe || 0, nt: (F.nt || "").trim().slice(0, 100) }); F.v = "list"; F.sd = {}; F.t0 = null; F.rpe = null; F.nt = ""; commit("entreno"); }
+    },
+    done: function (h) { return !!(h.log && h.log[K(0)]); },
+    sum: function (h) { var L = h.log || {}, s = wkKeys().reduce(function (a, k) { return a + (L[k] || []).length; }, 0); return s ? s + (s === 1 ? " sesión" : " sesiones") + " esta semana · " + sumWeek(L, mins) + " min" : ""; }
+  };
+
+  // ---------- DEPORTE: diario de partidos ----------
+  APPS.partidos = {
+    view: function () {
+      var h = H("partidos", { log: [] }), L = h.log; if (F.res == null) { F.res = "G"; F.lv = "3"; }
+      var out = card("<b>Anotá tu partido</b>" + '<div class="txrow2">' + field("Rival o equipo", inp("rv", "text", 'maxlength="40" placeholder="Contra quién"')) + field("Resultado", inp("sc", "text", 'maxlength="30" placeholder="6-4 6-3 / 2-1"')) + "</div>" +
+        chips("res", [["G", "Gané"], ["P", "Perdí"], ["E", "Empaté"]], F.res) + '<span class="small muted" style="display:block;margin-top:10px">¿Cómo jugaste? 1 muy mal · 5 muy bien</span>' + chips("lv", [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"]], F.lv) +
+        field("Qué salió bien", inp("ok", "text", 'maxlength="120" placeholder="Lo que tenés que seguir haciendo"')) + field("Qué mejorar", inp("mj", "text", 'maxlength="120" placeholder="Una sola cosa para entrenar"')) + btn("Guardar partido", "save"));
+      if (L.length) {
+        var g = L.filter(function (e) { return e.res === "G"; }).length, p = L.filter(function (e) { return e.res === "P"; }).length, l10 = L.slice(0, 10);
+        out += card("<b>Tu temporada</b>" + stats([[g + "-" + p, "ganados-perdidos"], [Math.round(g * 100 / L.length) + "%", "de victorias"], [avg(l10.map(function (e) { return e.lv; })).toFixed(1).replace(".", ","), "cómo jugaste (últ. 10)"]]) +
+          bars(l10.slice().reverse().map(function (e) { return { l: e.res, v: e.lv, c: e.res === "G" ? "ok" : "warn" }; }), { max: 5 }) + '<p class="small muted" style="margin:0">Cómo jugaste en tus últimos partidos (G ganado · P perdido).</p>');
+        var mj = L.filter(function (e) { return e.mj; }).slice(0, 3);
+        if (mj.length) out += card("<b>Lo que venís diciendo que tenés que mejorar</b><ul class='small' style='margin:8px 0 0;padding-left:18px'>" + mj.map(function (e) { return "<li>" + esc(e.mj) + "</li>"; }).join("") + "</ul>" + note("Si se repite, ese es tu próximo foco de entrenamiento."));
+        out += card("<b>Partidos</b>" + L.slice(0, 8).map(function (e) { return '<div class="txli"><span>' + esc(dm(e.d)) + " · " + (e.res === "G" ? "Ganaste" : e.res === "P" ? "Perdiste" : "Empate") + (e.rv ? " vs " + esc(e.rv) : "") + (e.sc ? " · " + esc(e.sc) : "") + "</span>" + mini("✕", "del", e.id) + "</div>"; }).join(""));
+      }
+      return out;
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return; var h = H("partidos", { log: [] });
+      if (a === "save") { h.log.unshift({ id: uid(), d: K(0), rv: (F.rv || "").trim().slice(0, 40), sc: (F.sc || "").trim().slice(0, 30), res: F.res || "G", lv: +F.lv || 3, ok: (F.ok || "").trim().slice(0, 120), mj: (F.mj || "").trim().slice(0, 120) }); h.log = h.log.slice(0, 300); F.rv = F.sc = F.ok = F.mj = ""; commit("partidos"); return; }
+      if (a === "del") { h.log = h.log.filter(function (e) { return e.id !== x; }); commit("partidos"); }
+    },
+    done: function (h) { return (h.log || []).some(function (e) { return e.d === K(0); }); },
+    sum: function (h) { var L = h.log || []; if (!L.length) return ""; return L.length + " partidos · " + L.filter(function (e) { return e.res === "G"; }).length + " ganados"; }
+  };
+
+  // ---------- COMER: comidas y agua ----------
+  var MEALS = [["des", "Desayuno"], ["alm", "Almuerzo"], ["mer", "Merienda"], ["cen", "Cena"]];
+  function ordOf(e) { return e ? MEALS.filter(function (m) { return e.m && e.m[m[0]] === "ok"; }).length : 0; }
+  APPS.comidas = {
+    view: function () {
+      var h = H("comidas", { log: {}, goal: 8 }), L = h.log, td = L[K(0)] || { m: {}, w: 0 }, goal = h.goal || 8;
+      var out = card("<b>Hoy</b>" + MEALS.map(function (m) { var v = td.m[m[0]]; return '<div class="txmeal"><span>' + m[1] + '</span><div class="chips txchips">' + [["ok", "Ordenada"], ["pic", "Picoteé"], ["no", "La salteé"]].map(function (o) { return '<button class="chip" data-tx="meal" data-ta="' + m[0] + '" data-tb="' + o[0] + '" aria-pressed="' + (v === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div></div>"; }).join("") +
+        '<div class="txwater"><span><b>Agua</b><small>' + (td.w || 0) + " de " + goal + ' vasos</small></span><div class="row" style="gap:8px;align-items:center">' + mini("−", "w", "-1") + '<span class="txwv">' + (td.w ? "💧".repeat(Math.min(td.w, 10)) : "") + "</span>" + mini("+ vaso", "w", "1") + "</div></div>");
+      var ks = lastN(7);
+      out += card("<b>Tus últimos 7 días</b>" + bars(ks.map(function (k) { var o = ordOf(L[k]); return { l: lbl(k), v: o, c: o >= 3 ? "ok" : o ? "warn" : "" }; }), { max: 4 }) + '<p class="small muted" style="margin:0">Comidas ordenadas por día (de 4).</p>' +
+        stats([[streakWhere(function (k) { return ordOf(L[k]) >= 3; }) + " días", "seguidos con 3 o más"], [avg(ks.filter(function (k) { return L[k]; }).map(function (k) { return L[k].w || 0; })).toFixed(1).replace(".", ","), "vasos de agua promedio"]]));
+      out += card("<b>Tu meta de agua</b>" + chips("goal", [["6", "6 vasos"], ["8", "8 vasos"], ["10", "10 vasos"]], String(goal), "goal"));
+      return out + note("Es un registro de hábitos, no una dieta. Si tenés una indicación médica o nutricional, seguí esa.");
+    },
+    act: function (a, x, y) {
+      var h = H("comidas", { log: {}, goal: 8 }), k = K(0), e = h.log[k] = h.log[k] || { m: {}, w: 0 };
+      if (a === "meal") { if (e.m[x] === y) delete e.m[x]; else e.m[x] = y; }
+      else if (a === "w") e.w = Math.max(0, Math.min(20, (e.w || 0) + (+x)));
+      else if (a === "goal") h.goal = +y;
+      commit("comidas");
+    },
+    done: function (h) { var e = h.log && h.log[K(0)]; return !!(e && Object.keys(e.m || {}).length); },
+    sum: function (h) { var L = h.log || {}, ks = lastN(7).filter(function (k) { return L[k]; }); return ks.length ? "Promedio: " + avg(ks.map(function (k) { return ordOf(L[k]); })).toFixed(1).replace(".", ",") + " comidas ordenadas por día" : ""; }
+  };
+
+  // ---------- COMER: menú semanal y compras ----------
+  var DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+  APPS.menu = {
+    view: function () {
+      var h = H("menu", { w: {}, list: [] }), W = h.w, Ls = h.list; F.v = F.v || "menu";
+      if (!F.ld) { for (var i = 0; i < 7; i++) { F["a" + i] = W["a" + i] || ""; F["c" + i] = W["c" + i] || ""; } F.ld = 1; }
+      var pend = Ls.filter(function (i) { return !i.ok; }).length, tabs = chips("v", [["menu", "Menú de la semana"], ["lista", "Lista de compras" + (pend ? " (" + pend + ")" : "")]], F.v);
+      if (F.v === "lista") return tabs + card("<b>Lista de compras</b>" + '<div class="row" style="gap:8px;margin:8px 0">' + inp("it", "text", 'maxlength="80" placeholder="Tomates, arroz, leche…" style="flex:1"') + mini("Sumar", "add") + "</div>" +
+        (Ls.length ? Ls.map(function (i) { return ck(i.ok, "tg", i.id, i.t); }).join("") : '<p class="small muted">Vacía. Separá con comas para sumar varias cosas juntas.</p>') + (Ls.some(function (i) { return i.ok; }) ? btn("Sacar lo ya comprado", "clr", null, null, "ghost") : ""));
+      return tabs + card("<b>Planificá tus comidas</b>" + note("Con 10 minutos el domingo te ahorrás pensar qué comer todos los días. No hace falta llenar todo.") +
+        DAYS.map(function (d, i) { return '<div class="txday"><b>' + d + '</b><div class="txrow2">' + field("Almuerzo", inp("a" + i, "text", 'maxlength="50" placeholder="—"')) + field("Cena", inp("c" + i, "text", 'maxlength="50" placeholder="—"')) + "</div></div>"; }).join("") +
+        btn(F.saved ? "Guardado ✓" : "Guardar menú", "save"));
+    },
+    act: function (a, x, y) {
+      var h = H("menu", { w: {}, list: [] }); if (a === "set") { F[x] = y; return; }
+      if (a === "save") { for (var i = 0; i < 7; i++) { h.w["a" + i] = (F["a" + i] || "").trim().slice(0, 50); h.w["c" + i] = (F["c" + i] || "").trim().slice(0, 50); } F.saved = 1; commit("menu"); return; }
+      F.saved = 0;
+      if (a === "add") { var t = (F.it || "").trim(); if (!t) return false; t.split(",").forEach(function (s) { s = s.trim(); if (s) h.list.push({ id: uid(), t: s.slice(0, 40), ok: false }); }); F.it = ""; }
+      else if (a === "tg") h.list.forEach(function (i) { if (i.id === x) i.ok = !i.ok; });
+      else if (a === "clr") h.list = h.list.filter(function (i) { return !i.ok; });
+      commit("menu");
+    },
+    sum: function (h) { var n = Object.keys(h.w || {}).filter(function (k) { return h.w[k]; }).length, p = (h.list || []).filter(function (i) { return !i.ok; }).length; return n || p ? n + " comidas planificadas · " + p + " cosas por comprar" : ""; }
+  };
+
+  // ---------- MOVIMIENTO: registro ----------
+  APPS.mover = {
+    view: function () {
+      var h = H("mover", { log: {}, goal: 150 }), L = h.log, goal = h.goal || 150; if (F.tp == null) F.tp = "Caminar";
+      var wk = sumWeek(L, mins), pc = Math.min(100, Math.round(wk * 100 / goal));
+      var out = card("<b>Esta semana: " + wk + " de " + goal + " min</b>" + '<div class="pgbar" style="margin:10px 0 4px"><i style="width:' + pc + '%"></i></div><p class="small muted" style="margin:0">' + (wk >= goal ? "¡Meta cumplida! Lo que sumes ahora es extra." : "Te faltan " + (goal - wk) + " minutos. En pedacitos también cuenta.") + "</p>" + bars(lastN(7).map(function (k) { var m = mins(L[k]); return { l: lbl(k), v: m, c: m ? "ok" : "" }; })));
+      out += card("<b>Sumá movimiento</b>" + chips("tp", [["Caminar", "🚶 Caminar"], ["Bici", "🚲 Bici"], ["Gimnasio", "🏋️ Gimnasio"], ["Deporte", "⚽ Deporte"], ["Baile", "💃 Baile"], ["Otro", "Otro"]], F.tp) +
+        '<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">' + [10, 20, 30, 45, 60].map(function (m) { return mini("+" + m + " min", "add", m); }).join("") + "</div>" +
+        '<div class="row" style="gap:8px;margin-top:8px">' + inp("mn", "number", 'min="1" max="300" inputmode="numeric" placeholder="Otra cantidad" style="flex:1"') + mini("Sumar", "addc") + "</div>");
+      var td = L[K(0)] || []; if (td.length) out += card("<b>Hoy</b>" + td.map(function (x, i) { return '<div class="txli"><span>' + esc(x.t) + " · <b>" + x.m + " min</b></span>" + mini("✕", "del", i) + "</div>"; }).join(""));
+      out += card("<b>Tu meta semanal</b>" + chips("goal", [["90", "90 min"], ["150", "150 min"], ["210", "210 min"], ["300", "300 min"]], String(goal), "goal") + note("La recomendación general para adultos es de al menos 150 minutos por semana de actividad moderada. Empezá por donde estés."));
+      return out;
+    },
+    act: function (a, x, y) {
+      var h = H("mover", { log: {}, goal: 150 }), k = K(0); if (a === "set") { F[x] = y; return; }
+      if (a === "goal") { h.goal = +y; commit("mover"); return; }
+      if (a === "add" || a === "addc") { var m = a === "add" ? +x : Math.round(+F.mn); if (!m || m < 1 || m > 300) return false; (h.log[k] = h.log[k] || []).push({ t: F.tp || "Otro", m: m }); F.mn = ""; commit("mover"); return; }
+      if (a === "del") { (h.log[k] || []).splice(+x, 1); if (h.log[k] && !h.log[k].length) delete h.log[k]; commit("mover"); }
+    },
+    done: function (h) { return !!(h.log && h.log[K(0)] && h.log[K(0)].length); },
+    sum: function (h) { var wk = sumWeek(h.log || {}, mins); return wk ? wk + " de " + (h.goal || 150) + " min esta semana" : ""; }
+  };
+
+  // ---------- PLATA: gastos ----------
+  var GCAT = ["Comida", "Súper", "Transporte", "Casa y servicios", "Salidas", "Compras", "Salud", "Otros"];
+  function mKey() { return K(0).slice(0, 7); }
+  APPS.gastos = {
+    view: function () {
+      var h = H("gastos", { g: [], bud: 0 }), M = h.g.filter(function (e) { return e.d.slice(0, 7) === mKey(); }), tot = M.reduce(function (s, e) { return s + e.v; }, 0), bud = h.bud || 0;
+      if (F.ct == null) F.ct = "Comida";
+      var out = card("<b>Anotá un gasto</b>" + '<div class="txrow2">' + field("Monto", inp("mo", "number", 'min="1" inputmode="decimal" placeholder="0"')) + field("Detalle (opcional)", inp("nt", "text", 'maxlength="40" placeholder="Qué fue"')) + "</div>" + chips("ct", GCAT.map(function (c) { return [c, c]; }), F.ct) + btn("Guardar gasto", "save"));
+      var d = new Date(), left = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate() - d.getDate() + 1, by = {};
+      M.forEach(function (e) { by[e.c] = (by[e.c] || 0) + e.v; }); var cs = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; });
+      out += card("<b>Este mes: " + money(tot) + "</b>" + (bud ? '<div class="pgbar" style="margin:10px 0 4px"><i style="width:' + Math.min(100, Math.round(tot * 100 / bud)) + "%" + (tot > bud ? ";background:var(--err)" : "") + '"></i></div><p class="small muted" style="margin:0">' + (tot > bud ? "Te pasaste " + money(tot - bud) + " del presupuesto." : "Te quedan " + money(bud - tot) + " para " + left + " días: unos " + money((bud - tot) / left) + " por día.") + "</p>" : '<p class="small muted" style="margin:6px 0 0">Poné un presupuesto mensual y te decimos cuánto podés gastar por día.</p>') +
+        (cs.length ? '<div style="margin-top:12px">' + cs.map(function (c) { return '<div class="txcat"><span>' + esc(c) + '</span><i><u style="width:' + Math.max(4, Math.round(by[c] * 100 / by[cs[0]])) + '%"></u></i><b>' + money(by[c]) + "</b></div>"; }).join("") + '</div><p class="small" style="margin:10px 0 0">Tu mayor gasto es <b>' + esc(cs[0]) + "</b>: " + Math.round(by[cs[0]] * 100 / tot) + "% del mes.</p>" : ""));
+      out += card("<b>Presupuesto mensual</b>" + '<div class="row" style="gap:8px;margin-top:8px">' + inp("bd", "number", 'min="0" inputmode="numeric" placeholder="' + (bud ? money(bud) : "Ej: 300000") + '" style="flex:1"') + mini("Guardar", "bud") + "</div>");
+      if (M.length) out += card("<b>Últimos gastos</b>" + M.slice(0, 8).map(function (e) { return '<div class="txli"><span>' + esc(dm(e.d)) + " · " + esc(e.c) + (e.nt ? " · " + esc(e.nt) : "") + " · <b>" + money(e.v) + "</b></span>" + mini("✕", "del", e.id) + "</div>"; }).join(""));
+      return out + note("Tus datos quedan en tu cuenta. Forma no te pide datos bancarios ni se conecta con tu banco.");
+    },
+    act: function (a, x, y) {
+      var h = H("gastos", { g: [], bud: 0 }); if (a === "set") { F[x] = y; return; }
+      if (a === "save") { var v = Math.round(+F.mo); if (!v || v <= 0) return false; h.g.unshift({ id: uid(), d: K(0), v: v, c: F.ct || "Otros", nt: (F.nt || "").trim().slice(0, 40) }); h.g = h.g.slice(0, 1500); F.mo = ""; F.nt = ""; commit("gastos"); return; }
+      if (a === "bud") { var b = Math.round(+F.bd); if (!(b >= 0)) return false; h.bud = b; F.bd = ""; commit("gastos"); return; }
+      if (a === "del") { h.g = h.g.filter(function (e) { return e.id !== x; }); commit("gastos"); }
+    },
+    done: function (h) { return (h.g || []).some(function (e) { return e.d === K(0); }); },
+    sum: function (h) { var t = (h.g || []).filter(function (e) { return e.d.slice(0, 7) === mKey(); }).reduce(function (s, e) { return s + e.v; }, 0); return t ? "Este mes: " + money(t) + (h.bud ? " de " + money(h.bud) : "") : ""; }
+  };
+
+  // ---------- PLATA: metas de ahorro ----------
+  APPS.ahorro = {
+    view: function () {
+      var h = H("ahorro", { m: [] }), M = h.m;
+      var out = M.map(function (m) { var s = m.ap.reduce(function (q, x) { return q + x.v; }, 0), pc = Math.min(100, Math.round(s * 100 / m.obj));
+        return card('<div class="row between"><b>' + esc(m.n) + "</b>" + mini("✕", "dm", m.id) + '</div><p class="small" style="margin:6px 0">' + money(s) + " de " + money(m.obj) + " · <b>" + pc + '%</b></p><div class="pgbar"><i style="width:' + pc + '%"></i></div>' +
+          (s >= m.obj ? '<p class="small" style="margin:8px 0 0"><b>¡Llegaste a tu meta!</b></p>' : '<div class="row" style="gap:8px;margin-top:10px">' + inp("ap_" + m.id, "number", 'min="1" inputmode="numeric" placeholder="Sumar un aporte" style="flex:1"') + mini("Sumar", "ap", m.id) + "</div>")); }).join("");
+      out += card("<b>Nueva meta</b>" + field("¿Para qué ahorrás?", inp("mn", "text", 'maxlength="40" placeholder="Viaje, bici, fondo de emergencia…"')) + field("¿Cuánto necesitás?", inp("mo", "number", 'min="1" inputmode="numeric" placeholder="0"')) + btn("Crear meta", "mk", null, null, M.length ? "ghost" : "sage"));
+      return out + note("Tip: apartá el aporte apenas cobrás, antes de gastar.");
+    },
+    act: function (a, x) {
+      var h = H("ahorro", { m: [] });
+      if (a === "mk") { var n = (F.mn || "").trim(), o = Math.round(+F.mo); if (!n || !o) return false; h.m.push({ id: uid(), n: n.slice(0, 40), obj: o, ap: [] }); F.mn = ""; F.mo = ""; commit("ahorro"); return; }
+      if (a === "ap") { var v = Math.round(+F["ap_" + x]), m = h.m.filter(function (z) { return z.id === x; })[0]; if (!m || !v) return false; m.ap.push({ d: K(0), v: v }); F["ap_" + x] = ""; commit("ahorro"); return; }
+      if (a === "dm") { if (!confirm("¿Borrar esta meta?")) return false; h.m = h.m.filter(function (z) { return z.id !== x; }); commit("ahorro"); }
+    },
+    done: function (h) { return (h.m || []).some(function (m) { return m.ap.some(function (x) { return x.d === K(0); }); }); },
+    sum: function (h) { var m = (h.m || [])[0]; if (!m) return ""; var s = m.ap.reduce(function (q, x) { return q + x.v; }, 0); return m.n + ": " + Math.min(100, Math.round(s * 100 / m.obj)) + "% de la meta"; }
+  };
+
+  // ---------- VIAJES: mi viaje ----------
+  var VRUB = [["pas", "Pasajes"], ["alo", "Alojamiento"], ["com", "Comida"], ["pse", "Paseos y entradas"], ["otr", "Otros"]];
+  var VRES = ["Pasajes", "Alojamiento", "Seguro de viaje", "Documentos (DNI o pasaporte)", "Traslados", "Plata: efectivo o tarjeta para el destino"];
+  function dTo(k) { return Math.round((new Date(k + "T12:00:00") - new Date(K(0) + "T12:00:00")) / 864e5); }
+  APPS.viaje = {
+    view: function () {
+      var h = H("viaje", { t: null }), T = h.t;
+      if (!T || F.edit) {
+        if (!F.ld) { var t0 = T || {}; F.ds = t0.ds || ""; F.di = t0.di || ""; F.dv = t0.dv || ""; F.pr = t0.pr || ""; F.ld = 1; }
+        return card("<b>" + (T ? "Editar mi viaje" : "Armá tu viaje") + "</b>" + field("¿Adónde vas?", inp("ds", "text", 'maxlength="40" placeholder="Destino"')) + '<div class="txrow2">' + field("Ida", inp("di", "date")) + field("Vuelta", inp("dv", "date")) + "</div>" + field("Presupuesto total", inp("pr", "number", 'min="0" inputmode="numeric" placeholder="0"')) + btn("Guardar", "save") + (T ? btn("Cancelar", "cancel", null, null, "ghost") : ""));
+      }
+      T.rb = T.rb || {}; T.it = T.it || []; T.rs = T.rs || {};
+      var dd = dTo(T.di), nd = T.dv ? Math.max(1, dTo(T.dv) - dd + 1) : 0, plan = VRUB.reduce(function (s, r) { return s + (+T.rb[r[0]] || 0); }, 0), rd = VRES.filter(function (r, i) { return T.rs[i]; }).length;
+      var out = card('<div class="row between"><b style="font-size:18px">✈️ ' + esc(T.ds) + "</b>" + mini("Editar", "edit") + "</div>" + stats([[dd > 0 ? dd : dd === 0 ? "¡Hoy!" : "En viaje", dd > 0 ? "días para salir" : "a disfrutar"], [nd ? nd + " días" : "—", "de viaje"], [T.pr ? money(+T.pr) : "—", "presupuesto"]]));
+      out += card("<b>Reservas y papeles · " + rd + "/" + VRES.length + '</b><div class="pgbar" style="margin:8px 0"><i style="width:' + Math.round(rd * 100 / VRES.length) + '%"></i></div>' + VRES.map(function (r, i) { return ck(T.rs[i], "rs", i, r); }).join(""));
+      if (!F.rbl) { VRUB.forEach(function (r) { F["rb_" + r[0]] = T.rb[r[0]] || ""; }); F.rbl = 1; }
+      out += card("<b>Presupuesto por rubro</b>" + '<div class="txrow2">' + VRUB.map(function (r) { return field(r[1], inp("rb_" + r[0], "number", 'min="0" inputmode="numeric" placeholder="0"')); }).join("") + "</div>" +
+        '<p class="small" style="margin:8px 0 0">Planificado: <b>' + money(plan) + "</b>" + (T.pr ? (plan > +T.pr ? " · te pasás " + money(plan - T.pr) : " · te sobran " + money(T.pr - plan)) : "") + (nd && plan ? " · " + money(plan / nd) + " por día" : "") + "</p>" + btn("Guardar presupuesto", "rb", null, null, "ghost"));
+      out += card("<b>Itinerario</b>" + (T.it.length ? T.it.map(function (x) { return '<div class="txli"><span><b>Día ' + x.d + "</b> · " + esc(x.t) + "</span>" + mini("✕", "di", x.id) + "</div>"; }).join("") : '<p class="small muted" style="margin:6px 0 0">Anotá qué querés hacer cada día. Una o dos cosas por día alcanzan.</p>') +
+        '<div class="row" style="gap:8px;margin-top:10px">' + inp("idn", "number", 'min="1" max="90" inputmode="numeric" placeholder="Día" style="width:74px"') + inp("itx", "text", 'maxlength="60" placeholder="Qué vas a hacer" style="flex:1"') + mini("Sumar", "ai") + "</div>");
+      return out + btn("Cerrar este viaje y armar otro", "reset", null, null, "ghost");
+    },
+    act: function (a, x) {
+      var h = H("viaje", { t: null });
+      if (a === "edit") { F.edit = 1; F.ld = 0; return; }
+      if (a === "cancel") { F.edit = 0; return; }
+      if (a === "save") { var ds = (F.ds || "").trim(); if (!ds || !F.di) return false; h.t = Object.assign(h.t || {}, { ds: ds.slice(0, 40), di: F.di, dv: F.dv || "", pr: Math.round(+F.pr) || 0 }); F.edit = 0; commit("viaje"); return; }
+      var T = h.t; if (!T) return false;
+      if (a === "rs") { T.rs = T.rs || {}; if (T.rs[x]) delete T.rs[x]; else T.rs[x] = 1; }
+      else if (a === "rb") { T.rb = {}; VRUB.forEach(function (r) { T.rb[r[0]] = Math.round(+F["rb_" + r[0]]) || 0; }); }
+      else if (a === "ai") { var t = (F.itx || "").trim(), d = Math.round(+F.idn); if (!t || !d) return false; T.it = T.it || []; T.it.push({ id: uid(), d: d, t: t.slice(0, 60) }); T.it.sort(function (p, q) { return p.d - q.d; }); F.itx = ""; }
+      else if (a === "di") T.it = (T.it || []).filter(function (z) { return z.id !== x; });
+      else if (a === "reset") { if (!confirm("¿Cerrar este viaje? Se borra para que armes uno nuevo.")) return false; h.t = null; F = {}; }
+      commit("viaje");
+    },
+    sum: function (h) { var T = h.t; if (!T) return ""; var dd = dTo(T.di); return T.ds + (dd > 0 ? " · faltan " + dd + " días" : "") + " · " + VRES.filter(function (r, i) { return T.rs && T.rs[i]; }).length + "/" + VRES.length + " reservas"; }
+  };
+
+  // ---------- VIAJES: valija ----------
+  var VTPL = { base: ["Documento o pasaporte", "Cargador y adaptador", "Medicamentos que uses", "Cepillo y pasta de dientes", "Ropa interior y medias", "Remeras", "Pantalón", "Abrigo liviano", "Calzado cómodo", "Auriculares"], playa: ["Malla", "Protector solar", "Ojotas", "Lentes de sol", "Gorra", "Toallón"], frio: ["Campera abrigada", "Gorro y guantes", "Ropa térmica", "Bufanda", "Medias gruesas"] };
+  APPS.valija = {
+    view: function () {
+      var h = H("valija", { it: [] }), I = h.it, dn = I.filter(function (i) { return i.ok; }).length;
+      var out = card("<b>" + (I.length ? "Tu valija · " + dn + "/" + I.length : "Armá tu valija") + "</b>" + (I.length ? '<div class="pgbar" style="margin:8px 0"><i style="width:' + Math.round(dn * 100 / I.length) + '%"></i></div>' : "") + '<p class="small muted" style="margin:6px 0 8px">Sumá una lista base y agregá lo tuyo.</p><div class="row" style="gap:8px;flex-wrap:wrap">' + mini("+ Básico", "tpl", "base") + mini("+ Playa", "tpl", "playa") + mini("+ Frío", "tpl", "frio") + "</div>");
+      out += card(I.map(function (i) { return '<div class="row" style="gap:6px">' + '<div style="flex:1">' + ck(i.ok, "tg", i.id, i.t) + "</div>" + mini("✕", "del", i.id) + "</div>"; }).join("") + '<div class="row" style="gap:8px;margin-top:8px">' + inp("nt", "text", 'maxlength="40" placeholder="Agregar algo" style="flex:1"') + mini("Sumar", "add") + "</div>");
+      return out + (I.length ? btn("Vaciar la lista", "clr", null, null, "ghost") : "");
+    },
+    act: function (a, x) {
+      var h = H("valija", { it: [] });
+      if (a === "tpl") (VTPL[x] || []).forEach(function (t) { if (!h.it.some(function (i) { return i.t === t; })) h.it.push({ id: uid(), t: t, ok: false }); });
+      else if (a === "add") { var t = (F.nt || "").trim(); if (!t) return false; h.it.push({ id: uid(), t: t.slice(0, 40), ok: false }); F.nt = ""; }
+      else if (a === "tg") h.it.forEach(function (i) { if (i.id === x) i.ok = !i.ok; });
+      else if (a === "del") h.it = h.it.filter(function (i) { return i.id !== x; });
+      else if (a === "clr") { if (!confirm("¿Vaciar la lista?")) return false; h.it = []; }
+      commit("valija");
+    },
+    sum: function (h) { var I = h.it || []; return I.length ? "Valija: " + I.filter(function (i) { return i.ok; }).length + " de " + I.length + " cosas listas" : ""; }
+  };
+
+  // ---------- LABURO: postulaciones ----------
+  var PST = ["Enviada", "Entrevista", "Prueba técnica", "Oferta", "No quedó"];
+  APPS.postul = {
+    view: function () {
+      var h = H("postul", { p: [] }), P = h.p;
+      var out = card("<b>Nueva postulación</b>" + '<div class="txrow2">' + field("Empresa", inp("em", "text", 'maxlength="40"')) + field("Puesto", inp("pu", "text", 'maxlength="40"')) + "</div>" + btn("Guardar", "add"));
+      if (P.length) {
+        var inP = P.filter(function (p) { return p.s >= 1 && p.s <= 3; }).length, of = P.filter(function (p) { return p.s === 3; }).length;
+        out += card("<b>Tu búsqueda</b>" + stats([[P.length, "postulaciones"], [inP, "en proceso"], [of, of === 1 ? "oferta" : "ofertas"]]) + bars(lastN(7).map(function (k) { var n = P.filter(function (p) { return p.d === k; }).length; return { l: lbl(k), v: n, c: n ? "ok" : "" }; })) +
+          note(P.length < 10 ? "Constancia: 2 o 3 postulaciones buenas por día rinden más que 20 de golpe." : inP ? "Vas bien: preparate para cada entrevista con el simulacro." : "Si no te llaman, revisá tu CV y adaptalo a cada puesto."));
+        out += card("<b>Postulaciones</b>" + P.slice(0, 20).map(function (p) { return '<div class="txpst"><div style="flex:1;min-width:0"><b>' + esc(p.em) + "</b><small>" + esc(p.pu || "") + " · " + esc(dm(p.d)) + '</small></div><button class="txstage s' + p.s + '" data-tx="st" data-ta="' + p.id + '">' + PST[p.s] + " ›</button>" + mini("✕", "del", p.id) + "</div>"; }).join("") + note("Tocá el estado para avanzarlo."));
+      }
+      return out;
+    },
+    act: function (a, x) {
+      var h = H("postul", { p: [] });
+      if (a === "add") { var em = (F.em || "").trim(); if (!em) return false; h.p.unshift({ id: uid(), em: em.slice(0, 40), pu: (F.pu || "").trim().slice(0, 40), s: 0, d: K(0) }); F.em = ""; F.pu = ""; }
+      else if (a === "st") h.p.forEach(function (p) { if (p.id === x) { p.s = (p.s + 1) % PST.length; p.u = K(0); } });
+      else if (a === "del") h.p = h.p.filter(function (p) { return p.id !== x; });
+      commit("postul");
+    },
+    done: function (h) { return (h.p || []).some(function (p) { return p.d === K(0) || p.u === K(0); }); },
+    sum: function (h) { var P = h.p || []; return P.length ? P.length + " postulaciones · " + P.filter(function (p) { return p.s >= 1 && p.s <= 3; }).length + " en proceso" : ""; }
+  };
+
+  // ---------- cuándo cuenta como "hecha hoy" y resumen de datos (herramientas que ya existían) ----------
+  APPS.sueno.done = function (h) { return !!(h.log && h.log[K(0)]); };
+  APPS.sueno.sum = function (h) { var L = h.log || {}, v = lastN(7).filter(function (k) { return L[k]; }).map(function (k) { return L[k].h; }); return v.length ? "Dormís " + hm(avg(v) * 60) + " en promedio (" + v.length + (v.length === 1 ? " noche" : " noches") + ")" : ""; };
+  APPS.pantalla.done = function (h) { return !!(h.log && h.log[K(0)]); };
+  APPS.pantalla.sum = function (h) { var L = h.log || {}, v = lastN(7).filter(function (k) { return L[k]; }).map(function (k) { return L[k].m; }); return v.length ? "Pantalla: " + hm(avg(v)) + " por día · límite " + hm(h.limit || 180) : ""; };
+  APPS.enfoque.done = function (h) { return !!(h.log && h.log[K(0)] && h.log[K(0)].length); };
+  APPS.enfoque.sum = function (h) { var m = sumWeek(h.log || {}, mins); return m ? m + " min de foco esta semana" : ""; };
+  APPS.animo.done = function (h) { return !!(h.log && h.log[K(0)] && h.log[K(0)].length); };
+  APPS.animo.sum = function (h) { var L = h.log || {}, n = lastN(7).reduce(function (s, k) { return s + (L[k] || []).length; }, 0); return n ? n + " registros de ánimo en 7 días" : ""; };
+  APPS.ritmos.done = function (h) { return !!(h.log && h.log[K(0)]); };
+  APPS.ritmos.sum = function (h) { var m = sumWeek(h.log || {}, function (x) { return +x || 0; }); return m ? m + " min de respiración esta semana" : ""; };
+  APPS.revision.done = function (h) { return !!(h.log && h.log[mondayKey()]); };
+  APPS.rutinas.done = function (h) { return (h.r || []).some(function (r) { return r.done && r.done[K(0)] && Object.keys(r.done[K(0)]).length; }); };
+  APPS.tarjetas.sum = function (h) { var D = h.decks || {}, n = Object.keys(D).reduce(function (s, k) { return s + D[k].cards.length; }, 0); return n ? n + " tarjetas en " + Object.keys(D).length + " mazo(s)" : ""; };
+  APPS.examen.sum = function (h) { var E = (h.ex || []).filter(function (e) { return e.d >= K(0); }); return E.length ? E.length + " examen(es) por delante" : ""; };
+
   // ================= motor =================
   function collect() { [].slice.call(document.querySelectorAll("#tx [data-f]")).forEach(function (el) { F[el.dataset.f] = el.value; }); }
   function paint() {
@@ -424,7 +732,7 @@
   function open(id) {
     var T = (window.FormaTools.defs || []).filter(function (t) { return t.id === id; })[0]; if (!T || !APPS[id]) return;
     cur = id; F = {}; ses = null; clearInterval(tick); tick = null;
-    var b = BR(); b.sheet('<div class="row"><span class="shape">' + b.shape(T.plan) + '</span><div><span class="badge">Herramienta · ' + esc(b.planName(T.plan)) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><div id="tx" style="margin-top:12px"></div><button class="btn ghost block" data-close style="margin-top:6px">Cerrar</button>');
+    var b = BR(); b.sheet('<div class="row"><span class="shape">' + b.shape(T.plan) + '</span><div><span class="badge">Herramienta · ' + esc(b.planName(T.plan)) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><div id="tx" style="margin-top:12px"></div><button class="btn ghost block" data-close style="margin-top:6px">Listo</button>', true);
     paint();
   }
   document.addEventListener("click", function (e) {
@@ -437,6 +745,8 @@
   window.FormaTools = {
     open: open,
     has: function (id) { return !!APPS[id]; },
+    done: function (id) { var A = APPS[id], s = BR().S(), h = s.tl && s.tl[id]; if (!A || !h) return false; try { if (A.done) return !!A.done(h); } catch (e) { return false; } return !!(h.at && dk(new Date(h.at)) === K(0)); },
+    sum: function (id) { var A = APPS[id], s = BR().S(), h = s.tl && s.tl[id]; if (!A || !h || !A.sum) return ""; try { return A.sum(h) || ""; } catch (e) { return ""; } },
     defs: [
       { id: "sueno", n: "Registro de sueño", d: "Anotá cómo dormiste y mirá tu promedio y tu regularidad.", plan: "dormir", mins: 5, app: true },
       { id: "pantalla", n: "Registro de celular", d: "Tu tiempo de pantalla por día, con tu límite y tu racha.", plan: "celular", mins: 5, app: true },
@@ -447,7 +757,17 @@
       { id: "tarjetas", n: "Tarjetas de repaso", d: "Creá mazos y repasalos con repetición espaciada.", plan: "estudio", mins: 15, app: true },
       { id: "examen", n: "Plan de examen", d: "Fecha y temas: te decimos cuánto ver cada día.", plan: "estudio", mins: 10, app: true },
       { id: "revision", n: "Revisión semanal", d: "Cuatro preguntas para cerrar la semana y elegir la próxima prioridad.", plan: "vida", gate: "vida", mins: 10, app: true },
-      { id: "rutinas", n: "Mis rutinas", d: "Armá tus rutinas con pasos propios y tildalas cada día.", plan: "vida", gate: "vida", mins: 10, app: true }
+      { id: "rutinas", n: "Mis rutinas", d: "Armá tus rutinas con pasos propios y tildalas cada día.", plan: "vida", gate: "vida", mins: 10, app: true },
+      { id: "entreno", n: "Mi rutina de entrenamiento", d: "Armá tus rutinas, hacelas serie por serie y mirá tu carga de la semana.", plan: "deporte", mins: 45, app: true },
+      { id: "partidos", n: "Diario de partidos", d: "Resultado, cómo jugaste y qué mejorar. Ves tu temporada y tus patrones.", plan: "deporte", mins: 5, app: true },
+      { id: "comidas", n: "Comidas y agua", d: "Tildá tus 4 comidas y tus vasos de agua. Sin contar calorías.", plan: "comer", mins: 3, app: true },
+      { id: "menu", n: "Menú semanal y compras", d: "Planificá almuerzos y cenas de la semana y armá tu lista del súper.", plan: "comer", mins: 15, app: true },
+      { id: "mover", n: "Registro de movimiento", d: "Sumá tus minutos de actividad y llegá a tu meta de la semana.", plan: "movimiento", mins: 3, app: true },
+      { id: "gastos", n: "Registro de gastos", d: "Anotá en segundos, mirá en qué se te va la plata y cuánto te queda por día.", plan: "plata", mins: 3, app: true },
+      { id: "ahorro", n: "Metas de ahorro", d: "Poné una meta, sumá aportes y mirá cuánto te falta.", plan: "plata", mins: 3, app: true },
+      { id: "viaje", n: "Mi viaje", d: "Cuenta regresiva, presupuesto por rubro, reservas e itinerario día por día.", plan: "viajes", mins: 15, app: true },
+      { id: "valija", n: "Valija", d: "Listas base para playa o frío, y tildás lo que ya guardaste.", plan: "viajes", mins: 10, app: true },
+      { id: "postul", n: "Mis postulaciones", d: "Seguí cada búsqueda: enviada, entrevista, prueba, oferta.", plan: "laburo", mins: 10, app: true }
     ]
   };
 })();

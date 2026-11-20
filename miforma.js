@@ -684,7 +684,7 @@
     close();
     var el = document.createElement("div"); el.className = "sheet" + (full ? " sfull" : ""); el.id = "sheet";
     el.innerHTML = "<div>" + (full ? '<button class="fullback" data-close>\u2190 Volver</button>' : "") + html + "</div>"; document.body.appendChild(el);
-    if (!REDUCE && el.animate) { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 700, stag: 0 }); }
+    if (!REDUCE && el.animate) { if (full) animIn([el.firstChild], { dy: 16, d: 380, stag: 0 }); else { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 700, stag: 0 }); } }
   }
   function close() { var s = $("#sheet"); if (s) s.remove(); var f = $("#full"); if (f) f.remove(); stopBreath(); }
   function notifyForm(label, email) {
@@ -749,7 +749,8 @@
   function scaleChips(P, key, sel) {
     return '<div class="pgm" data-key="' + key + '">' + [1, 2, 3, 4, 5].map(function (n) { return '<button class="chip" data-pgm="' + n + '" aria-pressed="' + (sel === n) + '">' + n + "</button>"; }).join("") + '</div><div class="row between small muted" style="margin-top:4px"><span>1 · ' + esc(P.lo) + "</span><span>5 · " + esc(P.hi) + "</span></div>";
   }
-  function openPrograms() {
+  function openPrograms() { HOME = null; close(); tab = "obj"; render(); window.scrollTo(0, 0); }
+  function openProgramsOld() {
     sheetF('<h2 style="font-size:22px">Tus objetivos</h2><p class="muted small">Uno por vez, un paso por día. Elegí el que más te haga falta ahora.</p>' +
       PG.list.map(function (P) { var it = pgItem(P.id), n = pgCount(P.id), st = !it ? "Empezar" : n >= 14 ? "Terminado" : (S.prog.cur === P.id ? "Paso " + (n + 1) + " de 14" : "Retomar");
         return '<button class="prod" data-pgopen="' + P.id + '"><span class="shape">' + (SHAPES[P.id] || SHAPES.vida) + "</span><span style='flex:1;min-width:0'><b>" + esc(P.n) + "</b><small>" + esc(P.tag) + " · " + esc(P.intro.split(".")[0]) + '.</small></span><span class="tag">' + st + "</span></button>"; }).join("") +
@@ -844,7 +845,8 @@
       (nx ? '<div class="card"><b>Lo que viene: Nivel ' + (li + 2) + " · " + esc(nx.n) + '</b><p class="small muted" style="margin:6px 0 0">' + esc(nx.g) + " Tu próximo paso te espera mañana y aparece en tu día.</p></div>" : "") +
       '<button class="btn sage block" data-pgopen="' + id + '">Seguir mi camino</button>');
   }
-  function openProgram(id) {
+  function openProgram(id) { if (!pgOf(id)) return; openHome(id, "hoy"); }
+  function openProgramOld(id) {
     var P = pgOf(id); if (!P) return;
     if (!pgCan(id)) { var P0 = pgOf(id), pl0 = planOf(id); return sheetF('<span class="badge">Objetivo · ' + esc(P0.n) + '</span><h2 style="font-size:24px;margin:8px 0 6px">¡Completaste tu primer paso!</h2><p class="muted">Hiciste el paso 1 y quedó guardado. Para seguir con los demás pasos, subir de nivel y ver tu resultado final, pasate a Forma Pro.</p><button class="btn sage block" data-openpro>Ver Forma Pro</button><div class="sec" style="margin-top:16px">Tu camino: 5 niveles</div>' + pgMap(P0, pgCount(id), false) + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>'); }
     var it = pgItem(id), n = pgCount(id), h = '<span class="badge">Objetivo por niveles</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(P.n) + "</h2>";
@@ -869,6 +871,89 @@
         (S.prog.cur === id ? '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este objetivo</button>' : '<button class="btn ghost block" data-pgresume="' + id + '">Retomar este objetivo</button>') + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
     }
     sheetF(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  }
+  // ---------- CASA DE CADA OBJETIVO: Hoy · Herramientas · Progreso ----------
+  var HOME = null;
+  function goalOfPlan(pid) { return GOALS.filter(function (g) { return g.plan === pid; })[0]; }
+  function btsOfTool(tid) { return (S.bts || []).filter(function (x) { return x.tool === tid; }); }
+  function bkLabel(bk) { return String(bk || "").split("|").slice(1).join("|"); }
+  function toolDoneToday(T) {
+    if (!T) return false;
+    if (T.app) return !!(window.FormaTools && window.FormaTools.done && window.FormaTools.done(T.id));
+    return !!(S.tdn && S.tdn[today()] && S.tdn[today()][T.id]);
+  }
+  function homeHead(id) {
+    var p = planOf(id), g = goalOfPlan(id), P = pgOf(id), it = pgItem(id), n = pgCount(id), lv = lvOf(Math.min(n, 13));
+    var sub = !it ? "Objetivo · 5 niveles" : n >= 14 ? "Objetivo completado 🏆" : "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n;
+    return '<div class="hmhead" style="--c:' + p.c + '"><span class="hmemo">' + (SHAPES[id] || "") + '</span><div style="flex:1;min-width:0"><span class="hmsub">' + esc(sub) + "</span><h2>" + esc(g ? g.n : p.n) + "</h2></div>" + (it ? '<span class="lvxp">' + lvXp(n) + " XP</span>" : "") + "</div>" +
+      (it ? '<div class="pgbar hmbar" style="--c:' + p.c + '"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></div><p class="small muted" style="margin:6px 0 0">' + Math.min(n, 14) + " de 14 pasos" + (it.why ? " · «" + esc(it.why) + "»" : "") + "</p>" : '<p class="muted" style="margin:10px 0 0">' + esc(P.intro) + "</p>");
+  }
+  function homeTabs(tab) {
+    return '<div class="hmtabs" role="tablist">' + [["hoy", "Hoy"], ["tools", "Herramientas"], ["prog", "Progreso"]].map(function (t) { return '<button role="tab" data-htab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + "</button>"; }).join("") + "</div>";
+  }
+  function homeToolRow(T, compact) {
+    var ok = toolOk(T), dn = ok && toolDoneToday(T), inDay = btsOfTool(T.id);
+    var tags = '<div class="hmtags"><span>' + (T.app ? "📊 Registro" : "▶️ Guiada") + " · " + T.mins + " min</span>" + (dn ? '<span class="ok">✓ Hecha hoy</span>' : "") + inDay.map(function (x) { return '<span class="day">En tu día · ' + esc(bkLabel(x.bk)) + ' <button class="hmx" data-btsx="' + x.id + '" aria-label="Sacar de mi día">✕</button></span>'; }).join("") + "</div>";
+    var acts = ok ? '<div class="hmacts"><button class="btn sage sm" data-huse="' + T.id + '">' + (dn && T.app ? "Abrir" : "Usar") + "</button>" + (compact ? "" : isProU() ? '<button class="btn ghost sm" data-btsadd="' + T.id + '">' + (inDay.length ? "Sumar a otro momento" : "Sumar a mi día") + "</button>" : '<button class="btn ghost sm" data-openpro>🔒 Sumar a mi día</button>') + "</div>"
+      : '<div class="hmacts"><button class="btn ghost sm" data-openpro>🔒 Con Forma Pro</button></div>';
+    return '<div class="hmtool' + (ok ? "" : " lock") + (dn ? " dn" : "") + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + "</small>" + tags + acts + "</div>";
+  }
+  function homeToolList(id) { return toolsOf(id).slice().sort(function (a, b) { return (b.app ? 1 : 0) - (a.app ? 1 : 0); }); }
+  function homeHoy(id) {
+    var P = pgOf(id), it = pgItem(id), n = pgCount(id), h = '<div class="sec" style="margin-top:4px">Tu paso de hoy</div>';
+    if (!pgCan(id)) h += '<div class="card dark"><b>¡Hiciste tu primer paso!</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro seguís con los 14 pasos, subís de nivel y ves tu resultado con datos reales.</p><button class="btn sage" data-openpro>Ver Forma Pro</button></div>';
+    else if (!it) {
+      h += '<div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
+        '<div class="card"><b>Tu razón</b><p class="small muted" style="margin:4px 0 8px">Escribila: te la vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
+        '<label class="pgl">¿A qué hora querés hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + (P.reminder || "20:00") + '"></div>' +
+        '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn sage block" data-pgstart="' + id + '">Empezar objetivo</button>' +
+        '<p class="small muted" style="margin:10px 0 0">Un paso por día, de 2 a 5 minutos. En «Progreso» ves los 5 niveles.</p>';
+    } else if (n >= 14) {
+      var b = it.before, a = it.after, rep = pgReport(P, it);
+      h += '<div class="card' + (a ? " sage" : "") + '"><b>¡Completaste todos los niveles!</b>' + (a ? '<p style="margin:8px 0 0">' + esc(P.q) + "<br><b>Antes: " + b + " · Después: " + a + "</b></p><p class=\"small\" style=\"margin:6px 0 0\">" + (P.better === "up" ? (a > b ? "Mejoraste. Seguí usando tus herramientas para sostenerlo." : "Todavía no se nota el cambio. Es normal: repetí lo que más te sirvió.") : (a < b ? "Bajó. Usá tus herramientas cuando haga falta." : "Todavía no bajó. Repetí lo que más te sirvió y, si sigue, hablalo con un profesional.")) + "</p>" :
+        '<p class="small" style="margin:6px 0 10px">Último paso: contanos cómo estás ahora. ' + esc(P.q) + "</p>" + scaleChips(P, "after", 0) + '<button class="btn sage block" data-pgafter="' + id + '" style="margin-top:10px">Ver mi resultado</button>') + "</div>" +
+        (a ? '<div class="card"><b>Tus datos reales</b><ul class="ticks" style="margin:8px 0 0">' + rep.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" : "") +
+        '<button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:12px">Repetir el objetivo</button>';
+    } else if (!S.prog || S.prog.cur !== id) {
+      var oc = S.prog && S.prog.cur && pgOf(S.prog.cur);
+      h += '<div class="card"><b>Este objetivo está en pausa</b><p class="small muted" style="margin:6px 0 10px">Vas por el paso ' + (n + 1) + " de 14. " + (oc ? "Hacés un camino a la vez: si lo retomás, pausamos «" + esc(oc.n) + "». Tus herramientas siguen disponibles igual." : "Retomalo cuando quieras: tu avance quedó guardado.") + '</p><button class="btn sage" data-pgresume="' + id + '">Retomar</button></div>';
+    } else {
+      var st = P.days[n], done = pgToday(id), ok = pgWhenOk(st);
+      if (done) h += '<div class="card sage"><b>Listo por hoy ✓</b><p class="small" style="margin:4px 0 0">Mañana te espera el paso ' + (n + 1) + ": «" + esc(st.t) + "». Una cosa por día alcanza.</p></div>";
+      else if (!ok) h += '<div class="card"><span class="small muted">Paso ' + (n + 1) + ' de 14</span><b style="display:block;font-size:18px;margin-top:2px">' + esc(st.t) + '</b><p class="small muted" style="margin:8px 0 0">' + pgWhenTxt(st) + "</p></div>";
+      else h += '<div class="card"><span class="small muted">Paso ' + (n + 1) + ' de 14</span><b style="display:block;font-size:18px;margin-top:2px">' + esc(st.t) + "</b><p style='margin:8px 0'>" + esc(st.a) + "</p><p class='small muted' style='margin:0'>" + esc(st.w) + "</p>" + pgStepForm(P, id, n, it) + '<p class="small" id="pgmsg" style="margin:12px 0 0;color:var(--err)"></p><button class="btn block" data-pgdone="' + id + '" style="margin-top:10px">Completar paso</button></div>';
+    }
+    var L = homeToolList(id), mine = L.filter(function (T) { return toolOk(T) && btsOfTool(T.id).length; });
+    if (mine.length) h += '<div class="sec" style="margin-top:18px">Tus herramientas de hoy</div>' + mine.map(function (T) { return homeToolRow(T, true); }).join("");
+    else if (L.some(toolOk)) h += '<div class="card" style="margin-top:14px"><b>Sumá herramientas a tu día</b><p class="small muted" style="margin:6px 0 10px">Elegí una y sumala a un momento de tu día: queda como un paso y se tilda sola cuando la usás.</p><button class="btn ghost sm" data-htab="tools">Ver herramientas</button></div>';
+    else if (L.length) h += '<div class="card" style="margin-top:14px"><b>Herramientas de este objetivo</b><p class="small muted" style="margin:6px 0 10px">' + L.length + " herramientas para registrar, practicar y ver tu avance. Vienen con Forma Pro.</p><button class=\"btn ghost sm\" data-htab=\"tools\">Verlas</button></div>";
+    return h;
+  }
+  function homeToolsTab(id) {
+    var L = homeToolList(id);
+    if (!L.length) return '<p class="muted">Pronto vas a tener herramientas para este objetivo.</p>';
+    return '<p class="small muted" style="margin:4px 0 12px">Usalas cuando quieras o sumalas a un momento de tu día: quedan como un paso y se tildan solas cuando las usás.</p>' + L.map(function (T) { return homeToolRow(T, false); }).join("");
+  }
+  function homeProg(id) {
+    var P = pgOf(id), it = pgItem(id), n = pgCount(id), h = "";
+    var sums = homeToolList(id).filter(function (T) { return T.app && toolOk(T); }).map(function (T) { var s = window.FormaTools && window.FormaTools.sum ? window.FormaTools.sum(T.id) : ""; return s ? '<button class="hmdata" data-huse="' + T.id + '"><small>' + esc(T.n) + "</small><b>" + esc(s) + "</b></button>" : ""; }).join("");
+    h += '<div class="sec" style="margin-top:4px">Tus datos</div>' + (sums || '<div class="card"><p class="small muted" style="margin:0">Cuando uses las herramientas de registro, acá vas a ver tus números reales.</p></div>');
+    if (it) h += '<div class="card"><b>Cómo arrancaste</b><p class="small" style="margin:6px 0 0">' + esc(P.q) + " <b>" + it.before + "/5</b>" + (it.after ? " → ahora <b>" + it.after + "/5</b>" : " · al terminar lo medimos de nuevo") + "</p></div>" + pgChart(P, it);
+    h += '<div class="sec" style="margin-top:16px">Tu camino · 5 niveles</div>' + pgMap(P, n, !!it);
+    if (it && n < 14 && S.prog && S.prog.cur === id) h += '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este objetivo</button>';
+    return h + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
+  }
+  function openHome(id, tab) {
+    var p = planOf(id), P = pgOf(id); if (!p || !P) return;
+    tab = tab || (HOME && HOME.id === id ? HOME.tab : "hoy"); HOME = { id: id, tab: tab };
+    var html = '<button class="fullback" data-homex>← Objetivos</button>' + homeHead(id) + homeTabs(tab) + '<div class="hmbody">' + (tab === "tools" ? homeToolsTab(id) : tab === "prog" ? homeProg(id) : homeHoy(id)) + "</div>";
+    var ex = $("#sheet"); if (ex && ex.getAttribute("data-home") === id) { ex.firstChild.innerHTML = html; return; }
+    sheet("", true); var s = $("#sheet"); s.setAttribute("data-home", id); s.firstChild.innerHTML = html;
+  }
+  function useTool(tid) {
+    var T = toolById(tid); if (!T) return; if (!toolOk(T)) return openTool(tid);
+    if (T.act) return startAct(T.act);
+    if (T.app && window.FormaTools) return window.FormaTools.open(T.id);
   }
   function openPgQuit(id) {
     var it = pgItem(id); if (!it) return;
@@ -1451,6 +1536,43 @@
       { t: "Preparate", d: "Silenciá notificaciones, cerrá pestañas y llená tu vaso de agua.", s: 30 },
       { t: "25 minutos de foco", d: "Trabajá solo en tu tarea. Si te distraés, volvé sin culparte.", s: 1500 },
       { t: "Cerrá el bloque", d: "¿Qué avanzaste? Anotalo en una frase.", type: "input", ph: "Ej: armé el borrador" }] },
+    previa: { t: "Previa del partido", note: "Adaptalo a tu deporte. Si algo duele, salteá ese movimiento.", steps: [
+      { t: "Activá el cuerpo", d: "Trote suave o skipping en el lugar. Que suba un poco la temperatura.", s: 90 },
+      { t: "Movilidad dinámica", d: "Balanceos de pierna adelante-atrás y a los costados, círculos de cadera y de brazos.", s: 90 },
+      { t: "Arranques cortos", d: "3 o 4 arranques de 5 metros a ritmo creciente, volviendo caminando.", s: 60 },
+      { t: "Respirá y bajá un cambio", d: "Inhalá en 4, soltá en 6. Los nervios son normales: que jueguen a tu favor.", s: 45, type: "breath" },
+      { t: "Tu foco de hoy", d: "Una sola cosa en la que te vas a concentrar. Algo que dependa de vos, no del resultado.", type: "input", ph: "Hoy me enfoco en..." }] },
+    recupero: { t: "Vuelta a la calma", note: "Estirá sin rebotes y sin dolor.", steps: [
+      { t: "Bajá las pulsaciones", d: "Caminá tranquilo y respirá por la nariz.", s: 60 },
+      { t: "Cuádriceps", d: "Parado, llevá un talón hacia la cola. 30 segundos cada pierna.", s: 60 },
+      { t: "Isquiotibiales", d: "Pierna estirada apoyada adelante; inclinate desde la cadera con la espalda recta.", s: 60 },
+      { t: "Gemelos", d: "Contra una pared, la pierna de atrás estirada y el talón al piso. Cambiá a la mitad.", s: 60 },
+      { t: "Hombros y espalda", d: "Cruzá un brazo por delante del pecho; después abrazate y redondeá la espalda.", s: 45 },
+      { t: "Hidratá", d: "Tomá agua. Si querés, anotá cómo te sentiste en tu rutina o tu diario de partidos.", s: 15 }] },
+    fuerza: { t: "Fuerza en casa", note: "Sin equipamiento. A tu ritmo y sin dolor.", steps: [
+      { t: "Sentadillas", d: "Pies al ancho de los hombros, bajá como para sentarte. Todas las que puedas con buena técnica.", s: 45 },
+      { t: "Descanso", d: "Respirá y tomá agua si querés.", s: 20 },
+      { t: "Flexiones", d: "Con las rodillas apoyadas si hace falta. Cuerpo recto de cabeza a rodillas.", s: 40 },
+      { t: "Descanso", d: "Respirá.", s: 20 },
+      { t: "Puente de glúteos", d: "Boca arriba, rodillas flexionadas: subí la cadera apretando los glúteos.", s: 45 },
+      { t: "Descanso", d: "Respirá.", s: 20 },
+      { t: "Plancha", d: "Antebrazos y puntas de pie, panza firme. Si cuesta, con las rodillas apoyadas.", s: 30 },
+      { t: "Estocadas alternadas", d: "Paso largo adelante y bajá la rodilla de atrás cerca del piso.", s: 45 }] },
+    caminata: { t: "Caminata de 10 minutos", note: "Ideal después de comer o para cortar el día.", steps: [
+      { t: "Salí a caminar", d: "Ritmo cómodo los primeros minutos.", s: 180 },
+      { t: "Subí un poco el ritmo", d: "Que te cueste un poco hablar, pero que puedas.", s: 300 },
+      { t: "Volvé tranquilo", d: "Bajá el ritmo y respirá hondo.", s: 120 }] },
+    atento: { t: "Comer con atención", note: "No es una dieta: es comer sin apuro y darte cuenta de cuándo te llenás.", steps: [
+      { t: "Antes de empezar", d: "Sin pantallas. Mirá el plato y respirá dos veces.", s: 20, type: "breath" },
+      { t: "Los primeros bocados", d: "Comé despacio. Apoyá los cubiertos entre bocado y bocado.", s: 120 },
+      { t: "A mitad del plato", d: "Pausa. ¿Cuánta hambre te queda, del 1 al 10?", s: 30 },
+      { t: "¿Cómo terminaste?", d: "Con hambre, bien o muy lleno. Anotalo para notar el patrón.", type: "input", ph: "Terminé...", opt: true }] },
+    entrevista: { t: "Simulacro de entrevista", note: "Respondé en voz alta, como si fuera real. Si podés, grabate.", steps: [
+      { t: "«Contame de vos»", d: "En 1 minuto: qué hacés, qué sabés hacer y qué estás buscando.", s: 60 },
+      { t: "«¿Por qué este puesto?»", d: "Conectá lo que pide el puesto con algo concreto que hiciste.", s: 60 },
+      { t: "«Un problema que resolviste»", d: "Contalo así: la situación, qué hiciste vos y cómo terminó.", s: 90 },
+      { t: "«¿Qué tenés para mejorar?»", d: "Uno real, y qué estás haciendo para mejorarlo.", s: 60 },
+      { t: "Tus preguntas", d: "Prepará 2 preguntas para hacerle a la empresa.", type: "input", ph: "1) ... 2) ..." }] },
     cierre: { t: "Cierre del día", note: "Lo que escribas queda guardado en tu cuenta.", steps: [
       { t: "¿Qué salió bien hoy?", d: "Aunque sea algo chico.", type: "input", ph: "Hoy salió bien..." },
       { t: "¿Qué quedó pendiente?", d: "Anotalo para soltarlo. Mañana se retoma.", type: "input", ph: "Quedó pendiente...", opt: true },
@@ -1510,10 +1632,16 @@
     { id: "calma", n: "Respiración para calmar", d: "3 minutos de respiración lenta para bajar la tensión.", act: "calma", plan: "calma", gate: "vida", mins: 10 },
     { id: "grounding", n: "5-4-3-2-1", d: "Volvé al presente cuando la cabeza se acelera.", act: "grounding", plan: "calma", mins: 10 },
     { id: "estudio", n: "Bloque de estudio", d: "25 minutos de estudio y recuerdo activo, con pausa.", act: "estudio", plan: "estudio", mins: 35 },
-    { id: "repaso", n: "Repaso activo", d: "Repasá recordando sin mirar: lo que te falta es lo que hay que estudiar.", act: "repaso", plan: "estudio", mins: 15 }
+    { id: "repaso", n: "Repaso activo", d: "Repasá recordando sin mirar: lo que te falta es lo que hay que estudiar.", act: "repaso", plan: "estudio", mins: 15 },
+    { id: "previa", n: "Previa del partido", d: "5 minutos de activación y un foco claro antes de jugar.", act: "previa", plan: "deporte", mins: 10 },
+    { id: "recupero", n: "Vuelta a la calma", d: "Estiramientos guiados para después de entrenar o jugar.", act: "recupero", plan: "deporte", mins: 10 },
+    { id: "fuerza", n: "Fuerza en casa", d: "Circuito guiado de 5 minutos, sin equipamiento.", act: "fuerza", plan: "movimiento", mins: 10 },
+    { id: "caminata", n: "Caminata de 10 minutos", d: "Guiada, con cambio de ritmo.", act: "caminata", plan: "movimiento", mins: 10 },
+    { id: "atento", n: "Comer con atención", d: "Una comida sin apuro: notás el hambre y cuándo te llenás.", act: "atento", plan: "comer", mins: 20 },
+    { id: "entrevista", n: "Simulacro de entrevista", d: "Las 4 preguntas que siempre aparecen, con tiempo para responder en voz alta.", act: "entrevista", plan: "laburo", mins: 10 }
   ];
   if (window.FormaTools && window.FormaTools.defs) TOOLS = TOOLS.concat(window.FormaTools.defs);
-  window.FormaBridge = { S: function () { return S; }, save: function () { save(); }, sheet: function (h) { sheet(h); }, close: close, shape: function (id) { return SHAPES[id] || ""; }, planName: function (id) { var p = planOf(id); return p ? p.n : ""; }, weekCount: function (o) { try { return weekCount(o || 0); } catch (e) { return null; } } };
+  window.FormaBridge = { S: function () { return S; }, save: function () { save(); }, sheet: function (h, f) { sheet(h, f); }, close: close, shape: function (id) { return SHAPES[id] || ""; }, planName: function (id) { var p = planOf(id); return p ? p.n : ""; }, weekCount: function (o) { try { return weekCount(o || 0); } catch (e) { return null; } } };
   function toolById(id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }
   function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
   function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
@@ -1549,12 +1677,12 @@
   function goalCardNew(g) {
     var p = planOf(g.plan), P = p && pgOf(p.id); if (!P) return "";
     var it = pgItem(p.id), n = pgCount(p.id), ow = pgOwns(p.id), started = !!it, fin = n >= 14, lv = lvOf(Math.min(n, 13));
-    var sub = fin ? "Completado" : started ? "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n : g.d;
-    var tag = fin ? "✓" : started ? Math.round(n * 100 / 14) + "%" : (ow ? "Empezar" : "Paso 1 gratis");
+    var nt = toolsOf(p.id).length, sub = (fin ? "Completado" : started ? "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n : g.d) + (nt ? " · " + nt + " herramientas" : "");
+    var tag = fin ? "✓" : started ? Math.round(n * 100 / 14) + "%" : (ow ? "Entrar" : "Paso 1 gratis");
     return '<button class="plancard" data-pgopen="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + (SHAPES[p.id] || "") + "</span><span style='flex:1;min-width:0'><b>" + esc(g.n) + "</b><small>" + esc(sub) + '</small>' + (started ? '<span class="pgbar" style="display:block;margin-top:6px"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></span>' : "") + '</span><span class="tag">' + tag + "</span></button>";
   }
   function vObj() {
-    var h = '<h1 class="hello">Tus objetivos</h1><p class="small muted" style="margin:0 0 14px">Elegí lo que querés lograr. Cada objetivo es un camino de 5 niveles: un paso por día, todo dentro de la app. Cargás, practicás y subís de nivel haciendo.</p>';
+    var h = '<h1 class="hello">Tus objetivos</h1><p class="small muted" style="margin:0 0 14px">Cada objetivo tiene su lugar: tu paso de hoy, sus herramientas y tu progreso. Entrá al que quieras trabajar.</p>';
     var cur = pgCur();
     if (cur && pgCount(cur) < 14) {
       var P = pgOf(cur), n = pgCount(cur), dn = pgToday(cur), pl = planOf(cur), lv = lvOf(n);
@@ -1562,7 +1690,8 @@
     }
     h += '<div class="sec" style="margin-top:18px">Todos los objetivos</div>' + GOALS.map(goalCardNew).join("");
     h += '<div class="card" style="margin-top:14px"><b>¿No sabés por dónde empezar?</b><p class="small muted" style="margin:6px 0 10px">Respondé unas preguntas y te recomendamos uno. Después elegís vos.</p><button class="btn ghost sm" data-open="elegir">Que Forma me recomiende</button></div>';
-    h += '<div class="sec" style="margin-top:22px">Herramientas</div><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody();
+    var gen = toolsOf("vida");
+    if (gen.length) h += '<div class="sec" style="margin-top:22px">Herramientas para cualquier día</div><p class="small muted" style="margin:0 0 6px">Las de cada objetivo están adentro de cada uno.</p>' + gen.map(toolRow).join("");
     return h;
   }
   function openTools() {
@@ -1575,7 +1704,7 @@
     if (T.app) { if (ok && window.FormaTools) return window.FormaTools.open(T.id); A = { steps: [{ t: "Se usa cuando quieras, desde Hoy u Objetivo" }, { t: "Guarda tu historial en tu cuenta" }, { t: "Te muestra tu progreso con gráficos simples" }] }; }
     sheet('<div class="row"><span class="shape">' + SHAPES[T.plan] + '</span><div><span class="badge">Herramienta · ' + esc(pl.n) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><p style="margin:14px 0">' + esc(T.d) + "</p>" +
       '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>" +
-      (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" ' + (T.act ? 'data-btsadd="' : 'data-xtadd="') + T.id + '" style="margin-top:8px">Sumar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
+      (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" data-btsadd="' + T.id + '" style="margin-top:8px">Sumar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
         : '<div class="card dark" style="margin-top:12px"><b>' + 'Es parte de Forma Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro la usás cuando quieras y la sumás a tu día. También la podés conseguir con ' + (T.gate === "vida" ? "Vida diaria Pro" : "el plan " + esc(pl.n)) + '.</p><button class="btn sage" data-openpro>Ver Forma Pro</button> <button class="btn ghost" data-plan="' + (T.gate === "vida" ? "vida" : pl.id) + '">Ver el plan</button></div>') +
       '<button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }
@@ -1703,6 +1832,7 @@
     var key = act.key, A = ACTS[key], vals = act.vals;
     if (act.tm) clearInterval(act.tm);
     if (vals.length) { S.notes = S.notes || {}; S.notes[today()] = S.notes[today()] || {}; S.notes[today()][key] = vals; }
+    var TTd = toolByAct(key); if (TTd) { var td0 = today(); if (!S.tdn || !S.tdn[td0]) S.tdn = {}; S.tdn[td0] = S.tdn[td0] || {}; S.tdn[td0][TTd.id] = 1; }
     var marked = completeAct(key); pgActDone(key); S.actn = (S.actn || 0) + 1; touchBest(); save();
     var n = weekCount(0), el = $("#full"); act = null; if (!el) return;
     el.innerHTML = '<div class="actbody" style="text-align:center;padding-top:80px"><div class="bigflame on" style="margin:0 auto 10px;width:70px;height:70px">' + ICON.flame + '</div><h2>¡Actividad completa!</h2><p class="muted">' + esc(A.t) + " hecha de verdad. " + (marked ? "Quedó tildada en tu día." : "") + '</p><p><b style="font-size:28px">' + n + "</b>/7 días con algo hecho esta semana</p>" + '<button class="btn block" data-actdone>Volver a mi día</button></div>';
@@ -2262,15 +2392,15 @@
     def.forEach(function (x) { if (x[2] && out.some(function (z) { return x[2].test(z.l); })) return; if (out.some(function (z) { return z.l === x[0]; })) return; out.push({ l: x[0], o: x[1] }); });
     out = out.sort(function (a, c) { return (a.o || 0) - (c.o || 0); });
     bdetails(b).forEach(function (x) { if (!out.some(function (z) { return z.l === x; })) out.push({ l: x, u: 1 }); });
-    btsFor(b).forEach(function (x) { var T = toolById(x.tool); if (T && !out.some(function (z) { return z.l === T.n; })) out.push({ l: T.n, tool: T.id, act: T.act, n: "Herramienta · " + T.mins + " min", u: 2, sid: x.id }); });
+    btsFor(b).forEach(function (x) { var T = toolById(x.tool); if (T && !out.some(function (z) { return z.l === T.n; })) out.push({ l: T.n, tool: T.id, act: T.act, app: !!T.app, n: "Herramienta · " + T.mins + " min", u: 2, sid: x.id }); });
     return out;
   }
   function stepKey(b, st) { return "s|" + armKey(b) + "|" + st.l; }
-  function stepDone(b, st) { return !!(S.ad && S.ad[today()] && S.ad[today()][stepKey(b, st)]); }
+  function stepDone(b, st) { if (st.tool && toolDoneToday(toolById(st.tool))) return true; return !!(S.ad && S.ad[today()] && S.ad[today()][stepKey(b, st)]); }
   function stepsHtml(b, i, big) {
     var ss = blockSteps(b); if (!ss.length) return ""; var pro = true, n = ss.filter(function (x) { return stepDone(b, x); }).length;
     return '<div class="bsteps' + (big ? " big" : "") + '"><div class="bstl"><span>Paso a paso</span><span class="bstn' + (n === ss.length ? " all" : "") + '">' + (n === ss.length ? "¡Completo!" : n + "/" + ss.length) + "</span></div>" +
-      ss.map(function (x, j) { var dn = stepDone(b, x); if (x.tool) return '<div class="bstep tl' + (dn ? " dn" : "") + '"><i class="bsc' + (dn ? " on" : "") + '">' + ICON.ok + '</i><button class="bstool" data-bsttool="' + i + ":" + j + '"><span>' + esc(x.l) + "<small>" + (dn ? "Hecha hoy · tocá para repetirla" : "Tocá para usarla") + '</small></span><em>' + (dn ? "\u2713" : "Usar") + '</em></button>' + "</div>"; return (pro ? '<button class="bstep" role="checkbox" aria-checked="' + dn + '" data-bstep="' + i + ":" + j + '">' : '<div class="bstep ro">') + '<i class="bsc">' + ICON.ok + "</i><span>" + esc(x.l) + (x.n ? "<small>" + esc(x.n) + "</small>" : "") + "</span>" + (pro ? "</button>" : "</div>"); }).join("") + "</div>";
+      ss.map(function (x, j) { var dn = stepDone(b, x); if (x.tool) return '<div class="bstep tl' + (dn ? " dn" : "") + '"><i class="bsc' + (dn ? " on" : "") + '">' + ICON.ok + '</i><button class="bstool" data-bsttool="' + i + ":" + j + '"><span>' + esc(x.l) + "<small>" + (dn ? (x.app ? "Hecha hoy · tocá para abrirla" : "Hecha hoy · tocá para repetirla") : "Tocá para usarla") + '</small></span><em>' + (dn ? "\u2713" : "Usar") + '</em></button>' + "</div>"; return (pro ? '<button class="bstep" role="checkbox" aria-checked="' + dn + '" data-bstep="' + i + ":" + j + '">' : '<div class="bstep ro">') + '<i class="bsc">' + ICON.ok + "</i><span>" + esc(x.l) + (x.n ? "<small>" + esc(x.n) + "</small>" : "") + "</span>" + (pro ? "</button>" : "</div>"); }).join("") + "</div>";
   }
   function tickStep(el, v) {
     var p = v.split(":"), bl = armBlocks()[+p[0]]; if (!bl) return; var st = blockSteps(bl)[+p[1]]; if (!st) return;
@@ -2289,17 +2419,17 @@
   function bdetails(b) { return bnAll(b).filter(function (x) { return bnShow(bnRule(b, x)); }); }
   function btsFor(b) { return (S.bts || []).filter(function (x) { return x.bk === bkey(b) && bnShow(x.r); }); }
   function openBtsAdd(id) {
-    var T = toolById(id); if (!T || !T.act) return; if (!isProU()) return openPro();
+    var T = toolById(id); if (!T) return; if (!isProU()) return openPro(); if (!toolOk(T)) return openTool(id);
     var bl = armBlocks(), pro = isProU(), dw = DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s");
     sheet('<h2 style="font-size:22px">Sumar a mi d\u00eda</h2><p class="muted small">' + esc(T.n) + ' · eleg\u00ed en qu\u00e9 momento de tu d\u00eda va. Se suma como un paso de ese momento.</p>' +
       '<div class="btsl">' + bl.map(function (b, i) { var K = window.FormaDia.KIND[b.kind]; return '<label class="btsr"><input type="radio" name="btsb" value="' + i + '"' + (i === 0 ? " checked" : "") + '><span><b>' + esc(b.label) + '</b><small class="muted"> ' + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + "</small></span></label>"; }).join("") + "</div>" +
       '<label class="field" style="margin-top:12px"><span>\u00bfCu\u00e1ndo se repite?</span><select id="btsw" style="' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + dw + (pro ? "" : " (Forma Pro)") + '</option></select></label>' +
-      '<button class="btn block" data-btsok="' + id + '" style="margin-top:14px">Sumar como paso</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+      '<button class="btn block" data-btsok="' + id + '" style="margin-top:14px">Sumar como paso</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>', !!HOME);
   }
   function btsSave(id) {
     var r = document.querySelector("#sheet input[name=btsb]:checked"), w = (document.getElementById("btsw") || {}).value || "all", b = r && armBlocks()[+r.value]; if (!b) return;
-    S.bts = S.bts || []; if (S.bts.some(function (x) { return x.tool === id && x.bk === bkey(b); })) { close(); return; }
-    S.bts.push({ id: "t" + Date.now(), tool: id, bk: bkey(b), r: w === "all" ? null : w === "dow" ? { t: "dow", d: new Date().getDay() } : { t: "once", d: today() } }); save(); close(); render();
+    S.bts = S.bts || []; if (S.bts.some(function (x) { return x.tool === id && x.bk === bkey(b); })) { close(); if (HOME) openHome(HOME.id, HOME.tab); return; }
+    if (w === "dow" && !isProU()) return openPro(); S.bts.push({ id: "t" + Date.now(), tool: id, bk: bkey(b), r: w === "all" ? null : w === "dow" ? { t: "dow", d: new Date().getDay() } : { t: "once", d: today() } }); save(); close(); render(); if (HOME) openHome(HOME.id, HOME.tab);
   }
   function bdDone(b, x) { return !!(S.bdn && S.bdn[today()] && S.bdn[today()][bkey(b) + "::" + x]); }
   function bdDoneN(b) { return bdetails(b).filter(function (x) { return bdDone(b, x); }).length; }
@@ -2656,7 +2786,11 @@
     if (d.shareprog !== undefined) { shareProgress(); return; }
     if (d.refine !== undefined) { armOpen(S.arm && S.arm.ans); return; }
     if (d.tab) { close(); tab = d.tab; render(); window.scrollTo(0, 0); return; }
-    if (d.close !== undefined) { close(); return; }
+    if (d.homex !== undefined) { HOME = null; close(); render(); return; }
+    if (d.htab) { if (HOME) openHome(HOME.id, d.htab); var sc = $("#sheet"); if (sc && sc.firstChild) sc.firstChild.scrollTop = 0; return; }
+    if (d.huse) return useTool(d.huse);
+    if (d.btsx) { S.bts = (S.bts || []).filter(function (x) { return x.id !== d.btsx; }); save(); render(); if (HOME) openHome(HOME.id, HOME.tab); return; }
+    if (d.close !== undefined) { var wasH = !!($("#sheet") && $("#sheet").getAttribute("data-home")); close(); render(); if (HOME && !wasH) openHome(HOME.id, HOME.tab); else if (wasH) HOME = null; return; }
     if (d.openpro !== undefined) return openPro();
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
@@ -2700,8 +2834,8 @@
     if (d.open === "organizar") return openOrganizar();
     if (d.open === "respirar") return openRespirar();
     if (t.id === "orgdone") { completeAct("organizar"); touchBest(); save(); close(); render(); return; }
-    if (d.actexit !== undefined) { if (confirm("¿Salir? Si salís, la actividad no se tilda.")) { close(); } return; }
-    if (d.actdone !== undefined) { close(); render(); return; }
+    if (d.actexit !== undefined) { if (confirm("¿Salir? Si salís, la actividad no se tilda.")) { close(); render(); if (HOME) openHome(HOME.id, HOME.tab); } return; }
+    if (d.actdone !== undefined) { close(); render(); if (HOME) openHome(HOME.id, HOME.tab); return; }
     if (t.id === "actnext") return nextStep();
     if (d.act) return startAct(d.act);
     if (d.area) { toggleIn(draft.areas, d.area); var nm = $("#f-name"); if (nm) draft.name = nm.value; renderOnboard(); return; }
@@ -2736,7 +2870,7 @@
     if (d.pgk) { var kit = pgItem(S.prog && S.prog.cur); if (kit) { kit.dr = kit.dr || {}; kit.dr[d.pgk] = kit.dr[d.pgk] === 1 ? 0 : 1; t.setAttribute("aria-pressed", kit.dr[d.pgk] === 1 ? "true" : "false"); save(); } return; }
     if (d.pgtm) { var tid = S.prog && S.prog.cur, tit = pgItem(tid); if (tit) { tit.st = tit.st || {}; tit.st.tm = { end: Date.now() + (+d.pgtm) * 1000 }; save(); openProgram(tid); } return; }
     if (d.pgact) return startAct(d.pgact);
-    if (d.pgquit2) { S.prog.cur = null; save(); close(); render(); return; }
+    if (d.pgquit2) { S.prog.cur = null; save(); close(); render(); if (HOME) openHome(HOME.id, "hoy"); return; }
     if (d.pgafter) { var sa = document.querySelector('#sheet .pgm[data-key=after] [aria-pressed=true]'); if (!sa) return; pgItem(d.pgafter).after = +sa.dataset.pgm; save(); render(); return openProgram(d.pgafter); }
     if (d.pgquit) return openPgQuit(d.pgquit);
     if (d.pgresume) { if (pgOwns(d.pgresume)) { S.prog.cur = d.pgresume; save(); close(); render(); openProgram(d.pgresume); } return; }
@@ -2765,7 +2899,7 @@
     if (d.btsadd) return openBtsAdd(d.btsadd);
     if (d.btsok) return btsSave(d.btsok);
     if (d.btsdel) { var dp = d.btsdel.split(":"); S.bts = (S.bts || []).filter(function (x) { return x.id !== dp[0]; }); save(); render(); openBlock(+dp[1]); return; }
-    if (d.bsttool) { var tp = d.bsttool.split(":"), tb = armBlocks()[+tp[0]], ts = tb && blockSteps(tb)[+tp[1]]; if (!ts || !ts.act) return; var tT = toolById(ts.tool); if (tT && !toolOk(tT)) return openTool(tT.id); return startAct(ts.act); }
+    if (d.bsttool) { var tp = d.bsttool.split(":"), tb = armBlocks()[+tp[0]], ts = tb && blockSteps(tb)[+tp[1]]; if (!ts || !ts.tool) return; return useTool(ts.tool); }
     if (d.bstmark) { var mp = d.bstmark.split(":"), mb = armBlocks()[+mp[0]], ms = mb && blockSteps(mb)[+mp[1]]; if (!ms) return; var mt = today(); S.ad = S.ad || {}; S.ad[mt] = S.ad[mt] || {}; S.ad[mt][stepKey(mb, ms)] = 1; save(); var sh0 = !!$("#sheet"); render(); if (sh0) openBlock(+mp[0]); return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
     if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
