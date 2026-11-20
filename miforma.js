@@ -2276,7 +2276,11 @@
     if (c) { c.textContent = n === all.length ? "¡Completo!" : n + "/" + all.length; c.classList.toggle("all", n === all.length); if (n === all.length && c.animate && !REDUCE) c.animate([{ transform: "scale(.8)", opacity: 0 }, { transform: "scale(1.15)", opacity: 1, offset: .5 }, { transform: "scale(1)" }], { duration: 560, easing: "ease-out" }); }
   }
   function bkey(b) { return b.kind + "|" + b.label; }
-  function bdetails(b) { return (S.bn && S.bn[bkey(b)]) || []; }
+  function bnAll(b) { return (S.bn && S.bn[bkey(b)]) || []; }
+  function bnRule(b, x) { return (S.bnr && S.bnr[bkey(b) + "::" + x]) || null; }
+  function bnShow(r) { if (!r) return true; var n = new Date(); return r.t === "dow" ? n.getDay() === r.d : r.t === "once" ? r.d === today(n) : true; }
+  function bnTag(r) { return !r ? "Todos los d\u00edas" : r.t === "dow" ? "Los " + DNL[r.d].toLowerCase() + (/s$/.test(DNL[r.d]) ? "" : "s") : "Solo hoy"; }
+  function bdetails(b) { return bnAll(b).filter(function (x) { return bnShow(bnRule(b, x)); }); }
   function bdDone(b, x) { return !!(S.bdn && S.bdn[today()] && S.bdn[today()][bkey(b) + "::" + x]); }
   function bdDoneN(b) { return bdetails(b).filter(function (x) { return bdDone(b, x); }).length; }
   function bdToggle(i, j) {
@@ -2291,9 +2295,9 @@
     sheet('<span class="badge">' + k.tag + " · " + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + '</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(b.label) + "</h2>" + (b.note ? '<p class="muted">' + esc(b.note) + "</p>" : "") +
       stepsHtml(b, i, false) +
       '<div class="sec" style="margin-top:14px">Para hacer en este momento</div>' +
-      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1">' + bdItem(b, i, j, x) + '</div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
-      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px"><input id="bn" maxlength="80" placeholder="Agregar una acci\u00f3n" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 detalles. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
-      '<p class="small muted" style="margin:8px 0 0">Se repite todos los días en este momento y la tildás cada día.</p>' +
+      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1">' + bdItem(b, i, j, x) + '<small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
+      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px;flex-wrap:wrap"><input id="bn" maxlength="80" placeholder="Agregar una acci\u00f3n" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button><select id="bnw" aria-label="Cu\u00e1ndo se repite" style="flex-basis:100%;margin-top:8px;' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s") + (pro ? "" : " (Forma Pro)") + '</option></select></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 detalles. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
+      '<p class="small muted" style="margin:8px 0 0">Cada acción se repite según lo que elijas y la tildás cada día.</p>' +
       (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
       (ck && tk && !armDone(b) ? '<button class="btn sage block" data-armtool="' + tk + '" style="margin-top:12px">Hacer ahora (actividad guiada)</button>' : "") +
       (ck ? '<button class="btn block" data-ackb="' + i + '" style="margin-top:8px">' + (armDone(b) ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
@@ -2740,7 +2744,7 @@
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
     if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bdt) { var bp = d.bdt.split(":"), oi = +bp[0], inSh = !!$("#sheet"); bdToggle(oi, +bp[1]); render(); if (inSh) openBlock(oi); return; }
-    if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
+    if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2) { var tx = bdetails(bd2)[+pr[1]], ar = S.bn[bkey(bd2)], ix = ar.indexOf(tx); if (ix > -1) ar.splice(ix, 1); if (S.bnr) delete S.bnr[bkey(bd2) + "::" + tx]; save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
     if (d.setview) { try { localStorage.setItem("forma_view", d.setview); } catch (e) {} render(); window.scrollTo(0, 0); return; }
     if (t.id === "more") { moreOpen = !moreOpen; render(); return; }
@@ -2815,7 +2819,9 @@
   document.addEventListener("change", function (e) { if (e.target.getAttribute && e.target.getAttribute("data-fk")) save(); });
   document.addEventListener("submit", function (e) {
     if (e.target.id === "compf") { e.preventDefault(); var cv = $("#compown").value.trim(); if (cv && compDraft) { if (compDraft.sel.length >= 3) { $("#compmsg").textContent = "Hasta 3. Sacá uno para sumar otro."; return; } if (compDraft.sel.indexOf(cv) < 0) compDraft.sel.push(cv.slice(0, 80)); drawComp(); } return; }
-    if (e.target.id === "bnf") { e.preventDefault(); var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim(); if (bx && bv && (S.bn && S.bn[bkey(bx)] ? S.bn[bkey(bx)].length : 0) < (isProU() ? 8 : 3)) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv.slice(0, 80)); save(); render(); openBlock(bi); } return; }
+    if (e.target.id === "bnf") { e.preventDefault(); var bi = +e.target.dataset.i, bx = armBlocks()[bi], bv = $("#bn").value.trim().slice(0, 80), bw = ($("#bnw") || {}).value || "all";
+      if (bw === "dow" && !isProU()) { return openPro(); }
+      if (bx && bv && bdetails(bx).length < (isProU() ? 8 : 3) && bnAll(bx).indexOf(bv) < 0) { S.bn = S.bn || {}; (S.bn[bkey(bx)] = S.bn[bkey(bx)] || []).push(bv); if (bw !== "all") { S.bnr = S.bnr || {}; S.bnr[bkey(bx) + "::" + bv] = bw === "dow" ? { t: "dow", d: new Date().getDay() } : { t: "once", d: today() }; } save(); render(); openBlock(bi); } return; }
     if (e.target.id === "tmf") { e.preventDefault(); var tv = $("#tmi").value.trim(); if (tv) { S.tm = S.tm || {}; S.tm[today(tmDate())] = { t: tv.slice(0, 80), d: 0 }; save(); render(); } return; }
     if (e.target.id === "winf") { e.preventDefault(); var wv = $("#win").value.trim(); if (wv) { S.wins = S.wins || {}; (S.wins[today()] = S.wins[today()] || []).push(wv.slice(0, 120)); save(); render(); } return; }
     if (e.target.id === "todof") { e.preventDefault(); var tv = $("#todo").value.trim(); if (tv && (S.todo || []).length < 60) { S.todo = S.todo || []; S.todo.push({ id: "t" + Date.now(), t: tv.slice(0, 120), done: false, doneAt: "" }); save(); render(); } return; }
