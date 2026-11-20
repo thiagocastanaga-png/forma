@@ -1575,7 +1575,7 @@
     if (T.app) { if (ok && window.FormaTools) return window.FormaTools.open(T.id); A = { steps: [{ t: "Se usa cuando quieras, desde Hoy u Objetivo" }, { t: "Guarda tu historial en tu cuenta" }, { t: "Te muestra tu progreso con gráficos simples" }] }; }
     sheet('<div class="row"><span class="shape">' + SHAPES[T.plan] + '</span><div><span class="badge">Herramienta · ' + esc(pl.n) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><p style="margin:14px 0">' + esc(T.d) + "</p>" +
       '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>" +
-      (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" data-xtadd="' + T.id + '" style="margin-top:8px">Agregar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
+      (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" ' + (T.act ? 'data-btsadd="' : 'data-xtadd="') + T.id + '" style="margin-top:8px">Sumar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
         : '<div class="card dark" style="margin-top:12px"><b>' + 'Es parte de Forma Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro la usás cuando quieras y la sumás a tu día. También la podés conseguir con ' + (T.gate === "vida" ? "Vida diaria Pro" : "el plan " + esc(pl.n)) + '.</p><button class="btn sage" data-openpro>Ver Forma Pro</button> <button class="btn ghost" data-plan="' + (T.gate === "vida" ? "vida" : pl.id) + '">Ver el plan</button></div>') +
       '<button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }
@@ -1710,8 +1710,9 @@
   function completeAct(key) {
     var t = today(), hs = activeHabits().filter(function (h) { return gated(h) && actKey(h.tool) === key && !h.days[t]; });
     if (hs.length) { hs[0].days[t] = 1; return true; }
+    var sm = false; armBlocks().forEach(function (bk) { blockSteps(bk).forEach(function (st) { if (st.tool && st.act === key && !stepDone(bk, st)) { S.ad = S.ad || {}; S.ad[t] = S.ad[t] || {}; S.ad[t][stepKey(bk, st)] = 1; sm = true; } }); });
     var ab = armBlocks().filter(function (b) { return armCheckable(b) && armToolOf(b) === key && !armDone(b); })[0];
-    if (!ab) return false;
+    if (!ab) return sm;
     S.ad = S.ad || {}; S.ad[t] = S.ad[t] || {}; S.ad[t][armKey(ab)] = 1; return true;
   }
   function openRespirar() { startAct("respirar"); }
@@ -2261,6 +2262,7 @@
     def.forEach(function (x) { if (x[2] && out.some(function (z) { return x[2].test(z.l); })) return; if (out.some(function (z) { return z.l === x[0]; })) return; out.push({ l: x[0], o: x[1] }); });
     out = out.sort(function (a, c) { return (a.o || 0) - (c.o || 0); });
     bdetails(b).forEach(function (x) { if (!out.some(function (z) { return z.l === x; })) out.push({ l: x, u: 1 }); });
+    btsFor(b).forEach(function (x) { var T = toolById(x.tool); if (T && !out.some(function (z) { return z.l === T.n; })) out.push({ l: T.n, tool: T.id, act: T.act, n: "Herramienta · " + T.mins + " min", u: 2, sid: x.id }); });
     return out;
   }
   function stepKey(b, st) { return "s|" + armKey(b) + "|" + st.l; }
@@ -2268,7 +2270,7 @@
   function stepsHtml(b, i, big) {
     var ss = blockSteps(b); if (!ss.length) return ""; var pro = true, n = ss.filter(function (x) { return stepDone(b, x); }).length;
     return '<div class="bsteps' + (big ? " big" : "") + '"><div class="bstl"><span>Paso a paso</span><span class="bstn' + (n === ss.length ? " all" : "") + '">' + (n === ss.length ? "¡Completo!" : n + "/" + ss.length) + "</span></div>" +
-      ss.map(function (x, j) { var dn = stepDone(b, x); return (pro ? '<button class="bstep" role="checkbox" aria-checked="' + dn + '" data-bstep="' + i + ":" + j + '">' : '<div class="bstep ro">') + '<i class="bsc">' + ICON.ok + "</i><span>" + esc(x.l) + (x.n ? "<small>" + esc(x.n) + "</small>" : "") + "</span>" + (pro ? "</button>" : "</div>"); }).join("") + "</div>";
+      ss.map(function (x, j) { var dn = stepDone(b, x); if (x.tool) return '<div class="bstep tl' + (dn ? " dn" : "") + '"><i class="bsc' + (dn ? " on" : "") + '">' + ICON.ok + '</i><button class="bstool" data-bsttool="' + i + ":" + j + '"><span>' + esc(x.l) + "<small>" + (dn ? "Hecha hoy · tocá para repetirla" : "Tocá para usarla") + '</small></span><em>' + (dn ? "\u2713" : "Usar") + '</em></button>' + (dn ? "" : '<button class="linkbtn small bsyh" data-bstmark="' + i + ":" + j + '">Ya la hice</button>') + "</div>"; return (pro ? '<button class="bstep" role="checkbox" aria-checked="' + dn + '" data-bstep="' + i + ":" + j + '">' : '<div class="bstep ro">') + '<i class="bsc">' + ICON.ok + "</i><span>" + esc(x.l) + (x.n ? "<small>" + esc(x.n) + "</small>" : "") + "</span>" + (pro ? "</button>" : "</div>"); }).join("") + "</div>";
   }
   function tickStep(el, v) {
     var p = v.split(":"), bl = armBlocks()[+p[0]]; if (!bl) return; var st = blockSteps(bl)[+p[1]]; if (!st) return;
@@ -2285,6 +2287,20 @@
   function bnShow(r) { if (!r) return true; var n = new Date(); return r.t === "dow" ? n.getDay() === r.d : r.t === "once" ? r.d === today(n) : true; }
   function bnTag(r) { return !r ? "Todos los d\u00edas" : r.t === "dow" ? "Los " + DNL[r.d].toLowerCase() + (/s$/.test(DNL[r.d]) ? "" : "s") : "Solo hoy"; }
   function bdetails(b) { return bnAll(b).filter(function (x) { return bnShow(bnRule(b, x)); }); }
+  function btsFor(b) { return (S.bts || []).filter(function (x) { return x.bk === bkey(b) && bnShow(x.r); }); }
+  function openBtsAdd(id) {
+    var T = toolById(id); if (!T || !T.act) return; if (!isProU()) return openPro();
+    var bl = armBlocks(), pro = isProU(), dw = DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s");
+    sheet('<h2 style="font-size:22px">Sumar a mi d\u00eda</h2><p class="muted small">' + esc(T.n) + ' · eleg\u00ed en qu\u00e9 momento de tu d\u00eda va. Se suma como un paso de ese momento.</p>' +
+      '<div class="btsl">' + bl.map(function (b, i) { var K = window.FormaDia.KIND[b.kind]; return '<label class="btsr"><input type="radio" name="btsb" value="' + i + '"' + (i === 0 ? " checked" : "") + '><span><b>' + esc(b.label) + '</b><small class="muted"> ' + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + "</small></span></label>"; }).join("") + "</div>" +
+      '<label class="field" style="margin-top:12px"><span>\u00bfCu\u00e1ndo se repite?</span><select id="btsw" style="' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + dw + (pro ? "" : " (Forma Pro)") + '</option></select></label>' +
+      '<button class="btn block" data-btsok="' + id + '" style="margin-top:14px">Sumar como paso</button><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+  }
+  function btsSave(id) {
+    var r = document.querySelector("#sheet input[name=btsb]:checked"), w = (document.getElementById("btsw") || {}).value || "all", b = r && armBlocks()[+r.value]; if (!b) return;
+    S.bts = S.bts || []; if (S.bts.some(function (x) { return x.tool === id && x.bk === bkey(b); })) { close(); return; }
+    S.bts.push({ id: "t" + Date.now(), tool: id, bk: bkey(b), r: w === "all" ? null : w === "dow" ? { t: "dow", d: new Date().getDay() } : { t: "once", d: today() } }); save(); close(); render();
+  }
   function bdDone(b, x) { return !!(S.bdn && S.bdn[today()] && S.bdn[today()][bkey(b) + "::" + x]); }
   function bdDoneN(b) { return bdetails(b).filter(function (x) { return bdDone(b, x); }).length; }
   function bdToggle(i, j) {
@@ -2298,8 +2314,9 @@
     var k = window.FormaDia.KIND[b.kind], pro = isProU(), det = bdetails(b), tk = armToolOf(b), ck = armCheckable(b);
     sheet('<span class="badge">' + k.tag + " · " + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + '</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(b.label) + "</h2>" + (b.note ? '<p class="muted">' + esc(b.note) + "</p>" : "") +
       (blockSteps(b).length ? stepsHtml(b, i, false) : '<div class="sec" style="margin-top:14px">Paso a paso</div><p class="small muted" style="margin:0 0 6px">Este momento todavía no tiene pasos. Armalo vos: lo que agregues acá se tilda cada día.</p>') +
-      (det.length ? '<div class="sec" style="margin-top:14px">Los pasos que agregaste</div>' : "") +
-      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(x) + '</span> <small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
+      (det.length || btsFor(b).length ? '<div class="sec" style="margin-top:14px">Los pasos que agregaste</div>' : "") +
+      btsFor(b).map(function (x) { var T = toolById(x.tool); return T ? '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(T.n) + '</span> <small class="muted bntag">Herramienta \u00b7 ' + bnTag(x.r) + '</small></div><button class="linkbtn small" data-btsdel="' + x.id + ":" + i + '">Quitar</button></div>' : ""; }).join("") +
+      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(x) + '</span> <small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Sumá tus propios pasos: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
       (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px;flex-wrap:wrap"><input id="bn" maxlength="80" placeholder="Agregar un paso" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button><select id="bnw" aria-label="Cu\u00e1ndo se repite" style="flex-basis:100%;margin-top:8px;' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s") + (pro ? "" : " (Forma Pro)") + '</option></select></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 pasos propios. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
       '<p class="small muted" style="margin:8px 0 0">Cada paso que agregás se suma al paso a paso, se repite según lo que elijas y lo tildás cada día.</p>' +
       (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
@@ -2745,6 +2762,11 @@
     if (t.id === "compsave" && compDraft) { S.comp = S.comp || {}; S.comp[today()] = compDraft.sel.slice(0, 3); compDraft = null; save(); close(); render(); return; }
     if (d.cack !== undefined) { var ctx = compToday()[+d.cack]; if (ctx !== undefined) { S.ad = S.ad || {}; var tdc = today(); S.ad[tdc] = S.ad[tdc] || {}; if (S.ad[tdc]["c|" + ctx]) delete S.ad[tdc]["c|" + ctx]; else S.ad[tdc]["c|" + ctx] = 1; touchBest(); save(); render(); } return; }
     if (d.deploy !== undefined) { deployOpen = !deployOpen; t.setAttribute("aria-expanded", deployOpen); var dw = t.parentNode.querySelector(".dwrap"); if (dw) { dw.hidden = !deployOpen; if (deployOpen) animIn(dw.children, { dy: 12, d: 600, stag: 90 }); } return; }
+    if (d.btsadd) return openBtsAdd(d.btsadd);
+    if (d.btsok) return btsSave(d.btsok);
+    if (d.btsdel) { var dp = d.btsdel.split(":"); S.bts = (S.bts || []).filter(function (x) { return x.id !== dp[0]; }); save(); render(); openBlock(+dp[1]); return; }
+    if (d.bsttool) { var tp = d.bsttool.split(":"), tb = armBlocks()[+tp[0]], ts = tb && blockSteps(tb)[+tp[1]]; if (!ts || !ts.act) return; var tT = toolById(ts.tool); if (tT && !toolOk(tT)) return openTool(tT.id); return startAct(ts.act); }
+    if (d.bstmark) { var mp = d.bstmark.split(":"), mb = armBlocks()[+mp[0]], ms = mb && blockSteps(mb)[+mp[1]]; if (!ms) return; var mt = today(); S.ad = S.ad || {}; S.ad[mt] = S.ad[mt] || {}; S.ad[mt][stepKey(mb, ms)] = 1; save(); var sh0 = !!$("#sheet"); render(); if (sh0) openBlock(+mp[0]); return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
     if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bdt) { var bp = d.bdt.split(":"), oi = +bp[0], inSh = !!$("#sheet"); bdToggle(oi, +bp[1]); render(); if (inSh) openBlock(oi); return; }

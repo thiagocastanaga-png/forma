@@ -577,3 +577,13 @@ textarea.txin{resize:vertical;min-height:80px}
 .bditem.on{opacity:.65;text-decoration:line-through}
 .bdbox{width:22px;height:22px;border-radius:7px;border:2px solid rgba(0,0,0,.25);display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:14px;font-weight:800}
 .bditem.on .bdbox{background:#C6F432;border-color:#C6F432;color:#111}
+
+.bstep.tl{display:flex;align-items:center;gap:8px}
+.bstep.tl .bsc.on{background:#C6F432;border-color:#C6F432}
+.bstool{flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;background:none;border:0;font:inherit;color:inherit;text-align:left;padding:0;cursor:pointer}
+.bstool small{display:block;opacity:.7;font-size:12px}
+.bstool em{font-style:normal;font-weight:700;background:var(--tx);color:var(--bg);border-radius:999px;padding:5px 12px;font-size:13px}
+.bstep.tl.dn .bstool em{background:none;color:inherit}
+.bsyh{white-space:nowrap}
+.btsl{display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto}
+.btsr{display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
