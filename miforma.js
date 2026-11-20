@@ -679,10 +679,11 @@
     });
   }
   var lastAnim = "";
-  function sheet(html) {
+  function sheetF(html) { sheet(html, true); }
+  function sheet(html, full) {
     close();
-    var el = document.createElement("div"); el.className = "sheet"; el.id = "sheet";
-    el.innerHTML = "<div>" + html + "</div>"; document.body.appendChild(el);
+    var el = document.createElement("div"); el.className = "sheet" + (full ? " sfull" : ""); el.id = "sheet";
+    el.innerHTML = "<div>" + (full ? '<button class="fullback" data-close>\u2190 Volver</button>' : "") + html + "</div>"; document.body.appendChild(el);
     if (!REDUCE && el.animate) { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 700, stag: 0 }); }
   }
   function close() { var s = $("#sheet"); if (s) s.remove(); var f = $("#full"); if (f) f.remove(); stopBreath(); }
@@ -749,7 +750,7 @@
     return '<div class="pgm" data-key="' + key + '">' + [1, 2, 3, 4, 5].map(function (n) { return '<button class="chip" data-pgm="' + n + '" aria-pressed="' + (sel === n) + '">' + n + "</button>"; }).join("") + '</div><div class="row between small muted" style="margin-top:4px"><span>1 · ' + esc(P.lo) + "</span><span>5 · " + esc(P.hi) + "</span></div>";
   }
   function openPrograms() {
-    sheet('<h2 style="font-size:22px">Tus objetivos</h2><p class="muted small">Uno por vez, un paso por día. Elegí el que más te haga falta ahora.</p>' +
+    sheetF('<h2 style="font-size:22px">Tus objetivos</h2><p class="muted small">Uno por vez, un paso por día. Elegí el que más te haga falta ahora.</p>' +
       PG.list.map(function (P) { var it = pgItem(P.id), n = pgCount(P.id), st = !it ? "Empezar" : n >= 14 ? "Terminado" : (S.prog.cur === P.id ? "Paso " + (n + 1) + " de 14" : "Retomar");
         return '<button class="prod" data-pgopen="' + P.id + '"><span class="shape">' + (SHAPES[P.id] || SHAPES.vida) + "</span><span style='flex:1;min-width:0'><b>" + esc(P.n) + "</b><small>" + esc(P.tag) + " · " + esc(P.intro.split(".")[0]) + '.</small></span><span class="tag">' + st + "</span></button>"; }).join("") +
       '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
@@ -838,14 +839,14 @@
   function openLevelUp(id, li) {
     var P = pgOf(id), L = LVS[li], nx = LVS[li + 1], it = pgItem(id), rep = [];
     try { rep = pgReport(P, it) || []; } catch (e) {}
-    sheet('<div style="text-align:center;padding:6px 0"><div class="lvbadge">' + L.e + '</div><span class="badge">Nivel ' + (li + 1) + " completado</span><h2 style='font-size:26px;margin:10px 0 4px'>" + esc(L.n) + "</h2><p class='muted' style='margin:0'>" + esc(P.n) + " · " + lvXp(pgCount(id)) + " XP</p></div>" +
+    sheetF('<div style="text-align:center;padding:6px 0"><div class="lvbadge">' + L.e + '</div><span class="badge">Nivel ' + (li + 1) + " completado</span><h2 style='font-size:26px;margin:10px 0 4px'>" + esc(L.n) + "</h2><p class='muted' style='margin:0'>" + esc(P.n) + " · " + lvXp(pgCount(id)) + " XP</p></div>" +
       '<div class="card sage"><b>Lo que lograste</b><p class="small" style="margin:6px 0 0">' + esc(L.g) + "</p>" + (rep.length ? '<ul class="ticks" style="margin:8px 0 0">' + rep.slice(0, 2).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") + "</div>" +
       (nx ? '<div class="card"><b>Lo que viene: Nivel ' + (li + 2) + " · " + esc(nx.n) + '</b><p class="small muted" style="margin:6px 0 0">' + esc(nx.g) + " Tu próximo paso te espera mañana y aparece en tu día.</p></div>" : "") +
       '<button class="btn sage block" data-pgopen="' + id + '">Seguir mi camino</button>');
   }
   function openProgram(id) {
     var P = pgOf(id); if (!P) return;
-    if (!pgCan(id)) { var P0 = pgOf(id), pl0 = planOf(id); return sheet('<span class="badge">Objetivo · ' + esc(P0.n) + '</span><h2 style="font-size:24px;margin:8px 0 6px">¡Completaste tu primer paso!</h2><p class="muted">Hiciste el paso 1 y quedó guardado. Para seguir con los demás pasos, subir de nivel y ver tu resultado final, pasate a Forma Pro.</p><button class="btn sage block" data-openpro>Ver Forma Pro</button><div class="sec" style="margin-top:16px">Tu camino: 5 niveles</div>' + pgMap(P0, pgCount(id), false) + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>'); }
+    if (!pgCan(id)) { var P0 = pgOf(id), pl0 = planOf(id); return sheetF('<span class="badge">Objetivo · ' + esc(P0.n) + '</span><h2 style="font-size:24px;margin:8px 0 6px">¡Completaste tu primer paso!</h2><p class="muted">Hiciste el paso 1 y quedó guardado. Para seguir con los demás pasos, subir de nivel y ver tu resultado final, pasate a Forma Pro.</p><button class="btn sage block" data-openpro>Ver Forma Pro</button><div class="sec" style="margin-top:16px">Tu camino: 5 niveles</div>' + pgMap(P0, pgCount(id), false) + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>'); }
     var it = pgItem(id), n = pgCount(id), h = '<span class="badge">Objetivo por niveles</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(P.n) + "</h2>";
     if (!it) {
       h += '<p>' + esc(P.intro) + '</p><div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
@@ -867,11 +868,11 @@
       h += pgChart(P, it) + '<div class="sec" style="margin-top:16px">Tu camino</div>' + pgMap(P, n, true) +
         (S.prog.cur === id ? '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este objetivo</button>' : '<button class="btn ghost block" data-pgresume="' + id + '">Retomar este objetivo</button>') + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
     }
-    sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+    sheetF(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
   function openPgQuit(id) {
     var it = pgItem(id); if (!it) return;
-    sheet('<h2 style="font-size:22px">¿Pausar el programa?</h2>' + (it.why ? '<div class="card"><span class="small muted">Tu razón era</span><b style="display:block;margin-top:4px">«' + esc(it.why) + "»</b></div>" : "") + '<p class="small muted">Tu avance queda guardado y lo podés retomar cuando quieras.</p><button class="btn sage block" data-pgopen="' + id + '">Seguir con el programa</button><button class="btn ghost block" data-pgquit2="' + id + '" style="margin-top:8px">Pausar igual</button>');
+    sheetF('<h2 style="font-size:22px">¿Pausar el programa?</h2>' + (it.why ? '<div class="card"><span class="small muted">Tu razón era</span><b style="display:block;margin-top:4px">«' + esc(it.why) + "»</b></div>" : "") + '<p class="small muted">Tu avance queda guardado y lo podés retomar cuando quieras.</p><button class="btn sage block" data-pgopen="' + id + '">Seguir con el programa</button><button class="btn ghost block" data-pgquit2="' + id + '" style="margin-top:8px">Pausar igual</button>');
   }
   function progCard() {
     if (!isProU() || !PG.list.length) return "";
@@ -917,12 +918,12 @@
   var fbCat = "";
   function openFeedback() {
     var cats = ["Algo no funciona", "No se entiende", "Una idea", "Me gustó"];
-    sheet('<h2 style="font-size:22px">Tu comentario</h2><p class="muted small">Contame qué te pasó o qué pensás. Todo sirve, lo bueno y lo malo.</p><div class="chips" style="margin:8px 0">' + cats.map(function (c) { return '<button class="chip" data-fbc="' + esc(c) + '" aria-pressed="' + (fbCat === c) + '">' + esc(c) + "</button>"; }).join("") + '</div><textarea id="fbt" rows="5" maxlength="800" placeholder="Escribí acá..." style="width:100%;' + fieldCss() + '"></textarea><button class="btn sage block" data-fbsend style="margin-top:12px">Enviar</button><p class="small muted" style="margin:8px 0 0">Se abre para que lo mandes por WhatsApp o donde quieras. Ya incluye en qué pantalla estabas.</p><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
+    sheetF('<h2 style="font-size:22px">Tu comentario</h2><p class="muted small">Contame qué te pasó o qué pensás. Todo sirve, lo bueno y lo malo.</p><div class="chips" style="margin:8px 0">' + cats.map(function (c) { return '<button class="chip" data-fbc="' + esc(c) + '" aria-pressed="' + (fbCat === c) + '">' + esc(c) + "</button>"; }).join("") + '</div><textarea id="fbt" rows="5" maxlength="800" placeholder="Escribí acá..." style="width:100%;' + fieldCss() + '"></textarea><button class="btn sage block" data-fbsend style="margin-top:12px">Enviar</button><p class="small muted" style="margin:8px 0 0">Se abre para que lo mandes por WhatsApp o donde quieras. Ya incluye en qué pantalla estabas.</p><button class="btn ghost block" data-close style="margin-top:8px">Cancelar</button>');
   }
   function sendFeedback() {
     var t = ($("#fbt") || {}).value || ""; if (!t.trim()) return;
     var txt = "Comentario sobre Forma (" + (fbCat || "general") + "):\n" + t.trim() + "\n\n— versión " + BUILD + " · " + (PFREE ? "gratis" : "completa") + " · pantalla: " + tab + " · " + window.innerWidth + "x" + window.innerHeight;
-    function done(m) { sheet('<h2 style="font-size:22px">' + m + '</h2><button class="btn block" data-close>Listo</button>'); }
+    function done(m) { sheetF('<h2 style="font-size:22px">' + m + '</h2><button class="btn block" data-close>Listo</button>'); }
     if (navigator.share) navigator.share({ text: txt }).then(function () { done("¡Gracias!"); }, function () {});
     else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { done("Copiado. Pegalo en un mensaje para mandármelo."); }, function () { done("No se pudo copiar."); });
   }
@@ -1996,7 +1997,7 @@
   }
   function armKey(b) { return b.kind + "|" + b.label + "|" + b.s; }
   function armCheckable(b) { return b.kind === "train" || b.kind === "focus" || b.kind === "habit" || b.kind === "pause" || (b.kind === "rest" && b.label.indexOf("Desconectar") === 0); }
-  function bchips(b) { var d = bdetails(b); if (!d.length) return ""; return '<span class="bchips">' + d.slice(0, 3).map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + (d.length > 3 ? "<em>+" + (d.length - 3) + "</em>" : "") + "</span>"; }
+  function bchips(b) { var d = bdetails(b); if (!d.length) return ""; var n = bdDoneN(b); return '<span class="bchips"><em>' + (n === d.length ? "\u2713 " : "") + n + "/" + d.length + " para hacer</em></span>"; }
   function armToolOf(b) { return b.tool || ARMTOOL[b.label] || (b.kind === "train" ? "movimiento" : b.kind === "focus" ? "foco" : ""); }
   function armDone(b) { if (b.pgstep) return pgToday(b.pgstep); return !!(S.ad && S.ad[today()] && S.ad[today()][armKey(b)]); }
   function armOpen(ans) {
@@ -2240,12 +2241,7 @@
   }
   function deployBody(b, i) {
     var h = "", pro = isProU(), tl = blockTools(b), tips = blockTips(b), det = bdetails(b), steps = blockSteps(b), gst = (b.steps || []).length, G = S.goal && S.goal.ids && S.goal.ids.length ? goalById(S.goal.ids[0]) : null;
-    if (tl.length) h += deployGroup("tools", "Herramientas", "para este momento", tl.map(function (T) {
-      var ok = toolOk(T), pl = planOf(T.plan);
-      return '<div class="dtool"><button class="dtinfo" data-tl="' + T.id + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + '</small></button>' + (ok ? '<button class="btn sage sm" ' + (T.app ? 'data-tlapp="' + T.id + '"' : 'data-act="' + T.act + '"') + '>Usar</button>' : '<button class="dlock" data-tl="' + T.id + '" aria-label="Con Forma Pro">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Pro</button>") + "</div>";
-    }).join(""));
-    if (tips.length) h += deployGroup("tips", "Para tener en cuenta", "", "<ul>" + tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>");
-    h += deployGroup("mine", "Tus detalles", "", (det.length ? '<div class="bchips">' + det.map(function (x) { return "<em>" + esc(x) + "</em>"; }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todavía no agregaste nada para este momento.</p>') + '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis detalles" : "Agregar un detalle") + "</button>");
+    h += deployGroup("mine", "Para hacer en este momento", "", (det.length ? '<div class="bdlist">' + det.map(function (x, j) { return bdItem(b, i, j, x); }).join("") + "</div>" : '<p class="small muted" style="margin:0">Todav\u00eda no agregaste nada para hacer en este momento.</p>') + '<button class="linkbtn small" data-blkopen="' + i + '" style="margin-top:8px">' + (det.length ? "Editar mis acciones" : "Agregar una acci\u00f3n") + "</button>");
     return h;
   }
   function deployHtml(b, i) {
@@ -2281,15 +2277,23 @@
   }
   function bkey(b) { return b.kind + "|" + b.label; }
   function bdetails(b) { return (S.bn && S.bn[bkey(b)]) || []; }
+  function bdDone(b, x) { return !!(S.bdn && S.bdn[today()] && S.bdn[today()][bkey(b) + "::" + x]); }
+  function bdDoneN(b) { return bdetails(b).filter(function (x) { return bdDone(b, x); }).length; }
+  function bdToggle(i, j) {
+    var b = armBlocks()[i], x = b && bdetails(b)[j]; if (x === undefined) return;
+    var t = today(); if (!S.bdn || !S.bdn[t]) S.bdn = (function () { var o = {}; o[t] = {}; return o; })();
+    var k = bkey(b) + "::" + x; if (S.bdn[t][k]) delete S.bdn[t][k]; else S.bdn[t][k] = 1; save();
+  }
+  function bdItem(b, i, j, x) { var on = bdDone(b, x); return '<button class="bditem' + (on ? " on" : "") + '" data-bdt="' + i + ":" + j + '" aria-pressed="' + (on ? "true" : "false") + '"><span class="bdbox">' + (on ? "\u2713" : "") + "</span><span>" + esc(x) + "</span></button>"; }
   function openBlock(i) {
     var bl = armBlocks(), b = bl[i]; if (!b) return;
     var k = window.FormaDia.KIND[b.kind], pro = isProU(), det = bdetails(b), tk = armToolOf(b), ck = armCheckable(b);
     sheet('<span class="badge">' + k.tag + " · " + window.FormaDia.fmt(b.s) + " a " + window.FormaDia.fmt(b.e) + '</span><h2 style="font-size:24px;margin:8px 0 4px">' + esc(b.label) + "</h2>" + (b.note ? '<p class="muted">' + esc(b.note) + "</p>" : "") +
       stepsHtml(b, i, false) +
-      '<div class="sec" style="margin-top:14px">Tus detalles para este momento</div>' +
-      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:7px 0;border-top:1px solid var(--line)"><span>' + esc(x) + '</span><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
-      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px"><input id="bn" maxlength="80" placeholder="Agregar un detalle" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 detalles. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
-      '<p class="small muted" style="margin:8px 0 0">Se repite todos los días en este momento.</p>' +
+      '<div class="sec" style="margin-top:14px">Para hacer en este momento</div>' +
+      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1">' + bdItem(b, i, j, x) + '</div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Anotá lo que querés incluir: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
+      (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px"><input id="bn" maxlength="80" placeholder="Agregar una acci\u00f3n" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 detalles. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
+      '<p class="small muted" style="margin:8px 0 0">Se repite todos los días en este momento y la tildás cada día.</p>' +
       (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
       (ck && tk && !armDone(b) ? '<button class="btn sage block" data-armtool="' + tk + '" style="margin-top:12px">Hacer ahora (actividad guiada)</button>' : "") +
       (ck ? '<button class="btn block" data-ackb="' + i + '" style="margin-top:8px">' + (armDone(b) ? "Marcar como no hecho" : "Marcar como hecho") + "</button>" : "") +
@@ -2735,6 +2739,7 @@
     if (d.deploy !== undefined) { deployOpen = !deployOpen; t.setAttribute("aria-expanded", deployOpen); var dw = t.parentNode.querySelector(".dwrap"); if (dw) { dw.hidden = !deployOpen; if (deployOpen) animIn(dw.children, { dy: 12, d: 600, stag: 90 }); } return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
     if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
+    if (d.bdt) { var bp = d.bdt.split(":"), oi = +bp[0], inSh = !!$("#sheet"); bdToggle(oi, +bp[1]); render(); if (inSh) openBlock(oi); return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2) { S.bn[bkey(bd2)].splice(+pr[1], 1); save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
     if (d.setview) { try { localStorage.setItem("forma_view", d.setview); } catch (e) {} render(); window.scrollTo(0, 0); return; }
