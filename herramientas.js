@@ -732,7 +732,7 @@
   function open(id) {
     var T = (window.FormaTools.defs || []).filter(function (t) { return t.id === id; })[0]; if (!T || !APPS[id]) return;
     cur = id; F = {}; ses = null; clearInterval(tick); tick = null;
-    var b = BR(); b.sheet('<div class="row"><span class="shape">' + b.shape(T.plan) + '</span><div><span class="badge">Herramienta · ' + esc(b.planName(T.plan)) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><div id="tx" style="margin-top:12px"></div><button class="btn ghost block" data-close style="margin-top:6px">Listo</button>', true);
+    var b = BR(); b.sheet('<div class="row"><span class="shape">' + b.shape(T.id) + '</span><div><span class="badge">Herramienta · ' + esc(b.planName(T.plan)) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><div id="tx" style="margin-top:12px"></div><button class="btn ghost block" data-close style="margin-top:6px">Listo</button>', true);
     paint();
   }
   document.addEventListener("click", function (e) {

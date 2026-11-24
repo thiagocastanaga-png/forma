@@ -683,7 +683,7 @@
   function sheet(html, full) {
     close();
     var el = document.createElement("div"); el.className = "sheet" + (full ? " sfull" : ""); el.id = "sheet";
-    el.innerHTML = "<div>" + (full ? '<button class="fullback" data-close>\u2190 Volver</button>' : "") + html + "</div>"; document.body.appendChild(el);
+    el.innerHTML = "<div>" + (full && full !== "bare" ? '<button class="fullback" data-close>\u2190 Volver</button>' : "") + html + "</div>"; document.body.appendChild(el);
     if (!REDUCE && el.animate) { if (full) animIn([el.firstChild], { dy: 16, d: 380, stag: 0 }); else { el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, fill: "backwards" }); animIn([el.firstChild], { dy: 40, d: 700, stag: 0 }); } }
   }
   function close() { var s = $("#sheet"); if (s) s.remove(); var f = $("#full"); if (f) f.remove(); stopBreath(); }
@@ -837,15 +837,7 @@
     var cur = lvOf(Math.min(n, 13)), L = LVS[cur], inL = Math.max(0, Math.min(n, L.t + 1) - L.f), tot = L.t - L.f + 1;
     return '<div class="lvhead"><div class="row between"><b>Nivel ' + (cur + 1) + " de 5 · " + esc(L.n) + '</b><span class="lvxp">' + lvXp(n) + ' XP</span></div><div class="pgbar"><i style="width:' + Math.round(inL * 100 / tot) + '%"></i></div><p class="small muted" style="margin:6px 0 0">' + inL + " de " + tot + " pasos del nivel · " + n + " de 14 en total</p></div>";
   }
-  function openLevelUp(id, li) {
-    var P = pgOf(id), L = LVS[li], nx = LVS[li + 1], it = pgItem(id), rep = [];
-    try { rep = pgReport(P, it) || []; } catch (e) {}
-    sheetF('<div style="text-align:center;padding:6px 0"><div class="lvbadge">' + L.e + '</div><span class="badge">Nivel ' + (li + 1) + " completado</span><h2 style='font-size:26px;margin:10px 0 4px'>" + esc(L.n) + "</h2><p class='muted' style='margin:0'>" + esc(P.n) + " · " + lvXp(pgCount(id)) + " XP</p></div>" +
-      '<div class="card sage"><b>Lo que lograste</b><p class="small" style="margin:6px 0 0">' + esc(L.g) + "</p>" + (rep.length ? '<ul class="ticks" style="margin:8px 0 0">' + rep.slice(0, 2).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" : "") + "</div>" +
-      (nx ? '<div class="card"><b>Lo que viene: Nivel ' + (li + 2) + " · " + esc(nx.n) + '</b><p class="small muted" style="margin:6px 0 0">' + esc(nx.g) + " Tu próximo paso te espera mañana y aparece en tu día.</p></div>" : "") +
-      '<button class="btn sage block" data-pgopen="' + id + '">Seguir mi camino</button>');
-  }
-  function openProgram(id) { if (!pgOf(id)) return; openHome(id, "hoy"); }
+  function openProgram(id) { if (!pgOf(id)) return; openHome(id, "camino"); }
   function openProgramOld(id) {
     var P = pgOf(id); if (!P) return;
     if (!pgCan(id)) { var P0 = pgOf(id), pl0 = planOf(id); return sheetF('<span class="badge">Objetivo · ' + esc(P0.n) + '</span><h2 style="font-size:24px;margin:8px 0 6px">¡Completaste tu primer paso!</h2><p class="muted">Hiciste el paso 1 y quedó guardado. Para seguir con los demás pasos, subir de nivel y ver tu resultado final, pasate a Forma Pro.</p><button class="btn sage block" data-openpro>Ver Forma Pro</button><div class="sec" style="margin-top:16px">Tu camino: 5 niveles</div>' + pgMap(P0, pgCount(id), false) + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>'); }
@@ -872,9 +864,19 @@
     }
     sheetF(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
-  // ---------- CASA DE CADA OBJETIVO: Hoy · Herramientas · Progreso ----------
-  var HOME = null;
+  // ================= OBJETIVOS: camino estilo Duolingo =================
+  var HOME = null, LSN = null;
+  var TEMO = {
+    respirar: "🌬️", movimiento: "🤸", cierre: "🌙", dormir: "🛏️", descarga: "📝", antesabrir: "✋", pausacel: "📵", foco: "🎯", dosmin: "⏱️",
+    calma: "🫁", grounding: "🖐️", estudio: "📖", repaso: "🧠", previa: "🔥", recupero: "🧘", fuerza: "💪", caminata: "🚶", atento: "🍽️", entrevista: "🎤",
+    sueno: "😴", pantalla: "📱", matriz: "🗂️", enfoque: "⏳", animo: "🌤️", ritmos: "🎵", tarjetas: "🃏", examen: "📅", revision: "🗓️", rutinas: "🔁",
+    entreno: "🏋️", partidos: "🏆", comidas: "🥗", menu: "🛒", mover: "👟", gastos: "💸", ahorro: "🐷", viaje: "✈️", valija: "🧳", postul: "💼"
+  };
+  var GEMO = { dormir: "😴", celular: "📵", arrancar: "🚀", calma: "🧘", estudio: "📚", plata: "💰", movimiento: "🏃", comer: "🥗", viajes: "✈️", laburo: "💼", deporte: "🏆", vida: "🌱" };
+  function temo(id) { return TEMO[id] || "🧰"; }
+  function gemo(id) { return GEMO[id] || "🎯"; }
   function goalOfPlan(pid) { return GOALS.filter(function (g) { return g.plan === pid; })[0]; }
+  function goalName(id) { var g = goalOfPlan(id), p = planOf(id); return g ? g.n : p ? p.n : ""; }
   function btsOfTool(tid) { return (S.bts || []).filter(function (x) { return x.tool === tid; }); }
   function bkLabel(bk) { return String(bk || "").split("|").slice(1).join("|"); }
   function toolDoneToday(T) {
@@ -882,78 +884,213 @@
     if (T.app) return !!(window.FormaTools && window.FormaTools.done && window.FormaTools.done(T.id));
     return !!(S.tdn && S.tdn[today()] && S.tdn[today()][T.id]);
   }
-  function homeHead(id) {
-    var p = planOf(id), g = goalOfPlan(id), P = pgOf(id), it = pgItem(id), n = pgCount(id), lv = lvOf(Math.min(n, 13));
-    var sub = !it ? "Objetivo · 5 niveles" : n >= 14 ? "Objetivo completado 🏆" : "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n;
-    return '<div class="hmhead" style="--c:' + p.c + '"><span class="hmemo">' + (SHAPES[id] || "") + '</span><div style="flex:1;min-width:0"><span class="hmsub">' + esc(sub) + "</span><h2>" + esc(g ? g.n : p.n) + "</h2></div>" + (it ? '<span class="lvxp">' + lvXp(n) + " XP</span>" : "") + "</div>" +
-      (it ? '<div class="pgbar hmbar" style="--c:' + p.c + '"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></div><p class="small muted" style="margin:6px 0 0">' + Math.min(n, 14) + " de 14 pasos" + (it.why ? " · «" + esc(it.why) + "»" : "") + "</p>" : '<p class="muted" style="margin:10px 0 0">' + esc(P.intro) + "</p>");
+  function homeToolList(id) { return toolsOf(id).slice().sort(function (a, b) { return (b.app ? 1 : 0) - (a.app ? 1 : 0); }); }
+  // --- racha, XP, misiones ---
+  function pgDates(it) { var o = {}; if (it && it.done) Object.keys(it.done).forEach(function (k) { o[it.done[k]] = 1; }); return o; }
+  function pgStreak(id) { var D = pgDates(pgItem(id)), n = 0, i = D[today()] ? 0 : 1; while (i < 4000 && D[daysBack(i)]) { n++; i++; } return n; }
+  function pgBest(id) {
+    var ks = Object.keys(pgDates(pgItem(id))).sort(), best = 0, run = 0, prev = null;
+    ks.forEach(function (k) { var d = new Date(k + "T12:00:00"); run = prev && Math.round((d - prev) / 864e5) === 1 ? run + 1 : 1; best = Math.max(best, run); prev = d; });
+    return best;
+  }
+  function pgXp(id) { var it = pgItem(id); return it ? lvXp(pgCount(id)) + 15 * Object.keys(it.bx || {}).length : 0; }
+  function allXp() { return PG.list.reduce(function (s, P) { return s + pgXp(P.id); }, 0); }
+  function allLevels() { return PG.list.reduce(function (s, P) { var n = pgCount(P.id); return s + LVS.filter(function (L) { return n > L.t; }).length; }, 0); }
+  function pgQuests(id) {
+    var L = toolsOf(id), n = pgCount(id), used = L.some(function (T) { return toolOk(T) && toolDoneToday(T); });
+    return [
+      { e: "👣", t: n >= 14 ? "Objetivo completo: sostené lo que lograste" : "Completá tu paso de hoy", ok: n >= 14 || pgToday(id) },
+      { e: temo((L[0] || {}).id), t: "Usá una herramienta de este objetivo", ok: used },
+      { e: "📍", t: "Tené una herramienta sumada a tu día", ok: L.some(function (T) { return btsOfTool(T.id).length; }) }
+    ];
+  }
+  function questsHtml(id) {
+    var it = pgItem(id); if (!it || !pgOwns(id)) return "";
+    var Q = pgQuests(id), ok = Q.filter(function (q) { return q.ok; }).length, got = it.bx && it.bx[today()];
+    return '<div class="quests"><div class="qhead"><b>🎯 Misiones de hoy</b><span>' + ok + "/3</span></div>" +
+      Q.map(function (q) { return '<div class="qrow' + (q.ok ? " ok" : "") + '"><span class="qemo">' + q.e + "</span><span class='qt'>" + esc(q.t) + '</span><span class="qck">' + (q.ok ? "✅" : "⬜") + "</span></div>"; }).join("") +
+      '<div class="qbar"><i style="width:' + Math.round(ok * 100 / 3) + '%"></i></div>' +
+      (got ? '<p class="qdone">🎉 Cofre abierto: +15 XP. Volvé mañana por otro.</p>' : ok === 3 ? '<button class="btn qchest block" data-pgchest="' + id + '">🎁 Abrir cofre · +15 XP</button>' : '<p class="qhint">Completá las 3 y abrí el cofre 🎁</p>') + "</div>";
+  }
+  function face(P, v) { var F = ["😣", "😕", "😐", "🙂", "😄"]; return P.better === "up" ? F[v - 1] : F[5 - v]; }
+  // --- cabecera ---
+  function homeTop(id) {
+    var p = planOf(id), it = pgItem(id), n = pgCount(id), li = lvOf(Math.min(n, 13)), L = LVS[li];
+    var sub = !it ? "5 niveles · 14 pasos" : n >= 14 ? "🏆 Objetivo completado" : L.e + " Nivel " + (li + 1) + " · " + L.n;
+    return '<div class="ohtop"><button class="ohback" data-homex aria-label="Volver a objetivos">←</button><span class="ohst" title="Días seguidos">🔥 ' + pgStreak(id) + '</span><span class="ohst" title="Experiencia">⚡ ' + pgXp(id) + "</span></div>" +
+      '<div class="ohhero" style="--c:' + p.c + '"><span class="ohemo">' + gemo(id) + '</span><div style="flex:1;min-width:0"><small>' + esc(sub) + "</small><h2>" + esc(goalName(id)) + "</h2>" +
+      (it ? '<div class="ohbar"><i style="width:' + Math.round(Math.min(n, 14) * 100 / 14) + '%"></i></div><small class="ohn">' + Math.min(n, 14) + " de 14 pasos</small>" : "") + "</div></div>";
   }
   function homeTabs(tab) {
-    return '<div class="hmtabs" role="tablist">' + [["hoy", "Hoy"], ["tools", "Herramientas"], ["prog", "Progreso"]].map(function (t) { return '<button role="tab" data-htab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + "</button>"; }).join("") + "</div>";
+    return '<div class="hmtabs" role="tablist">' + [["camino", "🗺️ Camino"], ["tools", "🧰 Herramientas"], ["cambio", "📈 Mi cambio"]].map(function (t) { return '<button role="tab" data-htab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + "</button>"; }).join("") + "</div>";
   }
-  function homeToolRow(T, compact) {
-    var ok = toolOk(T), dn = ok && toolDoneToday(T), inDay = btsOfTool(T.id);
-    var tags = '<div class="hmtags"><span>' + (T.app ? "📊 Registro" : "▶️ Guiada") + " · " + T.mins + " min</span>" + (dn ? '<span class="ok">✓ Hecha hoy</span>' : "") + inDay.map(function (x) { return '<span class="day">En tu día · ' + esc(bkLabel(x.bk)) + ' <button class="hmx" data-btsx="' + x.id + '" aria-label="Sacar de mi día">✕</button></span>'; }).join("") + "</div>";
-    var acts = ok ? '<div class="hmacts"><button class="btn sage sm" data-huse="' + T.id + '">' + (dn && T.app ? "Abrir" : "Usar") + "</button>" + (compact ? "" : isProU() ? '<button class="btn ghost sm" data-btsadd="' + T.id + '">' + (inDay.length ? "Sumar a otro momento" : "Sumar a mi día") + "</button>" : '<button class="btn ghost sm" data-openpro>🔒 Sumar a mi día</button>') + "</div>"
-      : '<div class="hmacts"><button class="btn ghost sm" data-openpro>🔒 Con Forma Pro</button></div>';
-    return '<div class="hmtool' + (ok ? "" : " lock") + (dn ? " dn" : "") + '"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + "</small>" + tags + acts + "</div>";
+  // --- camino ---
+  var ZZ = [0, 52, 78, 52, 0, -52, -78, -52];
+  function nodeHtml(id, s, k, P) {
+    var it = pgItem(id), n = pgCount(id), started = !!it, st, emo, bub = "";
+    var li = lvOf(s), L = LVS[li], paused = started && S.prog && S.prog.cur !== id;
+    if (s < n) { st = "done"; emo = "⭐"; }
+    else if (s === n && n < 14) {
+      if (!pgCan(id)) { st = "pro"; emo = "🔒"; bub = "Con Forma Pro"; }
+      else if (!started) { st = "cur"; emo = L.e; bub = "¡Empezá acá!"; }
+      else if (paused) { st = "cur"; emo = L.e; bub = "Retomar"; }
+      else if (pgToday(id)) { st = "wait"; emo = "⏳"; bub = "Mañana"; }
+      else if (!pgWhenOk(P.days[s])) { st = "wait"; emo = P.days[s].when === "pm" ? "🌙" : "☀️"; bub = P.days[s].when === "pm" ? "Desde las 18:00" : "Hasta las 14:00"; }
+      else { st = "cur"; emo = L.e; bub = "Hoy"; }
+    } else { st = "lock"; emo = "🔒"; }
+    return '<div class="pnrow" style="--x:' + ZZ[k % ZZ.length] + 'px">' + (bub ? '<span class="pbub">' + esc(bub) + "</span>" : "") + '<button class="pnode ' + st + '" data-pgnode="' + id + "|" + s + "|" + st + '" aria-label="Paso ' + (s + 1) + ": " + esc(P.days[s].t) + '"><span>' + emo + '</span></button><span class="pnlab">' + esc(P.days[s].t) + "</span></div>";
   }
-  function homeToolList(id) { return toolsOf(id).slice().sort(function (a, b) { return (b.app ? 1 : 0) - (a.app ? 1 : 0); }); }
-  function homeHoy(id) {
-    var P = pgOf(id), it = pgItem(id), n = pgCount(id), h = '<div class="sec" style="margin-top:4px">Tu paso de hoy</div>';
-    if (!pgCan(id)) h += '<div class="card dark"><b>¡Hiciste tu primer paso!</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro seguís con los 14 pasos, subís de nivel y ves tu resultado con datos reales.</p><button class="btn sage" data-openpro>Ver Forma Pro</button></div>';
-    else if (!it) {
-      h += '<div class="card"><b>Antes de empezar</b><p class="small" style="margin:6px 0 10px">' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
-        '<div class="card"><b>Tu razón</b><p class="small muted" style="margin:4px 0 8px">Escribila: te la vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
-        '<label class="pgl">¿A qué hora querés hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + (P.reminder || "20:00") + '"></div>' +
-        '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn sage block" data-pgstart="' + id + '">Empezar objetivo</button>' +
-        '<p class="small muted" style="margin:10px 0 0">Un paso por día, de 2 a 5 minutos. En «Progreso» ves los 5 niveles.</p>';
-    } else if (n >= 14) {
-      var b = it.before, a = it.after, rep = pgReport(P, it);
-      h += '<div class="card' + (a ? " sage" : "") + '"><b>¡Completaste todos los niveles!</b>' + (a ? '<p style="margin:8px 0 0">' + esc(P.q) + "<br><b>Antes: " + b + " · Después: " + a + "</b></p><p class=\"small\" style=\"margin:6px 0 0\">" + (P.better === "up" ? (a > b ? "Mejoraste. Seguí usando tus herramientas para sostenerlo." : "Todavía no se nota el cambio. Es normal: repetí lo que más te sirvió.") : (a < b ? "Bajó. Usá tus herramientas cuando haga falta." : "Todavía no bajó. Repetí lo que más te sirvió y, si sigue, hablalo con un profesional.")) + "</p>" :
-        '<p class="small" style="margin:6px 0 10px">Último paso: contanos cómo estás ahora. ' + esc(P.q) + "</p>" + scaleChips(P, "after", 0) + '<button class="btn sage block" data-pgafter="' + id + '" style="margin-top:10px">Ver mi resultado</button>') + "</div>" +
-        (a ? '<div class="card"><b>Tus datos reales</b><ul class="ticks" style="margin:8px 0 0">' + rep.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" : "") +
-        '<button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:12px">Repetir el objetivo</button>';
-    } else if (!S.prog || S.prog.cur !== id) {
-      var oc = S.prog && S.prog.cur && pgOf(S.prog.cur);
-      h += '<div class="card"><b>Este objetivo está en pausa</b><p class="small muted" style="margin:6px 0 10px">Vas por el paso ' + (n + 1) + " de 14. " + (oc ? "Hacés un camino a la vez: si lo retomás, pausamos «" + esc(oc.n) + "». Tus herramientas siguen disponibles igual." : "Retomalo cuando quieras: tu avance quedó guardado.") + '</p><button class="btn sage" data-pgresume="' + id + '">Retomar</button></div>';
-    } else {
-      var st = P.days[n], done = pgToday(id), ok = pgWhenOk(st);
-      if (done) h += '<div class="card sage"><b>Listo por hoy ✓</b><p class="small" style="margin:4px 0 0">Mañana te espera el paso ' + (n + 1) + ": «" + esc(st.t) + "». Una cosa por día alcanza.</p></div>";
-      else if (!ok) h += '<div class="card"><span class="small muted">Paso ' + (n + 1) + ' de 14</span><b style="display:block;font-size:18px;margin-top:2px">' + esc(st.t) + '</b><p class="small muted" style="margin:8px 0 0">' + pgWhenTxt(st) + "</p></div>";
-      else h += '<div class="card"><span class="small muted">Paso ' + (n + 1) + ' de 14</span><b style="display:block;font-size:18px;margin-top:2px">' + esc(st.t) + "</b><p style='margin:8px 0'>" + esc(st.a) + "</p><p class='small muted' style='margin:0'>" + esc(st.w) + "</p>" + pgStepForm(P, id, n, it) + '<p class="small" id="pgmsg" style="margin:12px 0 0;color:var(--err)"></p><button class="btn block" data-pgdone="' + id + '" style="margin-top:10px">Completar paso</button></div>';
-    }
-    var L = homeToolList(id), mine = L.filter(function (T) { return toolOk(T) && btsOfTool(T.id).length; });
-    if (mine.length) h += '<div class="sec" style="margin-top:18px">Tus herramientas de hoy</div>' + mine.map(function (T) { return homeToolRow(T, true); }).join("");
-    else if (L.some(toolOk)) h += '<div class="card" style="margin-top:14px"><b>Sumá herramientas a tu día</b><p class="small muted" style="margin:6px 0 10px">Elegí una y sumala a un momento de tu día: queda como un paso y se tilda sola cuando la usás.</p><button class="btn ghost sm" data-htab="tools">Ver herramientas</button></div>';
-    else if (L.length) h += '<div class="card" style="margin-top:14px"><b>Herramientas de este objetivo</b><p class="small muted" style="margin:6px 0 10px">' + L.length + " herramientas para registrar, practicar y ver tu avance. Vienen con Forma Pro.</p><button class=\"btn ghost sm\" data-htab=\"tools\">Verlas</button></div>";
-    return h;
+  function pathHtml(id) {
+    var P = pgOf(id), it = pgItem(id), n = pgCount(id), k = 0, cl = lvOf(Math.min(n, 13)), h = '<div class="path">';
+    LVS.forEach(function (L, li) {
+      var ldone = n > L.t, lnow = !ldone && li === cl;
+      h += '<div class="ubanner ' + (ldone ? "done" : lnow ? "now" : "lock") + '"><div style="flex:1;min-width:0"><small>Nivel ' + (li + 1) + (ldone ? " · completado ✅" : "") + "</small><b>" + esc(L.n) + "</b><span>" + esc(L.g) + '</span></div><span class="uemo">' + L.e + "</span></div>";
+      for (var s = L.f; s <= L.t; s++) { if (P.days[s]) { h += nodeHtml(id, s, k, P); k++; } }
+      var last = li === LVS.length - 1;
+      h += '<div class="pnrow" style="--x:' + ZZ[k % ZZ.length] + 'px"><button class="pnode chest ' + (ldone ? "open" : "lock") + '" data-pgchestlv="' + id + "|" + li + "|" + (ldone ? 1 : 0) + '" aria-label="Premio del nivel ' + (li + 1) + '"><span>' + (last ? "🏆" : ldone ? "🏅" : "🎁") + '</span></button><span class="pnlab">' + (last ? "Tu resultado" : "Premio del nivel " + (li + 1)) + "</span></div>";
+      k++;
+    });
+    return h + "</div>";
   }
-  function homeToolsTab(id) {
-    var L = homeToolList(id);
-    if (!L.length) return '<p class="muted">Pronto vas a tener herramientas para este objetivo.</p>';
-    return '<p class="small muted" style="margin:4px 0 12px">Usalas cuando quieras o sumalas a un momento de tu día: quedan como un paso y se tildan solas cuando las usás.</p>' + L.map(function (T) { return homeToolRow(T, false); }).join("");
-  }
-  function homeProg(id) {
+  function homeCamino(id) {
     var P = pgOf(id), it = pgItem(id), n = pgCount(id), h = "";
-    var sums = homeToolList(id).filter(function (T) { return T.app && toolOk(T); }).map(function (T) { var s = window.FormaTools && window.FormaTools.sum ? window.FormaTools.sum(T.id) : ""; return s ? '<button class="hmdata" data-huse="' + T.id + '"><small>' + esc(T.n) + "</small><b>" + esc(s) + "</b></button>" : ""; }).join("");
-    h += '<div class="sec" style="margin-top:4px">Tus datos</div>' + (sums || '<div class="card"><p class="small muted" style="margin:0">Cuando uses las herramientas de registro, acá vas a ver tus números reales.</p></div>');
-    if (it) h += '<div class="card"><b>Cómo arrancaste</b><p class="small" style="margin:6px 0 0">' + esc(P.q) + " <b>" + it.before + "/5</b>" + (it.after ? " → ahora <b>" + it.after + "/5</b>" : " · al terminar lo medimos de nuevo") + "</p></div>" + pgChart(P, it);
-    h += '<div class="sec" style="margin-top:16px">Tu camino · 5 niveles</div>' + pgMap(P, n, !!it);
-    if (it && n < 14 && S.prog && S.prog.cur === id) h += '<button class="linkbtn small" data-pgquit="' + id + '">Pausar este objetivo</button>';
-    return h + '<p class="small muted" style="margin-top:10px">' + esc(P.note) + "</p>";
+    if (!it) h += '<div class="ohintro"><p>' + esc(P.intro) + '</p><button class="btn lsngo block" data-pgnode="' + id + '|0|cur">🚀 Empezar el camino</button><small>Un paso por día, de 2 a 5 minutos. Cada paso es algo que cambiás de verdad en tu día.</small></div>';
+    else if (n >= 14) h += resultHtml(id);
+    else if (S.prog && S.prog.cur !== id) { var oc = S.prog.cur && pgOf(S.prog.cur); h += '<div class="ohintro"><p><b>⏸️ Este objetivo está en pausa.</b> ' + (oc ? "Hacés un camino a la vez: si lo retomás, pausamos «" + esc(goalName(S.prog.cur)) + "». " : "") + 'Tu avance quedó guardado.</p><button class="btn lsngo block" data-pgresume="' + id + '">▶️ Retomar</button></div>'; }
+    else if (!pgCan(id)) h += '<div class="ohintro pro"><p><b>🎉 ¡Hiciste tu primer paso!</b> Con Forma Pro seguís el camino completo: 14 pasos, 5 niveles, misiones y tu resultado con datos reales.</p><button class="btn lsngo block" data-openpro>Ver Forma Pro</button></div>';
+    else if (it.why) h += '<p class="ohwhy">💬 Tu razón: «' + esc(it.why) + "»</p>";
+    h += questsHtml(id) + pathHtml(id);
+    if (it && n < 14 && S.prog && S.prog.cur === id) h += '<button class="linkbtn small" data-pgquit="' + id + '" style="display:block;margin:18px auto 0">Pausar este objetivo</button>';
+    return h + '<p class="small muted" style="margin-top:14px;text-align:center">' + esc(P.note) + "</p>";
   }
+  function resultHtml(id) {
+    var P = pgOf(id), it = pgItem(id), b = it.before, a = it.after;
+    if (!a) return '<div class="ohintro"><p><b>🏆 ¡Llegaste al final del camino!</b> Último paso: contanos cómo estás ahora.<br>' + esc(P.q) + "</p>" + scaleChips(P, "after", 0) + '<button class="btn lsngo block" data-pgafter="' + id + '" style="margin-top:12px">Ver mi resultado</button></div>';
+    var better = P.better === "up" ? a > b : a < b;
+    return '<div class="ohintro win"><p><b>🏆 Objetivo completado</b></p><div class="bvsa"><div><span>' + face(P, b) + "</span><b>" + b + '/5</b><small>Antes</small></div><span class="arr">➜</span><div><span>' + face(P, a) + "</span><b>" + a + '/5</b><small>Ahora</small></div></div><p class="small" style="margin:10px 0 0">' + (better ? "Cambiaste de verdad. Seguí usando tus herramientas para sostenerlo. 💪" : "Todavía no se nota del todo. Es normal: repetí lo que más te sirvió" + (P.better === "up" ? "." : " y, si sigue, hablalo con un profesional.")) + '</p><button class="btn ghost block" data-pgagain="' + id + '" style="margin-top:12px">🔁 Repetir el camino</button></div>';
+  }
+  // --- herramientas ---
+  function toolCard(T) {
+    var ok = toolOk(T), dn = ok && toolDoneToday(T), inDay = btsOfTool(T.id);
+    var tags = '<div class="hmtags"><span>' + (T.app ? "📊 Registro" : "▶️ Guiada") + " · " + T.mins + " min</span>" + (dn ? '<span class="ok">✅ Hecha hoy</span>' : "") + inDay.map(function (x) { return '<span class="day">📍 ' + esc(bkLabel(x.bk)) + ' <button class="hmx" data-btsx="' + x.id + '" aria-label="Sacar de mi día">✕</button></span>'; }).join("") + "</div>";
+    var acts = ok ? '<div class="hmacts"><button class="btn sage sm" data-huse="' + T.id + '">' + (T.app ? "Abrir" : "▶️ Usar") + "</button>" + (isProU() ? '<button class="btn ghost sm" data-btsadd="' + T.id + '">' + (inDay.length ? "➕ Otro momento" : "📍 Sumar a mi día") + "</button>" : "") + "</div>"
+      : '<div class="hmacts"><button class="btn ghost sm" data-openpro>🔒 Con Forma Pro</button></div>';
+    return '<div class="tcard' + (ok ? "" : " lock") + (dn ? " dn" : "") + '"><span class="temo">' + temo(T.id) + '</span><div class="tcb"><b>' + esc(T.n) + "</b><small>" + esc(T.d) + "</small>" + tags + acts + "</div></div>";
+  }
+  function homeTools(id) {
+    var L = homeToolList(id); if (!L.length) return '<p class="muted">Pronto vas a tener herramientas para este objetivo.</p>';
+    var rec = L.filter(function (T) { return toolOk(T) && !toolDoneToday(T); })[0];
+    var h = '<p class="small muted" style="margin:2px 0 14px">Usalas cuando quieras, o sumalas a un momento de tu día: quedan como un paso y se tildan solas cuando las usás.</p>';
+    if (rec) h += '<div class="trec"><small>✨ Para hoy te recomendamos</small>' + toolCard(rec) + "</div>";
+    return h + L.filter(function (T) { return T !== rec; }).map(toolCard).join("");
+  }
+  // --- mi cambio ---
+  function ciSeries(id) {
+    var it = pgItem(id), out = [{ d: it.start, v: it.before, l: "Inicio" }];
+    Object.keys(it.ci || {}).sort().forEach(function (k) { if (k !== it.start) out.push({ d: k, v: it.ci[k], l: k.slice(8) + "/" + k.slice(5, 7) }); });
+    if (it.after) out.push({ d: "fin", v: it.after, l: "Final" });
+    return out.slice(-7);
+  }
+  function badgesHtml(id) {
+    var it = pgItem(id), n = pgCount(id), P = pgOf(id), ser = it ? ciSeries(id) : [], lastV = ser.length ? ser[ser.length - 1].v : 0;
+    var up = it && ser.length > 1 && (P.better === "up" ? lastV > it.before : lastV < it.before);
+    var B = [["👣", "Primer paso", n >= 1], ["🔥", "3 días seguidos", pgBest(id) >= 3], ["⚡", "7 días seguidos", pgBest(id) >= 7]]
+      .concat(LVS.map(function (L, i) { return [L.e, "Nivel " + (i + 1), n > L.t]; }))
+      .concat([["📍", "Herramienta en tu día", toolsOf(id).some(function (T) { return btsOfTool(T.id).length; })], ["🎁", "Primer cofre", it && Object.keys(it.bx || {}).length > 0], ["📈", "Mejoraste", !!up]]);
+    var got = B.filter(function (b) { return b[2]; }).length;
+    return '<div class="sec" style="margin-top:22px">🏅 Logros · ' + got + "/" + B.length + '</div><div class="badges">' + B.map(function (b) { return '<div class="bdg' + (b[2] ? " on" : "") + '"><span>' + b[0] + "</span><small>" + esc(b[1]) + "</small></div>"; }).join("") + "</div>";
+  }
+  function homeCambio(id) {
+    var P = pgOf(id), it = pgItem(id), n = pgCount(id), h = "";
+    var sums = homeToolList(id).filter(function (T) { return T.app && toolOk(T); }).map(function (T) { var s = window.FormaTools && window.FormaTools.sum ? window.FormaTools.sum(T.id) : ""; return s ? '<button class="hmdata" data-huse="' + T.id + '"><span>' + temo(T.id) + "</span><span><small>" + esc(T.n) + "</small><b>" + esc(s) + "</b></span></button>" : ""; }).join("");
+    if (!it) return '<div class="ohintro"><p><b>📈 Acá vas a ver cuánto cambiaste.</b> Cuando empieces el camino medimos cómo estás, y a medida que avanzás vas viendo la diferencia con tus propios datos.</p><button class="btn lsngo block" data-pgnode="' + id + '|0|cur">🚀 Empezar</button></div>' + (sums ? '<div class="sec" style="margin-top:18px">Tus datos</div>' + sums : "");
+    var days = Math.max(1, Math.round((new Date(today() + "T12:00:00") - new Date(it.start + "T12:00:00")) / 864e5) + 1);
+    h += '<div class="stiles"><div><span>🔥</span><b>' + pgStreak(id) + '</b><small>días seguidos</small></div><div><span>⭐</span><b>' + n + '</b><small>pasos hechos</small></div><div><span>⚡</span><b>' + pgXp(id) + '</b><small>XP</small></div><div><span>📅</span><b>' + days + "</b><small>" + (days === 1 ? "día" : "días") + " en camino</small></div></div>";
+    var ser = ciSeries(id), last = ser[ser.length - 1], dlt = (last.v - it.before) * (P.better === "up" ? 1 : -1);
+    h += '<div class="card chg"><b>' + esc(P.q) + '</b><div class="bvsa"><div><span>' + face(P, it.before) + "</span><b>" + it.before + '/5</b><small>Cuando empezaste</small></div><span class="arr">➜</span><div><span>' + face(P, last.v) + "</span><b>" + last.v + "/5</b><small>" + (ser.length > 1 ? "Ahora" : "Todavía sin medir") + "</small></div></div>" +
+      (ser.length > 1 ? '<div class="cich">' + ser.map(function (x) { return '<div><span>' + face(P, x.v) + '</span><i style="height:' + (x.v * 14) + 'px"></i><small>' + esc(x.l) + "</small></div>"; }).join("") + "</div>" : "") +
+      '<p class="small" style="margin:10px 0 0">' + (ser.length < 2 ? "Medite cuando quieras para ver tu evolución." : dlt > 0 ? "Mejoraste " + dlt + (dlt === 1 ? " punto" : " puntos") + " desde que empezaste. 💪" : dlt === 0 ? "Igual que al empezar. Los cambios tardan: seguí con tus pasos." : "Hoy estás un poco peor que al empezar. Pasa: lo importante es seguir.") + "</p>";
+    var hoy = it.ci && it.ci[today()];
+    h += '<div class="cinow"><small>' + (hoy ? "Hoy te mediste: " + face(P, hoy) + " " + hoy + "/5 · podés cambiarlo" : "¿Cómo estás hoy?") + '</small><div class="cifaces">' + [1, 2, 3, 4, 5].map(function (v) { return '<button data-pgci="' + id + "|" + v + '" aria-pressed="' + (hoy === v) + '" aria-label="' + v + '">' + face(P, v) + "</button>"; }).join("") + '</div><div class="row between small muted"><span>' + esc(P.lo) + "</span><span>" + esc(P.hi) + "</span></div></div></div>";
+    if (sums || pgSeries(P, it).length >= 2) h += '<div class="sec" style="margin-top:20px">📊 Tus datos reales</div>' + sums + pgChart(P, it);
+    var dn = []; for (var k = 0; k < Math.min(n, 14); k++) dn.push(k);
+    h += '<div class="sec" style="margin-top:20px">✅ Lo que ya sumaste a tu vida</div>' + (dn.length ? '<div class="impl">' + dn.reverse().map(function (k) { var d = it.done[k]; return '<button class="implr" data-pgnode="' + id + "|" + k + '|done"><span>✅</span><span style="flex:1;min-width:0"><b>' + esc(P.days[k].t) + "</b><small>Paso " + (k + 1) + (d ? " · " + d.slice(8) + "/" + d.slice(5, 7) : "") + "</small></span><span class='muted'>›</span></button>"; }).join("") + "</div>" : '<p class="small muted">Cada paso que completás queda acá: es algo que ya hiciste, no algo que pensás hacer.</p>');
+    return h + badgesHtml(id);
+  }
+  // --- pantalla del objetivo ---
   function openHome(id, tab) {
     var p = planOf(id), P = pgOf(id); if (!p || !P) return;
-    tab = tab || (HOME && HOME.id === id ? HOME.tab : "hoy"); HOME = { id: id, tab: tab };
-    var html = '<button class="fullback" data-homex>← Objetivos</button>' + homeHead(id) + homeTabs(tab) + '<div class="hmbody">' + (tab === "tools" ? homeToolsTab(id) : tab === "prog" ? homeProg(id) : homeHoy(id)) + "</div>";
-    var ex = $("#sheet"); if (ex && ex.getAttribute("data-home") === id) { ex.firstChild.innerHTML = html; return; }
-    sheet("", true); var s = $("#sheet"); s.setAttribute("data-home", id); s.firstChild.innerHTML = html;
+    if (tab === "hoy" || tab === "prog") tab = tab === "prog" ? "cambio" : "camino";
+    var fresh = !(HOME && HOME.id === id); tab = tab || (!fresh ? HOME.tab : "camino"); HOME = { id: id, tab: tab }; LSN = null;
+    var html = homeTop(id) + homeTabs(tab) + '<div class="hmbody">' + (tab === "tools" ? homeTools(id) : tab === "cambio" ? homeCambio(id) : homeCamino(id)) + "</div>";
+    var ex = $("#sheet"), keep = ex && ex.getAttribute("data-home") === id, sc = keep ? ex.firstChild.scrollTop : 0;
+    if (keep) { ex.firstChild.innerHTML = html; ex.firstChild.scrollTop = sc; return; }
+    sheet(html, "bare"); var s = $("#sheet"); s.setAttribute("data-home", id); s.classList.add("ohome"); s.style.setProperty("--c", p.c);
+    if (tab === "camino") setTimeout(function () { var c = s.querySelector(".pnode.cur,.pnode.wait,.pnode.pro"); if (c && pgCount(id) > 2) s.firstChild.scrollTop = Math.max(0, c.getBoundingClientRect().top - s.getBoundingClientRect().top - window.innerHeight * 0.45); }, 60);
   }
   function useTool(tid) {
     var T = toolById(tid); if (!T) return; if (!toolOk(T)) return openTool(tid);
     if (T.act) return startAct(T.act);
     if (T.app && window.FormaTools) return window.FormaTools.open(T.id);
+  }
+  // --- antes de empezar ---
+  function openStart(id) {
+    var P = pgOf(id); if (!P || !pgCan(id)) return;
+    sheet('<div class="lsntop"><button class="lsnx" data-close aria-label="Cerrar">✕</button><div class="lsnbar"><i style="width:4%"></i></div></div>' +
+      '<div class="lsnhero"><span class="lsnemo">' + gemo(id) + '</span><small>Antes de empezar</small><h2>' + esc(goalName(id)) + "</h2></div>" +
+      '<div class="lsncard"><b>📍 ¿Dónde estás hoy?</b><p>' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
+      '<div class="lsncard"><b>💬 ¿Por qué querés lograrlo?</b><p class="small muted" style="margin:4px 0 8px">Te lo vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
+      '<label class="pgl">⏰ ¿A qué hora vas a hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + (P.reminder || "20:00") + '"></div>' +
+      '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn lsngo block" data-pgstart="' + id + '">Empezar mi camino 🚀</button>', "bare");
+    $("#sheet").classList.add("lsn"); $("#sheet").style.setProperty("--c", planOf(id).c);
+  }
+  // --- lección: el paso del día ---
+  function openLesson(id) {
+    var P = pgOf(id), it = pgItem(id), n = pgCount(id); if (!P || !it || n >= 14) return;
+    if (!pgCan(id)) return openPro();
+    var st = P.days[n], li = lvOf(n), L = LVS[li], inL = n - L.f, tot = L.t - L.f + 1; LSN = id;
+    var h = '<div class="lsntop"><button class="lsnx" data-close aria-label="Cerrar">✕</button><div class="lsnbar"><i style="width:' + Math.max(4, Math.round(inL * 100 / tot)) + '%"></i></div><span class="lsnxp">⚡ ' + pgXp(id) + "</span></div>" +
+      '<div class="lsnhero"><span class="lsnemo">' + L.e + "</span><small>Nivel " + (li + 1) + " · Paso " + (n + 1) + " de 14</small><h2>" + esc(st.t) + "</h2></div>";
+    if (pgToday(id)) h += '<div class="lsncard"><b>⏳ Ya hiciste tu paso de hoy</b><p>Mañana te espera este. Una cosa por día alcanza.</p></div><button class="btn ghost block" data-close>Volver</button>';
+    else if (!pgWhenOk(st)) h += '<div class="lsncard"><b>' + (st.when === "pm" ? "🌙" : "☀️") + " Todavía no es el momento</b><p>" + pgWhenTxt(st) + '</p></div><button class="btn ghost block" data-close>Volver</button>';
+    else h += '<div class="lsncard"><b>👉 Hacé esto</b><p>' + esc(st.a) + '</p></div><div class="lsnwhy"><span>💡</span><span>' + esc(st.w) + "</span></div>" + pgStepForm(P, id, n, it) +
+      '<p class="small" id="pgmsg" style="margin:14px 0 0;color:var(--err)"></p><button class="btn lsngo block" data-pgdone="' + id + '">✅ Completar paso</button>';
+    var keep = $("#sheet") && $("#sheet").classList.contains("lsn"), sc = keep ? $("#sheet").firstChild.scrollTop : 0;
+    sheet(h, "bare"); var s = $("#sheet"); s.classList.add("lsn"); s.style.setProperty("--c", planOf(id).c); s.setAttribute("data-lsn", id); if (keep) s.firstChild.scrollTop = sc;
+  }
+  // --- un paso ya hecho ---
+  function openStepRecap(id, k) {
+    var P = pgOf(id), it = pgItem(id); if (!P || !it || !P.days[k]) return; var st = P.days[k], fl = (it.fl && it.fl[k]) || [], txt = [];
+    fl.forEach(function (v, i) { var f = (st.f || [])[i]; if (!f) return; if (f.k === "text" && v) txt.push([f.l || "Lo que escribiste", v]); else if (f.k === "list" && v && v.join) txt.push([f.l || "Tu lista", v.join(" · ")]); else if (f.k === "choice" && f.o) txt.push([f.l || "Elegiste", f.o[v]]); else if (f.k === "time" && v) txt.push([f.l || "Hora", v]); else if (f.k === "num") txt.push([f.l || "Número", v + (f.u ? " " + f.u : "")]); });
+    sheet('<div class="lsnhero"><span class="lsnemo">⭐</span><small>Paso ' + (k + 1) + " · hecho el " + esc((it.done[k] || "").slice(8) + "/" + (it.done[k] || "").slice(5, 7)) + "</small><h2>" + esc(st.t) + "</h2></div>" +
+      '<div class="lsncard"><b>👉 Lo que hiciste</b><p>' + esc(st.a) + "</p></div>" + txt.map(function (x) { return '<div class="lsncard"><b>📝 ' + esc(x[0]) + "</b><p>" + esc(x[1]) + "</p></div>"; }).join("") +
+      '<div class="lsnwhy"><span>💡</span><span>' + esc(st.w) + '</span></div><button class="btn ghost block" data-close style="margin-top:14px">Volver</button>', "bare");
+    $("#sheet").classList.add("lsn"); $("#sheet").style.setProperty("--c", planOf(id).c);
+  }
+  // --- celebración ---
+  var CHEERS = ["El primer paso es el más difícil, y ya lo diste.", "Dos días: ya empieza a ser un patrón.", "No es lo que pensás hacer: es lo que ya hiciste.", "Cada paso es un cambio real en tu día.", "Lo estás haciendo costumbre. Así se cambia.", "Vas más lejos que la mayoría que empieza.", "Constancia le gana a motivación. Y la tenés.", "Tu yo de hace una semana estaría orgulloso."];
+  function confettiHtml() { var E = ["🎉", "✨", "⭐", "🎊", "💫"], o = ""; for (var i = 0; i < 18; i++) o += '<i style="left:' + Math.round(Math.random() * 96) + "%;animation-delay:" + (Math.random() * 0.6).toFixed(2) + "s;animation-duration:" + (1.6 + Math.random() * 1.2).toFixed(2) + 's">' + E[i % E.length] + "</i>"; return '<div class="confe" aria-hidden="true">' + o + "</div>"; }
+  function openCelebrate(id, n) {
+    var P = pgOf(id), nn = n + 1, li = lvOf(n), L = LVS[li], lvUp = nn > L.t, xp = 10 + (lvUp ? 20 : 0);
+    var T = toolsOf(id).filter(function (x) { return toolOk(x) && !btsOfTool(x.id).length; })[0];
+    sheet(confettiHtml() + '<div class="celeb"><span class="celemo">' + (nn >= 14 ? "🏆" : lvUp ? L.e : "🎉") + "</span><h2>" + (nn >= 14 ? "¡Terminaste el camino!" : lvUp ? "¡Nivel " + (li + 1) + " completado!" : "¡Paso completado!") + "</h2><p>" + esc(P.days[n].t) + "</p>" +
+      '<div class="celstats"><div class="xp"><small>XP</small><b>⚡ +' + xp + '</b></div><div class="fire"><small>Racha</small><b>🔥 ' + pgStreak(id) + '</b></div><div class="lv"><small>Nivel ' + (li + 1) + "</small><b>" + L.e + " " + (Math.min(nn, L.t + 1) - L.f) + "/" + (L.t - L.f + 1) + "</b></div></div>" +
+      '<p class="celmsg">' + esc(CHEERS[n % CHEERS.length]) + "</p>" +
+      (T && isProU() && !lvUp && nn < 14 ? '<div class="celtool"><span>' + temo(T.id) + '</span><span style="flex:1;min-width:0"><small>Para sostenerlo</small><b>Sumá «' + esc(T.n) + '» a tu día</b></span><button class="btn ghost sm" data-btsadd="' + T.id + '">📍 Sumar</button></div>' : "") +
+      (lvUp && nn < 14 ? '<button class="btn lsngo block" data-pglvup="' + id + "|" + li + '">Ver mi premio 🎁</button>' : nn >= 14 ? '<button class="btn lsngo block" data-close>Ver mi resultado 🏆</button>' : '<button class="btn lsngo block" data-close>Continuar</button>') + "</div>", "bare");
+    $("#sheet").classList.add("lsn", "celebs"); $("#sheet").style.setProperty("--c", planOf(id).c);
+  }
+  function openLevelUp(id, li) {
+    var P = pgOf(id), L = LVS[li], nx = LVS[li + 1], it = pgItem(id), rep = [], hoy = it && it.ci && it.ci[today()];
+    try { rep = pgReport(P, it) || []; } catch (e) {}
+    var done = []; for (var k = L.f; k <= L.t; k++) if (P.days[k]) done.push(P.days[k].t);
+    sheet(confettiHtml() + '<div class="celeb"><span class="celemo">🏅</span><small class="celsm">Nivel ' + (li + 1) + " completado</small><h2>" + esc(L.n) + "</h2><p>" + esc(L.g) + "</p>" +
+      '<div class="lsncard" style="text-align:left"><b>✅ Lo que sumaste a tu vida</b><ul class="ticks" style="margin:8px 0 0">' + done.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" +
+      (rep.length && pgSeries(P, it).length >= 2 ? '<div class="lsncard" style="text-align:left"><b>📊 Tus datos</b><p class="small">' + esc(rep[0]) + "</p></div>" : "") +
+      '<div class="lsncard" style="text-align:left"><b>📈 ¿Cómo estás ahora?</b><p class="small muted" style="margin:4px 0 8px">' + esc(P.q) + ' Al empezar pusiste ' + face(P, it.before) + " " + it.before + '/5.</p><div class="cifaces">' + [1, 2, 3, 4, 5].map(function (v) { return '<button data-pgci="' + id + "|" + v + "|" + li + '" aria-pressed="' + (hoy === v) + '" aria-label="' + v + '">' + face(P, v) + "</button>"; }).join("") + "</div></div>" +
+      (nx ? '<div class="lsncard" style="text-align:left"><b>' + nx.e + " Lo que viene: Nivel " + (li + 2) + " · " + esc(nx.n) + '</b><p class="small muted" style="margin:6px 0 0">' + esc(nx.g) + "</p></div>" : "") +
+      '<button class="btn lsngo block" data-close>Seguir mi camino</button></div>', "bare");
+    $("#sheet").classList.add("lsn", "celebs"); $("#sheet").style.setProperty("--c", planOf(id).c);
   }
   function openPgQuit(id) {
     var it = pgItem(id); if (!it) return;
@@ -989,8 +1126,7 @@
     it.fl = it.fl || {}; it.fl[n] = data.f;
     it.done[n] = today(); it.last = today(); it.dr = {}; it.st = null;
     S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render();
-    var nn = n + 1, li = lvOf(n);
-    if (nn > LVS[li].t && nn < 14) openLevelUp(id, li); else openProgram(id);
+    LSN = null; if (!HOME || HOME.id !== id) HOME = { id: id, tab: "camino" }; openCelebrate(id, n);
   }
   setInterval(function () {
     var e = document.getElementById("pgtmr"); if (!e) return;
@@ -1641,7 +1777,7 @@
     { id: "entrevista", n: "Simulacro de entrevista", d: "Las 4 preguntas que siempre aparecen, con tiempo para responder en voz alta.", act: "entrevista", plan: "laburo", mins: 10 }
   ];
   if (window.FormaTools && window.FormaTools.defs) TOOLS = TOOLS.concat(window.FormaTools.defs);
-  window.FormaBridge = { S: function () { return S; }, save: function () { save(); }, sheet: function (h, f) { sheet(h, f); }, close: close, shape: function (id) { return SHAPES[id] || ""; }, planName: function (id) { var p = planOf(id); return p ? p.n : ""; }, weekCount: function (o) { try { return weekCount(o || 0); } catch (e) { return null; } } };
+  window.FormaBridge = { S: function () { return S; }, save: function () { save(); }, sheet: function (h, f) { sheet(h, f); }, close: close, shape: function (id) { return '<span class="emo">' + (TEMO[id] || GEMO[id] || "🧰") + "</span>"; }, planName: function (id) { var p = planOf(id); return p ? p.n : ""; }, weekCount: function (o) { try { return weekCount(o || 0); } catch (e) { return null; } } };
   function toolById(id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }
   function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
   function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
@@ -1676,22 +1812,22 @@
   }
   function goalCardNew(g) {
     var p = planOf(g.plan), P = p && pgOf(p.id); if (!P) return "";
-    var it = pgItem(p.id), n = pgCount(p.id), ow = pgOwns(p.id), started = !!it, fin = n >= 14, lv = lvOf(Math.min(n, 13));
-    var nt = toolsOf(p.id).length, sub = (fin ? "Completado" : started ? "Nivel " + (lv + 1) + " de 5 · " + LVS[lv].n : g.d) + (nt ? " · " + nt + " herramientas" : "");
-    var tag = fin ? "✓" : started ? Math.round(n * 100 / 14) + "%" : (ow ? "Entrar" : "Paso 1 gratis");
-    return '<button class="plancard" data-pgopen="' + p.id + '" style="--c:' + p.c + '"><span class="shape">' + (SHAPES[p.id] || "") + "</span><span style='flex:1;min-width:0'><b>" + esc(g.n) + "</b><small>" + esc(sub) + '</small>' + (started ? '<span class="pgbar" style="display:block;margin-top:6px"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></span>' : "") + '</span><span class="tag">' + tag + "</span></button>";
+    var it = pgItem(p.id), n = pgCount(p.id), ow = pgOwns(p.id), fin = n >= 14, li = lvOf(Math.min(n, 13));
+    var st = fin ? "🏆 Completado" : it ? LVS[li].e + " Nivel " + (li + 1) : ow ? "✨ Empezar" : "🎁 Paso 1 gratis";
+    return '<button class="otile' + (it ? " on" : "") + '" data-pgopen="' + p.id + '" style="--c:' + p.c + '"><span class="otemo">' + gemo(p.id) + "</span><b>" + esc(g.n) + "</b><small>" + st + "</small>" + (it ? '<span class="obar"><i style="width:' + Math.round(Math.min(n, 14) * 100 / 14) + '%"></i></span>' : "") + (it && pgToday(p.id) ? '<span class="odot" title="Hecho hoy">✅</span>' : it && pgStreak(p.id) ? '<span class="odot">🔥' + pgStreak(p.id) + "</span>" : "") + "</button>";
   }
   function vObj() {
-    var h = '<h1 class="hello">Tus objetivos</h1><p class="small muted" style="margin:0 0 14px">Cada objetivo tiene su lugar: tu paso de hoy, sus herramientas y tu progreso. Entrá al que quieras trabajar.</p>';
+    var h = '<h1 class="hello">Tus objetivos</h1>';
+    h += '<div class="ostats"><div><span>🔥</span><b>' + Math.max.apply(null, [streakNow()].concat(PG.list.map(function (P) { return pgStreak(P.id); }))) + '</b><small>días seguidos</small></div><div><span>⚡</span><b>' + allXp() + '</b><small>XP total</small></div><div><span>🏅</span><b>' + allLevels() + '</b><small>niveles</small></div></div>';
     var cur = pgCur();
     if (cur && pgCount(cur) < 14) {
-      var P = pgOf(cur), n = pgCount(cur), dn = pgToday(cur), pl = planOf(cur), lv = lvOf(n);
-      h += '<div class="card pgcard"><span class="small muted">Tu camino de ahora · nivel ' + (lv + 1) + " de 5</span><b style='display:block;font-size:19px;margin:4px 0 4px'>" + esc(P.n) + "</b><span class='small muted' style='display:block;margin-bottom:10px'>" + (dn ? "Listo por hoy ✓. Mañana, el paso siguiente." : "Paso " + (n + 1) + " de 14: " + esc(P.days[n].t)) + '</span><button class="btn ' + (dn ? "ghost" : "sage") + ' sm" data-pgopen="' + cur + '">' + (dn ? "Ver mi camino" : "Hacer el paso de hoy") + "</button></div>";
-    }
-    h += '<div class="sec" style="margin-top:18px">Todos los objetivos</div>' + GOALS.map(goalCardNew).join("");
-    h += '<div class="card" style="margin-top:14px"><b>¿No sabés por dónde empezar?</b><p class="small muted" style="margin:6px 0 10px">Respondé unas preguntas y te recomendamos uno. Después elegís vos.</p><button class="btn ghost sm" data-open="elegir">Que Forma me recomiende</button></div>';
+      var P = pgOf(cur), n = pgCount(cur), dn = pgToday(cur), pl = planOf(cur), li = lvOf(n), ok = pgWhenOk(P.days[n]);
+      h += '<button class="ocont" data-pgopen="' + cur + '" style="--c:' + pl.c + '"><span class="otemo big">' + gemo(cur) + '</span><span style="flex:1;min-width:0"><small>' + LVS[li].e + " Nivel " + (li + 1) + " · " + esc(goalName(cur)) + "</small><b>" + (dn ? "✅ Listo por hoy" : esc(P.days[n].t)) + '</b><span class="obar"><i style="width:' + Math.round(n * 100 / 14) + '%"></i></span><em>' + (dn ? "Mañana, el paso " + (n + 2) + ". Mirá tu progreso ›" : ok ? "▶️ Hacer el paso " + (n + 1) : (P.days[n].when === "pm" ? "🌙 Desde las 18:00" : "☀️ Hasta las 14:00")) + "</em></span></button>";
+    } else h += '<p class="small muted" style="margin:0 0 4px">Elegí qué querés cambiar. Cada objetivo es un camino de 5 niveles: un paso por día, misiones, herramientas y tu progreso real.</p>';
+    h += '<div class="sec" style="margin-top:18px">Todos los objetivos</div><div class="ogrid">' + GOALS.map(goalCardNew).join("") + "</div>";
+    h += '<button class="orec" data-open="elegir"><span>🤔</span><span style="flex:1;min-width:0"><b>¿No sabés por dónde empezar?</b><small>Respondé unas preguntas y te recomendamos uno.</small></span><span>›</span></button>';
     var gen = toolsOf("vida");
-    if (gen.length) h += '<div class="sec" style="margin-top:22px">Herramientas para cualquier día</div><p class="small muted" style="margin:0 0 6px">Las de cada objetivo están adentro de cada uno.</p>' + gen.map(toolRow).join("");
+    if (gen.length) h += '<div class="sec" style="margin-top:22px">🧰 Herramientas para cualquier día</div>' + gen.map(toolCard).join("");
     return h;
   }
   function openTools() {
@@ -2790,7 +2926,18 @@
     if (d.htab) { if (HOME) openHome(HOME.id, d.htab); var sc = $("#sheet"); if (sc && sc.firstChild) sc.firstChild.scrollTop = 0; return; }
     if (d.huse) return useTool(d.huse);
     if (d.btsx) { S.bts = (S.bts || []).filter(function (x) { return x.id !== d.btsx; }); save(); render(); if (HOME) openHome(HOME.id, HOME.tab); return; }
-    if (d.close !== undefined) { var wasH = !!($("#sheet") && $("#sheet").getAttribute("data-home")); close(); render(); if (HOME && !wasH) openHome(HOME.id, HOME.tab); else if (wasH) HOME = null; return; }
+    if (d.close !== undefined) { var wasH = !!($("#sheet") && $("#sheet").getAttribute("data-home")), wasL = !!($("#sheet") && $("#sheet").getAttribute("data-lsn")); close(); render(); if (wasL) LSN = null; if (LSN && !wasL) openLesson(LSN); else if (HOME && !wasH) openHome(HOME.id, HOME.tab); else if (wasH) HOME = null; return; }
+    if (d.pgnode) { var pn = d.pgnode.split("|"), pid = pn[0], ps = +pn[1], pst = pn[2];
+      if (pst === "done") return openStepRecap(pid, ps);
+      if (pst === "pro") return openPro();
+      if (pst === "lock") { var pnb = t; pnb.classList.remove("shake"); void pnb.offsetWidth; pnb.classList.add("shake"); return; }
+      if (!pgItem(pid)) return pgCan(pid) ? openStart(pid) : openPro();
+      if (S.prog.cur !== pid) { if (!pgOwns(pid) && pgCount(pid) >= 1) return openPro(); S.prog.cur = pid; save(); }
+      return openLesson(pid); }
+    if (d.pgchestlv) { var cl = d.pgchestlv.split("|"); if (cl[2] === "1") return openLevelUp(cl[0], +cl[1]); var cb = t; cb.classList.remove("shake"); void cb.offsetWidth; cb.classList.add("shake"); return; }
+    if (d.pglvup) { var lu = d.pglvup.split("|"); return openLevelUp(lu[0], +lu[1]); }
+    if (d.pgchest) { var cit2 = pgItem(d.pgchest); if (cit2 && pgQuests(d.pgchest).every(function (q) { return q.ok; })) { cit2.bx = cit2.bx || {}; cit2.bx[today()] = 1; save(); openHome(d.pgchest, "camino"); } return; }
+    if (d.pgci) { var ci = d.pgci.split("|"), cii = pgItem(ci[0]); if (!cii) return; cii.ci = cii.ci || {}; cii.ci[today()] = +ci[1]; save(); if (ci[2] !== undefined) { [].slice.call(t.parentNode.querySelectorAll("[data-pgci]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; } openHome(ci[0], "cambio"); return; }
     if (d.openpro !== undefined) return openPro();
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
@@ -2834,8 +2981,8 @@
     if (d.open === "organizar") return openOrganizar();
     if (d.open === "respirar") return openRespirar();
     if (t.id === "orgdone") { completeAct("organizar"); touchBest(); save(); close(); render(); return; }
-    if (d.actexit !== undefined) { if (confirm("¿Salir? Si salís, la actividad no se tilda.")) { close(); render(); if (HOME) openHome(HOME.id, HOME.tab); } return; }
-    if (d.actdone !== undefined) { close(); render(); if (HOME) openHome(HOME.id, HOME.tab); return; }
+    if (d.actexit !== undefined) { if (confirm("¿Salir? Si salís, la actividad no se tilda.")) { close(); render(); if (LSN) openLesson(LSN); else if (HOME) openHome(HOME.id, HOME.tab); } return; }
+    if (d.actdone !== undefined) { close(); render(); if (LSN) openLesson(LSN); else if (HOME) openHome(HOME.id, HOME.tab); return; }
     if (t.id === "actnext") return nextStep();
     if (d.act) return startAct(d.act);
     if (d.area) { toggleIn(draft.areas, d.area); var nm = $("#f-name"); if (nm) draft.name = nm.value; renderOnboard(); return; }
@@ -2864,17 +3011,17 @@
     if (d.pgall !== undefined) return openPrograms();
     if (d.pgopen) return openProgram(d.pgopen);
     if (d.pgm !== undefined) { var par = t.parentNode; [].slice.call(par.querySelectorAll("[data-pgm]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; }
-    if (d.pgstart) { if (!pgCan(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'), pm = $("#pgmsg"), why = ($("#pgwhy").value || "").trim(); if (!sb) { if (pm) pm.textContent = "Elegí un número para empezar."; return; } if (why.length < 8) { if (pm) pm.textContent = "Escribí tu razón (una frase corta alcanza)."; return; } S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, why: why.slice(0, 200), at: ($("#pgat").value || "").slice(0, 5), done: {}, last: null, lg: {}, fl: {}, dr: {}, st: null }; S.prog.cur = d.pgstart; save(); close(); render(); return openProgram(d.pgstart); }
+    if (d.pgstart) { if (!pgCan(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'), pm = $("#pgmsg"), why = ($("#pgwhy").value || "").trim(); if (!sb) { if (pm) pm.textContent = "Elegí un número para empezar."; return; } if (why.length < 8) { if (pm) pm.textContent = "Escribí tu razón (una frase corta alcanza)."; return; } S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, why: why.slice(0, 200), at: ($("#pgat").value || "").slice(0, 5), done: {}, last: null, lg: {}, fl: {}, dr: {}, st: null }; S.prog.cur = d.pgstart; save(); close(); render(); HOME = HOME && HOME.id === d.pgstart ? HOME : { id: d.pgstart, tab: "camino" }; return openLesson(d.pgstart); }
     if (d.pgdone) return pgSubmit(d.pgdone);
     if (d.pgc) { var pc = d.pgc.split("|"), cit = pgItem(S.prog && S.prog.cur); if (cit) { cit.dr = cit.dr || {}; cit.dr[pc[0]] = +pc[1]; [].slice.call(t.parentNode.querySelectorAll("[data-pgc]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); save(); } return; }
     if (d.pgk) { var kit = pgItem(S.prog && S.prog.cur); if (kit) { kit.dr = kit.dr || {}; kit.dr[d.pgk] = kit.dr[d.pgk] === 1 ? 0 : 1; t.setAttribute("aria-pressed", kit.dr[d.pgk] === 1 ? "true" : "false"); save(); } return; }
-    if (d.pgtm) { var tid = S.prog && S.prog.cur, tit = pgItem(tid); if (tit) { tit.st = tit.st || {}; tit.st.tm = { end: Date.now() + (+d.pgtm) * 1000 }; save(); openProgram(tid); } return; }
+    if (d.pgtm) { var tid = S.prog && S.prog.cur, tit = pgItem(tid); if (tit) { tit.st = tit.st || {}; tit.st.tm = { end: Date.now() + (+d.pgtm) * 1000 }; save(); if (LSN) openLesson(tid); else openProgram(tid); } return; }
     if (d.pgact) return startAct(d.pgact);
-    if (d.pgquit2) { S.prog.cur = null; save(); close(); render(); if (HOME) openHome(HOME.id, "hoy"); return; }
-    if (d.pgafter) { var sa = document.querySelector('#sheet .pgm[data-key=after] [aria-pressed=true]'); if (!sa) return; pgItem(d.pgafter).after = +sa.dataset.pgm; save(); render(); return openProgram(d.pgafter); }
+    if (d.pgquit2) { S.prog.cur = null; save(); close(); render(); if (HOME) openHome(HOME.id, "camino"); return; }
+    if (d.pgafter) { var sa = document.querySelector('#sheet .pgm[data-key=after] [aria-pressed=true]'); if (!sa) return; pgItem(d.pgafter).after = +sa.dataset.pgm; save(); render(); return openHome(d.pgafter, "cambio"); }
     if (d.pgquit) return openPgQuit(d.pgquit);
-    if (d.pgresume) { if (pgOwns(d.pgresume)) { S.prog.cur = d.pgresume; save(); close(); render(); openProgram(d.pgresume); } return; }
-    if (d.pgagain) { delete S.prog.items[d.pgagain]; save(); render(); return openProgram(d.pgagain); }
+    if (d.pgresume) { if (pgOwns(d.pgresume)) { S.prog.cur = d.pgresume; save(); openHome(d.pgresume, "camino"); } return; }
+    if (d.pgagain) { if (!confirm("¿Empezar el camino de nuevo? Tu avance actual se borra.")) return; delete S.prog.items[d.pgagain]; save(); render(); return openHome(d.pgagain, "camino"); }
     if (d.tmshow !== undefined) { showTm = true; render(); return; }
     if (d.tmedit !== undefined) { if (S.tm) delete S.tm[today(tmDate())]; save(); render(); return; }
     if (d.tmdone !== undefined) { var c0 = S.tm && S.tm[today()]; if (c0) { c0.d = c0.d ? 0 : 1; S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; if (c0.d) S.ad[today()]["tm|prio"] = 1; else delete S.ad[today()]["tm|prio"]; touchBest(); save(); render(); } return; }
