@@ -46,7 +46,7 @@
 
   var L = [
     {
-      id: "dormir", n: "Dormir de verdad", tag: "Sueño", reminder: "21:00",
+      id: "dormir", n: "Dormir mejor", tag: "Sueño", reminder: "21:00",
       intro: "Subí de nivel para ordenar tu sueño. Cargás tus horarios, hacés un paso por día y al final ves tus datos reales: cuánto dormís y qué tan regular sos.",
       q: "¿Cómo dormiste esta última semana?", lo: "Muy mal", hi: "Muy bien", better: "up",
       note: "Si hace más de tres meses que dormís mal, roncás fuerte con pausas al respirar o estás muy cansado durante el día, consultá con un médico. Esto es un apoyo de hábitos y no reemplaza a un profesional.",
@@ -76,7 +76,7 @@
       ]
     },
     {
-      id: "celular", n: "Celular bajo control", tag: "Atención", reminder: "09:00",
+      id: "celular", n: "Usar menos el celular", tag: "Atención", reminder: "09:00",
       intro: "Subí de nivel para usar el celular vos y que no te use a vos. Cargás tu tiempo de pantalla cada día y al final ves cuánto lo bajaste.",
       q: "¿Cuánto control sentís que tenés sobre tu celular?", lo: "Nada", hi: "Mucho", better: "up",
       note: "Es un apoyo de hábitos. Si sentís que no podés controlar el uso aunque lo intentes y te afecta mucho, consultá con un profesional.",
@@ -101,10 +101,10 @@
       ]
     },
     {
-      id: "calma", n: "Calmar la cabeza", tag: "Calma", reminder: "20:00",
+      id: "calma", n: "Bajar la ansiedad", tag: "Calma", reminder: "20:00",
       intro: "Subí de nivel con herramientas simples para bajar la tensión de todos los días. Registrás cómo estás y armás tu propio kit.",
       q: "¿Cuánta tensión o ansiedad sentiste esta semana?", lo: "Poca", hi: "Mucha", better: "down",
-      note: "Es un apoyo de bienestar y no reemplaza a un profesional de la salud mental. Si la ansiedad te impide hacer tu vida o sentís que no podés más, hablá con un profesional. Si es una urgencia, llamá al 911.",
+      note: "Es un apoyo de bienestar y no reemplaza a un profesional de la salud mental. Si la ansiedad te impide hacer tu vida o sentís que no podés más, hablá con un profesional. Si estás en crisis, llamá gratis las 24 horas a la Línea Nacional de Salud Mental: 0800-999-0091. Si hay riesgo inmediato, llamá al 911.",
       log: [CH("¿Cuánta tensión sentiste hoy?", ["1 · Poca", "2", "3", "4", "5 · Mucha"])], logKeys: ["ten"],
       ml: "Tensión", up: false,
       metric: function (v) { return +v.ten + 1; }, fmt: function (m) { return (Math.round(m * 10) / 10) + " de 5"; },
@@ -126,7 +126,7 @@
       ]
     },
     {
-      id: "estudio", n: "Estudiar mejor", tag: "Estudio", reminder: "17:00",
+      id: "estudio", n: "Estudiar y rendir mejor", tag: "Estudio", reminder: "17:00",
       intro: "Subí de nivel para estudiar mejor y rendir más. Aprendés técnicas que funcionan de verdad, las practicás dentro de la app y registrás cuánto estudiás de forma efectiva.",
       q: "¿Qué tan seguro te sentís con lo que estudiás?", lo: "Nada seguro", hi: "Muy seguro", better: "up",
       note: "Esto es un apoyo de hábitos de estudio. Si la ansiedad antes de rendir te afecta mucho, hablalo con un profesional o con tu institución.",
@@ -176,7 +176,7 @@
       ]
     },
     {
-      id: "plata", n: "Plata en orden", tag: "Plata", reminder: "21:00",
+      id: "plata", n: "Ordenar mi plata", tag: "Plata", reminder: "21:00",
       intro: "Subí de nivel para saber en qué gastás y armar un presupuesto simple. Cargás lo que gastás cada día y al final ves tu panorama real.",
       q: "¿Qué tan claro tenés adónde va tu plata?", lo: "Nada claro", hi: "Muy claro", better: "up",
       note: "Esto es organización personal, no asesoramiento financiero ni de inversión. Para decisiones importantes o deudas grandes, consultá con un profesional.",
@@ -201,7 +201,7 @@
       ]
     },
     {
-      id: "viajes", n: "Armá tu viaje", tag: "Viaje", reminder: "20:00",
+      id: "viajes", n: "Organizar un viaje", tag: "Viaje", reminder: "20:00",
       intro: "Subí de nivel para armar el viaje que querés, paso a paso: destino, presupuesto, itinerario, reservas y valija. Cargás cuánto fuiste ahorrando y tu viaje queda listo.",
       q: "¿Qué tan listo sentís tu viaje?", lo: "Nada", hi: "Totalmente", better: "up",
       note: "Chequeá siempre requisitos de ingreso, documentos y recomendaciones de salud en las fuentes oficiales del destino.",

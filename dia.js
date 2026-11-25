@@ -37,7 +37,7 @@
         if (d > 1260) return "Entre que te despertás y te dormís hay más de 21 horas. Revisá los horarios.";
         return "";
       } },
-    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, entrenamientos o lo que no se mueve. Agregá todos los que necesites, ponele nombre y elegí los días en que se repite. Si terminás después de medianoche, elegí la hora igual (por ejemplo, 06:00).",
+    { title: "¿Tenés horarios fijos?", hint: "Trabajo, estudio, entrenamientos o lo que no se mueve. Agregá todos los que necesites, ponele nombre y elegí los días en que se repite.",
       fields: [
         { key: "fixedOn", label: "", type: "chips", opts: [["No tengo", "no"], ["Sí tengo", "yes"]] },
         { key: "fixed", label: "", type: "blocks", showIf: function (a) { return a.fixedOn === "yes"; } }
@@ -195,7 +195,16 @@
 
     // Sueño y despertar
     add(sleep - 60, sleep, "Desconectar y dormir", "rest", "Sin pantallas. Preparás el día siguiente y bajás el ritmo.");
-    add(wake, wake + 40, "Despertar, agua y desayuno", "meal", "Primero luz y un vaso de agua, antes que el celular.");
+    // El primer horario fijo nunca se mueve: si hace falta, se acorta el desayuno
+    var firstFx = 1e9, firstNm = "";
+    if (a.fixedOn === "yes") (a.fixed || []).forEach(function (fx) {
+      if (fx.s === undefined || fx.e === undefined || (dow !== undefined && fx.days && fx.days.indexOf(dow) < 0) || ((fx.e - fx.s) + 1440) % 1440 === 0) return;
+      var tr0 = fx.travel !== "no", ci0 = tr0 ? (typeof fx.go === "number" ? fx.go : (a.commuteGo || 0)) : 0, s0 = norm(fx.s) - ci0;
+      if (s0 < firstFx) { firstFx = s0; firstNm = (fx.name || "").trim() || "tu primer horario fijo"; }
+    });
+    var bfEnd = Math.min(wake + 40, Math.max(wake, firstFx));
+    if (firstFx < wake + 40) warnings.push(firstFx - wake < 15 ? "Te levantás muy justo para " + firstNm + ": casi no te queda tiempo para desayunar. Si podés, poné el despertador un poco antes." : "Para llegar a " + firstNm + " te quedan " + (firstFx - wake) + " minutos entre que te despertás y salís: acortamos el desayuno.");
+    add(wake, bfEnd, "Despertar, agua y desayuno", "meal", "Primero luz y un vaso de agua, antes que el celular.");
 
     // Comidas
     var lunch = null, din = null;
@@ -245,7 +254,7 @@
       var tr = fx.travel !== "no";
       var ci = tr ? (typeof fx.go === "number" ? fx.go : cGo) : 0, cb = tr ? (typeof fx.back === "number" ? fx.back : (typeof fx.go === "number" ? fx.go : cBack)) : 0;
       var s = norm(fx.s), e = s + dur;
-      s = Math.max(s, wake + 40 + ci);
+      s = Math.max(s, wake + ci);
       e = Math.min(e, sleep - 60 - cb);
       var nm = (fx.name || "").trim() || "Tus horarios fijos";
       if (e - s < 30) {
@@ -391,7 +400,7 @@
     if (typeof val === "number" && !has) { opts.push([fmt(val), val]); opts.sort(function (a, c) { return ((a[1] - 300 + 1440) % 1440) - ((c[1] - 300 + 1440) % 1440); }); }
     var h = '<label class="field"><span>' + esc(label) + '</span><select data-blk="' + i + '" data-prop="' + prop + '"><option value=""' + (typeof val === "number" ? "" : " selected") + " disabled>Hora</option>";
     opts.forEach(function (o) { h += '<option value="' + o[1] + '"' + (o[1] === val ? " selected" : "") + ">" + esc(o[0]) + "</option>"; });
-    return h + '</select></label><label class="field exact"><span class="small muted">Hora exacta</span><input type="time" data-blkx="' + i + '" data-prop="' + prop + '" value="' + (typeof val === "number" ? fmt(val) : "") + '"></label>';
+    return h + '</select></label><details class="exactd"><summary>¿Otra hora exacta?</summary><label class="field exact"><span class="small muted">Hora exacta</span><input type="time" data-blkx="' + i + '" data-prop="' + prop + '" value="' + (typeof val === "number" ? fmt(val) : "") + '"></label></details>';
   }
   function minSel(label, i, prop, val) {
     var opts = MIN_OPTS.filter(function (o) { return o[1] > 0; });
@@ -457,7 +466,7 @@
     if (!host) return;
     var total = nSteps(), body = host.querySelector(".dbody"), foot = host.querySelector(".dfoot"), bar = host.querySelector(".actbar i"), html = "", fh = "";
     if (st.step === 0) {
-      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : (STEPS.filter(function (q, qi) { return !skipped(qi + 1); }).length + " preguntas · 1 minuto")) + '</span><h2 style="font-size:28px;margin-top:8px">' + (st.opts.dayName ? "Armemos tu " + st.opts.dayName : "Armemos tu día") + '</h2><p class="muted">' + (st.opts.dayName ? "Pensá en cómo es tu " + st.opts.dayName + " de verdad, no en un día cualquiera. Lo armamos en bloques con horarios y queda guardado como tu " + st.opts.dayName + ". Después armás los demás días." : "Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.") + '</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
+      html = '<span class="badge">' + (st.quick ? "2 preguntas · 1 minuto" : (STEPS.filter(function (q, qi) { return !skipped(qi + 1); }).length + " preguntas · 1 minuto")) + '</span><h2 style="font-size:28px;margin-top:8px">' + (st.opts.dayName ? "Armemos tu " + st.opts.dayName : "Armemos tu día") + '</h2><p class="muted">' + (st.opts.dayName ? "Pensá en un día normal tuyo, como este " + st.opts.dayName + ". Lo armamos en bloques con horarios y queda como tu día base: se repite cada día hasta que lo cambies." : "Contanos cómo es tu día y te lo armamos en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Después lo ves siempre en Hoy.") + '</p><p class="small muted">Tus respuestas quedan en tu cuenta para que puedas cambiarlas cuando quieras.</p>';
       fh = '<button class="btn block" data-da="start">Empezar</button>'; bar.style.width = "0%";
     } else if (st.step <= total) {
       var s = STEPS[st.step - 1], msg = stepMessage(s), vt = 0, vn = 0; STEPS.forEach(function (q, qi) { if (qi < total && !skipped(qi + 1)) { vt++; if (qi + 1 <= st.step) vn++; } });
@@ -483,7 +492,8 @@
   function exactHtml(f, val) {
     if (!f.ex) return "";
     var v = typeof val === "number" && val >= 0 ? fmt(val) : "", err = st.exErr && st.exErr[f.key];
-    return '<label class="field exact"><span class="small muted">¿Otra hora? Escribila exacta (opcional)</span><input type="time" data-key="' + f.key + '" data-exact="1" value="' + v + '"></label>' + (err ? '<p class="small" style="color:var(--naranja,#FF8A4C);margin:4px 0 0">' + esc(err) + "</p>" : "");
+    var opn = err || (v && !(f.opts || []).some(function (o) { return o[1] === val; }));
+    return '<details class="exactd"' + (opn ? " open" : "") + '><summary>¿Otra hora exacta?</summary><label class="field exact"><span class="small muted">Escribila exacta</span><input type="time" data-key="' + f.key + '" data-exact="1" value="' + v + '"></label></details>' + (err ? '<p class="small" style="color:var(--naranja,#FF8A4C);margin:4px 0 0">' + esc(err) + "</p>" : "");
   }
   function exactSet(f, raw) {
     var mm = /^(\d\d):(\d\d)$/.exec(raw || ""); st.exErr = st.exErr || {}; delete st.exErr[f.key]; if (!mm) return;

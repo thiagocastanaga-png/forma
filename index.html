@@ -1,58 +1,109 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Forma: dale forma a la vida que querés</title>
-<meta name="description" content="Elegí qué querés lograr y Forma arma tu día alrededor de eso, con las herramientas y la guía paso a paso para cumplirlo. Gratis.">
+<meta name="description" content="Armá tu día en un minuto y elegí qué querés lograr: dormir mejor, estudiar, tenis, fútbol, ansiedad, plata. Un paso por día, estilo Duolingo. Gratis.">
 <link rel="canonical" href="https://formargentina.com/"><meta name="theme-color" content="#111111">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Forma"><meta property="og:locale" content="es_AR">
 <meta property="og:title" content="Forma: dale forma a la vida que querés"><meta property="og:description" content="Tu objetivo, tu día armado y las herramientas para lograrlo, paso a paso. Gratis.">
 <meta property="og:url" content="https://formargentina.com/"><meta property="og:image" content="https://formargentina.com/og.png"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon-192.png"><link rel="manifest" href="manifest.webmanifest">
 <style>
-:root{--bg:#111;--card:#1b1b19;--ink:#F5F1E8;--mut:#A39F92;--lima:#C6F432;--salvia:#86A892;--azul:#4C7DFF;--ama:#FFC83D;--nar:#FF8A4C;--lila:#B9A7F0}
+:root{--bg:#111;--card:#1b1b19;--ink:#F5F1E8;--mut:#A39F92;--lima:#C6F432;--salvia:#86A892;--azul:#4C7DFF;--ama:#FFC83D;--nar:#FF8A4C;--lila:#B9A7F0;--tur:#5FC4B0;--line:#2c2c29}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Inter,system-ui,-apple-system,sans-serif;overflow-x:hidden}
-a{color:inherit}.wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+a{color:inherit}.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
 header{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
 .logo{display:flex;align-items:center;gap:10px;font:800 28px Montserrat,Inter,sans-serif;letter-spacing:-.03em;text-decoration:none}
-.btn{display:inline-block;text-decoration:none;font-weight:700;padding:15px 24px;border-radius:14px;background:var(--lima);color:#111;transition:transform .3s ease,box-shadow .3s ease}
-.btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(198,244,50,.25)}.btn.alt{background:transparent;border:1px solid #4a4a45;color:var(--ink)}.btn.sm{padding:10px 16px;font-size:15px}
-.hero{position:relative;padding:64px 0 90px}
-h1{font:800 clamp(40px,8vw,76px)/1.02 Montserrat,Inter,sans-serif;letter-spacing:-.035em;margin:0 0 18px;max-width:8.6em}
-h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--lima) 62% 92%,transparent 92%);color:var(--ink)}
-.lead{font-size:clamp(18px,2.4vw,22px);color:var(--mut);max-width:28em;margin:0 0 28px}
+.btn{display:inline-block;text-decoration:none;font-weight:800;padding:15px 24px;border-radius:16px;background:var(--lima);color:#111;box-shadow:0 4px 0 #9cc21f;transition:transform .2s ease}
+.btn:hover{transform:translateY(-2px)}.btn.alt{background:transparent;border:1px solid #4a4a45;color:var(--ink);box-shadow:none}.btn.sm{padding:10px 16px;font-size:15px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:40px 0 60px}
+h1{font:800 clamp(40px,7vw,70px)/1.02 Montserrat,Inter,sans-serif;letter-spacing:-.035em;margin:0 0 18px}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--lima) 62% 92%,transparent 92%)}
+.lead{font-size:clamp(18px,2.3vw,21px);color:var(--mut);max-width:30em;margin:0 0 26px}
 .cta{display:flex;flex-wrap:wrap;gap:12px}.note{color:var(--mut);font-size:14px;margin-top:14px}
-.sh{position:absolute;pointer-events:none;opacity:.9}.sh.a{width:150px;height:150px;border-radius:50%;background:var(--lima);right:-30px;top:30px}
-.sh.b{width:120px;height:60px;border-radius:120px 120px 0 0;background:var(--lila);right:130px;top:250px}
-.sh.c{width:70px;height:70px;background:var(--ama);right:60px;top:360px;transform:rotate(12deg)}
-.sh.d{width:0;height:0;border-left:44px solid transparent;border-right:44px solid transparent;border-bottom:80px solid var(--nar);right:290px;top:40px;transform:rotate(-14deg)}
-@media(max-width:720px){.sh.a{width:90px;height:90px;right:-20px;top:10px}.sh.b{right:20px;top:520px;width:90px;height:45px}.sh.c{display:none}.sh.d{right:80px;top:-10px;transform:scale(.6)}}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-.card{background:var(--card);border-radius:22px;padding:24px;border-left:6px solid var(--c,var(--salvia))}
-.card h3{margin:0 0 8px;font-size:21px}.card p{margin:0;color:var(--mut);font-size:16px}
-section{padding:40px 0}h2{font:800 clamp(28px,5vw,42px)/1.1 Montserrat,Inter,sans-serif;letter-spacing:-.03em;margin:0 0 22px}
-.steps{counter-reset:s;display:grid;gap:14px;max-width:640px}.steps div{display:flex;gap:16px;align-items:flex-start}
-.steps b{flex:none;width:38px;height:38px;border-radius:50%;background:var(--salvia);color:#111;display:grid;place-items:center;font-weight:800}
-.steps span{color:var(--mut)}.steps strong{display:block;color:var(--ink)}
-footer{border-top:1px solid #2a2a27;margin-top:50px;padding:28px 0 50px;color:var(--mut);font-size:14px}footer a{margin-right:16px}
+.phones{position:relative;height:560px}
+.ph{position:absolute;width:250px;border-radius:34px;border:8px solid #2a2a27;box-shadow:0 30px 60px rgba(0,0,0,.5);overflow:hidden;background:#121211}
+.ph img{display:block;width:100%;height:auto}
+.ph.a{left:0;top:40px;transform:rotate(-6deg);z-index:1}.ph.b{right:0;top:0;transform:rotate(5deg);z-index:2}
+section{padding:48px 0}h2{font:800 clamp(28px,5vw,44px)/1.08 Montserrat,Inter,sans-serif;letter-spacing:-.03em;margin:0 0 10px}
+.sub{color:var(--mut);margin:0 0 26px;max-width:40em}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.step{background:var(--card);border-radius:22px;padding:22px}.step .e{font-size:38px;line-height:1}.step h3{margin:12px 0 6px;font-size:20px}.step p{margin:0;color:var(--mut);font-size:16px}
+.goals{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.goal{background:var(--card);border-radius:20px;padding:16px;border-bottom:4px solid var(--c)}.goal .e{font-size:32px}.goal b{display:block;margin-top:8px;font-size:15px;line-height:1.25}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.sport{background:linear-gradient(135deg,#1f2a10,#16231f);border-radius:28px;padding:32px}
+.sport ul{margin:14px 0 0;padding-left:0;list-style:none}.sport li{margin:8px 0;padding-left:30px;position:relative}.sport li:before{content:"✓";position:absolute;left:0;color:var(--lima);font-weight:800}
+.shot{border-radius:28px;border:8px solid #2a2a27;overflow:hidden;max-width:300px;margin:0 auto}.shot img{display:block;width:100%}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.plan{background:var(--card);border-radius:24px;padding:26px;border:2px solid var(--line);position:relative}
+.plan.top{border-color:var(--lima);box-shadow:0 6px 0 #9cc21f}
+.plan .tag{position:absolute;top:-13px;left:24px;background:var(--lima);color:#111;font-weight:800;font-size:13px;border-radius:999px;padding:4px 12px}
+.plan h3{margin:0;font-size:20px}.plan .pr{font:800 40px Montserrat,Inter,sans-serif;letter-spacing:-.03em;margin:8px 0 0}.plan .pr small{font:600 16px Inter;color:var(--mut)}
+.plan .pm{color:var(--mut);font-size:15px;margin:4px 0 14px}.plan ul{margin:0;padding-left:0;list-style:none}.plan li{margin:8px 0;padding-left:28px;position:relative;font-size:16px}.plan li:before{content:"✓";position:absolute;left:0;color:var(--lima);font-weight:800}
+.plan li.no{color:var(--mut)}.plan li.no:before{content:"–";color:var(--mut)}
+.fine{color:var(--mut);font-size:14px;margin-top:16px}
+.inst{display:grid;grid-template-columns:1fr 1fr;gap:16px}.inst div{background:var(--card);border-radius:22px;padding:22px}.inst h3{margin:0 0 8px}.inst ol{margin:0;padding-left:20px;color:var(--mut)}.inst li{margin:6px 0}
+details{background:var(--card);border-radius:18px;padding:18px 20px;margin:10px 0}summary{font-weight:700;cursor:pointer;font-size:17px}details p{color:var(--mut);margin:10px 0 0}
+.final{text-align:center;background:var(--card);border-radius:30px;padding:46px 22px;margin-top:20px}
+footer{border-top:1px solid #2a2a27;margin-top:50px;padding:28px 0 50px;color:var(--mut);font-size:14px}footer a{margin-right:16px;display:inline-block;margin-bottom:8px}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:20px}.phones{height:440px;max-width:420px;margin:0 auto;width:100%}.ph{width:200px}.steps,.plans,.split,.inst{grid-template-columns:1fr}.goals{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
 <div class="wrap">
 <header><a class="logo" href="./" aria-label="Forma"><svg viewBox="0 0 512 512" width="40" height="40" aria-hidden="true"><path d="M278.7 71.4A186 186 0 0 1 392.0 382.9L323.3 318.7A92 92 0 0 0 267.2 164.7Z" fill="#C6F432" stroke="#C6F432" stroke-width="14" stroke-linejoin="round"/><path d="M357.3 412.0A186 186 0 0 1 71.4 278.7L164.7 267.2A92 92 0 0 0 306.1 333.2Z" fill="#F5F1E8" stroke="#F5F1E8" stroke-width="14" stroke-linejoin="round"/><path d="M71.4 233.3A186 186 0 0 1 233.3 71.4L244.8 164.7A92 92 0 0 0 164.7 244.8Z" fill="#86A892" stroke="#86A892" stroke-width="14" stroke-linejoin="round"/></svg>forma</a><a class="btn sm" href="miforma">Abrir la app</a></header>
-<div class="hero"><i class="sh a"></i><i class="sh b"></i><i class="sh c"></i><i class="sh d"></i>
+<div class="hero"><div>
 <h1>Dale <em>forma</em> a la vida que querés</h1>
-<p class="lead">Elegís qué querés lograr (dormir mejor, rendir en el estudio, entrenar, enfocarte). Forma arma tu día alrededor de eso y te da las herramientas y el paso a paso para cumplirlo.</p>
-<div class="cta"><a class="btn" href="miforma">Empezar gratis</a><a class="btn alt" href="probar">Instalarla en el celular</a></div>
-<p class="note">Gratis. Creás tu cuenta con tu mail y empezás en un minuto.</p></div>
+<p class="lead">Armá tu día en un minuto y elegí qué querés lograr. Forma te guía con un paso por día, de 2 a 5 minutos, y te muestra cómo vas cambiando. Como Duolingo, pero para tu vida.</p>
+<div class="cta"><a class="btn" href="miforma">Empezar gratis</a><a class="btn alt" href="#instalar">Instalarla en el celular</a></div>
+<p class="note">Gratis para siempre: tu día y el nivel 1 de cada objetivo. Y 7 días de Forma Pro de regalo.</p></div>
+<div class="phones"><div class="ph a"><img src="app-2.webp" alt="El camino de un objetivo en Forma, con niveles y pasos" width="390" height="844" loading="eager"></div><div class="ph b"><img src="app-1.webp" alt="La pantalla Hoy de Forma con el paso del día" width="390" height="844" loading="eager"></div></div>
+</div>
 
-<section><h2>No es una agenda: es un camino</h2><div class="grid">
-<div class="card" style="--c:var(--azul)"><h3>Un objetivo claro</h3><p>Elegís qué querés lograr. Todo lo demás se arma para acercarte a eso, sin rigidez y a tu ritmo.</p></div>
-<div class="card" style="--c:var(--lima)"><h3>Tu día, armado alrededor de eso</h3><p>Forma te arma el día en bloques con horarios reales, y podés editarlo hora por hora a tu manera.</p></div>
-<div class="card" style="--c:var(--ama)"><h3>Herramientas y guía en cada momento</h3><p>Plan para dormir, bloques de foco, tarjetas de repaso, respiración y más: no solo qué hacer, sino cómo hacerlo.</p></div>
-<div class="card" style="--c:var(--lila)"><h3>Ves que avanzás</h3><p>Tus días con algo hecho y tu constancia a la vista, para sostener el cambio semana a semana.</p></div></div></section>
+<section><h2>Así funciona</h2><p class="sub">No es una agenda más. Es un camino chico y diario hacia lo que querés.</p><div class="steps">
+<div class="step"><div class="e">🗓️</div><h3>Armás tu día</h3><p>4 preguntas y en un minuto tenés tu día en bloques con horarios: lo fijo, las comidas, el descanso y tus momentos libres.</p></div>
+<div class="step"><div class="e">🎯</div><h3>Elegís un objetivo</h3><p>Un camino de 5 niveles y 14 pasos. Cada día hacés uno, se suma solo a tu día y te avisamos cuando toca.</p></div>
+<div class="step"><div class="e">📈</div><h3>Ves cómo cambiás</h3><p>Racha, XP, niveles y tu antes y ahora con datos reales. Más de 30 herramientas para sostenerlo.</p></div>
+</div></section>
 
-<section><h2>Cómo empezar</h2><div class="steps">
-<div><b>1</b><span><strong>Creá tu cuenta</strong>Con tu mail. Es gratis.</span></div>
-<div><b>2</b><span><strong>Elegí qué querés lograr</strong>Y contá cómo es tu día: en un minuto lo tenés armado.</span></div>
-<div><b>3</b><span><strong>Usá las herramientas de cada momento</strong>Con la guía paso a paso para cumplirlo.</span></div></div>
-<p style="margin-top:28px"><a class="btn" href="miforma">Abrir Forma</a></p></section>
+<section><h2>¿Qué querés lograr?</h2><p class="sub">Diez caminos, cada uno con sus propias herramientas.</p><div class="goals">
+<div class="goal" style="--c:#4C7DFF"><span class="e">😴</span><b>Dormir mejor</b></div>
+<div class="goal" style="--c:#FF8A4C"><span class="e">📵</span><b>Usar menos el celular</b></div>
+<div class="goal" style="--c:#5FC4B0"><span class="e">📚</span><b>Estudiar y rendir mejor</b></div>
+<div class="goal" style="--c:#B9A7F0"><span class="e">🧘</span><b>Bajar la ansiedad</b></div>
+<div class="goal" style="--c:#C6F432"><span class="e">🎾</span><b>Tenista de alto rendimiento</b></div>
+<div class="goal" style="--c:#4C7DFF"><span class="e">⚽</span><b>Futbolista profesional</b></div>
+<div class="goal" style="--c:#FF8A4C"><span class="e">🏃</span><b>Moverme más</b></div>
+<div class="goal" style="--c:#FFC83D"><span class="e">💰</span><b>Ordenar mi plata</b></div>
+<div class="goal" style="--c:#5FC4B0"><span class="e">✈️</span><b>Organizar un viaje</b></div>
+<div class="goal" style="--c:#86A892"><span class="e">💼</span><b>Buscar trabajo</b></div>
+</div></section>
 
-<footer><a href="https://www.instagram.com/formargentina/" target="_blank" rel="noopener">Instagram @formargentina</a><a href="privacidad">Privacidad</a><a href="terminos">Términos</a><a href="eliminar-cuenta">Eliminar mi cuenta</a><p>Forma está en versión de prueba: puede tener errores y la vamos mejorando con tu opinión.</p></footer>
+<section id="deporte"><div class="split"><div class="sport">
+<h2>Para tenistas y futbolistas que van en serio</h2>
+<p class="sub" style="margin:0">Hecho por un tenista en camino al profesionalismo y profe de tenis. Tu meta de la temporada, práctica con intención, la cabeza en el partido y la recuperación.</p>
+<ul><li>Rutinas modelo de activación, fuerza y prevención</li><li>Diario de partidos: resultado, cómo jugaste y qué ajustar</li><li>Previa del partido y vuelta a la calma guiadas</li><li>Tu carga de entrenamiento de la semana</li></ul>
+<p style="margin:22px 0 0"><a class="btn" href="miforma">Empezar mi camino</a></p></div>
+<div class="shot"><img src="app-3.webp" alt="La pestaña Mi cambio con el antes y ahora" width="390" height="844" loading="lazy"></div></div></section>
+
+<section id="precios"><h2>Gratis, o todo con Forma Pro</h2><p class="sub">Sin débito automático: pagás una vez con Mercado Pago y no se renueva solo.</p><div class="plans">
+<div class="plan"><h3>Gratis</h3><div class="pr">$0</div><p class="pm">Para siempre</p><ul><li>Tu día armado con horarios</li><li>El nivel 1 de los 10 objetivos</li><li>Una herramienta por objetivo</li><li>Avisos de cada momento del día</li><li class="no">Niveles 2 a 5</li><li class="no">Tu semana día por día</li></ul></div>
+<div class="plan top"><span class="tag">Ahorrás 49%</span><h3>Pro anual</h3><div class="pr">$47.900</div><p class="pm">$3.992 por mes · 12 meses</p><ul><li>Los 10 objetivos completos</li><li>Más de 30 herramientas</li><li>Tu semana día por día</li><li>Mi cambio y resumen semanal</li><li>Todo lo que se sume</li></ul></div>
+<div class="plan"><h3>Pro mensual</h3><div class="pr">$7.900<small> / mes</small></div><p class="pm">1 mes, sin compromiso</p><ul><li>Todo lo de Pro</li><li>Ideal para probar un objetivo</li><li>Lo renovás solo si querés</li></ul></div>
+</div><p class="fine">Precios finales en pesos argentinos. Tenés 10 días para arrepentirte de la compra (<a href="arrepentimiento">botón de arrepentimiento</a>).</p></section>
+
+<section id="instalar"><h2>Instalala en tu celular</h2><p class="sub">Forma funciona desde el navegador, sin bajar nada. Si la agregás a tu pantalla de inicio, se abre como una app.</p><div class="inst">
+<div><h3>📱 iPhone</h3><ol><li>Abrí <b>formargentina.com/miforma</b> en Safari.</li><li>Tocá el botón Compartir (el cuadrado con la flecha).</li><li>Elegí «Agregar a inicio».</li></ol></div>
+<div><h3>🤖 Android</h3><ol><li>Abrí <b>formargentina.com/miforma</b> en Chrome.</li><li>Tocá el menú ⋮ arriba a la derecha.</li><li>Elegí «Instalar app» o «Agregar a la pantalla principal».</li></ol></div>
+</div></section>
+
+<section><h2>Preguntas frecuentes</h2>
+<details><summary>¿Es gratis?</summary><p>Sí. Tu día armado, los avisos y el nivel 1 de cada objetivo son gratis para siempre. Al empezar tenés 7 días de Forma Pro de regalo, sin poner tarjeta.</p></details>
+<details><summary>¿Se renueva solo?</summary><p>No. Forma Pro se paga una sola vez por 1 mes o por 12 meses. No hay débito automático: te avisamos antes de que venza y decidís si lo renovás.</p></details>
+<details><summary>¿Cuánto tiempo me lleva por día?</summary><p>El paso de tu objetivo dura de 2 a 5 minutos. Las herramientas las usás cuando quieras, o las sumás a un momento de tu día.</p></details>
+<details><summary>¿Qué pasa con mis datos?</summary><p>Son tuyos. Se guardan en tu cuenta para que los veas en todos tus dispositivos, no los vendemos y podés descargarlos o borrar tu cuenta cuando quieras. Más en la <a href="privacidad">política de privacidad</a>.</p></details>
+<details><summary>¿Reemplaza a un médico, psicólogo o entrenador?</summary><p>No. Forma te ayuda a organizarte y a sostener hábitos, pero no hace diagnósticos ni reemplaza a un profesional.</p></details>
+</section>
+
+<div class="final"><h2>Tu primer paso, hoy</h2><p class="sub" style="margin:0 auto 22px">Un minuto para armar tu día. Dos para el primer paso.</p><a class="btn" href="miforma">Empezar gratis</a></div>
+
+<footer><a href="https://www.instagram.com/formargentina/" target="_blank" rel="noopener">Instagram @formargentina</a><a href="mailto:hola@formargentina.com">hola@formargentina.com</a><a href="privacidad">Privacidad</a><a href="terminos">Términos</a><a href="arrepentimiento">Botón de arrepentimiento</a><a href="eliminar-cuenta">Eliminar mi cuenta</a><p>© 2026 Forma · Argentina</p></footer>
 </div></body></html>

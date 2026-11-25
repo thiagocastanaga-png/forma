@@ -87,26 +87,26 @@
       d: "Un sistema para ordenar tu día y tu vida a tu manera: sin rigidez, con lo que vos elegís. Para gente común, a tu ritmo.",
       free: ["Tu día armado en 1 minuto, fijo en la pantalla de Hoy", "Cambiar tu día de hoy y armar mañana cada noche", "Tu mapa de vida", "Respiración guiada de 1 minuto"],
       pros: ["Incluye los planes de vida diaria: dormir, celular, arrancar, calma y los que vienen", "Tildar tu día y seguir tu constancia semanal", "Organizar tu semana: armá y guardá cada día (tu lunes, tu martes…) y que se repitan solos", "Cambiar tu día base cuando cambie tu vida", "Avisos en el calendario de tu celular", "Actividades guiadas dentro de tu día: calma, movimiento, foco, cierre y sueño", "Lo que hiciste bien hoy y tus pendientes", "Hábitos propios sin límite y revisión semanal", "Se incluye con cualquier otro plan Pro"] },
-    { id: "dormir", n: "Dormir de verdad", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", inc: true, grp: "Vida diaria", price: "",
+    { id: "dormir", n: "Dormir mejor", c: "#4C7DFF", pro: "plan-dormir", live: true, prog: "dormir", inc: true, grp: "Vida diaria", price: "",
       d: "Subí de nivel para ordenar tu sueño: cargás tus horarios, hacés un paso por día y al final ves tus datos reales.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Registro de tus horarios con gráfico", "Rutina guiada para dormir y respiración", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
-    { id: "celular", n: "Celular bajo control", c: "#FF8A4C", pro: "plan-celular", live: true, prog: "celular", inc: true, grp: "Vida diaria", price: "",
+    { id: "celular", n: "Usar menos el celular", c: "#FF8A4C", pro: "plan-celular", live: true, prog: "celular", inc: true, grp: "Vida diaria", price: "",
       d: "Subí de nivel para usar el celular vos y que no te use a vos. Medís tu pantalla y ves cuánto la bajás.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Registro de tu tiempo de pantalla con gráfico", "Temporizadores y desafíos dentro de la app", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
     { id: "arrancar", n: "Arrancar", c: "#FFC83D", pro: "plan-arrancar", live: false, inc: true, grp: "Vida diaria", price: "",
       d: "Subí de nivel para dejar de postergar: pasos diminutos, foco de 25 minutos y un registro de lo que lográs.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Bloques de foco guiados", "Registro de minutos de foco con gráfico", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
-    { id: "calma", n: "Calmar la cabeza", c: "#B9A7F0", pro: "plan-calma", live: true, prog: "calma", inc: true, grp: "Vida diaria", price: "",
+    { id: "calma", n: "Bajar la ansiedad", c: "#B9A7F0", pro: "plan-calma", live: true, prog: "calma", inc: true, grp: "Vida diaria", price: "",
       d: "Subí de nivel con herramientas simples para bajar la tensión de todos los días y armar tu propio kit.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Respiraciones y ejercicios guiados", "Registro de tu tensión con gráfico", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
-    { id: "estudio", n: "Estudiar mejor", c: "#5FC4B0", pro: "plan-estudio", live: true, prog: "estudio", grp: "Estudio y trabajo", price: "",
+    { id: "estudio", n: "Estudiar y rendir mejor", c: "#5FC4B0", pro: "plan-estudio", live: true, prog: "estudio", grp: "Estudio y trabajo", price: "",
       d: "Para estudiantes: organizá tu estudio, aprendé técnicas que funcionan y rendí mejor en tus exámenes. Con niveles, dentro de la app.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Técnicas probadas: recordar sin mirar, repaso espaciado, práctica de examen", "Bloques de foco guiados", "Registro de tus minutos de estudio con gráfico", "Tu método final, armado con lo que te funcionó", "Vida diaria Pro incluido"] },
     { id: "laburo", n: "Buscar trabajo", c: "#4C7DFF", pro: "plan-laburo", live: true, prog: "laburo", inc: true, grp: "Estudio y trabajo", d: "Armá tu CV, practicá entrevistas y organizá tu búsqueda con un plan diario.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
-    { id: "plata", n: "Plata en orden", c: "#C6F432", pro: "plan-plata", live: true, prog: "plata", inc: true, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
-    { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: true, prog: "movimiento", inc: true, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "plata", n: "Ordenar mi plata", c: "#C6F432", pro: "plan-plata", live: true, prog: "plata", inc: true, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "movimiento", n: "Moverme más", c: "#FF8A4C", pro: "plan-movimiento", live: true, prog: "movimiento", inc: true, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
-    { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: true, prog: "viajes", inc: true, grp: "Vida diaria", d: "Armá tu viaje paso a paso: destino, presupuesto, itinerario, reservas y valija. Con niveles, dentro de la app.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "viajes", n: "Organizar un viaje", c: "#B9A7F0", pro: "plan-viajes", live: true, prog: "viajes", inc: true, grp: "Vida diaria", d: "Armá tu viaje paso a paso: destino, presupuesto, itinerario, reservas y valija. Con niveles, dentro de la app.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$23.900", was: "$31.900", promo: "Precio de lanzamiento",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
@@ -191,13 +191,18 @@
   function touchBest() { var n = streakNow(); if (n > S.best) S.best = n; }
 
   // permisos
-  function hasProduct(id) { return S.demo || !!S.owned[id] || !!S.owned.todo || !!S.owned["forma-pro"] || !!(SIM && S.betaOwned && S.betaOwned[id]); }
-  function isPro(planId) {
-    var p = planOf(planId); if (!p) return false;
-    if (hasProduct(p.pro)) return true;
-    if (planId === "vida") return PLANS.some(function (x) { return x.id !== "vida" && hasProduct(x.pro); });
-    return false;
+  // ---------- Forma Pro: una sola oferta, todo incluido (mensual o anual) ----------
+  var PRICE = { mes: 7900, anio: 47900 }, TRIAL_DAYS = 7, FREE_N = 3;
+  function ars(n) { return "$" + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  function paidPro() {
+    var o = S.owned || {}; if (!Object.keys(o).length) return !!(SIM && S.betaOwned && Object.keys(S.betaOwned).length);
+    return !S.proUntil || Date.now() < S.proUntil;
   }
+  function trialLeft() { if (!S.trial || !S.trial.s || paidPro()) return 0; return Math.max(0, TRIAL_DAYS - daysSince(S.trial.s)); }
+  function trialOn() { return trialLeft() > 0; }
+  function proActive() { return !!(S.demo || paidPro() || trialOn()); }
+  function hasProduct(id) { return proActive(); }
+  function isPro(planId) { return proActive(); }
   function owns(p) { return hasProduct(p.id) || isPro(p.s); }
   function habitLimit() { return isPro("vida") ? 9999 : FREE_HABITS; }
 
@@ -246,7 +251,7 @@
     if (/fetch|network/i.test(m)) return "No hay conexión. Revisá tu internet.";
     return "No pudimos completar la acción. Probá de nuevo.";
   }
-  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal", "betaOwned", "tl"];
+  var EXTRA = ["mapa", "focos", "day", "notes", "checks", "reviews", "intencion", "arm", "ad", "wins", "todo", "comp", "bn", "actn", "cierre", "cierreL", "wk", "tm", "prog", "test", "dd", "cierreAt", "xt", "rem", "goal", "betaOwned", "tl", "bnr", "bts", "bdn", "tdn", "trial", "trialSeen", "lsev"];
   function mergeStates(local, remote) {
     var out = { profile: remote.profile || local.profile || null, habits: [], best: Math.max(local.best || 0, remote.best || 0) };
     var map = {};
@@ -307,7 +312,7 @@
     ]).then(function (res) {
       var st = res[0], pr = res[1], pu = res[2];
       if (pr && pr.data) acct.username = pr.data.username || "";
-      if (pu && pu.data) { var o = {}; pu.data.forEach(function (r) { o[r.product_id] = 1; }); S.owned = o; }
+      if (pu && pu.data) { var o = {}, until = 0; pu.data.forEach(function (r) { o[r.product_id] = 1; var ex = r.expires_at ? Date.parse(r.expires_at) : r.created_at ? Date.parse(r.created_at) + (r.product_id === "forma-pro-mes" ? 31 : 366) * 864e5 : 9e15; if (ex > until) until = ex; }); S.owned = o; S.proUntil = pu.data.length ? until : 0; }
       var remote = (st && st.data && st.data.state) || null;
       var stale = false;
       if (S.uid) stale = S.uid !== user.id;
@@ -366,6 +371,7 @@
     var hero = $app.querySelector(".armhero");
     if (hero && !S.welcomed) { S.welcomed = 1; save(); if (!REDUCE) { lastAnim = key; welcomeSeq(hero); return; } }
     if (key !== lastAnim) { lastAnim = key; var m = $app.querySelector("main"); animIn(m ? m.children : $app.children, {}); }
+    widgetSync(); setTimeout(maybeTrialEnd, 900);
   }
   function render0() {
     if (mode === "recovery") return renderRecovery();
@@ -376,15 +382,15 @@
       else return renderOnboard();
     }
     touchBest();
-    if (tab === "catalogo") tab = "planes";
+    if (tab === "catalogo" || tab === "planes") tab = "obj";
     if (tab === "tools") tab = "obj";
     var body = { hoy: vHoy, obj: vObj, planes: vPlanes, perfil: vPerfil }[tab]() + (tab === "hoy" ? installCard() : "");
-    var n = weekCount(0), topPro = isPro("vida") || PLANS.some(function (p) { return isPro(p.id); });
+    var sk = streakNow(), topPro = proActive();
     $app.innerHTML =
       '<div class="top"><div class="logo">'+LMARK+'forma<i></i></div><div class="row" style="gap:8px">' +
       (S.demo ? '<span class="tag">modo prueba</span>' : "") +
-      (S.arm ? '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? "Pro" : "Gratis") + "</span>" +
-      '<span class="flame-chip' + (n ? " on" : "") + '" title="Días con algo hecho esta semana">' + ICON.flame + "<b>" + n + "/7</b></span>" : "") + "</div></div>" +
+      (S.arm ? '<span class="plan-chip' + (topPro ? " pro" : "") + '">' + (topPro ? (trialOn() && !paidPro() && !S.demo ? "Pro · prueba" : "Pro") : "Gratis") + "</span>" +
+      '<span class="flame-chip' + (sk ? " on" : "") + '" title="Días seguidos con algo hecho" aria-label="Racha: ' + sk + ' días seguidos">' + ICON.flame + "<b>" + sk + "</b></span>" : "") + "</div></div>" +
       "<main>" + body + "</main>" +
       '<nav class="tabs" aria-label="Principal"><div>' +
       [["hoy", "Hoy"], ["obj", "Objetivo"], ["perfil", "Perfil"]].map(function (t) {
@@ -408,7 +414,6 @@
           '<button class="btn block" id="a-forgot">Enviar link</button><button class="btn ghost block" data-mode="login">Volver</button>';
       } else if (reg) {
         html += '<label class="field"><span>¿Cómo te llamás?</span><input id="a-name" autocomplete="given-name" maxlength="40" value="' + esc(draft.name) + '"></label>' +
-          '<label class="field"><span>Usuario</span><input id="a-user" autocomplete="username" autocapitalize="none" maxlength="21"  value="' + esc(draft.username) + '"></label>' +
           '<label class="field"><span>Email</span><input id="a-email" type="email" autocomplete="email" value="' + esc(draft.email) + '"></label>' +
           '<label class="field"><span>Contraseña (mínimo 8 caracteres)</span><input id="a-pass" type="password" autocomplete="new-password"></label>' +
           '<label class="row small"><input id="a-terms" type="checkbox" ' + (draft.terms ? "checked" : "") + '> <span>Acepto los <a href="terminos" target="_blank" rel="noopener">términos</a> y la <a href="privacidad" target="_blank" rel="noopener">política de privacidad</a>.</span></label>' +
@@ -516,7 +521,7 @@
   function vArmar() {
     var nm = (S.profile && S.profile.name) || "";
     return '<div class="armhero"><span class="badge">Bienvenido a Forma</span><h1>' + (nm ? "Hola, " + esc(nm) + "." : "Hola.") + '</h1>' +
-      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>Solo 2 preguntas, menos de 1 minuto.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día y te damos la guía</b><span>Herramientas y pasos concretos para cumplirlo, de a poco.</span></li></ol>' +
+      '<ol class="armsteps"><li><b>Contanos cómo es tu día hoy</b><span>4 preguntas, menos de 1 minuto.</span></li><li><b>Contanos qué querés lograr</b><span>Dormir mejor, estudiar, estar más tranquilo…</span></li><li><b>Armamos tu día y te damos la guía</b><span>Herramientas y pasos concretos para cumplirlo, de a poco.</span></li></ol>' +
       '<button class="btn sage block" id="armgo">Armar mi día</button><p class="small muted" style="text-align:center;margin:4px 0 0">' + (PRUEBA ? "Versión de prueba: tus datos quedan solo en este celular." : "Es gratis y tu día queda siempre acá, en Hoy.") + '</p></div>';
   }
   var deferredInstall = null;
@@ -535,13 +540,38 @@
     if (!S.arm || !S.arm.ans || !S.arm.ans.quick) return "";
     return '<div class="card sage refine" style="margin-top:12px"><b>Afiná tu día</b><p class="small" style="margin:6px 0 10px">Armamos tu día con valores generales. Respondé 10 preguntas más (comidas, entrenamiento, prioridades, hábitos) y queda a tu medida.</p><button class="btn sm" data-refine>Afinar mi día</button></div>';
   }
-  function vHoy() {
-    if (!S.arm) return vArmar();
-    if (S.demo || isPro("vida")) return vHoyPro();
+  function greetHtml() {
     var d = new Date(), hr = d.getHours(), greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-    return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard() + (armBlocks().length ? viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
-      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + weekCard() : "") + (armBlocks().length ? '<div class="card dark" style="margin-top:14px"><b>Hacé tu día tuyo con Forma Pro</b><ul class="ticks" style="margin:8px 0 12px"><li>Herramientas guiadas dentro de tu día</li><li>Armar tu semana con días distintos</li><li>Tus objetivos: dormir, celular, foco y calma</li><li>Cambiar tu día base cuando cambie tu vida</li><li>Avisos en el calendario de tu celular</li><li>Actividades guiadas dentro de tu día</li><li>Lo que hiciste bien hoy y tus pendientes</li></ul><button class="btn sage block" data-openpro>Ver Forma Pro</button></div>' : "");
+    return '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p><h1 class=\"hello\">" + greet + ", " + esc(S.profile.name) + "</h1>";
+  }
+  // Tarjeta del objetivo en Hoy: elegir el primero, o el paso de hoy
+  function goalHoyCard() {
+    var id = S.prog && S.prog.cur, started = PG.list.some(function (P) { return pgItem(P.id); });
+    if (!started || !id || !pgOf(id)) return '<button class="card goalnudge" data-goalpick><span class="gnemo">🎯</span><span style="flex:1;min-width:0"><b>Elegí tu primer objetivo</b><small>Dormir mejor, estudiar, tenis, fútbol, plata… Un paso por día, de 2 a 5 minutos.</small></span><span class="gnarrow">›</span></button>';
+    var n = pgCount(id), P = pgOf(id), it = pgItem(id); if (!P || n >= 14) return "";
+    if (pgToday(id)) return '<button class="card goalnudge done" data-pgopen="' + id + '"><span class="gnemo">✅</span><span style="flex:1;min-width:0"><b>Paso de hoy hecho</b><small>' + esc(goalName(id)) + " · racha de " + pgStreak(id) + (pgStreak(id) === 1 ? " día" : " días") + '. Mañana sigue: «' + esc(P.days[n] ? P.days[n].t : "") + '».</small></span><span class="gnarrow">›</span></button>';
+    if (!pgCan(id)) return '<button class="card goalnudge pro" data-openpro="nivel"><span class="gnemo">🏅</span><span style="flex:1;min-width:0"><b>¡Terminaste el nivel 1 de ' + esc(goalName(id)) + '!</b><small>Seguí con el nivel 2 y los demás con Forma Pro.</small></span><span class="gnarrow">›</span></button>';
+    return '<button class="card goalnudge now" data-pglesson="' + id + '"><span class="gnemo">' + gemo(id) + '</span><span style="flex:1;min-width:0"><small class="gnk">Tu paso de hoy' + (it && it.at ? " · " + esc(it.at) : "") + "</small><b>" + esc(P.days[n].t) + "</b><small>" + esc(goalName(id)) + " · paso " + (n + 1) + ' de 14</small></span><span class="gnplay">▶</span></button>';
+  }
+  function trialCard() {
+    var tl = trialLeft(); if (!tl || S.demo) return "";
+    return '<button class="card trialcard" data-openpro><span>✨</span><span style="flex:1;min-width:0"><b>' + (tl === 1 ? "Último día de Forma Pro gratis" : "Te quedan " + tl + " días de Forma Pro gratis") + '</b><small>Probá todo: los 14 pasos, las herramientas y tu semana.</small></span></button>';
+  }
+  function proExpCard() {
+    if (!paidPro() || S.demo || !S.proUntil || S.proUntil > 9e14) return "";
+    var dl = Math.ceil((S.proUntil - Date.now()) / 864e5); if (dl > 5 || dl < 0) return "";
+    return '<button class="card trialcard" data-openpro><span>⏳</span><span style="flex:1;min-width:0"><b>Tu Forma Pro vence ' + (dl <= 1 ? "mañana" : "en " + dl + " días") + '</b><small>Renovalo para seguir con tus caminos y herramientas.</small></span></button>';
+  }
+  function proNudge() {
+    if (proActive() || NATIVE) return "";
+    return '<button class="card pronudge" data-openpro><span>✨</span><span style="flex:1;min-width:0"><b>Forma Pro</b><small>Todos los niveles, más de 30 herramientas y tu semana día por día. Desde ' + ars(Math.round(PRICE.anio / 12)) + ' por mes.</small></span><span class="gnarrow">›</span></button>';
+  }
+  function vHoy() {
+    if (!S.arm) return vArmar();
+    if (proActive()) return vHoyPro();
+    return greetHtml() + refineCard() + (armBlocks().length ? goalHoyCard() + viewToggle() + (viewMode() === "now" ? nowSection() + compCard() : armSection()) : armSection()) +
+      (armBlocks().length ? prioCard() + cierreCard() + mananaCard() + notifNudge() + proNudge() : "");
   }
   function vHoyPro() {
     var t = today(), hs = activeHabits().filter(function (h) { return !h.paused; }), done = hs.filter(function (h) { return h.days[t]; }).length;
@@ -550,7 +580,7 @@
     var greet = hr < 6 ? "Buenas noches" : hr < 13 ? "Buen día" : hr < 20 ? "Buenas tardes" : "Buenas noches";
     var dateStr = d.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     var head = wc === 0 ? "Esta semana todavía no sumaste nada. Con una cosa chica alcanza." : wc < 3 ? "Vas sumando. Tres días en la semana ya es una gran constancia." : "¡Muy buena semana! Así se construye el orden.";
-    var gr = '<p class="muted small" style="margin:0">' + esc(dateStr) + "</p>" + '<h1 class="hello">' + greet + ", " + esc(S.profile.name) + "</h1>" + refineCard();
+    var gr = greetHtml() + refineCard() + trialCard() + proExpCard() + (armBlocks().length ? goalHoyCard() : "");
     var html = gr +
       '<div class="card dark streakcard"><div class="row between"><div class="row"><span class="bigflame' + (wc ? " on" : "") + '">' + ICON.flame + "</span><div><b style='font-size:30px;line-height:1'>" + wc + "<span style='font-size:18px;opacity:.7'>/7</span></b><div class='small' style='opacity:.85'>días con algo hecho esta semana</div></div></div>" +
       '<div class="ring" style="--p:' + pct + '"><b>' + pct + "%</b></div></div>" + weekStrip() + '<div class="small" style="opacity:.85;margin-top:6px">' + head + (ws ? " · " + ws + (ws === 1 ? " semana" : " semanas") + " seguidas con 3+ días" : "") + "</div></div>";
@@ -559,7 +589,7 @@
     html += reminderCard() + cierreCard() + mananaCard();
     if (armBlocks().length) {
       if (viewMode() === "now") {
-        return gr + viewToggle() + nowSection() + prioCard() + weekSumCard() + cierreCard() + mananaCard() + reviewCard() + weekCard();
+        return gr + viewToggle() + nowSection() + prioCard() + weekSumCard() + cierreCard() + mananaCard() + notifNudge() + reviewCard() + weekCard();
       }
       return html.replace("@@ARM@@", viewToggle() + prioCard() + weekCard() + armSection());
     }
@@ -580,10 +610,32 @@
     if (hasProduct("forma-pro") && !S.demo) return '<div class="card dark" style="margin-bottom:14px"><b>Tenés Forma Pro</b><p class="small" style="margin:6px 0 0;opacity:.85">Todo desbloqueado: los planes, la semana completa y las herramientas.</p></div>';
     return '<button class="card dark" data-openpro style="width:100%;text-align:left;margin-bottom:14px;border:2px solid #C6F432"><span class="badge" style="background:#C6F432;color:#111">Todo incluido</span><div class="row between" style="margin-top:8px"><b style="font-size:20px">Forma Pro</b><span><b style="font-size:22px">$47.900</b><small style="opacity:.8"> / año</small></span></div><p class="small" style="margin:6px 0 0;opacity:.85">Todos los planes, tu semana completa y todas las herramientas, por 12 meses. Un solo pago.</p></button>';
   }
-  function openPro() {
-    var li = ["Organizar toda tu semana, día por día", "Todos los planes de vida diaria, estudio y los que vengan", "Los planes de Tenis y deportes", "Todas las herramientas de la app", "Recordatorios y revisión semanal", "12 meses, un solo pago (no se renueva solo)"];
-    sheet('<span class="badge">Forma Pro</span><h2 style="font-size:24px;margin:8px 0 2px">Todo Forma, por un año</h2><p class="muted small" style="margin:0 0 10px">USD 30 al año, en pesos: <b>$47.900</b>.</p><ul class="small" style="padding-left:18px;margin:0 0 6px">' + li.map(function (x) { return "<li style='margin-bottom:6px'>" + x + "</li>"; }).join("") + '</ul><p class="small muted">Si solo querés un tema, podés comprar los planes por separado, más baratos.</p>' + payButtons("forma-pro", "Forma Pro") + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
+  var PRO_LI = [["🗺️", "Los 10 objetivos completos", "Los 14 pasos y los 5 niveles de cada camino, con misiones y premios."], ["🧰", "Todas las herramientas", "Más de 30: rutinas, registros, foco, tarjetas, partidos, plata y más."], ["📅", "Tu semana día por día", "Un lunes distinto de un sábado, y días especiales cuando los necesites."], ["📈", "Mi cambio completo", "Tu antes y ahora, tus datos reales y el resumen de cada semana."]];
+  var proSel = "forma-pro";
+  function proPlansHtml() {
+    var mo = Math.round(PRICE.anio / 12), save = Math.round((1 - PRICE.anio / (PRICE.mes * 12)) * 100);
+    return '<div class="pplans" role="radiogroup" aria-label="Elegí tu plan">' +
+      '<button class="pplan' + (proSel === "forma-pro" ? " on" : "") + '" data-pplan="forma-pro" role="radio" aria-checked="' + (proSel === "forma-pro") + '"><span class="ptag">Ahorrás ' + save + '%</span><b>Anual</b><span class="pp">' + ars(PRICE.anio) + '</span><small>' + ars(mo) + ' por mes · 12 meses</small></button>' +
+      '<button class="pplan' + (proSel === "forma-pro-mes" ? " on" : "") + '" data-pplan="forma-pro-mes" role="radio" aria-checked="' + (proSel === "forma-pro-mes") + '"><b>Mensual</b><span class="pp">' + ars(PRICE.mes) + '</span><small>por 1 mes</small></button></div>';
   }
+  function proStatusTxt() {
+    if (S.demo) return "Modo prueba: todo desbloqueado.";
+    if (paidPro()) return S.proUntil && S.proUntil < 9e15 ? "Tenés Forma Pro hasta el " + new Date(S.proUntil).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" }) + "." : "Tenés Forma Pro.";
+    var tl = trialLeft(); if (tl) return "Estás probando Forma Pro gratis: " + (tl === 1 ? "hoy es tu último día." : "te quedan " + tl + " días.");
+    return "";
+  }
+  function openPro(why) {
+    track("paywall", why || "");
+    var st = proStatusTxt(), paid = paidPro() && !S.demo;
+    sheet('<div class="paywall"><span class="pwemo">✨</span><span class="badge">Forma Pro</span><h2>' + (paid ? "Ya tenés Forma Pro" : why === "nivel" ? "Seguí tu camino con Forma Pro" : "Todo Forma, sin límites") + '</h2>' +
+      (st ? '<p class="pwst">' + esc(st) + "</p>" : '<p class="muted small" style="margin:0 0 12px">El nivel 1 de cada objetivo es gratis para siempre. Con Pro seguís hasta el final.</p>') +
+      '<div class="pwli">' + PRO_LI.map(function (x) { return '<div><span>' + x[0] + '</span><p><b>' + esc(x[1]) + "</b><small>" + esc(x[2]) + "</small></p></div>"; }).join("") + "</div>" +
+      (NATIVE ? '<div class="card" style="margin-top:12px"><b>¿Ya tenés Forma Pro?</b><p class="small muted" style="margin:6px 0 0">Iniciá sesión con tu cuenta y se activa solo en este celular.</p></div>' :
+        proPlansHtml() + payButtons(proSel, "Forma Pro") +
+        '<p class="small muted pwfine">Pagás una sola vez con Mercado Pago. <b>No se renueva solo</b> y no hay débito automático: te avisamos antes de que venza. Si te arrepentís, tenés 10 días para pedir la devolución.</p>') +
+      '<button class="btn ghost block" data-close style="margin-top:10px">' + (paid ? "Listo" : "Ahora no") + "</button></div>");
+  }
+  function proCard() { return ""; }
   function vPlanes() {
     var rec = recIds(), head = "";
     if (rec.length) head = '<div class="sec">Para vos</div>' + rec.map(function (id) { return planCard(planOf(id)); }).join("") + '<button class="linkbtn small" data-open="test" style="margin:4px 0 8px">Rehacer el test</button>';
@@ -596,6 +648,10 @@
     return '<button class="linkbtn small" data-tab="perfil" style="margin-bottom:6px">← Volver a Perfil</button>' + "<h1 class='hello'>Planes</h1><p class='muted small'>Cada plan te ayuda con algo concreto, con un objetivo por niveles dentro de la app.</p>" + proCard() + head + out;
   }
   function openPlan(id) {
+    if (pgOf(id)) { close(); tab = "obj"; render(); return openHome(id, "camino"); }
+    return openPro();
+  }
+  function openPlanOld(id) {
     var p = planOf(id); if (!p) return;
     var pro = p.prog ? pgOwns(id) : isPro(id), pp = p.inc ? planOf("vida") : p, h = '<div class="row"><span class="shape">' + SHAPES[p.id] + '</span><div><h2 style="font-size:24px">' + esc(p.n) + '</h2><span class="small muted">' + (!p.live ? "Próximamente" : pro ? "Plan activo" : p.inc ? "Incluido en Vida diaria Pro" : "Plan completo (Pro)") + "</span></div></div><p style='margin:14px 0'>" + esc(p.d) + "</p>";
     if (!p.live) {
@@ -651,27 +707,138 @@
     }).join("") + '</div><p class="small muted" style="margin:8px 0 10px">Barra clara: cómo empezaste. Barra verde: cómo estás hoy.</p>' +
       (last7.length ? '<p class="small" style="margin:0 0 10px">Últimos 14 días: ánimo promedio <b>' + avg("mood").toFixed(1) + "/5</b> · energía <b>" + avg("energy").toFixed(1) + "/3</b></p>" : "") + '<button class="btn ghost" id="mapa">Rehacer mi mapa</button></div>';
   }
+  function fechaLarga(k) { var q = String(k || "").split("-"); if (q.length < 3) return ""; return new Date(+q[0], +q[1] - 1, +q[2]).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" }); }
+  function proProfileCard() {
+    if (S.demo) return '<div class="card dark procard"><div class="row between"><b>✨ Forma Pro</b><span class="tag ok">Modo prueba</span></div><p class="small" style="margin:6px 0 0;opacity:.85">Todo desbloqueado para probar.</p></div>';
+    var st = proStatusTxt(), paid = paidPro() && !S.demo, soon = paid && S.proUntil < 9e15 && S.proUntil - Date.now() < 7 * 864e5;
+    if (paid) return '<div class="card dark procard"><div class="row between"><b>✨ Forma Pro</b><span class="tag ok">Activo</span></div><p class="small" style="margin:6px 0 ' + (soon ? "10px" : "0") + ';opacity:.85">' + esc(st) + "</p>" + (soon && !NATIVE ? '<button class="btn sage block" data-openpro>Renovar</button>' : "") + "</div>";
+    return '<button class="card dark procard" data-openpro style="width:100%;text-align:left"><div class="row between"><b>✨ Forma Pro</b><span class="tag">' + (trialOn() ? "Prueba gratis" : "Plan gratis") + '</span></div><p class="small" style="margin:6px 0 0;opacity:.85">' + esc(st || "Tenés el nivel 1 de cada objetivo. Con Pro seguís hasta el final, con todas las herramientas.") + (NATIVE ? "" : " Desde " + ars(Math.round(PRICE.anio / 12)) + " por mes.") + "</p></button>";
+  }
   function vPerfil() {
     var p = S.profile, initial = (p.name || "?").charAt(0).toUpperCase();
     var syncTxt = user ? (sync.state === "ok" ? "Sincronizado" : sync.state === "pending" ? "Sincronizando..." : sync.state === "error" ? "Sin sincronizar (se reintenta al cambiar algo)" : "Conectado") : "";
+    var steps = PG.list.reduce(function (a, P) { return a + pgCount(P.id); }, 0), best = Math.max.apply(null, [S.best || 0].concat(PG.list.map(function (P) { return pgBest(P.id); })));
     var html = "<h1 class='hello'>Tu perfil</h1>" +
-      '<div class="card row"><span class="avatar">' + esc(initial) + '</span><div style="min-width:0"><b style="font-size:20px">' + esc(p.name) + "</b><div class='small muted'>" + (acct.username ? "@" + esc(acct.username) : "Sin cuenta") + (p.created ? " · desde " + esc(p.created) : "") + "</div></div></div>" +
-      '<div class="grid3"><div class="card stat"><b>' + weekCount(0) + '</b><span>días esta semana</span></div><div class="card stat"><b>' + weekStreak() + '</b><span>semanas con 3+ días</span></div><div class="card stat"><b>' + totalDone() + '</b><span>hábitos hechos</span></div></div>' +
-      levelCard() + themeCard() + progressCard() +
-      '<div class="card"><b>Tus planes</b><div style="margin-top:8px">' + PLANS.filter(function (x) { return x.live; }).map(function (x) {
-        return '<div class="row between" style="padding:6px 0"><span class="row"><span class="shape" style="width:26px;height:26px">' + SHAPES[x.id] + "</span>" + esc(x.n) + '</span><span class="tag' + (isPro(x.id) ? " ok" : "") + '">' + (isPro(x.id) ? "Pro" : "Gratis") + "</span></div>";
-      }).join("") + '</div><button class="btn ghost block" data-tab="planes" style="margin-top:10px">Ver planes y compras</button></div>';
-    if (PRUEBA) html += '<div class="card"><b>Versión de prueba ' + esc(BUILD) + '</b><p class="small muted" style="margin:6px 0 10px">Tus datos quedan solo en este celular. Usá el botón Comentarios (a la derecha) cuando algo no te cierre.</p><button class="btn ghost sm" data-fbreset>Empezar de cero</button></div>';
+      '<div class="card row"><span class="avatar">' + esc(initial) + '</span><div style="min-width:0"><b style="font-size:20px">' + esc(p.name) + "</b><div class='small muted'>" + (user ? esc(user.email || "") : "Sin cuenta") + (p.created ? " · desde el " + esc(fechaLarga(p.created)) : "") + "</div></div></div>" +
+      proProfileCard() +
+      '<div class="ostats"><div><span>🔥</span><b>' + best + '</b><small>mejor racha</small></div><div><span>⭐</span><b>' + steps + '</b><small>pasos hechos</small></div><div><span>🏅</span><b>' + allLevels() + '</b><small>niveles</small></div></div>' +
+      notifCard() + themeCard();
+    if (PRUEBA) html += '<div class="card"><b>Versión de prueba ' + esc(BUILD) + '</b><p class="small muted" style="margin:6px 0 10px">Tus datos quedan solo en este celular.</p><button class="btn ghost sm" data-fbreset>Empezar de cero</button></div>';
     html += '<div class="card stack"><b>Tu cuenta</b>' +
-      (user ? '<div class="small muted">' + esc(user.email || "") + " · " + esc(syncTxt) + "</div>" : '<p class="small muted" style="margin:0">Estás usando la app sin cuenta: tus datos están solo en este dispositivo y no podés guardar compras.</p><button class="btn sage block" id="mkacct">Crear cuenta o iniciar sesión</button>') +
+      (user ? '<div class="small muted">' + esc(user.email || "") + " · " + esc(syncTxt) + "</div>" : '<p class="small muted" style="margin:0">Estás usando la app sin cuenta: tus datos están solo en este dispositivo.</p><button class="btn sage block" id="mkacct">Crear cuenta o iniciar sesión</button>') +
       '<label class="field"><span>Nombre</span><input id="p-name" value="' + esc(p.name) + '" maxlength="40"></label>' +
-            '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
+      '<button class="btn" id="psave">Guardar cambios</button><div class="msg" id="pmsg"></div></div>' +
       '<div class="card stack"><b>Tus datos</b><p class="small muted" style="margin:0">' + (user ? "Tus datos se guardan en tu cuenta. Podés descargar una copia o borrar tu cuenta cuando quieras." : "Todo se guarda solo en este dispositivo. Si cambiás de teléfono o borrás los datos del navegador, se pierde.") + "</p>" +
       '<div class="grid2"><button class="btn ghost" id="export">Descargar copia</button><button class="btn ghost" id="wipe">' + (user ? "Borrar mi cuenta" : "Borrar todo") + "</button></div>" +
       (SIM && S.betaOwned && Object.keys(S.betaOwned).length ? '<button class="btn ghost block" data-betareset>Volver a Gratis (borrar compras de prueba)</button>' : "") + (user ? '<button class="btn ghost block" id="logout">Cerrar sesión</button>' : "") + "</div>" +
-      '<div class="card"><b>¿Algo no funciona o te falta algo?</b><p class="small muted" style="margin:6px 0 10px">Contanos qué te pasó o qué cambiarías, aunque sea una frase. Lo leemos todo. (Versión ' + esc(BUILD) + ")</p>" + '<a class="btn ghost block" href="https://ig.me/m/formargentina" target="_blank" rel="noopener">Escribirnos por Instagram</a></div>' +
-      '<div class="card small"><a data-link="instagram" href="' + esc(CFG.instagram || "#") + '" target="_blank" rel="noopener">Instagram @formargentina</a> · <a href="privacidad">Privacidad</a> · <a href="terminos">Términos</a> · <a href="./">Sitio de Forma</a></div>';
+      '<div class="card"><b>¿Algo no funciona o te falta algo?</b><p class="small muted" style="margin:6px 0 10px">Contanos qué te pasó o qué cambiarías, aunque sea una frase. Lo leemos todo. (Versión ' + esc(BUILD) + ")</p>" + '<a class="btn ghost block" href="https://ig.me/m/formargentina" target="_blank" rel="noopener">Escribirnos por Instagram</a><a class="btn ghost block" href="mailto:hola@formargentina.com" style="margin-top:8px">Escribirnos por mail</a></div>' +
+      '<div class="card small"><a data-link="instagram" href="' + esc(CFG.instagram || "#") + '" target="_blank" rel="noopener">Instagram @formargentina</a> · <a href="privacidad">Privacidad</a> · <a href="terminos">Términos</a> · <a href="arrepentimiento">Arrepentimiento</a> · <a href="./">Sitio de Forma</a></div>';
     return html;
+  }
+
+  // ---------- medición mínima (embudo): registro, día armado, objetivo, pasos, pago ----------
+  function track(ev, x) {
+    try { if (!sb || !user || S.demo) return; sb.from("events").insert({ user_id: user.id, ev: String(ev).slice(0, 40), x: String(x || "").slice(0, 80) }).then(function () {}, function () {}); } catch (e) {}
+  }
+  // ---------- elegir objetivo (después de armar el día, o desde Hoy) ----------
+  function openGoalPick(first) {
+    var tiles = GOALS.map(function (g) { var p = planOf(g.plan); if (!p || !pgOf(p.id)) return ""; var it = pgItem(p.id);
+      return '<button class="otile' + (it ? " on" : "") + '" data-gpick="' + p.id + '" style="--c:' + p.c + '"><span class="otemo">' + gemo(p.id) + "</span><b>" + esc(g.n) + "</b><small>" + esc(it ? "Ya empezado" : g.d) + "</small></button>"; }).join("");
+    sheet('<div class="lsntop"><button class="lsnx" data-close aria-label="Cerrar">✕</button></div><div class="gpick"><span class="lsnemo">🎯</span>' +
+      (first ? '<small class="celsm">Tu día ya está armado</small>' : "") + '<h2>¿Qué querés lograr primero?</h2><p class="muted">Elegí uno para empezar. Es un camino de 5 niveles: un paso por día, de 2 a 5 minutos, que se suma a tu día. Después podés sumar otros.</p>' +
+      '<div class="ogrid">' + tiles + '</div><button class="btn ghost block" data-open="elegir" style="margin-top:14px">🤔 No sé, ayudame a elegir</button>' +
+      '<button class="linkbtn small" data-close style="display:block;margin:14px auto 0">' + (first ? "Más tarde" : "Cerrar") + "</button></div>", "bare");
+    $("#sheet").classList.add("lsn");
+  }
+  // Hora sugerida para el paso: un momento libre de hoy, después de ahora
+  function suggestAt(P) {
+    try {
+      var bl = armBlocks(), d = new Date(), now = d.getHours() * 60 + d.getMinutes() + 30, c = null;
+      bl.forEach(function (b) { if (c === null && xtFree(b) && b.e - Math.max(b.s, now) >= 30 && b.s % 1440 >= 480 && b.s % 1440 <= 1320) c = Math.max(b.s, Math.ceil(now / 15) * 15); });
+      if (c === null) bl.forEach(function (b) { if (c === null && xtFree(b) && b.e - b.s >= 30) c = b.s; });
+      if (c !== null) { c = c % 1440; return pad(Math.floor(c / 60)) + ":" + pad(c % 60); }
+    } catch (e) {}
+    return (P && P.reminder) || "20:00";
+  }
+  // ---------- "¿No sabés por dónde empezar?": 6 preguntas → hasta 3 objetivos ----------
+  var QZQ = [
+    { q: "¿A qué te dedicás hoy?", o: [["📚", "Estudio"], ["💼", "Trabajo"], ["🔎", "Busco trabajo"], ["🏆", "Entreno o compito"], ["🙂", "Otra cosa"]] },
+    { q: "¿Cómo estás durmiendo?", o: [["😴", "Bien"], ["😕", "A veces me cuesta"], ["😣", "Mal, casi siempre"]] },
+    { q: "¿Cuántas horas por día usás el celular?", o: [["👌", "Menos de 2"], ["📱", "Entre 2 y 4"], ["📱", "Entre 4 y 6"], ["🔋", "Más de 6"]] },
+    { q: "¿Cómo está tu tensión o ansiedad?", o: [["🧘", "Tranquilo/a"], ["😬", "Por momentos tenso/a"], ["😰", "Seguido tenso/a"]] },
+    { q: "¿Hacés deporte?", o: [["🎾", "Juego al tenis y compito"], ["⚽", "Juego al fútbol"], ["🏋️", "Otro deporte o gimnasio"], ["🚶", "No, pero quiero moverme más"], ["🛋️", "No"]] },
+    { q: "¿Hay algo más que quieras ordenar?", o: [["💰", "Mi plata"], ["✈️", "Un viaje"], ["✋", "Nada más"]] }
+  ];
+  var QZ = null;
+  function openGoalQuiz() { QZ = { i: 0, a: [] }; quizDraw(); }
+  function quizDraw() {
+    if (!QZ) return;
+    if (QZ.i >= QZQ.length) return quizResult();
+    var Q = QZQ[QZ.i];
+    sheet('<div class="lsntop"><button class="lsnx" data-close aria-label="Cerrar">✕</button><div class="lsnbar"><i style="width:' + Math.round(QZ.i * 100 / QZQ.length) + '%"></i></div></div>' +
+      '<div class="qzbody"><small class="celsm">Pregunta ' + (QZ.i + 1) + " de " + QZQ.length + "</small><h2>" + esc(Q.q) + '</h2><div class="qzopts">' +
+      Q.o.map(function (o, k) { return '<button class="qzo" data-qz="' + k + '"><span>' + o[0] + "</span>" + esc(o[1]) + "</button>"; }).join("") + "</div>" +
+      (QZ.i ? '<button class="linkbtn small" data-qzback style="display:block;margin:14px auto 0">← Atrás</button>' : "") + "</div>", "bare");
+    $("#sheet").classList.add("lsn");
+  }
+  function quizPick(k) { if (!QZ) return; QZ.a.push(k); QZ.i++; quizDraw(); }
+  function quizResult() {
+    var a = QZ.a, sc = {}, why = {};
+    function add(id, n, w) { sc[id] = (sc[id] || 0) + n; if (n > 0 && !why[id]) why[id] = w; }
+    if (a[0] === 0) add("estudio", 3, "Estudiás: técnicas que funcionan y un plan para tus exámenes.");
+    if (a[0] === 1) add("calma", 1, "Trabajás: bajar la tensión del día te ordena todo lo demás.");
+    if (a[0] === 2) add("laburo", 5, "Estás buscando trabajo: CV, postulaciones y entrevistas, paso a paso.");
+    if (a[1] === 1) add("dormir", 2, "Te cuesta dormir algunas noches."); if (a[1] === 2) add("dormir", 4, "Dormís mal casi siempre: es lo primero que conviene ordenar.");
+    if (a[2] === 1) add("celular", 1, "Usás bastante el celular."); if (a[2] === 2) add("celular", 3, "Usás el celular entre 4 y 6 horas por día."); if (a[2] === 3) add("celular", 4, "Usás el celular más de 6 horas por día.");
+    if (a[3] === 1) add("calma", 2, "Por momentos estás tenso/a."); if (a[3] === 2) add("calma", 4, "Estás tenso/a seguido: herramientas simples para bajar un cambio.");
+    if (a[4] === 0) add("tenista", 6, "Competís en tenis: tu camino de tenista de alto rendimiento.");
+    if (a[4] === 1) add("futbolista", 6, "Jugás al fútbol: tu camino de futbolista.");
+    if (a[4] === 2) add("movimiento", 2, "Entrenás: sumá constancia y registro de lo que hacés.");
+    if (a[4] === 3) add("movimiento", 4, "Querés moverte más, de a poco y sin lesionarte.");
+    if (a[5] === 0) add("plata", 3, "Querés ordenar tu plata."); if (a[5] === 1) add("viajes", 3, "Tenés un viaje para organizar.");
+    var ids = Object.keys(sc).filter(function (k) { return sc[k] > 0 && pgOf(k); }).sort(function (x, y) { return sc[y] - sc[x]; }).slice(0, 3);
+    if (!ids.length) { ids = ["dormir", "celular"]; why.dormir = "Dormir bien mejora todo lo demás."; why.celular = "Recuperar tiempo del celular es el cambio más rápido de notar."; }
+    S.test = { rec: ids.map(function (k) { return { id: k, why: why[k] }; }), at: today() }; save(); QZ = null;
+    sheet('<div class="lsntop"><button class="lsnx" data-close aria-label="Cerrar">✕</button><div class="lsnbar"><i style="width:100%"></i></div></div><div class="qzbody"><span class="lsnemo">✨</span><h2>Te recomendamos empezar por</h2>' +
+      ids.map(function (k, i) { return '<button class="qzres' + (i ? "" : " top") + '" data-gpick="' + k + '" style="--c:' + planOf(k).c + '"><span class="otemo">' + gemo(k) + '</span><span style="flex:1;min-width:0;text-align:left"><b>' + esc(goalName(k)) + "</b><small>" + esc(why[k] || "") + '</small></span><span class="gnplay">' + (i ? "›" : "Empezar") + "</span></button>"; }).join("") +
+      '<button class="linkbtn small" data-goalpick style="display:block;margin:16px auto 0">Ver todos los objetivos</button></div>', "bare");
+    $("#sheet").classList.add("lsn");
+  }
+  // ---------- avisos ----------
+  function notifPerm() { return NATIVE ? (nativeOn() ? "granted" : "default") : window.Notification ? Notification.permission : "unsupported"; }
+  function notifNudge() {
+    var pm = notifPerm(); if (pm !== "default" || !armBlocks().length || (S.rem && S.rem.nx && daysSince(S.rem.nx) < 5)) return "";
+    return '<div class="card notifnudge"><div class="row" style="align-items:flex-start;gap:12px"><span style="font-size:28px;line-height:1">🔔</span><div style="flex:1;min-width:0"><b>¿Te avisamos?</b><p class="small muted" style="margin:4px 0 10px">Cuando empieza cada momento de tu día, tu paso del objetivo y el cierre. Los podés apagar cuando quieras.</p><div class="row" style="gap:8px"><button class="btn sage sm" id="notif">Activar avisos</button><button class="btn ghost sm" data-nnx>Ahora no</button></div></div></div></div>';
+  }
+  function notifCard() {
+    var pm = notifPerm(), R = remSet();
+    var on = [R.b ? "cada momento del día" : "", R.p ? "tu paso" : "", R.c ? "el cierre" : "", R.s ? "racha en peligro" : ""].filter(Boolean);
+    return '<div class="card"><div class="row between"><b>🔔 Avisos</b><button class="linkbtn small" data-remopen>Elegir</button></div><p class="small muted" style="margin:6px 0 10px">' + (on.length ? "Te avisamos: " + on.join(", ") + "." : "Tenés todos los avisos apagados.") + "</p>" +
+      (pm === "default" ? '<button class="btn sage block" id="notif">Activar avisos en este ' + (NATIVE ? "celular" : "navegador") + "</button>" : pm === "granted" ? '<p class="small" style="margin:0 0 8px">✅ Avisos activados' + (NATIVE ? " en este celular." : " en este navegador.") + "</p>" : pm === "denied" ? '<p class="small muted" style="margin:0 0 8px">Bloqueaste los avisos. Para recibirlos, permitilos en la configuración del ' + (NATIVE ? "celular" : "navegador") + ".</p>" : "") +
+      (NATIVE ? "" : '<p class="small muted" style="margin:8px 0">En la web los avisos llegan cuando Forma está abierta o en segundo plano. Para que te lleguen siempre, sumá tu día al calendario del celular: cada momento queda con su alarma.</p><button class="btn ghost block" id="ics">📅 Agregar mi día al calendario</button>') + "</div>";
+  }
+  // ---------- widget (app nativa): datos del día para la pantalla de inicio ----------
+  var wSig = "";
+  function widgetSync() {
+    try {
+      var W = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.FormaWidget; if (!NATIVE || !W || !S.arm) return;
+      var F = window.FormaDia, td = new Date(), tm = new Date(); tm.setDate(tm.getDate() + 1);
+      function pack(dt, off) { return armBlocksFor(dt).map(function (b) { var K = F.KIND[b.kind] || {}; return { s: b.s + off * 1440, e: b.e + off * 1440, l: String(b.label).slice(0, 40), c: K.dot || "#86A892", k: b.kind }; }); }
+      var id = S.prog && S.prog.cur, P = id && pgOf(id), n = id ? pgCount(id) : 0;
+      var data = { day: today(), blocks: pack(td, 0).concat(pack(tm, 1)), streak: streakNow(), name: (S.profile && S.profile.name) || "",
+        step: P && n < 14 ? { e: gemo(id), t: (pgToday(id) ? (P.days[n - 1] || {}).t : (P.days[n] || {}).t) || "", g: goalName(id), done: pgToday(id), lock: !pgCan(id) && !pgToday(id) } : null };
+      var sig = JSON.stringify(data); if (sig === wSig) return; wSig = sig;
+      W.update({ data: sig }).catch(function () {});
+    } catch (e) {}
+  }
+  // ---------- fin de la prueba gratis ----------
+  function maybeTrialEnd() {
+    if (S.demo || !S.trial || trialOn() || paidPro() || S.trialSeen || $("#sheet") || $("#full") || !S.profile) return;
+    S.trialSeen = today(); save();
+    var steps = PG.list.reduce(function (a, P) { return a + pgCount(P.id); }, 0);
+    sheet('<div class="paywall"><span class="pwemo">⏳</span><span class="badge">Forma Pro</span><h2>Terminó tu semana de Forma Pro</h2><p class="muted">' + (steps ? "En 7 días hiciste " + steps + (steps === 1 ? " paso" : " pasos") + " y armaste tu día. " : "") + 'Seguís teniendo gratis tu día armado, el nivel 1 de cada objetivo y una herramienta por objetivo.</p>' +
+      (NATIVE ? "" : proPlansHtml() + payButtons(proSel, "Forma Pro") + '<p class="small muted pwfine">Pagás una vez con Mercado Pago y no se renueva solo.</p>') +
+      '<button class="btn ghost block" data-close style="margin-top:10px">Seguir gratis</button></div>');
   }
 
   // ---------- hojas / pantallas ----------
@@ -709,11 +876,11 @@
   }
   function payButtons(id, label) {
     var link = (CFG.links && CFG.links[id]) || CFG.mercadoPago, h = "";
-    if (!SIM && CFG.checkout && ["forma-pro", "t-full", "t-pre", "t-resp", "t-mov", "t-rut", "plan-vida"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
-    if (!user && !S.demo) return '<div class="card" style="margin-top:12px"><b>Para comprar necesitás una cuenta</b><p class="small muted" style="margin:6px 0 10px">Así tu compra queda guardada y se desbloquea sola en la app.</p><button class="btn block" id="mkacct">Crear cuenta o iniciar sesión</button></div>';
-    if (SIM && !NATIVE) return '<button class="btn block" data-betabuy="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted">Versión de prueba: el pago es simulado y <b>no se cobra nada</b>.</p>';
+    if (!SIM && CFG.checkout && ["forma-pro", "forma-pro-mes"].indexOf(id) < 0) return '<div class="card" style="margin-top:12px"><b>Todavía no está a la venta</b><p class="small muted" style="margin:6px 0 0">Estamos terminando de armarlo. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email)) + "</div>";
+    if (!user && !S.demo) return '<button class="btn lsngo block" id="mkacct" style="margin-top:12px">Crear mi cuenta para pasarme a Pro</button><p class="small muted">Tu compra queda guardada en tu cuenta y se desbloquea sola en todos tus dispositivos.</p>';
+    if (SIM && !NATIVE) return '<button class="btn lsngo block" id="ckbtn" data-betabuy="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted">Versión de prueba: el pago es simulado y <b>no se cobra nada</b>.</p>';
     if (NATIVE) return '<div class="card" style="margin-top:12px"><b>¿Ya tenés ' + esc(label || "este plan") + '?</b><p class="small muted" style="margin:6px 0 0">Iniciá sesión con tu cuenta de Forma y se desbloquea solo.</p></div>';
-    if (CFG.checkout && !NATIVE && user) return '<button class="btn block" data-checkout="' + esc(id) + '" style="margin-top:12px">Pagar con Mercado Pago</button><p class="small muted" id="ckmsg">Pagás en Mercado Pago y se desbloquea solo en tu cuenta (' + esc(user.email || "") + ").</p>";
+    if (CFG.checkout && !NATIVE && user) return '<button class="btn lsngo block" id="ckbtn" data-checkout="' + esc(id) + '" style="margin-top:12px">Pasarme a Pro con Mercado Pago</button><p class="small muted" id="ckmsg">Se desbloquea solo en tu cuenta (' + esc(user.email || "") + ").</p>";
     if (link) h += '<a class="btn block" target="_blank" rel="noopener" href="' + esc(link) + '" style="margin-top:12px">Pagar con Mercado Pago</a><p class="small muted">Pagá con el mismo email de tu cuenta (' + esc(user && user.email || "") + ") para que se desbloquee solo.</p>";
     if (CFG.paypal && !NATIVE) h += '<a class="btn ghost block" target="_blank" rel="noopener" href="' + esc(CFG.paypal) + '" style="margin-top:8px">Pagar con PayPal</a>';
     if (!h) h = '<p class="small muted" style="margin-top:12px">Los pagos todavía no están abiertos. Dejá tu email y te avisamos primero (' + esc(label || "") + ').</p>' + notifyForm(label, (user && user.email) || (S.profile && S.profile.email));
@@ -721,6 +888,8 @@
   }
   function openProduct(id) {
     var p = prodOf(id); if (!p) return;
+    if (p.act && toolById(p.act)) return openTool(p.act);
+    return openPro();
     var pl = planOf(p.s), ok = owns(p), viaPro = ok && !hasProduct(p.id);
     if (ok && p.prog) return openProgram(p.prog);
     sheet('<div class="row"><span class="shape">' + SHAPES[p.s] + '</span><div><span class="badge">Producto suelto</span><h2 style="font-size:22px;margin-top:4px">' + esc(p.n) + '</h2><span class="small muted">' + esc(pl ? pl.n : "") + " · " + esc(p.g) + (p.price ? " · " + esc(p.price) : "") + "</span></div></div>" +
@@ -739,11 +908,11 @@
   // ---------- objetivos por niveles ----------
   var PG = window.FormaProg || { list: [], byId: {} };
   function pgOf(id) { return PG.byId[id]; }
-  function pgCan(id) { return pgOwns(id) || pgCount(id) < 1; }
-  function pgOwns(id) { var p = planOf(id); if (!p) return false; return p.inc ? hasProduct(planOf("vida").pro) : hasProduct(p.pro); }
+  function pgCan(id) { return pgOwns(id) || pgCount(id) < FREE_N; }
+  function pgOwns(id) { return !!planOf(id) && proActive(); }
   function pgItem(id) { return S.prog && S.prog.items && S.prog.items[id]; }
   function pgCount(id) { var it = pgItem(id); return it && it.done ? Object.keys(it.done).length : 0; }
-  function pgCur() { var id = S.prog && S.prog.cur; return id && pgOf(id) && pgOwns(id) ? id : null; }
+  function pgCur() { var id = S.prog && S.prog.cur; return id && pgOf(id) && (pgCan(id) || pgToday(id)) ? id : null; }
   function pgToday(id) { var it = pgItem(id); return !!(it && it.last === today()); }
   function pgPreview(P) { return '<ol class="small pgprev">' + P.days.map(function (x) { return "<li>" + esc(x.t) + "</li>"; }).join("") + "</ol>"; }
   function progPreview(p) {
@@ -784,7 +953,7 @@
     function bad(m) { return { ok: false, msg: m }; }
     var d = it.dr || {}, v;
     if (f.k === "text") { v = String(d[key] || "").trim(); return v.length >= f.min ? { ok: true, v: v } : bad("Falta completar: " + (f.l || "el texto") + " (un poco más largo).") }
-    if (f.k === "list") { var a = []; for (var i = 0; i < f.n; i++) a.push(String(d[key + "_" + i] || "").trim()); return a.every(function (x) { return x.length >= 2; }) ? { ok: true, v: a } : bad("Completá los " + f.n + " casilleros: " + (f.l || "")); }
+    if (f.k === "list") { var a = []; for (var i = 0; i < f.n; i++) a.push(String(d[key + "_" + i] || "").trim()); return a.some(function (x) { return x.length >= 2; }) ? { ok: true, v: a.filter(function (x) { return x.length >= 2; }) } : bad("Escribí al menos uno: " + (f.l || "")); }
     if (f.k === "choice") { v = d[key]; if (v === undefined || v === "") return bad("Elegí una opción: " + (f.l || "")); if (f.need && f.need.indexOf(+v) < 0) return bad("Para que este paso cuente, la respuesta tiene que ser: " + f.need.map(function (i) { return f.o[i]; }).join(" o ") + ". Si hoy no pudiste, probalo de nuevo mañana."); return { ok: true, v: +v }; }
     if (f.k === "time") { v = String(d[key] || ""); return /^\d\d:\d\d$/.test(v) ? { ok: true, v: v } : bad("Falta una hora: " + (f.l || "")); }
     if (f.k === "num") { v = parseFloat(d[key]); return !isNaN(v) && v >= (f.min || 0) && v <= (f.max || 99999) ? { ok: true, v: v } : bad("Falta un número válido: " + (f.l || "")); }
@@ -961,7 +1130,7 @@
     if (!it) h += '<div class="ohintro"><p>' + esc(P.intro) + '</p><button class="btn lsngo block" data-pgnode="' + id + '|0|cur">🚀 Empezar el camino</button><small>Un paso por día, de 2 a 5 minutos. Cada paso es algo que cambiás de verdad en tu día.</small></div>';
     else if (n >= 14) h += resultHtml(id);
     else if (S.prog && S.prog.cur !== id) { var oc = S.prog.cur && pgOf(S.prog.cur); h += '<div class="ohintro"><p><b>⏸️ Este objetivo está en pausa.</b> ' + (oc ? "Hacés un camino a la vez: si lo retomás, pausamos «" + esc(goalName(S.prog.cur)) + "». " : "") + 'Tu avance quedó guardado.</p><button class="btn lsngo block" data-pgresume="' + id + '">▶️ Retomar</button></div>'; }
-    else if (!pgCan(id)) h += '<div class="ohintro pro"><p><b>🎉 ¡Hiciste tu primer paso!</b> Con Forma Pro seguís el camino completo: 14 pasos, 5 niveles, misiones y tu resultado con datos reales.</p><button class="btn lsngo block" data-openpro>Ver Forma Pro</button></div>';
+    else if (!pgCan(id)) h += '<div class="ohintro pro"><p><b>🏅 ¡Completaste el nivel 1!</b> Con Forma Pro seguís el camino completo: 14 pasos, 5 niveles, misiones y tu resultado con datos reales.</p><button class="btn lsngo block" data-openpro="nivel">Seguir con Forma Pro</button></div>';
     else if (it.why) h += '<p class="ohwhy">💬 Tu razón: «' + esc(it.why) + "»</p>";
     h += questsHtml(id) + pathHtml(id);
     if (it && n < 14 && S.prog && S.prog.cur === id) h += '<button class="linkbtn small" data-pgquit="' + id + '" style="display:block;margin:18px auto 0">Pausar este objetivo</button>';
@@ -1043,8 +1212,8 @@
     sheet('<div class="lsntop"><button class="lsnx" data-close aria-label="Cerrar">✕</button><div class="lsnbar"><i style="width:4%"></i></div></div>' +
       '<div class="lsnhero"><span class="lsnemo">' + gemo(id) + '</span><small>Antes de empezar</small><h2>' + esc(goalName(id)) + "</h2></div>" +
       '<div class="lsncard"><b>📍 ¿Dónde estás hoy?</b><p>' + esc(P.q) + "</p>" + scaleChips(P, "before", 0) + "</div>" +
-      '<div class="lsncard"><b>💬 ¿Por qué querés lograrlo?</b><p class="small muted" style="margin:4px 0 8px">Te lo vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
-      '<label class="pgl">⏰ ¿A qué hora vas a hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + (P.reminder || "20:00") + '"></div>' +
+      '<div class="lsncard"><b>💬 ¿Por qué querés lograrlo? <small class="muted" style="font-weight:400">(opcional)</small></b><p class="small muted" style="margin:4px 0 8px">Te lo vamos a recordar cuando cueste seguir.</p><textarea id="pgwhy" class="pgin" rows="2" maxlength="200" placeholder="Quiero hacer esto porque…"></textarea>' +
+      '<label class="pgl">⏰ ¿A qué hora vas a hacer tu paso de cada día?</label><input id="pgat" class="pgin" type="time" value="' + suggestAt(P) + '"><small class="muted" style="display:block;margin-top:6px">Te sugerimos un momento libre de tu día. Ahí aparece tu paso y te avisamos.</small></div>' +
       '<p class="small" id="pgmsg" style="margin:0 0 8px;color:var(--err)"></p><button class="btn lsngo block" data-pgstart="' + id + '">Empezar mi camino 🚀</button>', "bare");
     $("#sheet").classList.add("lsn"); $("#sheet").style.setProperty("--c", planOf(id).c);
   }
@@ -1081,6 +1250,7 @@
       '<div class="celstats"><div class="xp"><small>XP</small><b>⚡ +' + xp + '</b></div><div class="fire"><small>Racha</small><b>🔥 ' + pgStreak(id) + '</b></div><div class="lv"><small>Nivel ' + (li + 1) + "</small><b>" + L.e + " " + (Math.min(nn, L.t + 1) - L.f) + "/" + (L.t - L.f + 1) + "</b></div></div>" +
       '<p class="celmsg">' + esc(CHEERS[n % CHEERS.length]) + "</p>" +
       (T && isProU() && !lvUp && nn < 14 ? '<div class="celtool"><span>' + temo(T.id) + '</span><span style="flex:1;min-width:0"><small>Para sostenerlo</small><b>Sumá «' + esc(T.n) + '» a tu día</b></span><button class="btn ghost sm" data-btsadd="' + T.id + '">📍 Sumar</button></div>' : "") +
+      (!pgOwns(id) && nn >= FREE_N && nn < 14 ? '<div class="celtool"><span>✨</span><span style="flex:1;min-width:0"><small>Nivel 1 gratis completo</small><b>Seguí con el nivel 2 en Forma Pro</b></span><button class="btn ghost sm" data-openpro="nivel">Ver</button></div>' : !pgOwns(id) && nn < FREE_N ? '<p class="small" style="opacity:.8;margin:4px 0 12px">Te quedan ' + (FREE_N - nn) + (FREE_N - nn === 1 ? " paso gratis" : " pasos gratis") + ' del nivel 1. Mañana seguís.</p>' : "") +
       (lvUp && nn < 14 ? '<button class="btn lsngo block" data-pglvup="' + id + "|" + li + '">Ver mi premio 🎁</button>' : nn >= 14 ? '<button class="btn lsngo block" data-close>Ver mi resultado 🏆</button>' : '<button class="btn lsngo block" data-close>Continuar</button>') + "</div>", "bare");
     $("#sheet").classList.add("lsn", "celebs"); $("#sheet").style.setProperty("--c", planOf(id).c);
   }
@@ -1124,12 +1294,13 @@
     var st = P.days[n], msg = $("#pgmsg"), data = { log: {}, f: [] }, i, r;
     function fail(m) { if (msg) msg.textContent = m; }
     if (!pgWhenOk(st)) return fail(pgWhenTxt(st));
-    for (i = 0; i < (P.log || []).length; i++) { r = pgFieldCheck(P.log[i], "L" + i, it); if (!r.ok) return fail(r.msg); data.log[P.logKeys[i]] = r.v; }
+    var anyLog = false;
+    for (i = 0; i < (P.log || []).length; i++) { var lv0 = (it.dr || {})["L" + i]; if (lv0 === undefined || lv0 === "" || lv0 === null) continue; r = pgFieldCheck(P.log[i], "L" + i, it); if (!r.ok) return fail(r.msg); data.log[P.logKeys[i]] = r.v; anyLog = true; }
     for (i = 0; i < (st.f || []).length; i++) { r = pgFieldCheck(st.f[i], "F" + i, it); if (!r.ok) return fail(r.msg); data.f.push(r.v); }
-    if (P.log) { it.lg = it.lg || {}; it.lg[today()] = data.log; }
+    if (P.log && anyLog) { it.lg = it.lg || {}; it.lg[today()] = data.log; }
     it.fl = it.fl || {}; it.fl[n] = data.f;
     it.done[n] = today(); it.last = today(); it.dr = {}; it.st = null;
-    S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render();
+    S.ad = S.ad || {}; S.ad[today()] = S.ad[today()] || {}; S.ad[today()]["p|" + id] = 1; touchBest(); save(); close(); render(); track("paso", id + ":" + (n + 1));
     LSN = null; if (!HOME || HOME.id !== id) HOME = { id: id, tab: "camino" }; openCelebrate(id, n);
   }
   setInterval(function () {
@@ -1744,7 +1915,8 @@
   function toolById(id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }
   function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
   function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
-  function toolOk(T) { return !!(T.free || (T.gate === "vida" ? isProU() : planOwned(T.plan))); }
+  var FREE_TOOLS = { respirar: 1, foco: 1, dormir: 1, antesabrir: 1, calma: 1, estudio: 1, caminata: 1, gastos: 1, viaje: 1, postul: 1, previa: 1 };
+  function toolOk(T) { return !!(T.free || FREE_TOOLS[T.id] || proActive()); }
   var SPORT_BASE = { tenista: "deporte", futbolista: "deporte" };
   function toolsOf(pid) { var q = SPORT_BASE[pid] || pid; return TOOLS.filter(function (t) { return t.plan === q; }); }
   function toolRow(T) {
@@ -1777,7 +1949,7 @@
   function goalCardNew(g) {
     var p = planOf(g.plan), P = p && pgOf(p.id); if (!P) return "";
     var it = pgItem(p.id), n = pgCount(p.id), ow = pgOwns(p.id), fin = n >= 14, li = lvOf(Math.min(n, 13));
-    var st = fin ? "🏆 Completado" : it ? LVS[li].e + " Nivel " + (li + 1) : ow ? "✨ Empezar" : "🎁 Paso 1 gratis";
+    var st = fin ? "🏆 Completado" : it ? LVS[li].e + " Nivel " + (li + 1) : ow ? "✨ Empezar" : "🎁 Nivel 1 gratis";
     return '<button class="otile' + (it ? " on" : "") + '" data-pgopen="' + p.id + '" style="--c:' + p.c + '"><span class="otemo">' + gemo(p.id) + "</span><b>" + esc(g.n) + "</b><small>" + st + "</small>" + (it ? '<span class="obar"><i style="width:' + Math.round(Math.min(n, 14) * 100 / 14) + '%"></i></span>' : "") + (it && pgToday(p.id) ? '<span class="odot" title="Hecho hoy">✅</span>' : it && pgStreak(p.id) ? '<span class="odot">🔥' + pgStreak(p.id) + "</span>" : "") + "</button>";
   }
   function vObj() {
@@ -1848,7 +2020,8 @@
   }
   function pgApply(bl, dt) {
     var id = pgCur(); if (!id || !bl.length || today(dt) !== today()) return bl;
-    var it = pgItem(id), P = pgOf(id), n = pgCount(id); if (!it || n >= 14) return bl;
+    var it = pgItem(id), P = pgOf(id), n = pgCount(id), dn = pgToday(id); if (!it || (n >= 14 && !dn)) return bl;
+    if (dn) n = n - 1; else if (!pgCan(id)) return bl;
     var st = P.days[n], m = 15, am = st.when === "am", pm = st.when === "pm", at = it.at ? (+it.at.slice(0, 2)) * 60 + (+it.at.slice(3, 5)) : (pm ? 1200 : 540);
     if (am && at >= 840) at = 600; if (pm && at < 1080) at = 1200;
     var out = bl.slice(), best = -1, bs = 0, bd = 1e9, lv = lvOf(n);
@@ -1856,7 +2029,7 @@
     if (best < 0 || bd > 240) return bl;
     var f = out[best], parts = [];
     if (f.s < bs) parts.push(Object.assign({}, f, { e: bs }));
-    parts.push({ s: bs, e: bs + m, kind: "habit", label: "Camino · " + st.t, note: "Nivel " + (lv + 1) + " · " + P.n + ". Paso " + (n + 1) + " de 14.", pgstep: id, tool: "__pg" });
+    parts.push({ s: bs, e: bs + m, kind: "habit", label: gemo(id) + " " + st.t, note: "Tu paso de hoy de «" + goalName(id) + "» · nivel " + (lv + 1) + ", paso " + (n + 1) + " de 14.", pgstep: id, tool: "__pg" });
     if (f.e > bs + m) parts.push(Object.assign({}, f, { s: bs + m }));
     out.splice.apply(out, [best, 1].concat(parts)); return out;
   }
@@ -1959,14 +2132,14 @@
     var name = draft.name.trim(), uname = draft.username.trim().replace(/^@/, "").toLowerCase(), email = draft.email.trim(), pass = val("a-pass");
     if (!name) return setMsg("Escribí tu nombre.");
     if (FLUJO) { S.profile = { name: name, email: "", areas: [], sports: [], created: today(), done: true }; S.guest = true; S.demo = PRUEBA ? !PFREE : new URLSearchParams(location.search).get("pro") === "1"; save(); tab = "hoy"; render(); return; }
-    if (!/^[a-z0-9_]{3,20}$/.test(uname)) return setMsg("El usuario tiene que tener de 3 a 20 caracteres: letras sin tilde, números o guion bajo.");
+    if (!/^[a-z0-9_]{3,20}$/.test(uname)) uname = (name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "").slice(0, 12) || "forma") + "_" + Math.floor(1000 + Math.random() * 9000);
     if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg("Revisá el email.");
     if (pass.length < 8) return setMsg("La contraseña tiene que tener al menos 8 caracteres.");
     if (!draft.terms) return setMsg("Tenés que aceptar los términos y la política de privacidad.");
     var btn = $("#a-register"); btn.disabled = true; setMsg("Creando tu cuenta...", true);
     sb.rpc("username_available", { u: uname }).then(function (r) {
       if (r.error) throw r.error;
-      if (r.data === false) { btn.disabled = false; return setMsg("Ese nombre de usuario ya está en uso. Elegí otro."); }
+      if (r.data === false) uname = uname.slice(0, 14) + Math.floor(100000 + Math.random() * 899999);
       return sb.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: "https://formargentina.com/miforma", data: { username: uname, name: name } } }).then(function (res) {
         if (res.error) { btn.disabled = false; return setMsg(authMsg(res.error)); }
         if (res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0) { btn.disabled = false; return setMsg("Ya hay una cuenta con ese email, por eso no te mandamos ningún mail nuevo. Tocá \"Iniciar sesión\" y entrá con tu contraseña. Si no te acordás, usá \"Olvidé mi contraseña\"."); }
@@ -2067,7 +2240,7 @@
   function armBlocks() { return armBlocksFor(new Date()); }
   // ---------- mi semana ----------
   var DNL = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], DNS = ["D", "L", "M", "M", "J", "V", "S"];
-  function weekDates() { var d = new Date(), k = (d.getDay() + 6) % 7, m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - k); return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return new Date(m.getFullYear(), m.getMonth(), m.getDate() + i); }); }
+  function weekDays() { var d = new Date(), k = (d.getDay() + 6) % 7, m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - k); return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return new Date(m.getFullYear(), m.getMonth(), m.getDate() + i); }); }
   function ddCustom(dt) { var k = today(dt), x = S.dd && S.dd[k]; return !!(x && (x.ans || (x.blocks && x.blocks.length))); }
   function wkCustom(dow) { return !!(S.wk && S.wk[dow] && S.wk[dow].ans); }
   function weekSumData() {
@@ -2094,12 +2267,12 @@
   function weekCard() {
     if (!isProU() && S.arm && S.arm.ans) return '<div class="card weekc"><div class="row between"><b>Mi semana</b><span class="small muted">Pro</span></div><p class="small muted" style="margin:6px 0 10px">Armá y guardá cada día de la semana: tu lunes, tu martes, tu miércoles… y que cada uno se repita solo.</p><button class="btn ghost block" data-plan="vida">' + ICON.lock.replace("<svg", '<svg width="14" height="14"') + " Organizar mi semana con Forma Pro</button></div>";
     if (!isProU() || !S.arm || !S.arm.ans) return "";
-    var t = today(), n = weekDates().filter(function (d) { return wkCustom(d.getDay()); }).length;
+    var t = today(), n = weekDays().filter(function (d) { return wkCustom(d.getDay()); }).length;
     return '<div class="card weekc"><div class="row between"><b>Mi semana</b><button class="linkbtn small" data-open="wsum">Ver resumen</button></div><div class="wkstrip">' +
-      weekDates().map(function (d) { var c = wkCustom(d.getDay()) || ddCustom(d); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" data-wkdt="' + today(d) + '" aria-label=""' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
+      weekDays().map(function (d) { var c = wkCustom(d.getDay()) || ddCustom(d); return '<button class="wkd' + (today(d) === t ? " today" : "") + (c ? " custom" : "") + '" data-wkday="' + d.getDay() + '" data-wkdt="' + today(d) + '" aria-label=""' + DNL[d.getDay()] + ' ' + d.getDate() + '"><small>' + DNS[d.getDay()] + "</small><b>" + d.getDate() + "</b><i></i></button>"; }).join("") +
       '</div></div>';
   }
-  function wkDate(dow) { return weekDates().filter(function (d) { return d.getDay() === dow; })[0]; }
+  function wkDate(dow) { return weekDays().filter(function (d) { return d.getDay() === dow; })[0]; }
   function openWeekDay(dow, dt) {
     var F = window.FormaDia, d = dt || wkDate(dow), k = today(d), bl = armBlocksFor(d), one = ddCustom(d), cu = wkCustom(dow), sg = DNL[dow].toLowerCase(), pl = sg + (/s$/.test(DNL[dow]) ? "" : "s");
     sheet('<span class="badge">' + (one ? "Solo para este " + sg + " " + d.getDate() : cu ? "Tu " + sg + " fijo" : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">' + (one ? "Cambiaste solo este día. Tu " + sg + " fijo no se toca." : cu ? "Este es tu " + sg + " fijo: se repite todos los " + pl + "." : "Es tu día base. Podés armar tu " + sg + " fijo o cambiar solo este día.") + "</p>" +
@@ -2205,7 +2378,7 @@
     bl.forEach(function (b, j) { if (j && b.s > bl[j - 1].e) out.push({ s: bl[j - 1].e, e: b.s, label: "Margen libre", kind: "free", note: "" }); out.push({ s: b.s, e: b.e, label: String(b.label).trim().slice(0, 40), kind: b.kind, note: b.note || "" }); });
     if (!out.length) { MB.err = "El día no puede quedar vacío."; return mbDraw(); }
     S.dd = S.dd || {}; var prev = S.dd[MB.k] || {}; S.dd[MB.k] = { ans: prev.ans || null, blocks: out, at: today() };
-    var wasFirst = MB.first; save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0); 
+    var wasFirst = MB.first; save(); MB = null; close(); tab = "hoy"; render(); window.scrollTo(0, 0); if (wasFirst && !(S.prog && S.prog.cur)) setTimeout(function () { openGoalPick(true); }, 300); 
   }
   function ddEdit(k) { ddManual(k); }
   function ddQ(k) {
@@ -2237,13 +2410,13 @@
     close();
     var pre = ans ? Object.assign({}, ans) : null; if (pre && typeof S.cierreAt === "number") pre.closeAt = S.cierreAt;
     var DNX = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-    var OPA = { ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(function () { ddManual(today(), true); }, 350); } };
+    var OPA = { ans: pre, quick: false, dayName: !S.arm ? DNX[new Date().getDay()] : "", dow: new Date().getDay(), onSave: function (a) { var first = !S.arm; if (first) { if (!S.trial) S.trial = { s: today() }; track("dia_armado"); S.wk = S.wk || {}; S.wk[new Date().getDay()] = { ans: JSON.parse(JSON.stringify(a)), at: today() }; } if (typeof a.closeAt === "number") { S.cierreAt = a.closeAt; } S.arm = { ans: a, at: today(), ans0: S.arm && S.arm.ans0 }; if (!S.arm.ans0) delete S.arm.ans0; save(); tab = "hoy"; render(); window.scrollTo(0, 0); if (first && !S.goal) setTimeout(function () { ddManual(today(), true); }, 350); } };
     if (/[?&]dia=1/.test(location.search)) return OPA.onSave({ wake: 420, sleep: 1380, fixedOn: "no", fixed: [], lunch: 780, dinner: "auto" });
     window.FormaDia.open(OPA);
   }
   function armSection() {
     var bl = armBlocks();
-    if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 2 preguntas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
+    if (!bl.length) return '<div class="card dark"><b>Armemos tu día</b><p class="small" style="margin:6px 0 12px;opacity:.85">Respondé 4 preguntas y te armamos el día en bloques con horarios: lo fijo, lo importante, tus hábitos y tus pausas. Queda siempre acá, en Hoy.</p><button class="btn sage" id="armgo">Armar mi día</button></div>';
     var d = new Date(), now = d.getHours() * 60 + d.getMinutes(), wake = bl[0].s; if (now < wake && now + 1440 < bl[bl.length - 1].e) now += 1440;
     var tr = bl.filter(armCheckable), n = tr.filter(armDone).length, pro = S.demo || isPro("vida");
     var html = '<div class="row between" style="margin:22px 0 6px"><span class="sec" style="margin:0">Tu día</span>' + ('<button class="linkbtn small" id="armedit">' + (pro ? "Cambiar mis respuestas" : "Cambiar mi día de hoy") + "</button>") + '</div>' +
@@ -2345,6 +2518,12 @@
     }
     return { html: '<div class="mgrid">' + ["L", "M", "M", "J", "V", "S", "D"].map(function (x) { return "<small>" + x + "</small>"; }).join("") + h + "</div>", n: cnt };
   }
+  function cierreGoalHtml() {
+    var id = S.prog && S.prog.cur, P = id && pgOf(id); if (!P || !pgItem(id)) return "";
+    if (pgToday(id)) return '<div class="lsncard" style="text-align:left;margin:0 0 12px"><b>' + gemo(id) + " Hiciste tu paso de «" + esc(goalName(id)) + '»</b><p class="small muted" style="margin:4px 0 0">Racha de ' + pgStreak(id) + (pgStreak(id) === 1 ? " día" : " días") + ". Lo más importante del día, hecho.</p></div>";
+    if (pgCan(id) && pgCount(id) < 14) return '<button class="goalnudge now" data-pglesson="' + id + '" style="margin:0 0 12px"><span class="gnemo">' + gemo(id) + '</span><span style="flex:1;min-width:0"><small class="gnk">Te falta tu paso de hoy</small><b>' + esc(P.days[pgCount(id)].t) + '</b><small>Son 2 a 5 minutos. ¿Lo hacés antes de cerrar?</small></span><span class="gnplay">▶</span></button>';
+    return "";
+  }
   function openCierre(ph) {
     var old = $("#full"); if (old) old.remove();
     var el = document.createElement("div"); el.className = "full"; el.id = "full"; document.body.appendChild(el);
@@ -2356,7 +2535,7 @@
     }
     el.innerHTML = '<header><button class="btn ghost sm" data-cierrefin="x">Volver</button><b>Cierre del día</b></header><div class="dbody" style="text-align:center"><div class="cring"><svg viewBox="0 0 120 120" width="150" height="150"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--sage)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - st.pct / 100)).toFixed(1) + '" transform="rotate(-90 60 60)" class="ringfill"/></svg><b>' + st.pct + '%</b></div>' +
       '<h2 style="font-size:24px;margin:12px 0 4px">' + esc(msg) + '</h2><div class="chips" style="justify-content:center;margin:12px 0">' + (st.nbl ? '<span class="chip on">Tu día: ' + st.nb + "/" + st.nbl + "</span>" : "") + (st.nl ? '<span class="chip on">Compromisos: ' + st.n + "/" + st.nl + "</span>" : "") + (st.prio ? '<span class="chip on">Prioridad: ' + (st.pd ? "hecha" : "pendiente") + "</span>" : "") + '</div>' +
-      '<label class="field" style="text-align:left"><span>Una cosa que salió bien hoy <small class="muted" style="font-weight:400">(opcional)</small></span><input id="cwin" maxlength="80" placeholder="Aunque sea algo chiquito" style="' + fieldCss() + '"></label></div><div class="dfoot"><button class="btn sage block" data-cierreok2>Cerrar mi día</button></div>';
+      cierreGoalHtml() + '<label class="field" style="text-align:left"><span>Una cosa que salió bien hoy <small class="muted" style="font-weight:400">(opcional)</small></span><input id="cwin" maxlength="80" placeholder="Aunque sea algo chiquito" style="' + fieldCss() + '"></label></div><div class="dfoot"><button class="btn sage block" data-cierreok2>Cerrar mi día</button></div>';
   }
   function doCierre() {
     var tdz = today(), st = cierreStats(); S.wins = S.wins || {}; var wl = S.wins[tdz] = S.wins[tdz] || [];
@@ -2546,7 +2725,7 @@
       (blockSteps(b).length ? stepsHtml(b, i, false) : '<div class="sec" style="margin-top:14px">Paso a paso</div><p class="small muted" style="margin:0 0 6px">Este momento todavía no tiene pasos. Armalo vos: lo que agregues acá se tilda cada día.</p>') +
       (det.length || btsFor(b).length ? '<div class="sec" style="margin-top:14px">Los pasos que agregaste</div>' : "") +
       btsFor(b).map(function (x) { var T = toolById(x.tool); return T ? '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(T.n) + '</span> <small class="muted bntag">Herramienta \u00b7 ' + bnTag(x.r) + '</small></div><button class="linkbtn small" data-btsdel="' + x.id + ":" + i + '">Quitar</button></div>' : ""; }).join("") +
-      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(x) + '</span> <small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Sumá tus propios pasos: por ejemplo, tomar creatina, un jugo de naranja o ver a alguien.</p>') +
+      (det.length ? det.map(function (x, j) { return '<div class="row between" style="padding:4px 0;border-top:1px solid var(--line)"><div style="flex:1"><span>' + esc(x) + '</span> <small class="muted bntag">' + bnTag(bnRule(b, x)) + '</small></div><button class="linkbtn small" data-bndel="' + i + ":" + j + '">Quitar</button></div>'; }).join("") : '<p class="small muted" style="margin:0 0 6px">Sumá tus propios pasos: por ejemplo, tomar agua, estirar 5 minutos o llamar a alguien.</p>') +
       (det.length < (pro ? 8 : 3) ? '<form id="bnf" data-i="' + i + '" class="row" style="margin-top:8px;flex-wrap:wrap"><input id="bn" maxlength="80" placeholder="Agregar un paso" style="flex:1;min-width:0;' + fieldCss() + '"><button class="btn sage">Sumar</button><select id="bnw" aria-label="Cu\u00e1ndo se repite" style="flex-basis:100%;margin-top:8px;' + fieldCss() + '"><option value="all">Todos los d\u00edas</option><option value="once">Solo hoy</option><option value="dow">Todos los ' + DNL[new Date().getDay()].toLowerCase() + (/s$/.test(DNL[new Date().getDay()]) ? "" : "s") + (pro ? "" : " (Forma Pro)") + '</option></select></form>' : (pro ? "" : '<p class="small muted" style="margin:8px 0 0">Llegaste a 3 pasos propios. Con Forma Pro podés sumar hasta 8 por momento.</p>')) +
       '<p class="small muted" style="margin:8px 0 0">Cada paso que agregás se suma al paso a paso, se repite según lo que elijas y lo tildás cada día.</p>' +
       (b.xt ? '<button class="btn ghost block" data-xtdel="' + b.xt + '" style="margin-top:8px">Sacar de mi día</button>' : "") +
@@ -2760,7 +2939,8 @@
   }
   // ---------- recordatorios: pocos y con sentido ----------
   // Por defecto, como máximo 3 por día: arranque, paso del programa (si hay) y cierre.
-  function remSet() { var r = S.rem || {}; return { a: r.a !== 0, p: r.p !== 0, c: r.c !== 0, b: r.b === 1 }; }
+  function remSet() { var r = S.rem || {}; return { a: r.a !== 0 && r.b === 0, p: r.p !== 0, c: r.c !== 0, b: r.b !== 0, s: r.s !== 0 }; }
+  function remBlocks(dt) { return armBlocksFor(dt).filter(function (b) { return b.kind !== "free" && b.kind !== "commute" && !(b.kind === "rest" && b.label === "Ocio y descanso"); }); }
   function remList() {
     var R = remSet(), F = window.FormaDia, bl = armBlocks(), out = [], pid = pgCur(), pit = pid && pgItem(pid);
     if (!bl.length || !F) return out;
@@ -2773,51 +2953,57 @@
     var L = remList().map(function (x) { return window.FormaDia.fmt(x.t % 1440) + " " + x.n.toLowerCase(); }), R = remSet(), extra = R.b ? " + un aviso por cada momento" : "";
     return L.length ? L.join(" · ") + extra : (R.b ? "Un aviso por cada momento de tu día" : "Sin avisos");
   }
-  function reminderCard() {
-    if (!armBlocks().length && !S.habits.some(function (h) { return !h.del && h.time; })) return "";
-    if (!(S.demo || isPro("vida"))) return "";
-    var perm = NATIVE ? (nativeOn() ? "granted" : "default") : window.Notification ? Notification.permission : "unsupported", n = remList().length + (remSet().b ? armBlocks().filter(armCheckable).length : 0);
-    return '<div class="card" style="margin-top:12px"><div class="row between"><b>Recordatorios</b><button class="linkbtn small" data-remopen>Cambiar</button></div><p class="small muted" style="margin:6px 0 10px">' + (n <= 3 ? "Pocos, a propósito: " : "") + esc(remSummary()) + ".</p>" +
-      (NATIVE ? "" : '<button class="btn sage block" id="ics">Agregar a mi calendario</button>') +
-      (perm === "default" ? '<button class="btn sage block" id="notif" style="margin-top:8px">' + (NATIVE ? "Activar avisos en este celular" : "Avisarme con la app abierta") + "</button>" : perm === "granted" ? '<p class="small muted" style="margin:8px 0 0">' + (NATIVE ? "Avisos del celular: activados." : "Avisos con la app abierta: activados.") + "</p>" : "") + "</div>";
-  }
+  function reminderCard() { return ""; }
   function openRem() {
-    var R = remSet(), F = window.FormaDia, pid = pgCur(), nb = armBlocks().filter(armCheckable).length;
+    var R = remSet(), F = window.FormaDia, pid = pgCur(), nb = remBlocks(new Date()).length;
     function row(k, on, t, d) { return '<button class="remrow" data-remt="' + k + '" aria-pressed="' + on + '"><span style="flex:1;text-align:left"><b>' + esc(t) + '</b><small class="muted" style="display:block">' + esc(d) + '</small></span><span class="remsw"><i></i></span></button>'; }
-    sheet('<h2 style="font-size:22px">Tus recordatorios</h2><p class="muted small">Pocos, para que los mires. Si te avisan por todo, terminás ignorándolos.</p>' +
-      row("a", R.a, "Arranque del día", "Un aviso a la mañana, 30 minutos después de despertarte.") +
-      row("p", R.p, "Paso de tu objetivo", pid ? "Un aviso por día a la hora que elegiste, mientras dure." : "Se activa cuando empezás un objetivo.") +
-      row("c", R.c, "Cierre del día", "A las " + F.fmt(tmThreshold()) + ", la hora que elegiste. También para dejar armado mañana.") +
-      row("b", R.b, "Un aviso por cada momento", nb + " avisos por día. Puede ser mucho: activalo solo si lo necesitás.") +
-      '<p class="small muted" style="margin:10px 0 0">Después de cambiar algo, volvé a tocar "Agregar a mi calendario": el calendario no se actualiza solo, y conviene borrar el evento anterior.</p><button class="btn ghost block" data-close style="margin-top:12px">Listo</button>');
+    sheet('<h2 style="font-size:22px">🔔 Tus avisos</h2><p class="muted small">Elegí qué querés que te avisemos. Los podés cambiar cuando quieras.</p>' +
+      row("b", R.b, "Cada momento de tu día", "Cuando empieza cada actividad: comidas, horarios fijos, tus pasos y herramientas (" + nb + " hoy). Los márgenes libres no avisan.") +
+      row("p", R.p, "Tu paso del objetivo", pid ? "Un aviso por día a la hora que elegiste, si todavía no lo hiciste." : "Se activa cuando empezás un objetivo.") +
+      row("s", R.s, "Racha en peligro", "Una hora antes del cierre, solo si todavía no hiciste tu paso.") +
+      row("c", R.c, "Cierre del día", "A las " + F.fmt(tmThreshold()) + ", para ver cómo te fue y dejar armado mañana.") +
+      (NATIVE ? "" : '<p class="small muted" style="margin:10px 0 0">Si usás el calendario: después de cambiar algo, volvé a tocar "Agregar mi día al calendario" y borrá el evento anterior.</p>') + '<button class="btn ghost block" data-close style="margin-top:12px">Listo</button>');
   }
   function nativeLN() { return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications; }
   function nativeOn() { try { return localStorage.getItem("forma_nat_notif") === "1"; } catch (e) { return false; } }
   var natSig = "";
   function nativeRemSync() {
-    var LN = nativeLN(); if (!LN || !nativeOn() || !S.profile || !(S.demo || isPro("vida"))) return;
-    var F = window.FormaDia; if (!F) return; var L = remList(); if (remSet().b) { /* por momento: no se programan nativamente para no saturar */ }
-    var sig = JSON.stringify(L.map(function (x) { return [x.k, x.t, x.body]; })); if (sig === natSig) return; natSig = sig;
-    LN.getPending().then(function (r) { return (r.notifications && r.notifications.length) ? LN.cancel({ notifications: r.notifications }) : null; }).then(function () {
-      var ns = L.map(function (x, i) { var m = x.t % 1440; return { id: 100 + i, title: "Forma", body: x.k === "a" ? "Tu día está armado. Mirá qué viene primero." : x.body, schedule: { on: { hour: Math.floor(m / 60), minute: m % 60 }, allowWhileIdle: true } }; });
-      if (ns.length) LN.schedule({ notifications: ns });
-    }).catch(function () {});
+    var LN = nativeLN(); if (!LN || !nativeOn() || !S.profile || !S.arm || !window.FormaDia) return;
+    var R = remSet(), out = [], base = new Date(), nowT = Date.now() + 30000; base.setHours(0, 0, 0, 0);
+    var pid = pgCur(), pit = pid && pgItem(pid);
+    for (var dd = 0; dd < 3; dd++) {
+      var day = new Date(base.getTime() + dd * 864e5), key = today(day), at = function (m) { return new Date(day.getTime() + m * 60000); };
+      if (R.b) remBlocks(day).forEach(function (b) {
+        var tm = window.FormaDia.fmt(b.s % 1440) + " a " + window.FormaDia.fmt(b.e % 1440);
+        out.push({ t: at(b.s), title: b.pgstep ? "Tu paso de hoy" : "Ahora: " + b.label, body: b.pgstep ? b.label + " · " + goalName(b.pgstep) + ". Son unos minutos." : tm + ". Tocá para ver tus pasos." });
+      });
+      if (R.a && remBlocks(day)[0]) out.push({ t: at(remBlocks(day)[0].s + 30), title: "Tu día está armado", body: "Mirá qué viene primero." });
+      if (R.p && pit && pit.at && pgCount(pid) < 14 && !(dd === 0 && pgToday(pid)) && !R.b) out.push({ t: at((+pit.at.slice(0, 2)) * 60 + (+pit.at.slice(3, 5))), title: "Tu paso de «" + goalName(pid) + "»", body: "Tu paso de hoy te espera. Son unos minutos." });
+      if (R.s && pid && pgStreak(pid) > 0 && !(dd === 0 && pgToday(pid))) out.push({ t: at(tmThreshold() - 60), title: "🔥 Tu racha está en peligro", body: dd === 0 ? "Llevás " + pgStreak(pid) + (pgStreak(pid) === 1 ? " día" : " días") + ". Hacé tu paso de hoy: son 2 minutos." : "Hacé tu paso de hoy para sumar un día más a tu racha." });
+      if (R.c && !(dd === 0 && S.cierre && S.cierre[key])) out.push({ t: at(tmThreshold()), title: "Cerrá tu día", body: "Mirá cómo te fue y dejá armado mañana." });
+    }
+    if (paidPro() && !S.demo && S.proUntil && S.proUntil < 9e14) { var ex = new Date(S.proUntil - 3 * 864e5); ex.setHours(11, 0, 0, 0); out.push({ t: ex, title: "Tu Forma Pro vence en 3 días", body: "Renovalo para seguir con tus caminos y herramientas." }); }
+    out = out.filter(function (x) { return x.t.getTime() > nowT; }).sort(function (a, b) { return a.t - b.t; }).slice(0, 60);
+    var sig = today() + JSON.stringify(out.map(function (x) { return [x.t.getTime(), x.title]; })); if (sig === natSig) return; natSig = sig;
+    LN.getPending().then(function (r) { return (r.notifications && r.notifications.length) ? LN.cancel({ notifications: r.notifications.map(function (n) { return { id: n.id }; }) }) : null; }).then(function () {
+      if (out.length) return LN.schedule({ notifications: out.map(function (x, i) { return { id: 1000 + i, title: x.title, body: x.body, schedule: { at: x.t, allowWhileIdle: true } }; }) });
+    }).catch(function () { natSig = ""; });
   }
   function enableNotif() {
     if (NATIVE) { var LN = nativeLN(); if (!LN) { alert("No se pudieron activar los avisos."); return; } LN.requestPermissions().then(function (r) { if (r.display === "granted") { try { localStorage.setItem("forma_nat_notif", "1"); } catch (e) {} natSig = ""; nativeRemSync(); } render(); }); return; }
     if (!window.Notification) { alert("Tu navegador no permite avisos. Usá el calendario."); return; }
-    Notification.requestPermission().then(function () { render(); });
+    Notification.requestPermission().then(function (r) { track("avisos", r); render(); });
   }
   var notified = {}, notifN = {};
   function pushNote(k, body) {
-    var t = today(); if (notified[k]) return; notified[k] = 1; notifN[t] = (notifN[t] || 0) + 1; if (notifN[t] > 4) return;
+    var t = today(); if (notified[k]) return; notified[k] = 1; notifN[t] = (notifN[t] || 0) + 1; if (notifN[t] > 30) return;
     var o = { body: body, icon: "icon-192.png", tag: k };
     if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification("Forma", o); }, function () { new Notification("Forma", o); });
     else new Notification("Forma", o);
   }
   function checkReminders() {
     if (NATIVE) { nativeRemSync(); return; }
-    if (!window.Notification || Notification.permission !== "granted" || !S.profile || !(S.demo || isPro("vida"))) return;
+    if (!window.Notification || Notification.permission !== "granted" || !S.profile || !S.arm) return;
     var hm = nowHM(), t = today(), F = window.FormaDia; if (!F) return;
     remList().forEach(function (x) {
       var tm = F.fmt(x.t % 1440), k = "r" + x.k + t; if (!(tm <= hm && tm >= minusMin(10))) return;
@@ -2825,10 +3011,12 @@
       else if (x.k === "p") { if (!pgToday(pgCur())) pushNote(k, x.body); }
       else if (x.k === "c") { if (!(S.cierre && S.cierre[t])) pushNote(k, x.body); }
     });
-    if (remSet().b) armBlocks().filter(armCheckable).forEach(function (b) {
-      var k = "arm" + armKey(b) + t, bt = F.fmt(b.s);
-      if (bt <= hm && !armDone(b) && bt >= minusMin(10)) pushNote(k, "Es tu momento: " + b.label + " (" + bt + "). Sin apuro, cuando puedas.");
+    if (remSet().b) remBlocks(new Date()).forEach(function (b) {
+      var k = "arm" + armKey(b) + t, bt = F.fmt(b.s % 1440);
+      if (bt <= hm && !armDone(b) && bt >= minusMin(10)) pushNote(k, b.pgstep ? "Tu paso de hoy: " + b.label + "." : "Ahora: " + b.label + " (" + bt + " a " + F.fmt(b.e % 1440) + ").");
     });
+    var spid = pgCur();
+    if (remSet().s && spid && pgStreak(spid) > 0 && !pgToday(spid)) { var stt = F.fmt((tmThreshold() - 60) % 1440); if (stt <= hm && stt >= minusMin(10)) pushNote("rs" + t, "🔥 Tu racha de " + pgStreak(spid) + " días está en peligro. Hacé tu paso de hoy: son 2 minutos."); }
     (S.xt || []).filter(function (x) { return x.n && !x.del && (!x.d || x.d === t); }).forEach(function (x) {
       var T = toolById(x.tool), tm = F.fmt(x.s % 1440), k = "xt" + x.id + t; if (T && tm <= hm && tm >= minusMin(10)) pushNote(k, "Es tu momento: " + T.n + " (" + tm + ").");
     });
@@ -2893,16 +3081,23 @@
     if (d.close !== undefined) { var wasH = !!($("#sheet") && $("#sheet").getAttribute("data-home")), wasL = !!($("#sheet") && $("#sheet").getAttribute("data-lsn")); close(); render(); if (wasL) LSN = null; if (LSN && !wasL) openLesson(LSN); else if (HOME && !wasH) openHome(HOME.id, HOME.tab); else if (wasH) HOME = null; return; }
     if (d.pgnode) { var pn = d.pgnode.split("|"), pid = pn[0], ps = +pn[1], pst = pn[2];
       if (pst === "done") return openStepRecap(pid, ps);
-      if (pst === "pro") return openPro();
+      if (pst === "pro") return openPro("nivel");
       if (pst === "lock") { var pnb = t; pnb.classList.remove("shake"); void pnb.offsetWidth; pnb.classList.add("shake"); return; }
       if (!pgItem(pid)) return pgCan(pid) ? openStart(pid) : openPro();
-      if (S.prog.cur !== pid) { if (!pgOwns(pid) && pgCount(pid) >= 1) return openPro(); S.prog.cur = pid; save(); }
+      if (S.prog.cur !== pid) { if (!pgCan(pid)) return openPro("nivel"); S.prog.cur = pid; save(); }
       return openLesson(pid); }
     if (d.pgchestlv) { var cl = d.pgchestlv.split("|"); if (cl[2] === "1") return openLevelUp(cl[0], +cl[1]); var cb = t; cb.classList.remove("shake"); void cb.offsetWidth; cb.classList.add("shake"); return; }
     if (d.pglvup) { var lu = d.pglvup.split("|"); return openLevelUp(lu[0], +lu[1]); }
     if (d.pgchest) { var cit2 = pgItem(d.pgchest); if (cit2 && pgQuests(d.pgchest).every(function (q) { return q.ok; })) { cit2.bx = cit2.bx || {}; cit2.bx[today()] = 1; save(); openHome(d.pgchest, "camino"); } return; }
     if (d.pgci) { var ci = d.pgci.split("|"), cii = pgItem(ci[0]); if (!cii) return; cii.ci = cii.ci || {}; cii.ci[today()] = +ci[1]; save(); if (ci[2] !== undefined) { [].slice.call(t.parentNode.querySelectorAll("[data-pgci]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; } openHome(ci[0], "cambio"); return; }
-    if (d.openpro !== undefined) return openPro();
+    if (d.openpro !== undefined) return openPro(d.openpro);
+    if (d.pplan) { proSel = d.pplan; [].slice.call(document.querySelectorAll("[data-pplan]")).forEach(function (b) { var on = b.dataset.pplan === proSel; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); }); var cb = $("#ckbtn"); if (cb) { if (cb.dataset.checkout) cb.dataset.checkout = proSel; if (cb.dataset.betabuy) cb.dataset.betabuy = proSel; } return; }
+    if (d.goalpick !== undefined) return openGoalPick(false);
+    if (d.gpick) { close(); track("objetivo", d.gpick); if (pgItem(d.gpick)) { if (S.prog.cur !== d.gpick && pgCan(d.gpick)) { S.prog.cur = d.gpick; save(); } return openHome(d.gpick, "camino"); } return openStart(d.gpick); }
+    if (d.pglesson) { close(); if (pgCan(d.pglesson)) { S.prog.cur = d.pglesson; save(); return openLesson(d.pglesson); } return openPro("nivel"); }
+    if (d.qz !== undefined) return quizPick(+d.qz);
+    if (d.qzback !== undefined) { if (QZ && QZ.i > 0) { QZ.i--; QZ.a.pop(); quizDraw(); } return; }
+    if (d.nnx !== undefined) { S.rem = S.rem || {}; S.rem.nx = today(); save(); render(); return; }
     if (d.plan) return openPlan(d.plan);
     if (d.cat) { catFilter = d.cat; render(); return; }
     if (d.prod) return openProduct(d.prod);
@@ -2911,7 +3106,7 @@
     if (d.fbsend !== undefined) return sendFeedback();
     if (d.fbreset !== undefined) { if (confirm("Se borra todo lo que cargaste y empezás de cero. ¿Seguro?")) { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); } return; }
     if (d.remopen !== undefined) return openRem();
-    if (d.remt) { var rr = remSet(), kk = d.remt; rr[kk] = !rr[kk]; S.rem = { a: rr.a ? 1 : 0, p: rr.p ? 1 : 0, c: rr.c ? 1 : 0, b: rr.b ? 1 : 0 }; save(); openRem(); render(); return; }
+    if (d.remt) { var rr = remSet(), kk = d.remt; rr[kk] = !rr[kk]; S.rem = { a: rr.a ? 1 : 0, p: rr.p ? 1 : 0, c: rr.c ? 1 : 0, b: rr.b ? 1 : 0, s: rr.s ? 1 : 0, nx: (S.rem || {}).nx }; natSig = ""; save(); openRem(); render(); return; }
     if (d.open === "tools") return openTools();
     if (d.tlapp) return window.FormaTools && window.FormaTools.open(d.tlapp);
     if (d.tl) return openTool(d.tl);
@@ -2920,8 +3115,7 @@
     if (d.xtw) { xtd.w = d.xtw; [].slice.call(document.querySelectorAll("#sheet [data-xtw]")).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.xtw === d.xtw ? "true" : "false"); }); return; }
     if (d.xtok !== undefined) { var sel = $("#xts"); if (!sel || !xtd.id || !isProU()) return; S.xt = S.xt || []; S.xt.push({ id: "x" + Date.now(), tool: xtd.id, s: +sel.value, d: xtd.w === "hoy" ? today() : "", n: xtd.n ? 1 : 0, at: today() }); save(); close(); render(); return; }
     if (d.xtdel) { var xi = (S.xt || []).filter(function (x) { return x.id === d.xtdel; })[0]; if (xi) { xi.del = true; xi.at = today(); save(); } close(); render(); return; }
-    if (d.open === "test") return openTest();
-    if (d.open === "elegir") return openTestOld();
+    if (d.open === "test" || d.open === "elegir") return openGoalQuiz();
     if (d.gexit !== undefined) { gs = null; var gf = $("#full"); if (gf) gf.remove(); return; }
     if (d.gpick) { if (!gs) return; var go0 = $("#gother"); if (go0) gs.other = go0.value; var gix = gs.sel.indexOf(d.gpick); if (gix >= 0) gs.sel.splice(gix, 1); else { if (gs.sel.length >= 2) gs.sel.shift(); gs.sel.push(d.gpick); } var gfe = $("#full"), gsc = gfe ? gfe.scrollTop : 0, gbd = $("#full .dbody"), gsb = gbd ? gbd.scrollTop : 0; drawGoals(); gfe = $("#full"); if (gfe) gfe.scrollTop = gsc; gbd = $("#full .dbody"); if (gbd) gbd.scrollTop = gsb; return; }
     if (d.gnext !== undefined) { if (!gs || !gs.sel.length) return; var go1 = $("#gother"); if (go1) gs.other = go1.value; if (gLive().length) { gs.st = "q"; gs.gi = 0; gs.qi = 0; drawGoals(); } else gFinish(); return; }
@@ -2931,7 +3125,7 @@
     if (d.gapply) { applyGoalChange(d.gapply); return; }
     if (d.grev) { goalReviewDo(d.grev); return; }
     if (d.gtoggle !== undefined) { goalOpen = !goalOpen; render(); return; }
-    if (d.checkout) { var cm = $("#ckmsg"); if (cm) cm.textContent = "Abriendo Mercado Pago…"; sb.functions.invoke("create-checkout", { body: { product: d.checkout } }).then(function (r) { var u = r && r.data && r.data.url; if (u) location.href = u; else if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }, function () { if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }); return; }
+    if (d.checkout) { track("checkout", d.checkout); var cm = $("#ckmsg"); if (cm) cm.textContent = "Abriendo Mercado Pago…"; sb.functions.invoke("create-checkout", { body: { product: d.checkout } }).then(function (r) { var u = r && r.data && r.data.url; if (u) location.href = u; else if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }, function () { if (cm) cm.textContent = "No pudimos abrir el pago. Probá de nuevo en un rato."; }); return; }
     if (d.betabuy) { simPay(d.betabuy); return; }
     if (d.betareset !== undefined) { S.betaOwned = {}; save(); render(); return; }
     if (d.open === "prog") return openProg();
@@ -2975,7 +3169,7 @@
     if (d.pgall !== undefined) return openPrograms();
     if (d.pgopen) return openProgram(d.pgopen);
     if (d.pgm !== undefined) { var par = t.parentNode; [].slice.call(par.querySelectorAll("[data-pgm]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; }
-    if (d.pgstart) { if (!pgCan(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'), pm = $("#pgmsg"), why = ($("#pgwhy").value || "").trim(); if (!sb) { if (pm) pm.textContent = "Elegí un número para empezar."; return; } if (why.length < 8) { if (pm) pm.textContent = "Escribí tu razón (una frase corta alcanza)."; return; } S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, why: why.slice(0, 200), at: ($("#pgat").value || "").slice(0, 5), done: {}, last: null, lg: {}, fl: {}, dr: {}, st: null }; S.prog.cur = d.pgstart; save(); close(); render(); HOME = HOME && HOME.id === d.pgstart ? HOME : { id: d.pgstart, tab: "camino" }; return openLesson(d.pgstart); }
+    if (d.pgstart) { if (!pgCan(d.pgstart)) return; var sb = document.querySelector('#sheet .pgm[data-key=before] [aria-pressed=true]'), pm = $("#pgmsg"), why = ($("#pgwhy").value || "").trim(); if (!sb) { if (pm) pm.textContent = "Elegí un número para empezar."; return; }  S.prog = S.prog || { cur: null, items: {} }; S.prog.items[d.pgstart] = { start: today(), before: +sb.dataset.pgm, after: null, why: why.slice(0, 200), at: ($("#pgat").value || "").slice(0, 5), done: {}, last: null, lg: {}, fl: {}, dr: {}, st: null }; S.prog.cur = d.pgstart; save(); close(); render(); HOME = HOME && HOME.id === d.pgstart ? HOME : { id: d.pgstart, tab: "camino" }; return openLesson(d.pgstart); }
     if (d.pgdone) return pgSubmit(d.pgdone);
     if (d.pgc) { var pc = d.pgc.split("|"), cit = pgItem(S.prog && S.prog.cur); if (cit) { cit.dr = cit.dr || {}; cit.dr[pc[0]] = +pc[1]; [].slice.call(t.parentNode.querySelectorAll("[data-pgc]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); save(); } return; }
     if (d.pgk) { var kit = pgItem(S.prog && S.prog.cur); if (kit) { kit.dr = kit.dr || {}; kit.dr[d.pgk] = kit.dr[d.pgk] === 1 ? 0 : 1; t.setAttribute("aria-pressed", kit.dr[d.pgk] === 1 ? "true" : "false"); save(); } return; }
@@ -3013,7 +3207,7 @@
     if (d.bsttool) { var tp = d.bsttool.split(":"), tb = armBlocks()[+tp[0]], ts = tb && blockSteps(tb)[+tp[1]]; if (!ts || !ts.tool) return; return useTool(ts.tool); }
     if (d.bstmark) { var mp = d.bstmark.split(":"), mb = armBlocks()[+mp[0]], ms = mb && blockSteps(mb)[+mp[1]]; if (!ms) return; var mt = today(); S.ad = S.ad || {}; S.ad[mt] = S.ad[mt] || {}; S.ad[mt][stepKey(mb, ms)] = 1; save(); var sh0 = !!$("#sheet"); render(); if (sh0) openBlock(+mp[0]); return; }
     if (d.bstep !== undefined) { tickStep(t, d.bstep); return; }
-    if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
+    if (d.ackb !== undefined) { var bb = armBlocks()[+d.ackb]; if (bb && bb.pgstep) { close(); if (pgToday(bb.pgstep)) openHome(bb.pgstep, "camino"); else openLesson(bb.pgstep); return; } if (bb) { S.ad = S.ad || {}; var tdb = today(); S.ad[tdb] = S.ad[tdb] || {}; if (S.ad[tdb][armKey(bb)]) delete S.ad[tdb][armKey(bb)]; else S.ad[tdb][armKey(bb)] = 1; touchBest(); save(); close(); render(); } return; }
     if (d.bdt) { var bp = d.bdt.split(":"), oi = +bp[0], inSh = !!$("#sheet"); bdToggle(oi, +bp[1]); render(); if (inSh) openBlock(oi); return; }
     if (d.bndel) { var pr = d.bndel.split(":"), bd2 = armBlocks()[+pr[0]]; if (bd2) { var tx = bdetails(bd2)[+pr[1]], ar = S.bn[bkey(bd2)], ix = ar.indexOf(tx); if (ix > -1) ar.splice(ix, 1); if (S.bnr) delete S.bnr[bkey(bd2) + "::" + tx]; save(); render(); openBlock(+pr[0]); } return; }
     if (d.settheme) return setTheme(d.settheme);
@@ -3027,11 +3221,11 @@
     if (d.cierrefin !== undefined) { var fe = $("#full"); if (fe) fe.remove(); if (d.cierrefin === "tm") { showTm = true; } render(); window.scrollTo(0, 0); return; }
     if (t.id === "armgo") return armOpen();
     if (t.id === "armedit") return armOpen(S.arm && S.arm.ans);
-    if (d.ack) { S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
+    if (d.ack) { var pgb = armBlocks().filter(function (x) { return x.pgstep && armKey(x) === d.ack; })[0]; if (pgb) { if (pgToday(pgb.pgstep)) openHome(pgb.pgstep, "camino"); else openLesson(pgb.pgstep); return; } S.ad = S.ad || {}; var td = today(); S.ad[td] = S.ad[td] || {}; if (S.ad[td][d.ack]) delete S.ad[td][d.ack]; else S.ad[td][d.ack] = 1; touchBest(); save(); render(); return; }
     if (d.delwin !== undefined) { var wl = S.wins && S.wins[today()]; if (wl) { wl.splice(+d.delwin, 1); save(); render(); } return; }
     if (d.todock) { var ti = (S.todo || []).filter(function (x) { return x.id === d.todock; })[0]; if (ti) { ti.done = !ti.done; ti.doneAt = ti.done ? today() : ""; save(); render(); } return; }
     if (d.tododel) { S.todo = (S.todo || []).filter(function (x) { return x.id !== d.tododel; }); save(); render(); return; }
-    if (d.armtool === "__pg") { var pc = pgCur(); if (pc) openProgram(pc); return; }
+    if (d.armtool === "__pg") { var pc = pgCur(); if (pc) { if (pgToday(pc)) openHome(pc, "camino"); else openLesson(pc); } return; }
     if (d.armtool) { if (!(S.demo || isPro("vida"))) return; return startAct(d.armtool); }
     if (t.id === "notif") return enableNotif();
     if (t.id === "dayquiz") return openQuiz();
@@ -3120,7 +3314,7 @@
   // ---------- inicio ----------
   initSb();
   render();
-  (function () { var sp = document.getElementById("splash"); if (!sp) return; setTimeout(function () { sp.classList.add("out"); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 500); }, Math.max(0, 2500 - (window.performance ? performance.now() : 0))); })();
+  (function () { var sp = document.getElementById("splash"); if (!sp) return; setTimeout(function () { sp.classList.add("out"); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 500); }, Math.max(0, 900 - (window.performance ? performance.now() : 0))); })();
   if (sb) {
     sb.auth.onAuthStateChange(function (ev) { if (ev === "PASSWORD_RECOVERY") { mode = "recovery"; render(); } });
     sb.auth.getSession().then(function (r) { if (r && r.data && r.data.session && mode !== "recovery") return onSession(r.data.session); }).catch(function () {});

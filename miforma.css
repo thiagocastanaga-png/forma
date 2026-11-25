@@ -752,3 +752,49 @@ textarea.txin{resize:vertical;min-height:80px}
 .ohome>div{padding-top:0!important}
 .ohtop{top:0;padding-top:calc(10px + env(safe-area-inset-top))}
 .ohome .hmtabs{top:calc(52px + env(safe-area-inset-top))}
+/* ===== v96: objetivo en Hoy, Pro, avisos, elegir objetivo ===== */
+.goalnudge,.trialcard,.pronudge{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--surf);color:var(--tx);border-radius:20px;padding:14px 16px;margin:12px 0 0;cursor:pointer;font:inherit}
+.goalnudge b,.trialcard b,.pronudge b{display:block;font-size:16px;line-height:1.25}
+.goalnudge small,.trialcard small,.pronudge small{display:block;font-size:13px;opacity:.75;margin-top:2px;line-height:1.35}
+.goalnudge .gnemo{font-size:30px;width:50px;height:50px;border-radius:15px;display:grid;place-items:center;background:var(--chipbg);flex:none}
+.goalnudge.now{border:2px solid #C6F432;box-shadow:0 4px 0 #9cc21f}
+.goalnudge.now .gnk{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:11px;opacity:.7;margin:0 0 2px}
+.goalnudge.done{border-color:#86A892}
+.goalnudge.pro{border-color:#B9A7F0}
+.gnarrow{font-size:26px;opacity:.5;flex:none}
+.gnplay{flex:none;background:#C6F432;color:#111;font-weight:800;border-radius:999px;min-width:40px;height:40px;padding:0 12px;display:grid;place-items:center;font-size:14px}
+.trialcard{background:linear-gradient(135deg,#C6F432,#86A892);color:#111;border:0}
+.trialcard>span:first-child,.pronudge>span:first-child{font-size:26px;flex:none}
+.pronudge{border-style:dashed}
+.notifnudge{border:1px solid var(--line)}
+.paywall{text-align:center;padding-top:6px}
+.paywall .pwemo{display:block;font-size:46px;line-height:1;margin-bottom:8px}
+.paywall h2{font-size:26px;margin:10px 0 6px;line-height:1.15}
+.paywall .pwst{font-weight:600;margin:0 0 12px}
+.pwli{display:grid;gap:10px;margin:14px 0;text-align:left}
+.pwli>div{display:flex;gap:12px;align-items:flex-start;background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:12px}
+.pwli>div>span{font-size:24px;line-height:1;flex:none}
+.pwli p{margin:0}.pwli b{display:block;font-size:15px}.pwli small{display:block;font-size:13px;opacity:.72;margin-top:2px}
+.pplans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 4px}
+.pplan{position:relative;border:2px solid var(--line);background:var(--surf);color:var(--tx);border-radius:18px;padding:18px 10px 12px;cursor:pointer;font:inherit;text-align:center}
+.pplan b{display:block;font-size:15px}.pplan .pp{display:block;font-size:24px;font-weight:800;margin:4px 0 2px;letter-spacing:-.02em}.pplan small{display:block;font-size:12px;opacity:.72}
+.pplan.on{border-color:#C6F432;box-shadow:0 4px 0 #9cc21f;background:color-mix(in srgb,#C6F432 12%,var(--surf))}
+.pplan .ptag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#C6F432;color:#111;font-size:11px;font-weight:800;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pwfine{margin:10px 0 0;line-height:1.45}
+.procard{display:block;margin:12px 0}
+.gpick,.qzbody{text-align:center;padding:4px 0 20px}
+.gpick h2,.qzbody h2{font-size:26px;margin:6px 0 8px;line-height:1.15}
+.gpick .ogrid{text-align:left;margin-top:14px}
+.qzopts{display:grid;gap:10px;margin-top:18px}
+.qzo{display:flex;align-items:center;gap:12px;text-align:left;border:2px solid var(--line);background:var(--surf);color:var(--tx);border-radius:16px;padding:14px 16px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.qzo span{font-size:24px}
+.qzo:active{transform:translateY(2px);box-shadow:none}
+.qzres{display:flex;align-items:center;gap:12px;width:100%;border:2px solid var(--line);background:var(--surf);color:var(--tx);border-radius:18px;padding:14px;margin-top:12px;font:inherit;cursor:pointer}
+.qzres.top{border-color:#C6F432;box-shadow:0 4px 0 #9cc21f}
+.qzres b{display:block;font-size:16px}.qzres small{display:block;font-size:13px;opacity:.75;margin-top:2px}
+.qzres .otemo{font-size:30px}
+details.exactd{margin-top:6px}
+details.exactd summary{font-size:13px;opacity:.7;cursor:pointer;list-style:none;padding:4px 0}
+details.exactd summary::-webkit-details-marker{display:none}
+details.exactd summary::before{content:"＋ "}
+details.exactd[open] summary::before{content:"－ "}
