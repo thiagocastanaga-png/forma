@@ -42,7 +42,9 @@
     comer: '<span class="emo">🥗</span>',
     laburo: '<span class="emo">💼</span>',
     viajes: '<span class="emo">✈️</span>',
-    deporte: '<span class="emo">🏆</span>'
+    deporte: '<span class="emo">🏆</span>',
+    tenista: '<span class="emo">🎾</span>',
+    futbolista: '<span class="emo">⚽</span>'
   };
   var AREAS = [
     ["cuerpo", "Cuerpo", "Energía, sueño, movimiento y comida"],
@@ -91,7 +93,7 @@
     { id: "celular", n: "Celular bajo control", c: "#FF8A4C", pro: "plan-celular", live: true, prog: "celular", inc: true, grp: "Vida diaria", price: "",
       d: "Subí de nivel para usar el celular vos y que no te use a vos. Medís tu pantalla y ves cuánto la bajás.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Registro de tu tiempo de pantalla con gráfico", "Temporizadores y desafíos dentro de la app", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
-    { id: "arrancar", n: "Arrancar", c: "#FFC83D", pro: "plan-arrancar", live: true, prog: "arrancar", inc: true, grp: "Vida diaria", price: "",
+    { id: "arrancar", n: "Arrancar", c: "#FFC83D", pro: "plan-arrancar", live: false, inc: true, grp: "Vida diaria", price: "",
       d: "Subí de nivel para dejar de postergar: pasos diminutos, foco de 25 minutos y un registro de lo que lográs.",
       free: ["Tu día armado", "El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Bloques de foco guiados", "Registro de minutos de foco con gráfico", "Tu resultado final con datos reales", "Incluido en Vida diaria Pro"] },
     { id: "calma", n: "Calmar la cabeza", c: "#B9A7F0", pro: "plan-calma", live: true, prog: "calma", inc: true, grp: "Vida diaria", price: "",
@@ -103,13 +105,15 @@
     { id: "laburo", n: "Buscar trabajo", c: "#4C7DFF", pro: "plan-laburo", live: true, prog: "laburo", inc: true, grp: "Estudio y trabajo", d: "Armá tu CV, practicá entrevistas y organizá tu búsqueda con un plan diario.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "plata", n: "Plata en orden", c: "#C6F432", pro: "plan-plata", live: true, prog: "plata", inc: true, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "movimiento", n: "Moverme", c: "#FF8A4C", pro: "plan-movimiento", live: true, prog: "movimiento", inc: true, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
-    { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: true, prog: "comer", inc: true, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "viajes", n: "Armá tu viaje", c: "#B9A7F0", pro: "plan-viajes", live: true, prog: "viajes", inc: true, grp: "Vida diaria", d: "Armá tu viaje paso a paso: destino, presupuesto, itinerario, reservas y valija. Con niveles, dentro de la app.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$23.900", was: "$31.900", promo: "Precio de lanzamiento",
       d: "Rutinas de preparación para jugadores que compiten.",
       free: ["Respirar 1 minuto", "Aviso cuando abra la preventa"],
       pros: ["Vida diaria Pro incluido", "Pre y post partido", "Respiración y enfoque", "Movilidad", "Rutina física, para sumar a tu día"] },
-    { id: "deporte", n: "Mejorar en mi deporte", c: "#C6F432", pro: "plan-deporte", live: true, prog: "deporte", inc: true, grp: "Deportes", price: "", d: "Subí de nivel para rendir más en tu deporte: meta, práctica con intención, cabeza y recuperación.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Registro de tu práctica con gráfico", "5 niveles que vas desbloqueando", "Incluido en Forma Pro"] },
+    { id: "deporte", n: "Deporte", c: "#C6F432", pro: "plan-deporte", live: false, inc: true, grp: "Deportes", price: "", d: "Herramientas de entrenamiento y partidos.", free: [], pros: ["Incluido en Forma Pro"] },
+    { id: "tenista", n: "Tenista de alto rendimiento", c: "#C6F432", pro: "plan-deporte", live: true, prog: "tenista", inc: true, grp: "Deportes", price: "", d: "Para tenistas que compiten en serio: meta, práctica con intención, cabeza entre puntos y recuperación.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Registro de tu práctica con gráfico", "5 niveles que vas desbloqueando", "Incluido en Forma Pro"] },
+    { id: "futbolista", n: "Futbolista profesional", c: "#4C7DFF", pro: "plan-deporte", live: true, prog: "futbolista", inc: true, grp: "Deportes", price: "", d: "Para futbolistas que quieren llegar o sostenerse en el profesionalismo: meta, práctica con intención, cabeza y recuperación.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día", "Registro de tu práctica con gráfico", "5 niveles que vas desbloqueando", "Incluido en Forma Pro"] },
     { id: "futbol", n: "Fútbol", grp: "Deportes", c: "#4C7DFF", pro: "plan-futbol", live: false, d: "Rutinas para futbolistas: antes y después del partido, movilidad y fuerza." },
     { id: "voley", n: "Vóley", grp: "Deportes", c: "#FFC83D", pro: "plan-voley", live: false, d: "Rutinas para vóley: saltos, hombros y recuperación." },
     { id: "basquet", n: "Básquet", grp: "Deportes", c: "#FF8A4C", pro: "plan-basquet", live: false, d: "Rutinas para básquet: explosividad, tobillos y recuperación." },
@@ -872,7 +876,7 @@
     sueno: "😴", pantalla: "📱", matriz: "🗂️", enfoque: "⏳", animo: "🌤️", ritmos: "🎵", tarjetas: "🃏", examen: "📅", revision: "🗓️", rutinas: "🔁",
     entreno: "🏋️", partidos: "🏆", comidas: "🥗", menu: "🛒", mover: "👟", gastos: "💸", ahorro: "🐷", viaje: "✈️", valija: "🧳", postul: "💼"
   };
-  var GEMO = { dormir: "😴", celular: "📵", arrancar: "🚀", calma: "🧘", estudio: "📚", plata: "💰", movimiento: "🏃", comer: "🥗", viajes: "✈️", laburo: "💼", deporte: "🏆", vida: "🌱" };
+  var GEMO = { dormir: "😴", celular: "📵", arrancar: "🚀", calma: "🧘", estudio: "📚", plata: "💰", movimiento: "🏃", comer: "🥗", viajes: "✈️", laburo: "💼", deporte: "🏆", tenista: "🎾", futbolista: "⚽", vida: "🌱" };
   function temo(id) { return TEMO[id] || "🧰"; }
   function gemo(id) { return GEMO[id] || "🎯"; }
   function goalOfPlan(pid) { return GOALS.filter(function (g) { return g.plan === pid; })[0]; }
@@ -1287,48 +1291,8 @@
         out.push({ s: 3, t: "Si en 3 semanas sigue igual o te frena en tu vida, hablalo con un profesional", why: "Forma ordena tus hábitos, pero no reemplaza un tratamiento", patch: null, tip: true });
         return out;
       } },
-    { id: "arrancar", n: "Arrancar el día con energía", d: "Mañanas ordenadas y dejar de postergar", plan: "arrancar",
-      qs: [
-        { k: "m", q: "¿Cómo son tus mañanas hoy?", o: ["Pesadas, me cuesta salir de la cama", "Apuradas, siempre llego justo", "Bien, pero sin una rutina", "Pierdo la mañana y arranco tarde"] },
-        { k: "p", q: "¿Qué hacés primero al despertarte?", o: ["Miro el celular", "Tomo algo y salgo", "Me ducho o me preparo", "Nada fijo"] },
-        { k: "c", q: "¿Qué es lo que más te cuesta?", o: ["Levantarme", "Empezar a hacer cosas", "Concentrarme", "Todo un poco"] },
-        { k: "t", q: "¿Cuánto tiempo podés dedicarle a tu mañana?", o: ["15 minutos", "30 minutos", "45 minutos", "1 hora"] }
-      ],
-      build: function (g) {
-        var out = [];
-        out.push({ s: 1, t: "Un primer paso fijo cada mañana", why: "Arrancar siempre igual saca la decisión y baja la pereza.", patch: pcat(ah("plan"), function (a) { if (g.c === 1 || g.c === 3) a.waste = "procrastinate"; }), act: A_("", 0, [], "Agua, luz natural y un primer paso chico." + (g.p === 0 ? " Primeros 20 minutos sin celular." : ""), { into: "first" }) });
-        if (g.c === 0) out.push({ s: 1, t: "Despertador lejos de la cama", why: "Para lo que más te cuesta: levantarte.", patch: null, act: A_("Dejar el despertador lejos de la cama", 2, [["sleep", -40]], "Levantate al primer sonido.") });
-        out.push({ s: 2, t: "Moverte 5 minutos apenas te levantás", why: "Despierta el cuerpo y sube la energía", patch: ah("move") });
-        if (g.c === 1 || g.c === 3) out.push({ s: 2, t: "Regla de 10 minutos", why: "Empezar es lo más difícil, no seguir.", patch: null, act: A_("", 0, [], "Regla de 10 minutos: empezá solo 10 y después decidís.", { into: "focus" }) });
-        out.push({ s: 3, t: "Dejar la mañana preparada la noche anterior", why: "Ropa, mochila y lo primero que vas a hacer", patch: ah("write"), act: A_("Dejar lista la ropa y lo primero de mañana", 10, [["sleep", -100]], "") });
-        return out;
-      } },
-    { id: "deporte", n: "Mejorar en mi deporte", d: "Entrenar mejor y rendir más", plan: "deporte" },
-    { id: "peso", n: "Comer mejor y bajar de peso", d: "Comidas más ordenadas y más movimiento, sin dietas", plan: "comer",
-      qs: [
-        { k: "m", q: "¿Qué es lo que más te cuesta hoy?", o: ["Picotear entre comidas", "Comer muy tarde o saltearme comidas", "Las porciones grandes", "Comer por ansiedad o aburrimiento", "No sé por dónde empezar"] },
-        { k: "c", q: "¿Cuántas comidas hacés por día?", o: ["1 o 2", "3", "4 o más"] },
-        { k: "a", q: "¿Tomás agua durante el día?", o: ["Casi nada", "Algo", "Sí, bastante"] },
-        { k: "e", q: "¿Cuánto te movés hoy?", o: ["Casi nada", "Camino algo", "Entreno 1 o 2 veces por semana", "Entreno 3 veces o más"] },
-        { k: "t", q: "¿Cuánto tiempo podés sumar por día para moverte?", o: ["10 minutos", "20 minutos", "30 minutos", "45 minutos o más"] },
-        { k: "o", q: "¿Tenés una indicación médica o de un nutricionista?", o: ["No", "Sí, y la sigo"] }
-      ],
-      build: function (g) {
-        var out = [], mv = [10, 20, 30, 45][g.t] || 20;
-        out.push({ s: 1, t: "Comer sin pantallas, despacio", why: "Prestar atención a la comida ayuda a notar cuándo ya estás conforme.", patch: null, act: A_("", 0, [], "Sin pantalla y despacio. Parate cuando estés conforme.", { into: "meal" }) });
-        if (g.a < 2) out.push({ s: 1, t: "Un vaso de agua al despertar", why: "Es fácil y arranca el hábito de tomar agua.", patch: null, act: A_("", 0, [], "Un vaso de agua apenas te levantás.", { into: "first" }) });
-        if (g.m === 0) out.push({ s: 1, t: "Dejar lista una colación", why: "Si ya tenés algo preparado, picoteás menos.", patch: null, act: A_("Preparar una colación (fruta, yogur, frutos secos)", 5, [["abs", 600]], "Dejala a la vista para cuando te dé hambre.") });
-        if (g.m === 1) out.push({ s: 1, t: "No saltear la comida principal", why: "Llegar con mucha hambre hace comer más y peor.", patch: null, act: A_("", 0, [], "No te la saltees: comer a horario evita llegar con demasiada hambre.", { into: "meal" }) });
-        if (g.m === 2) out.push({ s: 1, t: "Servirte una porción y esperar 10 minutos", why: "La señal de estar conforme tarda en llegar.", patch: null, act: A_("", 0, [], "Servite una sola porción y esperá 10 minutos antes de repetir.", { into: "meal" }) });
-        if (g.m === 3) out.push({ s: 1, t: "Pausa antes de comer algo fuera de hora", why: "Ayuda a distinguir hambre de ansiedad o aburrimiento.", patch: null, act: A_("Pausa de 5 minutos: ¿tengo hambre o es otra cosa?", 5, [["abs", 1020]], "Tomá agua, respirá o caminá un poco. Si sigue el hambre, comé algo tranquilo.") });
-        if (g.m === 4) out.push({ s: 1, t: "Anotar lo que comés, sin juzgar", why: "Para ver dónde estás antes de cambiar nada.", patch: null, act: A_("Anotar lo que comí hoy (solo anotar)", 5, [["sleep", -100]], "Sin culpa: es para conocerte.") });
-        out.push({ s: 2, t: "Caminar " + mv + " minutos por día", why: "Moverte todos los días pesa más que un gran esfuerzo un día.", patch: null, act: A_("Caminar " + mv + " minutos", mv, [["mid", 0]], "Al ritmo que puedas.") });
-        out.push({ s: 2, t: "Dejar preparada la comida de mañana", why: "Decidir con hambre es lo más difícil.", patch: null, act: A_("Dejar lista la comida de mañana", 15, [["sleep", -120]], "Aunque sea una parte: la base, la fruta o la vianda.") });
-        out.push({ s: 3, t: "Un paso más de movimiento", why: "Cuando ya caminás, sumamos movimiento con fuerza o estiramiento.", patch: ah("move") });
-        out.push({ s: 3, t: "Repasar la semana de comidas", why: "Ver qué te costó más te dice qué cambiar.", patch: null, act: A_("Repasar la semana: qué comida me costó más", 10, [["mid", 0]], "Elegí un solo cambio para la semana que viene.", { dow: [0] }) });
-        out.push({ s: 1, t: g.o === 1 ? "Seguí la indicación de tu médico o nutricionista: Forma la complementa, no la reemplaza" : "Para bajar de peso de forma segura, consultá a un médico o nutricionista", why: "Forma ordena tus hábitos pero no da dietas ni reemplaza a un profesional", patch: null, tip: true });
-        return out;
-      } },
+    { id: "tenista", n: "Tenista de alto rendimiento", d: "Entrenar y competir como un profesional", plan: "tenista" },
+    { id: "futbolista", n: "Futbolista profesional", d: "Entrenar y rendir como un profesional", plan: "futbolista" },
     { id: "movimiento", n: "Moverme más", d: "Empezar a entrenar o a moverte, de a poco", plan: "movimiento",
       qs: [
         { k: "e", q: "¿Cuánto te movés hoy?", o: ["Casi nada", "Camino algo", "Entreno 1 o 2 veces por semana", "Entreno 3 veces o más"] },
@@ -1430,10 +1394,9 @@
     dormir: ["Mejor sueño", "Acostarte y levantarte mejor"],
     movimiento: ["Actividad física", "Moverte más, de a poco"],
     celular: ["Tiempo sin pantalla", "Recuperar horas del celular"],
-    arrancar: ["Arrancar el día con energía", "Mañanas ordenadas, menos postergar"],
-    peso: ["Comer mejor", "Comidas más ordenadas, sin dietas"],
     plata: ["Plata en orden", "Saber en qué gastás"],
-    deporte: ["Mejorar en mi deporte", "Entrenar mejor y rendir más"],
+    tenista: ["Tenista de alto rendimiento", "Entrenar y competir como un profesional"],
+    futbolista: ["Futbolista profesional", "Entrenar y rendir como un profesional"],
     viaje: ["Organizar un viaje", "Armarlo paso a paso"],
     laburo: ["Buscar trabajo", "CV, entrevistas y búsqueda"]
   };
@@ -1763,8 +1726,8 @@
     { id: "descarga", n: "Descarga mental", d: "Sacá de la cabeza lo que te da vueltas antes de dormir.", act: "descarga", plan: "dormir", mins: 10 },
     { id: "antesabrir", n: "Antes de abrir el celular", d: "Un freno de 1 minuto: respirás y decidís para qué lo abrís.", act: "antesabrir", plan: "celular", mins: 5 },
     { id: "pausacel", n: "Pausa sin celular", d: "10 minutos lejos del celular, con un cierre corto.", act: "pausacel", plan: "celular", mins: 15 },
-    { id: "foco", n: "Bloque de foco", d: "25 minutos con una sola tarea, con intención y cierre.", act: "foco", plan: "arrancar", gate: "vida", mins: 30 },
-    { id: "dosmin", n: "Regla de los 2 minutos", d: "Para arrancar lo que venís postergando: un paso diminuto.", act: "dosmin", plan: "arrancar", mins: 10 },
+    { id: "foco", n: "Bloque de foco", d: "25 minutos con una sola tarea, con intención y cierre.", act: "foco", plan: "vida", gate: "vida", mins: 30 },
+    { id: "dosmin", n: "Regla de los 2 minutos", d: "Para arrancar lo que venís postergando: un paso diminuto.", act: "dosmin", plan: "vida", mins: 10 },
     { id: "calma", n: "Respiración para calmar", d: "3 minutos de respiración lenta para bajar la tensión.", act: "calma", plan: "calma", gate: "vida", mins: 10 },
     { id: "grounding", n: "5-4-3-2-1", d: "Volvé al presente cuando la cabeza se acelera.", act: "grounding", plan: "calma", mins: 10 },
     { id: "estudio", n: "Bloque de estudio", d: "25 minutos de estudio y recuerdo activo, con pausa.", act: "estudio", plan: "estudio", mins: 35 },
@@ -1773,7 +1736,7 @@
     { id: "recupero", n: "Vuelta a la calma", d: "Estiramientos guiados para después de entrenar o jugar.", act: "recupero", plan: "deporte", mins: 10 },
     { id: "fuerza", n: "Fuerza en casa", d: "Circuito guiado de 5 minutos, sin equipamiento.", act: "fuerza", plan: "movimiento", mins: 10 },
     { id: "caminata", n: "Caminata de 10 minutos", d: "Guiada, con cambio de ritmo.", act: "caminata", plan: "movimiento", mins: 10 },
-    { id: "atento", n: "Comer con atención", d: "Una comida sin apuro: notás el hambre y cuándo te llenás.", act: "atento", plan: "comer", mins: 20 },
+    { id: "atento", n: "Comer con atención", d: "Una comida sin apuro: notás el hambre y cuándo te llenás.", act: "atento", plan: "vida", mins: 20 },
     { id: "entrevista", n: "Simulacro de entrevista", d: "Las 4 preguntas que siempre aparecen, con tiempo para responder en voz alta.", act: "entrevista", plan: "laburo", mins: 10 }
   ];
   if (window.FormaTools && window.FormaTools.defs) TOOLS = TOOLS.concat(window.FormaTools.defs);
@@ -1782,7 +1745,8 @@
   function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
   function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
   function toolOk(T) { return !!(T.free || (T.gate === "vida" ? isProU() : planOwned(T.plan))); }
-  function toolsOf(pid) { return TOOLS.filter(function (t) { return t.plan === pid; }); }
+  var SPORT_BASE = { tenista: "deporte", futbolista: "deporte" };
+  function toolsOf(pid) { var q = SPORT_BASE[pid] || pid; return TOOLS.filter(function (t) { return t.plan === q; }); }
   function toolRow(T) {
     var ok = toolOk(T), pl = planOf(T.plan);
     return '<button class="prod" data-tl="' + T.id + '"><span class="shape">' + SHAPES[T.plan] + "</span><span style='flex:1;min-width:0'><b>" + esc(T.n) + "</b><small>" + esc(T.d) + '</small></span><span class="tag' + (ok ? " ok" : "") + '">' + (ok ? (T.free ? "Gratis" : "Tuya") : "Con Forma Pro") + "</span></button>";
@@ -1794,7 +1758,7 @@
   }
   function toolsBody() {
     var h = "";
-    PLANS.forEach(function (p) { var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
+    PLANS.forEach(function (p) { if (SPORT_BASE[p.id]) return; var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
     return h;
   }
   function vTools() { return '<h1 class="hello">Herramientas</h1><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>' + toolsBody(); }
@@ -1832,7 +1796,7 @@
   }
   function openTools() {
     var h = '<h2 style="font-size:24px;margin:0 0 4px">Herramientas</h2><p class="small muted" style="margin:0 0 6px">Usalas cuando las necesites o agregalas a tu día en un horario libre.</p>';
-    PLANS.forEach(function (p) { var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
+    PLANS.forEach(function (p) { if (SPORT_BASE[p.id]) return; var L = toolsOf(p.id); if (!L.length) return; h += '<div class="sec">' + esc(p.n) + "</div>" + L.map(toolRow).join(""); });
     sheet(h + '<button class="btn ghost block" data-close style="margin-top:12px">Cerrar</button>');
   }
   function openTool(id) {
@@ -2137,13 +2101,13 @@
   }
   function wkDate(dow) { return weekDates().filter(function (d) { return d.getDay() === dow; })[0]; }
   function openWeekDay(dow, dt) {
-    var F = window.FormaDia, d = dt || wkDate(dow), k = today(d), bl = armBlocksFor(d), one = ddCustom(d), cu = wkCustom(dow), pl = DNL[dow].toLowerCase() + (/s$/.test(DNL[dow]) ? "" : "s");
-    sheet('<span class="badge">' + (one ? "Cambiado solo para este día" : cu ? "Armado para los " + pl : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">' + (one ? "El resto de los " + pl + " no cambia." : cu ? "Se repite todos los " + pl + "." : "Es el día que armaste con el test.") + "</p>" +
+    var F = window.FormaDia, d = dt || wkDate(dow), k = today(d), bl = armBlocksFor(d), one = ddCustom(d), cu = wkCustom(dow), sg = DNL[dow].toLowerCase(), pl = sg + (/s$/.test(DNL[dow]) ? "" : "s");
+    sheet('<span class="badge">' + (one ? "Solo para este " + sg + " " + d.getDate() : cu ? "Tu " + sg + " fijo" : "Tu día base") + '</span><h2 style="font-size:24px;margin:8px 0 2px">' + DNL[dow] + " " + d.getDate() + '</h2><p class="small muted" style="margin:0 0 10px">' + (one ? "Cambiaste solo este día. Tu " + sg + " fijo no se toca." : cu ? "Este es tu " + sg + " fijo: se repite todos los " + pl + "." : "Es tu día base. Podés armar tu " + sg + " fijo o cambiar solo este día.") + "</p>" +
       '<div class="wklist">' + bl.map(function (b) { var K = F.KIND[b.kind]; return '<div class="wkrow"><span class="wkt">' + F.fmt(b.s) + '</span><i style="background:' + K.dot + '"></i><span>' + esc(b.label) + "</span></div>"; }).join("") + "</div>" +
-      '<button class="btn sage block" data-ddedit="' + k + '" style="margin-top:14px">Editar horario por horario</button>' +
-      (one ? '<button class="btn ghost block" data-ddreset="' + k + '" style="margin-top:8px">Volver a mi día base</button>' : "") +
-      '<button class="btn ghost block" data-wkedit="' + dow + '" style="margin-top:8px">' + (cu ? "Cambiar todos los " + pl : "Armar todos los " + pl + " distinto") + "</button>" +
-      (cu ? '<button class="btn ghost block" data-wkreset="' + dow + '" style="margin-top:8px">Todos los ' + pl + ' vuelven al día base</button>' : "") +
+      '<button class="btn sage block" data-ddedit="' + k + '" style="margin-top:14px">Armar solo este ' + sg + ' ' + d.getDate() + '</button><p class="small muted" style="margin:6px 2px 0">Cambia únicamente este día. Los demás ' + pl + ' quedan igual.</p>' +
+      (one ? '<button class="btn ghost block" data-ddreset="' + k + '" style="margin-top:8px">Volver a mi ' + sg + " fijo" + (cu ? "" : " (día base)") + "</button>" : "") +
+      '<button class="btn ghost block" data-wkedit="' + dow + '" style="margin-top:8px">' + (cu ? "Cambiar mi " + sg + " fijo" : "Armar mi " + sg + " fijo") + '</button><p class="small muted" style="margin:6px 2px 0">Lo armás una vez y se repite todos los ' + pl + ".</p>" +
+      (cu ? '<button class="btn ghost block" data-wkreset="' + dow + '" style="margin-top:8px">Mi ' + sg + ' fijo vuelve al día base</button>' : "") +
       '<div class="sec" style="margin-top:16px">Copiar este día a</div><div class="wkto">' + [1, 2, 3, 4, 5, 6, 0].filter(function (x) { return x !== dow; }).map(function (x) { return '<button class="chip" data-wkto="' + x + '" aria-pressed="false">' + DNL[x].slice(0, 3) + "</button>"; }).join("") + '</div>' +
       '<button class="btn ghost block" data-wkcopy="' + dow + '" style="margin-top:8px">Copiar</button><button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }

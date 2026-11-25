@@ -15,6 +15,35 @@
   function hm(h) { var m = Math.round(h * 60); return Math.floor(m / 60) + " h " + pad(m % 60) + " min"; }
   function range(list) { if (list.length < 2) return 0; var a = Math.min.apply(null, list), b = Math.max.apply(null, list); return b - a; }
 
+  // Programas de deporte: una carrera por deporte (mismo esqueleto de 14 pasos, contenido propio)
+  function sportProg(c) {
+    return {
+      id: c.id, n: c.n, tag: "Deporte", reminder: c.reminder || "17:00",
+      intro: c.intro,
+      q: "¿Qué tan bien sentís que rendís como " + c.rol + "?", lo: "Muy mal", hi: "Muy bien", better: "up",
+      note: "Forma es una guía de organización y hábitos y no reemplaza a tu entrenador, preparador físico ni a un profesional de la salud.",
+      log: [NU("Minutos de práctica o entrenamiento de hoy", "min", 0, 600)], logKeys: ["min"],
+      ml: "Práctica por día", up: true,
+      metric: function (v) { return +v.min; }, fmt: function (m) { return Math.round(m) + " min"; },
+      days: [
+        { t: "Tu nivel y tu juego", a: c.d0a, w: "Para mejorar hay que saber desde dónde.", f: [T(c.d0l, 8, c.d0p), CH("Mi nivel hoy", c.niv)] },
+        { t: "Tu meta de la temporada", a: "Elegí una meta concreta para los próximos meses. " + c.metaEj, w: "Una meta clara ordena todo el entrenamiento.", f: [T("Mi meta", 10, "Quiero lograr…")] },
+        { t: "Fortalezas y puntos a mejorar", a: "Anotá 3 cosas en las que sos bueno y 3 a mejorar en tu juego.", w: "Conocerte te dice dónde poner el tiempo.", f: [LS("Mis fortalezas", 3, "Algo que hago bien"), LS("A mejorar", 3, "Algo que quiero mejorar")] },
+        { t: "Una sola cosa", a: "Elegí UNA cosa para mejorar en estas dos semanas. " + c.foco, w: "Mejorar una cosa a la vez da resultados.", f: [T("Lo que voy a mejorar", 8, "Voy a mejorar…")] },
+        { t: "Entrada en calor", a: "Hacé la pausa de movimiento guiada como entrada en calor antes de entrenar.", w: "Prepararte bien baja el riesgo de lesión y mejora el rendimiento.", f: [AC("movimiento", "Pausa de movimiento guiada")] },
+        { t: "Práctica con intención", a: "20 minutos trabajando solo esa cosa. " + c.prac, w: "Practicar con intención rinde más que muchas horas distraído.", f: [TR(1200, "20 minutos de práctica enfocada"), CH("¿Cómo salió?", ["Mal", "Más o menos", "Bien"])] },
+        { t: "Visualizá", a: c.vis, w: "Imaginar con detalle entrena el cerebro como el cuerpo.", f: [TR(300, "5 minutos visualizando"), T("Lo que imaginé", 8, "Me vi…")] },
+        { t: c.resT, a: c.resA, w: "La respiración lenta baja la tensión y te devuelve el foco.", f: [AC("calma", "Respiración para calmar")] },
+        { t: "Tu rutina previa", a: c.rut, w: "Una rutina fija te da seguridad cuando hay presión.", f: [LS("Mi rutina previa", 4, "Un paso")] },
+        { t: "Recuperación", a: "Anotá cómo te recuperás: sueño, comida, hidratación y estiramiento.", w: "Se mejora cuando el cuerpo se recupera, no solo cuando entrena.", f: [CK(["Dormí lo que necesito", "Tomé agua", "Comí después de entrenar", "Estiré"])] },
+        { t: "Anotá cómo te fue", a: "Después de entrenar o de " + c.part + ", anotá qué salió bien y qué no.", w: "Lo que no se anota se olvida.", f: [CH("Hoy me sentí…", ["Flojo", "Normal", "Muy bien"]), T("Lo que salió bien", 6, "Me salió bien…"), T("Lo que quiero ajustar", 6, "Quiero ajustar…")] },
+        { t: "Manejá el error", a: c.err, w: "Cómo respondés al error pesa más que el error.", f: [T("Mi frase y mi gesto de reseteo", 8, "Cuando fallo, me digo…")] },
+        { t: "Mirá tu avance", a: "Mirá tu gráfico y anotá 3 cosas que mejoraron.", w: "Ver el avance sostiene la motivación.", f: [LS("Lo que mejoró", 3, "Algo que noto mejor")] },
+        { t: "Tu plan de entrenamiento", a: "Elegí tus 3 prácticas clave de la semana. Ese es tu plan para seguir.", w: "Lo que dura es lo que elegís vos.", f: [LS("Mis 3 prácticas clave", 3, "Una práctica")] }
+      ]
+    };
+  }
+
   var L = [
     {
       id: "dormir", n: "Dormir de verdad", tag: "Sueño", reminder: "21:00",
@@ -69,31 +98,6 @@
         { t: "Un reemplazo", a: "Elegí tres cosas para hacer en los momentos de aburrimiento, en lugar de abrir el celular.", w: "Si solo sacás el hábito, queda un hueco. Hay que ponerle algo.", f: [LS("Cosas que puedo hacer", 3, "Por ejemplo: leer 5 páginas")] },
         { t: "Una hora sin celular", a: "Hacé algo que te guste durante una hora entera con el celular en otra habitación.", w: "Te muestra lo que se siente tener la atención entera.", f: [TR(3600, "1 hora sin celular"), T("¿Qué hiciste?", 4, "Hice…")] },
         { t: "Tus reglas", a: "Elegí 3 reglas que vas a mantener.", w: "Lo que elegís vos se mantiene.", f: [LS("Mis 3 reglas", 3, "Una regla")] }
-      ]
-    },
-    {
-      id: "arrancar", n: "Arrancar", tag: "Foco", reminder: "09:00",
-      intro: "Subí de nivel para dejar de postergar. Pasos diminutos, foco de 25 minutos y un registro de cuánto lográs cada día.",
-      q: "¿Qué tan fácil te resulta empezar lo que tenés que hacer?", lo: "Muy difícil", hi: "Muy fácil", better: "up",
-      note: "Si postergar te viene acompañado de mucho malestar o de un cansancio que no se va, puede haber algo más y vale la pena consultarlo con un profesional.",
-      log: [NU("Minutos que estuviste enfocado hoy en tu tarea más importante", "min", 0, 600)], logKeys: ["foco"],
-      ml: "Foco por día", up: true,
-      metric: function (v) { return +v.foco; }, fmt: function (m) { return Math.round(m) + " min"; },
-      days: [
-        { t: "Elegí una sola cosa", a: "Escribí lo que más venís postergando. Una sola.", w: "Con una lista larga no se empieza ninguna.", f: [T("Lo que vengo postergando", 8, "Tengo que…")] },
-        { t: "Hacela diminuta", a: "Escribí el primer paso más chico posible, de menos de 2 minutos (abrir el archivo, juntar los papeles).", w: "El obstáculo suele ser empezar, no la tarea entera.", f: [T("Mi primer paso de 2 minutos", 8, "Abro… / Busco…")] },
-        { t: "La regla de los 2 minutos", a: "Hacé ahora ese primer paso. Solo ese. Después podés parar.", w: "Cuando arrancás, seguir es mucho más fácil.", f: [TR(120, "2 minutos haciendo el primer paso"), CH("¿Seguiste después de los 2 minutos?", ["Sí, seguí un rato", "Paré, y está bien"])] },
-        { t: "25 minutos de foco", a: "Un bloque de 25 minutos con una sola tarea y el celular lejos.", w: "Un tiempo corto y con final es más fácil de aceptar.", f: [AC("foco", "Bloque de foco guiado")] },
-        { t: "Dejalo listo de noche", a: "Dejá preparado hoy lo de mañana: el archivo abierto, la ropa, los papeles.", w: "Menos decisiones a la mañana, menos excusas.", when: "pm", f: [CK(["Dejé listo lo de mañana"]), T("¿Qué dejé listo?", 5, "Dejé…")] },
-        { t: "La prioridad del día", a: "Elegí UNA cosa que, si la hacés, el día valió la pena. Hacela primero.", w: "Primero lo importante, antes de que el día se llene.", f: [T("Mi prioridad de hoy", 5, "Hoy lo más importante es…"), CH("¿La hiciste?", ["Sí", "En parte"], [0, 1])] },
-        { t: "Dividí lo grande", a: "Tomá una tarea grande y partila en pasos chicos que arranquen con un verbo: llamar, escribir, enviar.", w: "Un paso claro se puede hacer; una montaña no.", f: [LS("Los pasos", 3, "Verbo + algo concreto")] },
-        { t: "Sacá las distracciones", a: "Antes de empezar, preparalo todo para no distraerte.", w: "Es más fácil sacar la distracción que resistirla.", f: [CK(["Cerré las pestañas que no uso", "Silencié el celular", "Puse agua al lado"])] },
-        { t: "Si no tenés ganas", a: "Prometete 5 minutos. Si pasados los 5 querés parar, parás. Casi nunca pasa.", w: "La motivación suele llegar después de empezar, no antes.", f: [TR(300, "5 minutos con la tarea"), CH("Pasados los 5 minutos…", ["Seguí", "Paré"])] },
-        { t: "Una hora fija", a: "Elegí un horario fijo para tu tarea más importante.", w: "Un horario fijo evita tener que decidirlo todos los días.", f: [TM("Mi hora para la tarea importante")] },
-        { t: "Foco y pausa de verdad", a: "Hacé un bloque de foco y después una pausa real de 5 minutos: caminar o tomar agua, sin celular.", w: "Descansar bien es parte de rendir.", f: [AC("foco", "Bloque de foco guiado"), TR(300, "5 minutos de pausa sin celular")] },
-        { t: "Terminá a medias", a: "Al cortar, dejá escrito cuál es el próximo paso para arrancar fácil mañana.", w: "Empezar desde algo ya empezado cuesta menos.", f: [T("Mi próximo paso", 8, "Mañana empiezo por…")] },
-        { t: "Mirá lo hecho", a: "Anotá 3 cosas que hiciste hoy. Cuenta lo hecho, no lo que falta.", w: "Ver avance te da ganas de seguir.", f: [LS("Lo que hice hoy", 3, "Algo que hice")] },
-        { t: "Tu sistema", a: "Elegí las 3 técnicas que más te funcionaron.", w: "Lo que funciona para vos es lo que queda.", f: [LS("Mis 3 técnicas", 3, "Una técnica")] }
       ]
     },
     {
@@ -172,31 +176,6 @@
       ]
     },
     {
-      id: "comer", n: "Comer ordenado", tag: "Comida", reminder: "19:00",
-      intro: "Subí de nivel para ordenar tus comidas sin dietas raras: horarios, compras y un plan simple. Cargás cuántas comidas te salieron ordenadas cada día.",
-      q: "¿Qué tan ordenadas son tus comidas hoy?", lo: "Nada", hi: "Muy ordenadas", better: "up",
-      note: "Esto es organización, no una dieta ni un plan nutricional. Si tenés una condición de salud, tomás medicación o tu relación con la comida te preocupa, consultá con un profesional de la salud.",
-      log: [NU("¿Cuántas comidas del día salieron como las planeaste?", "comidas", 0, 8)], logKeys: ["ok"],
-      ml: "Comidas ordenadas por día", up: true,
-      metric: function (v) { return +v.ok; }, fmt: function (m) { return (Math.round(m * 10) / 10) + " comidas"; },
-      days: [
-        { t: "Mirá cómo comés", a: "Sin cambiar nada, anotá lo que comiste hoy y cómo te sentiste.", w: "Primero se mira, después se ordena.", f: [LS("Lo que comí hoy", 3, "Desayuno, almuerzo, cena…"), CH("¿Cómo me sentí con lo que comí?", ["Mal", "Normal", "Bien"])] },
-        { t: "Horarios de comida", a: "Elegí a qué hora querés comer. Horarios parecidos todos los días ordenan el hambre.", w: "El cuerpo se acostumbra a lo que se repite.", f: [TM("Mi hora de almuerzo"), TM("Mi hora de cena")] },
-        { t: "Tomar agua", a: "Llená una botella y tomala a lo largo del día. Anotá cuántos vasos tomaste.", w: "A veces la sed se confunde con hambre.", f: [NU("Vasos de agua que tomé", "vasos", 0, 20), CK(["Llevé una botella conmigo"])] },
-        { t: "Un plato simple", a: "Armá hoy un plato con tres cosas: algo de verdura o fruta, algo de proteína y algo de energía (arroz, pan, papa).", w: "Una regla simple se cumple mejor que una dieta complicada.", f: [CK(["Había verdura o fruta", "Había una proteína", "Había algo que da energía"])] },
-        { t: "Planificá mañana", a: "Elegí qué vas a comer mañana en cada comida, antes de que llegue el hambre.", w: "Decidir con hambre sale mal; decidir antes sale bien.", when: "pm", f: [LS("Mi menú de mañana", 3, "Comida o plato")] },
-        { t: "Lista de compras", a: "Armá una lista con lo que necesitás para varios días.", w: "Comprar con lista ahorra plata, tiempo y malas decisiones.", f: [LS("Mi lista de compras", 5, "Algo que necesito")] },
-        { t: "Una base para la semana", a: "Elegí una cosa que cocinás en cantidad y que usás en varias comidas: arroz, legumbres, pollo, verduras.", w: "Cocinar una vez para varios días te salva en los días complicados.", f: [T("Lo que voy a cocinar de más", 6, "Voy a cocinar…"), CK(["Lo cociné", "Lo guardé para otros días"])] },
-        { t: "Comer sin pantalla", a: "Comé una comida entera sin celular ni tele, en 20 minutos.", w: "Sin distracciones notás cuándo estás satisfecho.", when: "pm", f: [TR(1200, "20 minutos comiendo sin pantallas"), CH("¿Cómo fue?", ["Difícil", "Normal", "Me gustó"])] },
-        { t: "Hambre real o ganas", a: "Antes de comer algo fuera de hora, preguntate qué sentís. Anotá qué fue.", w: "Distinguir hambre de aburrimiento o cansancio cambia las decisiones.", f: [CH("Hoy sentí…", ["Hambre física", "Ganas o aburrimiento", "Estrés o cansancio", "No me pasó"]), T("¿Qué hice?", 4, "Hice…")] },
-        { t: "Colaciones que sirven", a: "Elegí 3 opciones simples para cuando tenés hambre entre comidas.", w: "Tener opciones a mano evita ir a lo primero que aparece.", f: [LS("Mis colaciones", 3, "Fruta, frutos secos, yogur…")] },
-        { t: "Plan para los días locos", a: "Pensá qué comés cuando no tenés tiempo ni ganas de cocinar.", w: "Un plan B evita pedir comida por inercia.", f: [T("Mi plan B", 10, "Cuando no tengo tiempo, como…")] },
-        { t: "Salidas y fin de semana", a: "Pensá cómo disfrutar sin descontrolarte: qué vas a priorizar y qué vas a dejar pasar.", w: "Se trata de equilibrio, no de prohibir.", f: [T("Mi regla para salidas y fines de semana", 10, "Cuando salgo…")] },
-        { t: "Mirá lo que lograste", a: "Fijate cuántas comidas ordenadas tuviste y anotá 3 cosas que cambiaron.", w: "Ver avance sostiene el hábito.", f: [LS("Lo que cambió", 3, "Energía, gastos, orden…")] },
-        { t: "Tu sistema de comidas", a: "Elegí los 3 hábitos que más te sirvieron. Ese es tu sistema.", w: "Lo que dura es lo que elegís vos.", f: [LS("Mis 3 hábitos", 3, "Un hábito que me sirvió")] }
-      ]
-    },
-    {
       id: "plata", n: "Plata en orden", tag: "Plata", reminder: "21:00",
       intro: "Subí de nivel para saber en qué gastás y armar un presupuesto simple. Cargás lo que gastás cada día y al final ves tu panorama real.",
       q: "¿Qué tan claro tenés adónde va tu plata?", lo: "Nada claro", hi: "Muy claro", better: "up",
@@ -271,31 +250,24 @@
         { t: "Tu plan semanal", a: "Armá tu plan para la próxima semana: a quién escribís, dónde te postulás, qué practicás.", w: "Con un plan escrito se sigue buscando aunque cueste.", f: [LS("Mi plan de la semana", 3, "Acción concreta")] }
       ]
     },
-    {
-      id: "deporte", n: "Mejorar en mi deporte", tag: "Deporte", reminder: "17:00",
-      intro: "Subí de nivel para rendir más en tu deporte: una meta, práctica con intención, la cabeza y la recuperación. Cargás tus minutos de práctica y ves tu avance.",
-      q: "¿Qué tan bien sentís que rendís en tu deporte?", lo: "Muy mal", hi: "Muy bien", better: "up",
-      note: "Forma es una guía de organización y hábitos y no reemplaza a un profesional.",
-      log: [NU("Minutos de práctica o entrenamiento de hoy", "min", 0, 600)], logKeys: ["min"],
-      ml: "Práctica por día", up: true,
-      metric: function (v) { return +v.min; }, fmt: function (m) { return Math.round(m) + " min"; },
-      days: [
-        { t: "Tu deporte y tu nivel", a: "Escribí qué deporte practicás y en qué nivel estás hoy.", w: "Para mejorar hay que saber desde dónde.", f: [T("Mi deporte y mi nivel", 8, "Juego… hace…"), CH("Mi nivel hoy", ["Recién empiezo", "Recreativo", "Competitivo", "Alto rendimiento"])] },
-        { t: "Tu meta de la temporada", a: "Elegí una meta concreta para los próximos meses.", w: "Una meta clara ordena todo el entrenamiento.", f: [T("Mi meta", 10, "Quiero lograr…")] },
-        { t: "Fortalezas y puntos a mejorar", a: "Anotá 3 cosas en las que sos bueno y 3 a mejorar.", w: "Conocerte te dice dónde poner el tiempo.", f: [LS("Mis fortalezas", 3, "Algo que hago bien"), LS("A mejorar", 3, "Algo que quiero mejorar")] },
-        { t: "Una sola cosa", a: "Elegí UNA cosa para mejorar en estas dos semanas.", w: "Mejorar una cosa a la vez da resultados.", f: [T("Lo que voy a mejorar", 8, "Voy a mejorar…")] },
-        { t: "Entrada en calor", a: "Hacé la pausa de movimiento guiada como entrada en calor antes de entrenar.", w: "Prepararte bien baja el riesgo de lesión y mejora el rendimiento.", f: [AC("movimiento", "Pausa de movimiento guiada")] },
-        { t: "Práctica con intención", a: "20 minutos trabajando solo esa cosa, con repeticiones y atención en lo que hacés.", w: "Practicar con intención rinde más que muchas horas distraído.", f: [TR(1200, "20 minutos de práctica enfocada"), CH("¿Cómo salió?", ["Mal", "Más o menos", "Bien"])] },
-        { t: "Visualizá", a: "Cerrá los ojos 5 minutos e imaginá la jugada o el movimiento que querés mejorar, saliendo bien.", w: "Imaginar con detalle entrena el cerebro como el cuerpo.", f: [TR(300, "5 minutos visualizando"), T("Lo que imaginé", 8, "Me vi…")] },
-        { t: "Respirá antes de rendir", a: "Hacé la respiración guiada para bajar los nervios antes de competir o entrenar fuerte.", w: "La respiración lenta baja la tensión.", f: [AC("calma", "Respiración para calmar")] },
-        { t: "Tu rutina previa", a: "Armá tu rutina de 4 pasos antes de entrenar o competir y repetila siempre.", w: "Una rutina fija te da seguridad.", f: [LS("Mi rutina previa", 4, "Un paso")] },
-        { t: "Recuperación", a: "Anotá cómo te recuperás: sueño, comida, hidratación y estiramiento.", w: "Se mejora cuando el cuerpo se recupera, no solo cuando entrena.", f: [CK(["Dormí lo que necesito", "Tomé agua", "Comí después de entrenar", "Estiré"])] },
-        { t: "Anotá cómo te fue", a: "Después de entrenar o jugar, anotá qué salió bien y qué no.", w: "Lo que no se anota se olvida.", f: [CH("Hoy me sentí…", ["Flojo", "Normal", "Muy bien"]), T("Lo que salió bien", 6, "Me salió bien…"), T("Lo que quiero ajustar", 6, "Quiero ajustar…")] },
-        { t: "Manejá el error", a: "Elegí una frase y un gesto para resetear después de un error y seguir.", w: "Cómo respondés al error pesa más que el error.", f: [T("Mi frase y mi gesto de reseteo", 8, "Cuando fallo, me digo…")] },
-        { t: "Mirá tu avance", a: "Mirá tu gráfico y anotá 3 cosas que mejoraron.", w: "Ver el avance sostiene la motivación.", f: [LS("Lo que mejoró", 3, "Algo que noto mejor")] },
-        { t: "Tu plan de entrenamiento", a: "Elegí tus 3 prácticas clave de la semana. Ese es tu plan para seguir.", w: "Lo que dura es lo que elegís vos.", f: [LS("Mis 3 prácticas clave", 3, "Una práctica")] }
-      ]
-    }
+    sportProg({ id: "tenista", n: "Tenista de alto rendimiento", rol: "tenista",
+      intro: "Un camino para tenistas que compiten en serio: tu meta, práctica con intención, la cabeza entre puntos y la recuperación. Cargás tus minutos de práctica y ves tu avance.",
+      d0a: "Escribí cómo es tu juego hoy y en qué nivel competís.", d0l: "Mi juego hoy", d0p: "Juego de fondo, mi mejor golpe es…, compito en…", niv: ["Torneos de club", "Torneos regionales", "Ranking nacional", "Circuito ITF / profesional"],
+      metaEj: "Por ejemplo: subir en el ranking o ganar un torneo.", foco: "Por ejemplo: el segundo saque, la devolución o el drive en movimiento.",
+      prac: "Por ejemplo: 20 saques a una misma zona o series de derecha cruzada, con la misma rutina en cada pelota.",
+      vis: "Cerrá los ojos 5 minutos e imaginá un game importante: tu saque, el punto y cómo lo ganás.",
+      resT: "Respirá entre puntos", resA: "Hacé la respiración guiada: la vas a usar en los cambios de lado y entre puntos largos.",
+      rut: "Armá tu rutina de 4 pasos entre punto y punto (respirar, mirar las cuerdas, plan del punto, saque) y repetila siempre.",
+      part: "jugar un partido", err: "Elegí una frase y un gesto para resetear después de un error no forzado y seguir con el próximo punto." }),
+    sportProg({ id: "futbolista", n: "Futbolista profesional", rol: "futbolista",
+      intro: "Un camino para futbolistas que quieren llegar o sostenerse en el profesionalismo: tu meta, práctica con intención, la cabeza en el partido y la recuperación. Cargás tus minutos de práctica y ves tu avance.",
+      d0a: "Escribí en qué puesto jugás, cómo es tu juego hoy y en qué nivel estás.", d0l: "Mi puesto y mi juego", d0p: "Juego de…, mi mejor cualidad es…", niv: ["Liga amateur", "Inferiores o semi-profesional", "Reserva o primera", "Profesional"],
+      metaEj: "Por ejemplo: llegar a primera, ganarte la titularidad o hacer una prueba en un club.", foco: "Por ejemplo: el primer control, el pase, la definición o la intensidad sin pelota.",
+      prac: "Por ejemplo: 20 minutos de control y pase a un toque contra la pared, o de remates a la misma zona.",
+      vis: "Cerrá los ojos 5 minutos e imaginá una jugada de tu puesto: cómo te perfilás, qué decidís y cómo te sale.",
+      resT: "Respirá antes de jugar", resA: "Hacé la respiración guiada para bajar los nervios antes del partido o en el entretiempo.",
+      rut: "Armá tu rutina de 4 pasos antes del partido (comer, llegar, entrada en calor, foco) y repetila siempre.",
+      part: "jugar un partido", err: "Elegí una frase y un gesto para resetear después de perder una pelota o fallar y seguir con la jugada que viene." })
   ];
   var by = {}; L.forEach(function (p) { by[p.id] = p; });
   window.FormaProg = { list: L, byId: by, mins: mins };
