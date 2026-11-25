@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Forma</string>
+    <string name="title_activity_main">Forma</string>
+    <string name="package_name">com.formargentina.app</string>
+    <string name="custom_url_scheme">com.formargentina.app</string>
+    <string name="widget_desc">Lo que estás haciendo ahora, lo que sigue y tu paso del día.</string>
+</resources>

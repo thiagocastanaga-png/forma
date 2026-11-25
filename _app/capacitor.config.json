@@ -1,0 +1,11 @@
+{
+  "appId": "com.formargentina.app",
+  "appName": "Forma",
+  "webDir": "www",
+  "backgroundColor": "#111111",
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 800, "backgroundColor": "#111111", "showSpinner": false },
+    "LocalNotifications": { "smallIcon": "ic_stat_icon", "iconColor": "#86A892" }
+  }
+}

@@ -371,7 +371,8 @@
     var hero = $app.querySelector(".armhero");
     if (hero && !S.welcomed) { S.welcomed = 1; save(); if (!REDUCE) { lastAnim = key; welcomeSeq(hero); return; } }
     if (key !== lastAnim) { lastAnim = key; var m = $app.querySelector("main"); animIn(m ? m.children : $app.children, {}); }
-    widgetSync(); setTimeout(maybeTrialEnd, 900);
+    widgetSync(); setTimeout(maybeTrialEnd, 900); if (NATIVE) setTimeout(function () { try { nativeRemSync(); } catch (e) {} }, 400);
+    if (NATIVE) [].slice.call(document.querySelectorAll('a[href="privacidad"],a[href="terminos"],a[href="arrepentimiento"],a[href="eliminar-cuenta"],a[href="./"]')).forEach(function (a) { var h = a.getAttribute("href"); a.setAttribute("href", h === "./" ? "https://formargentina.com/" : h + ".html"); });
   }
   function render0() {
     if (mode === "recovery") return renderRecovery();
