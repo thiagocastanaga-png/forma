@@ -450,13 +450,16 @@
         var rows = cr.ex.map(function (e) {
           var c = F.sd[e.id] || 0, b = ""; tot += e.s; dn += Math.min(c, e.s);
           for (var i = 0; i < e.s; i++) b += '<button class="txset' + (i < c ? " on" : "") + '" data-tx="sr" data-ta="' + e.id + '" data-tb="' + (i + 1) + '">' + (i < c ? "✓" : i + 1) + "</button>";
-          return '<div class="txex"><div class="row between"><b>' + esc(e.n) + "</b>" + mini("✕", "de", e.id) + '</div><small class="muted">' + e.s + " series × " + esc(e.rep) + '</small><div class="txsets">' + b + "</div></div>";
+          var hw = EXL[e.n], rs = restOf(e);
+          return '<div class="txex"><div class="row between"><b>' + esc(e.n) + "</b><span>" + (hw ? mini(F.how === e.id ? "Ocultar" : "¿Cómo?", "how", e.id) : "") + mini("✕", "de", e.id) + "</span></div>" + (hw && F.how === e.id ? '<p class="small" style="margin:4px 0 6px">' + esc(hw) + "</p>" : "") + '<small class="muted">' + e.s + " series × " + esc(e.rep) + (rs ? " · descanso " + (rs >= 60 ? mmss(rs) : rs + " s") : "") + '</small><div class="txsets">' + b + "</div></div>";
         }).join("");
-        var out = card("<b>" + esc(cr.n) + "</b>" + (cr.ex.length ? '<p class="small muted" style="margin:4px 0 8px">Tocá cada serie cuando la terminás · ' + dn + "/" + tot + "</p>" + rows + btn(dn >= tot ? "Terminar sesión" : "Terminar sesión (" + dn + "/" + tot + ")", "end") : '<p class="small muted" style="margin:6px 0 0">Todavía no tiene ejercicios. Agregá el primero abajo.</p>'));
+        var rb = F.rest ? '<div class="txrest"><span>⏱️ Descansá</span><b id="txrest">' + mmss((F.rest.end - Date.now()) / 1000) + '</b><button class="txmini" data-tx="skip">Saltar</button></div>' : "";
+        var out = rb + card("<b>" + esc(cr.n) + "</b>" + (cr.ex.length ? '<p class="small muted" style="margin:4px 0 8px">Tocá cada serie cuando la terminás · ' + dn + "/" + tot + "</p>" + rows + btn(dn >= tot ? "Terminar sesión" : "Terminar sesión (" + dn + "/" + tot + ")", "end") : '<p class="small muted" style="margin:6px 0 0">Todavía no tiene ejercicios. Agregá el primero abajo.</p>'));
         out += card("<b>Agregar ejercicio</b>" + field("Ejercicio", inp("en", "text", 'maxlength="50" placeholder="Ej: sentadilla con mancuerna"')) + '<div class="txrow2">' + field("Series", inp("es", "number", 'min="1" max="10" inputmode="numeric" placeholder="3"')) + field("Repeticiones o tiempo", inp("er", "text", 'maxlength="20" placeholder="10 o 30 s"')) + "</div>" + btn("Agregar", "ae", null, null, "ghost"));
         return out + btn("Borrar esta rutina", "dr", cr.id, null, "ghost") + btn("Volver a mis rutinas", "list", null, null, "ghost");
       }
-      if (F.v === "new") return card("<b>¿Cómo querés empezar?</b><p class='small muted' style='margin:4px 0 8px'>Rutinas modelo para arrancar. Ajustalas con tu entrenador o preparador físico.</p>" + Object.keys(ETPL).filter(function (k) { var so = sportOnly(); return !(so === "t" && k.charAt(0) === "f" && k !== "vacia") && !(so === "f" && k.charAt(0) === "t"); }).map(function (k) { return '<button class="prod txdeck" data-tx="mk" data-ta="' + k + '"><span style="flex:1"><b>' + esc(ETPL[k][0]) + "</b><small>" + (ETPL[k][1].length ? ETPL[k][1].length + " ejercicios para arrancar, los cambiás a tu gusto" : "La armás de cero") + "</small></span></button>"; }).join("")) + btn("Volver", "list", null, null, "ghost");
+      if (F.v === "new") { var so0 = sportOnly(), keys0 = Object.keys(ETPL).filter(function (k) { return !(so0 === "t" && k.charAt(0) === "f") && !(so0 === "f" && k.charAt(0) === "t"); });
+        return card("<b>¿Cómo querés empezar?</b><p class='small muted' style='margin:4px 0 0'>Rutinas modelo armadas con ejercicios probados. Tocá «¿Cómo?» en cada ejercicio para ver cómo se hace. Ajustalas con tu entrenador o preparador físico.</p>") + EGRP.map(function (g) { var ks = keys0.filter(function (k) { return (ETPL[k][2] || "Desde cero") === g; }); if (!ks.length) return ""; return card("<b>" + esc(g) + "</b>" + ks.map(function (k) { var ex = ETPL[k][1]; return '<button class="prod txdeck" data-tx="mk" data-ta="' + k + '"><span style="flex:1;min-width:0"><b>' + esc(ETPL[k][0]) + "</b><small>" + (ex.length ? ex.length + " ejercicios · " + ex.slice(0, 3).map(function (e) { return e[0]; }).join(", ").slice(0, 70) + "…" : "Armala desde cero") + "</small></span><span class='tag'>Usar</span></button>"; }).join("")); }).join("") + btn("Volver", "list", null, null, "ghost"); }
       var ses = wkKeys().reduce(function (s, k) { return s + (L[k] || []).length; }, 0), wm = sumWeek(L, mins), load = sumWeek(L, function (a) { return a.reduce(function (s, x) { return s + x.min * (x.rpe || 5); }, 0); });
       var out2 = card("<b>Esta semana</b>" + stats([[ses, ses === 1 ? "sesión" : "sesiones"], [wm + " min", "entrenados"], [load, "carga"]]) + bars(lastN(7).map(function (k) { var m = mins(L[k]); return { l: lbl(k), v: m, c: m ? "ok" : "" }; })) + note("Carga = minutos × exigencia. Si sube mucho de una semana a la otra, cuidá el descanso."));
       out2 += card("<b>Mis rutinas</b>" + (R.length ? "" : '<p class="small muted" style="margin:6px 0 0">Armá tu rutina con ejercicios, series y repeticiones. La hacés acá, serie por serie, y cada sesión queda guardada.</p>') + R.map(function (r) { return '<button class="prod txdeck" data-tx="r" data-ta="' + r.id + '"><span style="flex:1"><b>' + esc(r.n) + "</b><small>" + r.ex.length + " ejercicios</small></span><span class='tag'>Entrenar</span></button>"; }).join("") + btn("Nueva rutina", "new", null, null, R.length ? "ghost" : "sage"));
@@ -469,10 +472,20 @@
       var h = H("entreno", { r: [], log: {} }), R = h.r, cr = R.filter(function (r) { return r.id === F.id; })[0];
       if (a === "list") { F.v = "list"; F.sd = {}; F.t0 = null; return; }
       if (a === "new") { F.v = "new"; return; }
-      if (a === "mk") { var t = ETPL[x], id = uid(); R.push({ id: id, n: t[0], ex: t[1].map(function (e) { return { id: uid(), n: e[0], s: e[1], rep: e[2] }; }) }); F.id = id; F.v = "r"; F.sd = {}; F.t0 = Date.now(); commit("entreno"); return; }
+      if (a === "mk") { var t = ETPL[x], id = uid(); R.push({ id: id, n: t[0], ex: t[1].map(function (e) { return { id: uid(), n: e[0], s: e[1], rep: e[2], rest: e[3] }; }) }); F.id = id; F.v = "r"; F.sd = {}; F.t0 = Date.now(); commit("entreno"); return; }
       if (a === "r") { if (F.id !== x) { F.sd = {}; F.t0 = Date.now(); } F.id = x; F.v = "r"; F.min = null; return; }
       if (!cr) return false;
-      if (a === "sr") { F.sd = F.sd || {}; if (!F.t0) F.t0 = Date.now(); var n = +y; F.sd[x] = (F.sd[x] || 0) >= n ? n - 1 : n; return; }
+      if (a === "how") { F.how = F.how === x ? null : x; return; }
+      if (a === "skip") { F.rest = null; clearInterval(tick); tick = null; return; }
+      if (a === "sr") {
+        F.sd = F.sd || {}; if (!F.t0) F.t0 = Date.now(); var n = +y, before = F.sd[x] || 0; F.sd[x] = before >= n ? n - 1 : n;
+        var ex0 = cr.ex.filter(function (z) { return z.id === x; })[0], rs0 = ex0 ? restOf(ex0) : 0, allDone = cr.ex.every(function (z) { return (F.sd[z.id] || 0) >= z.s; });
+        if (F.sd[x] > before && rs0 > 0 && !allDone) {
+          vib(40); F.rest = { end: Date.now() + rs0 * 1000 }; clearInterval(tick);
+          tick = setInterval(function () { if (!F.rest) { clearInterval(tick); tick = null; return; } var left = (F.rest.end - Date.now()) / 1000, el = document.getElementById("txrest"); if (left <= 0) { F.rest = null; clearInterval(tick); tick = null; vib([250, 100, 250]); beep(880, 300); paint(); return; } if (el) el.textContent = mmss(left); }, 500);
+        } else if (allDone) { F.rest = null; clearInterval(tick); tick = null; }
+        return;
+      }
       if (a === "ae") { var en = (F.en || "").trim(); if (!en) return false; cr.ex.push({ id: uid(), n: en.slice(0, 50), s: Math.max(1, Math.min(10, Math.round(+F.es) || 3)), rep: (F.er || "10").trim().slice(0, 20) || "10" }); F.en = ""; F.es = ""; F.er = ""; commit("entreno"); return; }
       if (a === "de") { cr.ex = cr.ex.filter(function (e) { return e.id !== x; }); commit("entreno"); return; }
       if (a === "dr") { if (!confirm("¿Borrar esta rutina?")) return false; h.r = R.filter(function (r) { return r.id !== x; }); F.v = "list"; commit("entreno"); return; }
@@ -712,6 +725,424 @@
     sum: function (h) { var P = h.p || []; return P.length ? P.length + " postulaciones · " + P.filter(function (p) { return p.s >= 1 && p.s <= 3; }).length + " en proceso" : ""; }
   };
 
+  // ================= v99: entrenamiento de calidad y herramientas nuevas =================
+  function vib(p) { try { var H2 = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics; if (H2 && H2.vibrate) H2.vibrate({ duration: 300 }); else if (navigator.vibrate) navigator.vibrate(p || [200, 80, 200]); } catch (e) {} }
+  var actx = null;
+  function beep(f, ms) { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); var o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f || 880; o.connect(g); g.connect(actx.destination); g.gain.setValueAtTime(0.18, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + (ms || 250) / 1000); o.start(); o.stop(actx.currentTime + (ms || 250) / 1000); } catch (e) {} }
+  var wl = null;
+  function wakeOn() { try { if (navigator.wakeLock && !wl) navigator.wakeLock.request("screen").then(function (x) { wl = x; }).catch(function () {}); } catch (e) {} }
+  function wakeOff() { try { if (wl) wl.release(); } catch (e) {} wl = null; }
+  function mmss(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ":" + p2(s % 60); }
+  function sportPick() { var so = sportOnly(); return F.sp || (so === "f" ? "f" : so === "t" ? "t" : "t"); }
+  function bestOf(arr, up) { var v = (arr || []).map(function (x) { return x.v; }); return v.length ? (up ? Math.max.apply(null, v) : Math.min.apply(null, v)) : null; }
+  function fmtV(v, u) { if (v == null) return "—"; return (u === "s" ? (Math.round(v * 100) / 100).toString().replace(".", ",") : String(Math.round(v * 10) / 10).replace(".", ",")) + " " + u; }
+
+  // ---------- Cómo se hace cada ejercicio ----------
+  var EXL = {
+    "Sentadillas": "Pies al ancho de los hombros, pecho arriba. Bajá como para sentarte atrás, con las rodillas siguiendo la punta de los pies, y subí empujando el piso.",
+    "Flexiones (rodillas apoyadas si hace falta)": "Manos un poco más abiertas que los hombros, cuerpo recto. Bajá el pecho hasta un puño del piso y empujá. Con las rodillas apoyadas es más fácil.",
+    "Flexiones": "Manos un poco más abiertas que los hombros, cuerpo recto de cabeza a talones. Bajá el pecho controlado y empujá. Si no salen, apoyá las rodillas.",
+    "Puente de glúteos": "Boca arriba, rodillas flexionadas y pies apoyados. Subí la cadera apretando los glúteos hasta formar una línea de hombros a rodillas. Bajá lento.",
+    "Estocadas alternadas": "Paso largo adelante y bajá hasta que las dos rodillas queden en ángulo recto. El torso derecho. Volvé y cambiá de pierna.",
+    "Plancha": "Antebrazos bajo los hombros y puntas de pie. Cuerpo recto: ni la cadera arriba ni la panza caída. Apretá abdomen y glúteos y respirá.",
+    "Movilidad de cadera": "En cuatro apoyos, dibujá círculos grandes con la rodilla (como un perro en la columna), 10 para cada lado y cada pierna.",
+    "Rotación de hombros con toalla o banda": "Agarrá la toalla con las manos bien abiertas y pasala de adelante hacia atrás por arriba de la cabeza, con los brazos estirados y sin dolor.",
+    "Equilibrio en un pie": "Parado en un pie con la rodilla apenas flexionada. Mirá un punto fijo. Si es fácil, cerrá los ojos o pasate una pelota.",
+    "Elevación de talones": "Parado, subí en puntas de pie lo más alto que puedas, sostené un segundo y bajá lento. Más difícil en un escalón o en un pie.",
+    "Plancha lateral": "Apoyado en un antebrazo, codo bajo el hombro y pies uno sobre otro. Subí la cadera hasta formar una línea recta y sostené.",
+    "Trote suave o skipping": "Trote liviano o rodillas arriba en el lugar. Que suba la temperatura sin cansarte.",
+    "Movilidad de hombros y cadera": "Círculos amplios de brazos, balanceos de piernas adelante y atrás, y giros de tronco suaves.",
+    "Desplazamientos laterales": "Bajo, con las rodillas flexionadas, pasos laterales rápidos sin cruzar los pies. Mantené el peso en la parte de adelante del pie.",
+    "Split step y arranques cortos": "Pequeño salto en el lugar cayendo con los pies separados, justo cuando el rival pegaría, y arranque explosivo de 2 o 3 pasos.",
+    "Sombra de golpes: drive, revés y saque": "Sin pelota, hacé el golpe completo con el movimiento de pies, a ritmo de partido. Concentrate en la técnica, no en la fuerza.",
+    "Sentadilla goblet o con peso del cuerpo": "Sostené una mancuerna o una pesa contra el pecho. Bajá con el pecho arriba y los codos entre las rodillas, y subí empujando el piso.",
+    "Sentadilla goblet": "Sostené una mancuerna contra el pecho. Bajá con el pecho arriba y los codos entre las rodillas, y subí empujando el piso.",
+    "Estocada lateral": "Paso amplio al costado y bajá sobre esa pierna, con la otra estirada y la cadera hacia atrás. Empujá para volver al centro.",
+    "Peso muerto a una pierna": "Parado en una pierna, inclinate desde la cadera llevando la otra pierna atrás, con la espalda recta, hasta sentir el isquio. Volvé apretando el glúteo.",
+    "Puente de glúteos a una pierna": "Como el puente de glúteos, pero con una pierna estirada en el aire. Que la cadera no se incline hacia un lado.",
+    "Antirrotación con banda (pallof)": "Banda atada al costado a la altura del pecho. Llevá las manos adelante estirando los brazos y no dejes que la banda te gire. Sostené 2 segundos.",
+    "Saltos laterales cortos": "Saltá de lado a lado sobre una línea, cayendo suave en las puntas y con las rodillas flexionadas.",
+    "Remo con banda o mancuerna": "Inclinado con la espalda recta, tirá del codo hacia la cadera juntando el omóplato. Bajá controlado.",
+    "Remo con mancuerna a una mano": "Una mano y una rodilla apoyadas en un banco, espalda recta. Tirá la mancuerna hacia la cadera llevando el codo atrás. Bajá lento.",
+    "Press con mancuerna a una mano": "Parado o sentado, empujá la mancuerna desde el hombro hacia arriba sin arquear la espalda. Bajá controlado.",
+    "Rotación externa de hombro con banda": "Codo pegado al cuerpo y doblado a 90 grados, con una toalla entre el codo y el costado. Girá el antebrazo hacia afuera contra la banda, lento.",
+    "Face pull con banda": "Banda a la altura de la cara. Tirá hacia la frente abriendo los codos hacia afuera y arriba, juntando los omóplatos.",
+    "Y-T-W boca abajo": "Boca abajo, con los pulgares hacia arriba, levantá los brazos formando una Y, después una T y después una W. Sin peso o con muy poco.",
+    "Extensión de muñeca con peso liviano": "Antebrazo apoyado en la pierna con la palma hacia abajo. Subí la mano doblando la muñeca y bajá lento. Peso muy liviano.",
+    "Abanico (fan drill)": "Desde el centro de la línea de fondo, tocá en orden 5 conos en forma de abanico, volviendo siempre al centro. Rápido y bajo.",
+    "Araña (5 pelotas)": "Pelotas en las esquinas de la línea de fondo, de la de saque y en la T. Desde el centro buscás cada una y la traés al centro de a una.",
+    "Split step y arranque reactivo": "Un compañero señala un lado justo cuando hacés el split step, y arrancás 3 pasos hacia ahí. Reaccioná, no adivines.",
+    "Pasos cruzados y recuperación al centro": "Desplazamiento con paso cruzado hacia una pelota imaginaria, golpe en sombra y recuperación al centro con pasos laterales.",
+    "Saltos laterales sobre una línea": "Pies juntos, saltá de un lado al otro de una línea lo más rápido posible, cayendo suave.",
+    "Saltos al cajón o escalón": "Desde parado, saltá arriba de un cajón o escalón firme y caé suave con las rodillas flexionadas. Bajá caminando, no saltando.",
+    "Saltos laterales (skater)": "Saltá de costado de un pie al otro, como un patinador, y frená el aterrizaje sosteniendo un segundo.",
+    "Lanzamiento rotacional de pelota medicinal contra la pared": "De costado a la pared, girá la cadera y el tronco como en un drive y lanzá la pelota con fuerza. Si no tenés, hacé el gesto con una banda.",
+    "Sprint 5-10-5": "Del centro, 5 metros a un lado, tocá la línea, 10 metros al otro, tocá, y 5 de vuelta. Máxima velocidad y frenadas bajas.",
+    "Flexiones explosivas": "Bajá controlado y empujá tan fuerte que las manos se despeguen un poco del piso. Con las manos en un banco es más fácil.",
+    "Skipping y talones a la cola": "Rodillas arriba con pasos cortos y rápidos, y después talones a la cola. Brazos acompañando.",
+    "Sprints cortos": "Desde parado, acelerá al máximo en la distancia indicada. Volvé caminando: la pausa es parte del ejercicio.",
+    "Cambios de dirección en zigzag": "Conos en zigzag. Bajá el centro de gravedad antes de cada cambio y empujá con la pierna de afuera.",
+    "Arranques desde distintas posiciones": "Arrancá desde sentado, de espaldas o acostado, a la señal, y acelerá a fondo pocos metros.",
+    "Pausa activa caminando": "Caminá tranquilo y respirá por la nariz hasta recuperarte.",
+    "Sentadilla búlgara": "El empeine de atrás apoyado en un banco o silla. Bajá con la pierna de adelante hasta que la rodilla de atrás casi toque el piso. Torso apenas inclinado.",
+    "Sentadilla búlgara con silla": "El empeine de atrás apoyado en una silla firme. Bajá con la pierna de adelante hasta que la rodilla de atrás casi toque el piso.",
+    "Peso muerto rumano": "Con mancuernas o barra, rodillas apenas flexionadas. Llevá la cadera atrás con la espalda recta hasta sentir los isquios, y volvé apretando los glúteos.",
+    "Curl nórdico de isquios": "De rodillas, alguien te sostiene los tobillos. Bajá el cuerpo recto hacia adelante lo más lento que puedas y frená con las manos. Volvé empujando. Es duro: arrancá con pocas.",
+    "Copenhague para aductores": "De costado, apoyá la pierna de arriba en un banco y subí la cadera hasta formar una línea recta. Más fácil con la rodilla apoyada en vez del pie.",
+    "Saltos a un escalón o cajón": "Saltá arriba de un escalón o cajón firme, cayendo suave. Bajá caminando.",
+    "Trote con aperturas de cadera": "Trotando, levantá la rodilla y abrí la cadera hacia afuera; a la vuelta, hacia adentro.",
+    "Sentadilla a una pierna": "Parado en una pierna, bajá a sentarte en un banco o silla y volvé a subir sin apoyarte. Que la rodilla no se vaya hacia adentro.",
+    "Saltos con caída controlada": "Saltá y caé en dos pies con las rodillas flexionadas y alineadas con las puntas, frenando en el lugar. Que la caída sea silenciosa.",
+    "Toques de pared con la pierna menos hábil": "A 2 o 3 metros de una pared, pasá y controlá con la pierna menos hábil lo más rápido que puedas sin perder el control.",
+    "Control orientado y pase a la pared": "Recibí el rebote orientando el control hacia un costado con el primer toque y devolvé el pase con el segundo. Alterná pies.",
+    "Conducción en zigzag entre conos": "Conducí entre conos usando borde interno y externo, con la pelota cerca. Levantá la vista entre cono y cono.",
+    "Jueguitos": "Mantené la pelota en el aire con pies, muslos y cabeza. Probá alternar pies y sumar superficies.",
+    "Pisadas y cambios de dirección con la suela": "Con la suela, arrastrá la pelota hacia atrás y cambiá de dirección. Alterná pies, cada vez más rápido.",
+    "Remate o pase a un blanco (de 10)": "Marcá un blanco en la pared o el arco. De 10 intentos, contá cuántos das. Anotalo en Desafíos.",
+    "Saltos con contramovimiento": "Bajá rápido flexionando las rodillas y saltá lo más alto posible con ayuda de los brazos. Caé suave y repetí con pausa.",
+    "Saltos horizontales encadenados": "3 saltos largos seguidos con los pies juntos, cayendo y saltando enseguida. Descansá entre series.",
+    "Saltos en una pierna (adelante)": "Saltos cortos hacia adelante en una pierna, cayendo estable. Después la otra.",
+    "Sprint de 10 metros": "Salida explosiva y 10 metros a máxima velocidad. Volvé caminando.",
+    "Arranques de espaldas y giro": "De espaldas a la dirección de carrera, a la señal girá y acelerá 10 metros.",
+    "Press de banca con mancuernas": "Acostado en un banco, mancuernas a la altura del pecho. Empujá hacia arriba juntándolas un poco y bajá controlado.",
+    "Estocadas hacia atrás": "Paso largo hacia atrás y bajá hasta que las dos rodillas queden en ángulo recto. Empujá con la pierna de adelante para volver.",
+    "Zancadas hacia atrás": "Paso largo hacia atrás y bajá hasta que las dos rodillas queden en ángulo recto. Empujá con la pierna de adelante para volver.",
+    "Press militar con mancuernas": "Parado o sentado, empujá las mancuernas desde los hombros hasta arriba sin arquear la espalda. Bajá controlado.",
+    "Jalón al pecho o dominadas asistidas": "En la máquina, tirá la barra hacia el pecho llevando los codos hacia abajo y atrás. Con banda, asistí las dominadas.",
+    "Hip thrust o puente de glúteos": "Espalda alta apoyada en un banco y peso sobre la cadera. Subí la cadera apretando los glúteos hasta quedar en línea recta y bajá lento.",
+    "Remo invertido en mesa firme": "Acostado debajo de una mesa muy firme, agarrate del borde y tirá el pecho hacia la mesa con el cuerpo recto. Probá antes que no se mueva.",
+    "Plancha con toque de hombro": "En plancha alta, tocá el hombro contrario con una mano y después con la otra, sin que la cadera se balancee.",
+    "Bicho muerto (dead bug)": "Boca arriba, brazos al techo y rodillas a 90 grados. Estirá un brazo y la pierna contraria sin que la espalda baja se despegue del piso. Alterná.",
+    "Perro de caza (bird dog)": "En cuatro apoyos, estirá un brazo y la pierna contraria hasta formar una línea. Sostené 2 segundos y alterná.",
+    "Gato-vaca": "En cuatro apoyos, redondeá la espalda llevando el mentón al pecho y después arqueala mirando al frente. Lento y con la respiración.",
+    "Caderas 90/90": "Sentado con las dos piernas dobladas a 90 grados, una adelante y otra al costado. Girá las rodillas al otro lado sin usar las manos si podés.",
+    "Estocada con rotación de tronco": "En estocada larga, apoyá la mano del lado de adentro en el piso y girá el tronco llevando el otro brazo al techo.",
+    "Rotación torácica en cuatro apoyos": "En cuatro apoyos, una mano en la nuca. Girá el codo hacia el piso y después hacia el techo, siguiéndolo con la mirada.",
+    "Sentadilla profunda sostenida": "Bajá a la sentadilla más profunda que puedas con los talones apoyados, con los codos empujando las rodillas hacia afuera. Respirá.",
+    "Tobillo a la pared": "Pie a unos 10 centímetros de la pared. Llevá la rodilla a tocarla sin despegar el talón. Alejá el pie de a poco."
+  };
+  // Plantillas: [nombre, [[ejercicio, series, reps, descanso en segundos]], grupo]
+  var ETPL2 = {
+    tfuerza: ["Tenis · Fuerza tren inferior y core", [["Sentadilla goblet", 3, "8 a 10", 90], ["Estocada lateral", 3, "8 por lado", 75], ["Peso muerto a una pierna", 3, "8 por pierna", 75], ["Puente de glúteos a una pierna", 3, "10 por pierna", 60], ["Antirrotación con banda (pallof)", 3, "10 por lado", 45], ["Plancha lateral", 2, "30 s por lado", 45]], "Tenis"],
+    tsup: ["Tenis · Tren superior y hombro", [["Remo con mancuerna a una mano", 3, "10 por brazo", 75], ["Press con mancuerna a una mano", 3, "8 por brazo", 75], ["Rotación externa de hombro con banda", 3, "15", 45], ["Face pull con banda", 3, "15", 45], ["Flexiones", 3, "8 a 12", 60], ["Extensión de muñeca con peso liviano", 2, "15", 30]], "Tenis"],
+    tmov: ["Tenis · Footwork y agilidad", [["Desplazamientos laterales", 3, "20 s", 40], ["Abanico (fan drill)", 4, "1 vuelta", 60], ["Araña (5 pelotas)", 3, "1 vuelta", 90], ["Split step y arranque reactivo", 4, "6", 45], ["Pasos cruzados y recuperación al centro", 3, "20 s", 40], ["Saltos laterales sobre una línea", 3, "20 s", 45]], "Tenis"],
+    tpot: ["Tenis · Potencia", [["Saltos al cajón o escalón", 4, "5", 90], ["Saltos laterales (skater)", 3, "6 por lado", 75], ["Lanzamiento rotacional de pelota medicinal contra la pared", 3, "8 por lado", 75], ["Sprint 5-10-5", 4, "1", 90], ["Flexiones explosivas", 3, "5", 75]], "Tenis"],
+    tprev: ["Tenis · Prevención de lesiones", [["Rotación externa de hombro con banda", 3, "15", 45], ["Y-T-W boca abajo", 2, "8 de cada", 45], ["Extensión de muñeca con peso liviano", 2, "15", 30], ["Puente de glúteos a una pierna", 3, "10 por pierna", 45], ["Elevación de talones", 3, "15", 45], ["Plancha lateral", 2, "25 s por lado", 30]], "Tenis"],
+    tpre: ["Tenis · Activación antes de jugar", [["Trote suave o skipping", 1, "3 min", 15], ["Movilidad de hombros y cadera", 1, "1 min", 15], ["Desplazamientos laterales", 3, "20 s", 30], ["Split step y arranques cortos", 4, "5", 30], ["Sombra de golpes: drive, revés y saque", 2, "10 de cada", 30]], "Tenis"],
+    ffuerza: ["Fútbol · Fuerza para la cancha", [["Sentadilla búlgara", 3, "8 por pierna", 90], ["Peso muerto rumano", 3, "10", 90], ["Curl nórdico de isquios", 3, "5", 90], ["Copenhague para aductores", 2, "20 s por lado", 60], ["Plancha", 3, "40 s", 45], ["Saltos a un escalón o cajón", 3, "6", 75]], "Fútbol"],
+    fprev: ["Fútbol · Prevención de lesiones", [["Trote con aperturas de cadera", 1, "2 min", 20], ["Curl nórdico de isquios", 2, "5", 90], ["Copenhague para aductores", 2, "15 s por lado", 60], ["Equilibrio en un pie", 2, "30 s por pie", 30], ["Sentadilla a una pierna", 2, "8 por pierna", 60], ["Saltos con caída controlada", 2, "8", 60], ["Plancha lateral", 2, "25 s por lado", 30]], "Fútbol"],
+    fvel: ["Fútbol · Velocidad y cambios de dirección", [["Skipping y talones a la cola", 2, "20 m", 40], ["Sprints cortos", 6, "15 m", 75], ["Cambios de dirección en zigzag", 4, "20 m", 75], ["Arranques desde distintas posiciones", 4, "10 m", 60], ["Pausa activa caminando", 1, "2 min", 0]], "Fútbol"],
+    fpot: ["Fútbol · Potencia y salto", [["Saltos con contramovimiento", 4, "5", 90], ["Saltos horizontales encadenados", 3, "3", 90], ["Saltos en una pierna (adelante)", 3, "4 por pierna", 75], ["Sprint de 10 metros", 6, "1", 60], ["Arranques de espaldas y giro", 4, "1", 60]], "Fútbol"],
+    ftec: ["Fútbol · Técnica con pelota en casa", [["Toques de pared con la pierna menos hábil", 4, "30 s", 30], ["Control orientado y pase a la pared", 3, "10 por pierna", 45], ["Conducción en zigzag entre conos", 4, "1 pasada", 45], ["Jueguitos", 3, "1 minuto", 45], ["Pisadas y cambios de dirección con la suela", 3, "30 s", 30], ["Remate o pase a un blanco (de 10)", 2, "10", 60]], "Fútbol"],
+    gA: ["Gimnasio · Cuerpo completo A", [["Sentadilla goblet", 3, "8 a 12", 90], ["Press de banca con mancuernas", 3, "8 a 12", 90], ["Remo con mancuerna a una mano", 3, "10 por brazo", 75], ["Peso muerto rumano", 3, "8 a 12", 90], ["Plancha", 3, "30 a 45 s", 45]], "Gimnasio"],
+    gB: ["Gimnasio · Cuerpo completo B", [["Estocadas hacia atrás", 3, "10 por pierna", 75], ["Press militar con mancuernas", 3, "8 a 12", 90], ["Jalón al pecho o dominadas asistidas", 3, "8 a 12", 90], ["Hip thrust o puente de glúteos", 3, "10 a 12", 75], ["Antirrotación con banda (pallof)", 3, "10 por lado", 45]], "Gimnasio"],
+    casa: ["En casa · Fuerza nivel 1", [["Sentadillas", 3, "12", 60], ["Flexiones (rodillas apoyadas si hace falta)", 3, "8", 60], ["Puente de glúteos", 3, "12", 45], ["Estocadas alternadas", 3, "10 por pierna", 60], ["Plancha", 3, "30 s", 45]], "En casa"],
+    casa2: ["En casa · Fuerza nivel 2", [["Sentadilla búlgara con silla", 3, "8 por pierna", 75], ["Flexiones", 3, "8 a 15", 60], ["Puente de glúteos a una pierna", 3, "10 por pierna", 45], ["Remo invertido en mesa firme", 3, "6 a 10", 75], ["Zancadas hacia atrás", 3, "10 por pierna", 60], ["Plancha con toque de hombro", 3, "10 por lado", 45]], "En casa"],
+    core: ["Core en 10 minutos", [["Plancha", 3, "30 s", 20], ["Bicho muerto (dead bug)", 3, "8 por lado", 20], ["Perro de caza (bird dog)", 3, "8 por lado", 20], ["Plancha lateral", 2, "25 s por lado", 20], ["Puente de glúteos", 2, "15", 20]], "En casa"],
+    mov: ["Movilidad en 10 minutos", [["Gato-vaca", 1, "10", 10], ["Caderas 90/90", 1, "8 por lado", 10], ["Estocada con rotación de tronco", 1, "5 por lado", 10], ["Rotación torácica en cuatro apoyos", 1, "8 por lado", 10], ["Sentadilla profunda sostenida", 1, "45 s", 10], ["Tobillo a la pared", 1, "10 por lado", 10]], "Movilidad y prevención"],
+    prev: ["Prevención y movilidad general", [["Movilidad de cadera", 2, "10", 20], ["Rotación de hombros con toalla o banda", 2, "12", 20], ["Equilibrio en un pie", 2, "30 s por pie", 20], ["Elevación de talones", 3, "15", 30], ["Plancha lateral", 2, "20 s por lado", 30]], "Movilidad y prevención"],
+    vacia: ["Mi rutina", [], "Desde cero"]
+  };
+  Object.keys(ETPL2).forEach(function (k) { ETPL[k] = ETPL2[k]; });
+  var EGRP = ["Tenis", "Fútbol", "Gimnasio", "En casa", "Movilidad y prevención", "Desde cero"];
+  function restOf(e) { if (e.rest != null) return e.rest; var t = null; Object.keys(ETPL).forEach(function (k) { (ETPL[k][1] || []).forEach(function (x) { if (t == null && x[0] === e.n && x[3] != null) t = x[3]; }); }); return t == null ? 75 : t; }
+
+  // ---------- TESTS FÍSICOS ----------
+  var TESTS = [
+    { id: "salto", sp: "g", n: "Salto en largo sin carrera", u: "cm", up: true, how: "Pies juntos detrás de una línea. Balanceá los brazos y saltá lo más lejos que puedas, cayendo en dos pies. Medí hasta el talón más cercano a la línea. Anotá el mejor de 3." },
+    { id: "flex", sp: "g", n: "Flexiones máximas", u: "rep", up: true, how: "Cuerpo recto, el pecho baja hasta un puño del piso. Contá las que hacés bien, sin parar a descansar." },
+    { id: "plancha", sp: "g", n: "Plancha", u: "s", up: true, how: "Antebrazos y puntas de pie, cuerpo recto. Parás cuando la cadera cae o sube. Anotá los segundos." },
+    { id: "sent1", sp: "g", n: "Sentadillas en 1 minuto", u: "rep", up: true, how: "Sentadillas completas con buena técnica durante 60 segundos. Contá cuántas." },
+    { id: "cooper", sp: "g", n: "Test de Cooper (12 minutos)", u: "m", up: true, how: "Corré o caminá 12 minutos en una pista o recorrido medido y anotá los metros. Te da una idea de tu resistencia aeróbica." },
+    { id: "s5105", sp: "t", n: "Sprint 5-10-5", u: "s", up: false, how: "Desde el centro, 5 metros a un lado, tocás la línea, 10 metros al otro, tocás y 5 de vuelta al centro. Alguien toma el tiempo. Mejor de 2 con 2 minutos de pausa." },
+    { id: "arana", sp: "t", n: "Araña (5 pelotas)", u: "s", up: false, how: "5 pelotas: las dos esquinas de la línea de fondo, las dos esquinas de la línea de saque y la T. Desde el centro de la línea de fondo buscás cada pelota y la dejás en el centro, de a una. Alguien toma el tiempo." },
+    { id: "saque", sp: "t", n: "Primeros saques adentro (de 20)", u: "de 20", up: true, how: "20 saques a velocidad de partido, 10 desde cada lado. Contá los que entran." },
+    { id: "s30", sp: "f", n: "Sprint de 30 metros", u: "s", up: false, how: "Salida parado. Alguien toma el tiempo desde tu primer movimiento hasta que cruzás los 30 metros. Mejor de 2 con 2 minutos de pausa." },
+    { id: "vert", sp: "f", n: "Salto vertical", u: "cm", up: true, how: "Al lado de una pared, marcá con tiza o cinta lo más alto que llegás con el brazo estirado. Saltá y tocá lo más alto posible. La diferencia es tu salto. Mejor de 3." },
+    { id: "jueg", sp: "f", n: "Jueguitos seguidos", u: "toques", up: true, how: "Contá los toques seguidos sin que la pelota toque el piso. Mejor de 3 intentos." }
+  ];
+  APPS.tests = {
+    view: function () {
+      var h = H("tests", { r: {} }), R = h.r, so = sportOnly();
+      if (F.v === "add") {
+        var T = TESTS.filter(function (t) { return t.id === F.t; })[0]; if (!T) { F.v = null; return ""; }
+        return card("<b>" + esc(T.n) + "</b><p class='small' style='margin:6px 0 8px'>" + esc(T.how) + "</p>" + field("Tu resultado (" + T.u + ")", inp("val", "number", 'step="any" min="0" inputmode="decimal"')) + btn("Guardar resultado", "save") + btn("Volver", "back", null, null, "ghost")) + note("Hacé 5 a 10 minutos de entrada en calor antes. Si algo duele, no hagas el test.");
+      }
+      var list = TESTS.filter(function (t) { return t.sp === "g" || !so || t.sp === so; });
+      var groups = [["t", "🎾 Tenis"], ["f", "⚽ Fútbol"], ["g", "💪 Generales"]].filter(function (g) { return list.some(function (t) { return t.sp === g[0]; }); });
+      var last = 0; Object.keys(R).forEach(function (k) { (R[k] || []).forEach(function (x) { var t = new Date(x.d + "T12:00:00").getTime(); if (t > last) last = t; }); });
+      var out = card("<b>Tus tests físicos</b><p class='small muted' style='margin:4px 0 0'>Elegí 2 o 3, hacelos hoy y repetilos cada 4 a 6 semanas. Vas a ver cuánto mejoraste con números reales.</p>" + (last && Date.now() - last > 28 * 864e5 ? "<p class='small' style='margin:8px 0 0'>⏰ Pasaron más de 4 semanas desde tu último test: es buen momento para repetirlos.</p>" : ""));
+      groups.forEach(function (g) {
+        out += card("<b>" + g[1] + "</b>" + list.filter(function (t) { return t.sp === g[0]; }).map(function (t) {
+          var a = R[t.id] || [], b = bestOf(a, t.up), f0 = a[0], lt = a[a.length - 1], ch = a.length > 1 ? (t.up ? lt.v - f0.v : f0.v - lt.v) : 0;
+          return '<button class="prod txdeck" data-tx="add" data-ta="' + t.id + '"><span style="flex:1;min-width:0"><b>' + esc(t.n) + "</b><small>" + (a.length ? "Último: " + fmtV(lt.v, t.u) + " · récord " + fmtV(b, t.u) + (a.length > 1 ? " · " + (ch > 0 ? "mejoraste " : ch < 0 ? "bajaste " : "igual ") + (ch ? fmtV(Math.abs(ch), t.u) : "") : "") : "Todavía sin hacer") + "</small></span><span class='tag'>" + (a.length && a[a.length - 1].d === K(0) ? "✓ Hoy" : "Cargar") + "</span></button>";
+        }).join(""));
+      });
+      return out;
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("tests", { r: {} });
+      if (a === "add") { F.v = "add"; F.t = x; F.val = ""; return; }
+      if (a === "back") { F.v = null; return; }
+      if (a === "save") { var v = parseFloat(String(F.val).replace(",", ".")); if (!(v >= 0) || v > 100000) return false; (h.r[F.t] = h.r[F.t] || []).push({ d: K(0), v: v }); F.v = null; vib(60); commit("tests"); }
+    },
+    done: function (h) { var R = h.r || {}; return Object.keys(R).some(function (k) { return (R[k] || []).some(function (x) { return x.d === K(0); }); }); },
+    sum: function (h) { var n = Object.keys(h.r || {}).filter(function (k) { return (h.r[k] || []).length; }).length; return n ? n + (n === 1 ? " test cargado" : " tests cargados") : ""; }
+  };
+
+  // ---------- DESAFÍOS DE PRÁCTICA ----------
+  var DRILLS = [
+    { id: "tT", sp: "t", n: "10 saques a la T", u: "de 10", up: true, how: "Desde el lado de iguales, apuntá a la T. Contá cuántos de 10 entran a menos de un metro de la T." },
+    { id: "t2", sp: "t", n: "Segundos saques adentro", u: "de 20", up: true, how: "20 segundos saques con efecto, a la velocidad que usás en partido. Contá cuántos entran." },
+    { id: "tcruz", sp: "t", n: "Drive cruzado sin error", u: "golpes", up: true, how: "Peloteo cruzado de drive con un compañero. Contá tus golpes seguidos que pican pasando la línea de saque." },
+    { id: "tprof", sp: "t", n: "Devoluciones profundas", u: "de 10", up: true, how: "Te sacan 10 veces. Contá cuántas devoluciones pican pasando la línea de saque." },
+    { id: "trev", sp: "t", n: "Revés paralelo al cuadrante", u: "de 10", up: true, how: "Marcá un cuadrante cerca de la línea de fondo. De 10 reveses paralelos, ¿cuántos pican adentro?" },
+    { id: "tvol", sp: "t", n: "Voleas seguidas contra la pared", u: "voleas", up: true, how: "A 3 metros de una pared, voleas seguidas sin que la pelota pique. Contá el máximo." },
+    { id: "fpar", sp: "f", n: "Pases a la pared en 30 s (pierna menos hábil)", u: "pases", up: true, how: "A 3 metros de la pared, contá cuántos pases hacés en 30 segundos solo con tu pierna menos hábil." },
+    { id: "fjue", sp: "f", n: "Jueguitos seguidos", u: "toques", up: true, how: "Contá tus toques seguidos sin que la pelota toque el piso." },
+    { id: "frem", sp: "f", n: "Remates al cuadrante", u: "de 10", up: true, how: "Marcá un cuadrante del arco o un blanco en la pared. Desde el borde del área, de 10 remates, ¿cuántos van adentro?" },
+    { id: "fzig", sp: "f", n: "Conducción en zigzag (6 conos)", u: "s", up: false, how: "6 conos separados 2 metros. Ida y vuelta conduciendo entre todos. Alguien toma el tiempo." },
+    { id: "fcon", sp: "f", n: "Controles orientados perfectos", u: "de 10", up: true, how: "Te pasan 10 pelotas. Contá cuántas controlás orientando al espacio con el primer toque, sin que se te escape." },
+    { id: "fcab", sp: "f", n: "Cabezazos al blanco", u: "de 10", up: true, how: "Te tiran 10 centros o pelotas al aire. Contá cuántos cabezazos van al blanco." },
+    { id: "gsoga", sp: "g", n: "Saltos de soga en 1 minuto", u: "saltos", up: true, how: "Contá cuántos saltos hacés en 60 segundos sin parar." }
+  ];
+  APPS.desafios = {
+    view: function () {
+      var h = H("desafios", { r: {} }), R = h.r, so = sportOnly();
+      if (F.v === "add") {
+        var T = DRILLS.filter(function (t) { return t.id === F.t; })[0]; if (!T) { F.v = null; return ""; }
+        var a = R[T.id] || [], b = bestOf(a, T.up);
+        return card("<b>" + esc(T.n) + "</b><p class='small' style='margin:6px 0 8px'>" + esc(T.how) + "</p>" + (b != null ? "<p class='small'>🏆 Tu récord: <b>" + fmtV(b, T.u) + "</b></p>" : "") + field("Tu puntaje de hoy (" + T.u + ")", inp("val", "number", 'step="any" min="0" inputmode="decimal"')) + btn("Guardar", "save") + btn("Volver", "back", null, null, "ghost"));
+      }
+      if (F.v === "pr") { var t2 = DRILLS.filter(function (t) { return t.id === F.t; })[0]; return card('<div style="text-align:center"><div style="font-size:52px">🏆</div><b style="font-size:20px">¡Nuevo récord!</b><p>' + esc(t2 ? t2.n : "") + ": <b>" + fmtV(F.pv, t2 ? t2.u : "") + "</b></p></div>" + btn("Seguir", "back")); }
+      var list = DRILLS.filter(function (t) { return t.sp === "g" || !so || t.sp === so; });
+      var out = card("<b>Desafíos de práctica</b><p class='small muted' style='margin:4px 0 0'>Practicá con un número en la cabeza. Elegí un desafío que tenga que ver con lo que estás mejorando, anotá tu puntaje y superá tu récord.</p>");
+      [["t", "🎾 Tenis"], ["f", "⚽ Fútbol"], ["g", "💪 Generales"]].forEach(function (g) {
+        var L2 = list.filter(function (t) { return t.sp === g[0]; }); if (!L2.length) return;
+        out += card("<b>" + g[1] + "</b>" + L2.map(function (t) {
+          var a = R[t.id] || [], b = bestOf(a, t.up), lt = a[a.length - 1];
+          return '<button class="prod txdeck" data-tx="add" data-ta="' + t.id + '"><span style="flex:1;min-width:0"><b>' + esc(t.n) + "</b><small>" + (a.length ? "🏆 " + fmtV(b, t.u) + " · último " + fmtV(lt.v, t.u) + " · " + a.length + (a.length === 1 ? " vez" : " veces") : "Sin intentos todavía") + "</small></span><span class='tag'>" + (lt && lt.d === K(0) ? "✓ Hoy" : "Anotar") + "</span></button>";
+        }).join(""));
+      });
+      return out;
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("desafios", { r: {} });
+      if (a === "add") { F.v = "add"; F.t = x; F.val = ""; return; }
+      if (a === "back") { F.v = null; return; }
+      if (a === "save") {
+        var v = parseFloat(String(F.val).replace(",", ".")); if (!(v >= 0) || v > 100000) return false;
+        var T = DRILLS.filter(function (t) { return t.id === F.t; })[0], arr = (h.r[F.t] = h.r[F.t] || []), b = bestOf(arr, T.up);
+        arr.push({ d: K(0), v: v }); commit("desafios");
+        if (b != null && (T.up ? v > b : v < b)) { F.v = "pr"; F.pv = v; vib([80, 60, 80, 60, 200]); beep(988, 300); } else { F.v = null; vib(60); }
+      }
+    },
+    done: function (h) { var R = h.r || {}; return Object.keys(R).some(function (k) { return (R[k] || []).some(function (x) { return x.d === K(0); }); }); },
+    sum: function (h) { var n = Object.keys(h.r || {}).reduce(function (s, k) { return s + (h.r[k] || []).length; }, 0); return n ? n + (n === 1 ? " intento" : " intentos") + " anotados" : ""; }
+  };
+
+  // ---------- PLAN DE PARTIDO ----------
+  APPS.partido = {
+    view: function () {
+      var h = H("partido", { p: [] }), P = h.p, sp = sportPick();
+      if (F.v === "new") {
+        var tt = sp === "t";
+        return card("<b>Nuevo plan de partido</b>" + chips("sp", [["t", "🎾 Tenis"], ["f", "⚽ Fútbol"]], sp) +
+          field("¿Cuándo jugás?", inp("d", "date")) + field("Rival", inp("riv", "text", 'maxlength="40" placeholder="' + (tt ? "Nombre del rival" : "Equipo rival") + '"')) +
+          field(tt ? "¿Cómo juega? (zurdo, saca fuerte, sube a la red, muy consistente…)" : "¿Cómo juegan? (presionan alto, juegan largo, son fuertes por un lado…)", inp("como", "text", 'maxlength="140"')) +
+          (tt ? field("Mi plan A", inp("pa", "text", 'maxlength="140" placeholder="Ej: jugarle alto al revés y atacar la bola corta"')) + field("Mi plan B si no funciona", inp("pb", "text", 'maxlength="140" placeholder="Ej: más paciencia, peloteo largo al centro"'))
+            : field("Mi rol en el equipo", inp("pa", "text", 'maxlength="140" placeholder="Ej: volante, cubrir el carril y llegar al área"')) + field("Cuando perdemos la pelota, yo…", inp("pb", "text", 'maxlength="140" placeholder="Ej: presiono 5 segundos y si no, vuelvo a mi lugar"')) + field("Cuando la recuperamos, yo…", inp("pc", "text", 'maxlength="140" placeholder="Ej: me ofrezco de frente o ataco el espacio"'))) +
+          field("Clave 1", inp("k1", "text", 'maxlength="80" placeholder="' + (tt ? "Ej: primer saque adentro" : "Ej: hablar y ordenar") + '"')) + field("Clave 2", inp("k2", "text", 'maxlength="80"')) + field("Clave 3", inp("k3", "text", 'maxlength="80"')) +
+          field("Mi frase para los momentos difíciles", inp("fr", "text", 'maxlength="60" placeholder="Ej: próxima jugada"')) + btn("Guardar plan", "save") + btn("Volver", "back", null, null, "ghost"));
+      }
+      if (F.v === "rev") {
+        var pr = P.filter(function (x) { return x.id === F.id; })[0]; if (!pr) { F.v = null; return ""; }
+        return card("<b>¿Cómo te fue contra " + esc(pr.riv || "el rival") + "?</b>" + chips("res", pr.sp === "t" ? [["G", "Gané"], ["P", "Perdí"]] : [["G", "Gané"], ["E", "Empaté"], ["P", "Perdí"]], F.res) +
+          '<span class="small muted">¿Seguiste tu plan?</span>' + chips("seg", [["s", "Sí"], ["m", "A medias"], ["n", "No"]], F.seg) +
+          field("Qué funcionó y qué ajusto para la próxima", inp("ap", "text", 'maxlength="160"')) + btn("Guardar", "srev") + btn("Volver", "back", null, null, "ghost")) + note("Para el detalle de cada partido usá también el Diario de partidos.");
+      }
+      var up = P.filter(function (x) { return !x.res && x.d >= K(0); }).sort(function (a, b) { return a.d < b.d ? -1 : 1; }), nx = up[0], past = P.filter(function (x) { return x !== nx; }).slice(-6).reverse();
+      var out = "";
+      if (nx) out += card('<span class="badge">' + (nx.d === K(0) ? "Hoy" : "Próximo partido · " + dm(nx.d)) + "</span><h3 style='margin:8px 0 4px'>vs " + esc(nx.riv || "rival") + "</h3>" + (nx.como ? "<p class='small muted' style='margin:0 0 8px'>" + esc(nx.como) + "</p>" : "") +
+        (nx.sp === "t" ? "<p><b>Plan A:</b> " + esc(nx.pa || "—") + "</p><p><b>Plan B:</b> " + esc(nx.pb || "—") + "</p>" : "<p><b>Mi rol:</b> " + esc(nx.pa || "—") + "</p><p><b>Sin pelota:</b> " + esc(nx.pb || "—") + "</p><p><b>Con pelota:</b> " + esc(nx.pc || "—") + "</p>") +
+        "<p><b>Claves:</b></p><ol style='margin:0 0 8px;padding-left:20px'>" + [nx.k1, nx.k2, nx.k3].filter(Boolean).map(function (k) { return "<li>" + esc(k) + "</li>"; }).join("") + "</ol>" + (nx.fr ? "<p style='font-size:18px;font-weight:800;margin:8px 0'>«" + esc(nx.fr) + "»</p>" : "") + btn("Ya jugué: ¿cómo me fue?", "rev", nx.id, null, "ghost"), "dark");
+      out += card("<b>Plan de partido</b><p class='small muted' style='margin:4px 0 0'>Un plan simple antes de jugar: cómo juega el rival, qué vas a hacer y 3 claves. Leelo en la previa.</p>" + btn(nx ? "Nuevo plan" : "Armar mi plan", "new", null, null, nx ? "ghost" : "sage"));
+      if (past.length) out += card("<b>Partidos anteriores</b>" + past.map(function (x) { return '<div class="txli"><span>' + dm(x.d) + " · vs " + esc(x.riv || "rival") + (x.res ? " · <b>" + ({ G: "Ganaste", P: "Perdiste", E: "Empataste" })[x.res] + "</b>" + (x.seg ? " · plan " + ({ s: "cumplido", m: "a medias", n: "no seguido" })[x.seg] : "") : "") + "</span>" + (x.res ? "" : mini("¿Cómo fue?", "rev", x.id)) + "</div>" + (x.ap ? "<p class='small muted' style='margin:0 0 6px'>" + esc(x.ap) + "</p>" : ""); }).join(""));
+      return out;
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("partido", { p: [] });
+      if (a === "new") { F = { v: "new", sp: sportPick(), d: K(0) }; return; }
+      if (a === "back") { F.v = null; return; }
+      if (a === "rev") { F.v = "rev"; F.id = x; F.res = null; F.seg = null; F.ap = ""; return; }
+      if (a === "save") { if (!(F.riv || "").trim() && !(F.k1 || "").trim()) return false; h.p.push({ id: uid(), c: K(0), sp: F.sp || sportPick(), d: F.d || K(0), riv: (F.riv || "").trim(), como: (F.como || "").trim(), pa: (F.pa || "").trim(), pb: (F.pb || "").trim(), pc: (F.pc || "").trim(), k1: (F.k1 || "").trim(), k2: (F.k2 || "").trim(), k3: (F.k3 || "").trim(), fr: (F.fr || "").trim() }); if (h.p.length > 60) h.p = h.p.slice(-60); F = {}; vib(60); commit("partido"); return; }
+      if (a === "srev") { var pr = h.p.filter(function (z) { return z.id === F.id; })[0]; if (!pr || !F.res) return false; pr.res = F.res; pr.seg = F.seg || ""; pr.ap = (F.ap || "").trim(); pr.rv = K(0); F = {}; commit("partido"); }
+    },
+    done: function (h) { return (h.p || []).some(function (x) { return x.c === K(0) || x.rv === K(0); }); },
+    sum: function (h) { var n = (h.p || []).filter(function (x) { return !x.res && x.d >= K(0); }).length; return n ? n + (n === 1 ? " partido con plan" : " partidos con plan") : ""; }
+  };
+
+  // ---------- REGISTRO DE PENSAMIENTOS ----------
+  var TRAMPAS = [["cat", "Catastrofizar"], ["todo", "Todo o nada"], ["mente", "Leer la mente"], ["fut", "Adivinar el futuro"], ["gen", "Generalizar"], ["etq", "Ponerme etiquetas"], ["deb", "Los «debería»"], ["filt", "Ver solo lo malo"]];
+  var EMOS = [["Ansiedad", "Ansiedad"], ["Tristeza", "Tristeza"], ["Enojo", "Enojo"], ["Culpa", "Culpa"], ["Vergüenza", "Vergüenza"], ["Miedo", "Miedo"], ["Frustración", "Frustración"]];
+  function n010(k) { var o = []; for (var i = 0; i <= 10; i++) o.push([i, String(i)]); return chips(k, o, F[k]); }
+  APPS.pensar = {
+    view: function () {
+      var h = H("pensar", { r: [] }), R = h.r;
+      if (F.v === "new") {
+        F.tr = F.tr || {};
+        return card("<b>1. ¿Qué pasó?</b>" + field("La situación, en una frase", inp("sit", "text", 'maxlength="140" placeholder="Ej: mi jefe me pidió hablar mañana"')) +
+          "<b style='display:block;margin-top:10px'>2. ¿Qué sentiste y cuánto?</b>" + chips("emo", EMOS, F.emo) + '<span class="small muted">Intensidad de 0 a 10</span>' + n010("i1") +
+          "<b style='display:block;margin-top:10px'>3. ¿Qué pensaste?</b>" + field("El pensamiento que apareció", inp("pen", "text", 'maxlength="160" placeholder="Ej: me van a echar"')) +
+          '<span class="small muted">¿Ves alguna de estas trampas? (opcional)</span><div class="chips txchips">' + TRAMPAS.map(function (t) { return '<button class="chip" data-tx="tr" data-ta="' + t[0] + '" aria-pressed="' + (F.tr[t[0]] ? "true" : "false") + '">' + esc(t[1]) + "</button>"; }).join("") + "</div>" +
+          "<b style='display:block;margin-top:10px'>4. Revisalo como lo haría un buen amigo</b>" + field("Pruebas a favor de ese pensamiento", inp("af", "text", 'maxlength="160"')) + field("Pruebas en contra", inp("ec", "text", 'maxlength="160" placeholder="Ej: la semana pasada me felicitaron"')) +
+          field("Una forma más equilibrada de verlo", inp("alt", "text", 'maxlength="180" placeholder="Ej: puede ser por otro tema; si hay algo para mejorar, lo voy a escuchar"')) +
+          "<b style='display:block;margin-top:10px'>5. ¿Cuánto lo sentís ahora?</b>" + n010("i2") + btn("Guardar", "save") + btn("Volver", "back", null, null, "ghost")) + note("Si sentís que no podés con esto o pensás en hacerte daño, llamá gratis las 24 horas a la Línea Nacional de Salud Mental: 0800-999-0091. Si hay riesgo inmediato, llamá al 911.");
+      }
+      var drop = R.filter(function (x) { return x.i1 != null && x.i2 != null; }).map(function (x) { return x.i1 - x.i2; }), cnt = {};
+      R.forEach(function (x) { Object.keys(x.tr || {}).forEach(function (k) { cnt[k] = (cnt[k] || 0) + 1; }); });
+      var top = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
+      var out = card("<b>Registro de pensamientos</b><p class='small muted' style='margin:4px 0 0'>Cuando algo te pone mal, escribilo en 5 pasos: qué pasó, qué sentiste, qué pensaste, qué pruebas hay y una forma más equilibrada de verlo. Es una técnica de la terapia cognitiva, usada en todo el mundo.</p>" + btn("Nuevo registro", "new"));
+      if (R.length) out += card("<b>Lo que vas viendo</b>" + stats([[R.length, R.length === 1 ? "registro" : "registros"], [drop.length ? "−" + (Math.round(avg(drop) * 10) / 10).toString().replace(".", ",") : "—", "baja promedio"], [top ? TRAMPAS.filter(function (t) { return t[0] === top; })[0][1] : "—", "tu trampa más común"]]) +
+        R.slice(-5).reverse().map(function (x) { return '<div class="txli" style="display:block"><b>' + dm(x.d) + " · " + esc(x.emo || "") + " " + (x.i1 != null ? x.i1 : "") + (x.i2 != null ? " → " + x.i2 : "") + "</b><small style='display:block' class='muted'>" + esc(x.sit) + "</small>" + (x.alt ? "<small style='display:block'>💬 " + esc(x.alt) + "</small>" : "") + "</div>"; }).join(""));
+      return out;
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("pensar", { r: [] });
+      if (a === "new") { F = { v: "new", tr: {} }; return; }
+      if (a === "back") { F.v = null; return; }
+      if (a === "tr") { F.tr = F.tr || {}; if (F.tr[x]) delete F.tr[x]; else F.tr[x] = 1; return; }
+      if (a === "save") { if (!(F.sit || "").trim() || !(F.pen || "").trim()) return false; h.r.push({ d: K(0), sit: F.sit.trim(), emo: F.emo || "", i1: F.i1 != null && F.i1 !== "" ? +F.i1 : null, pen: F.pen.trim(), tr: F.tr || {}, af: (F.af || "").trim(), ec: (F.ec || "").trim(), alt: (F.alt || "").trim(), i2: F.i2 != null && F.i2 !== "" ? +F.i2 : null }); if (h.r.length > 200) h.r = h.r.slice(-200); F = {}; commit("pensar"); }
+    },
+    done: function (h) { return (h.r || []).some(function (x) { return x.d === K(0); }); },
+    sum: function (h) { var n = (h.r || []).length; return n ? n + (n === 1 ? " registro" : " registros") : ""; }
+  };
+
+  // ---------- GASTOS FIJOS Y CUOTAS ----------
+  function ym() { return K(0).slice(0, 7); }
+  APPS.fijos = {
+    view: function () {
+      var h = H("fijos", { it: [], paid: {} }), I = h.it, pd = h.paid[ym()] || {}, today = new Date().getDate();
+      var tot = I.reduce(function (s, x) { return s + (+x.m || 0); }, 0), pend = I.filter(function (x) { return !pd[x.id]; });
+      var soon = pend.filter(function (x) { var dd = x.dia - today; return dd >= 0 && dd <= 7; }).sort(function (a, b) { return a.dia - b.dia; });
+      var late = pend.filter(function (x) { return x.dia < today; });
+      var out = card("<b>Este mes</b>" + stats([[money(tot), "fijo por mes"], [money(pend.reduce(function (s, x) { return s + (+x.m || 0); }, 0)), "falta pagar"], [I.length - pend.length + "/" + I.length, "pagados"]]) +
+        (late.length ? "<p class='small' style='margin:8px 0 0'>⚠️ Vencidos sin marcar: " + late.map(function (x) { return esc(x.n); }).join(", ") + "</p>" : "") +
+        (soon.length ? "<p class='small' style='margin:8px 0 0'>📅 Vencen esta semana: " + soon.map(function (x) { return esc(x.n) + " (día " + x.dia + ")"; }).join(", ") + "</p>" : ""));
+      out += card("<b>Tus gastos fijos, cuotas y suscripciones</b>" + (I.length ? I.slice().sort(function (a, b) { return a.dia - b.dia; }).map(function (x) {
+        return '<div class="txli">' + ck(!!pd[x.id], "pay", x.id, "Día " + x.dia + " · " + x.n + " · " + money(x.m) + (x.t === "c" && x.q ? " · quedan " + x.q + " cuotas" : x.t === "s" ? " · suscripción" : "")) + mini("✕", "del", x.id) + "</div>";
+      }).join("") : '<p class="small muted" style="margin:6px 0 0">Sumá lo que pagás todos los meses: alquiler, servicios, celular, cuotas, suscripciones. Tildás cada uno cuando lo pagás.</p>') +
+        "<div class='txrow2'>" + field("Qué es", inp("n", "text", 'maxlength="40" placeholder="Ej: Internet"')) + field("Monto", inp("m", "number", 'min="0" inputmode="numeric"')) + "</div>" +
+        "<div class='txrow2'>" + field("Día del mes que vence", inp("dia", "number", 'min="1" max="31" inputmode="numeric"')) + field("Cuotas que quedan (si es cuota)", inp("q", "number", 'min="0" max="120" inputmode="numeric"')) + "</div>" +
+        chips("t", [["f", "Gasto fijo"], ["c", "Cuota"], ["s", "Suscripción"]], F.t || "f") + btn("Agregar", "add", null, null, "ghost"));
+      var subs = I.filter(function (x) { return x.t === "s"; });
+      if (subs.length) out += card("<b>Suscripciones: " + money(subs.reduce(function (s, x) { return s + (+x.m || 0); }, 0)) + " por mes</b>" + note("Una vez por mes preguntate de cada una: ¿la usé? Si no, cancelarla es plata que vuelve todos los meses."));
+      return out;
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("fijos", { it: [], paid: {} });
+      if (a === "add") { var n = (F.n || "").trim(), m = Math.round(+F.m), dd = Math.round(+F.dia); if (!n || !(m > 0) || !(dd >= 1 && dd <= 31)) return false; h.it.push({ id: uid(), n: n.slice(0, 40), m: m, dia: dd, t: F.t || "f", q: F.t === "c" ? Math.round(+F.q) || 0 : 0 }); F = { t: F.t }; commit("fijos"); return; }
+      if (a === "del") { if (!confirm("¿Borrar este gasto?")) return false; h.it = h.it.filter(function (z) { return z.id !== x; }); commit("fijos"); return; }
+      if (a === "pay") { var k = ym(); h.paid[k] = h.paid[k] || {}; var it = h.it.filter(function (z) { return z.id === x; })[0]; if (h.paid[k][x]) { delete h.paid[k][x]; if (it && it.t === "c") it.q = (it.q || 0) + 1; } else { h.paid[k][x] = K(0); if (it && it.t === "c" && it.q > 0) it.q--; } commit("fijos"); }
+    },
+    done: function (h) { var p = (h.paid || {})[K(0).slice(0, 7)] || {}; return Object.keys(p).some(function (k) { return p[k] === K(0); }); },
+    sum: function (h) { var I = h.it || [], t = I.reduce(function (s, x) { return s + (+x.m || 0); }, 0); return I.length ? money(t) + " fijos por mes" : ""; }
+  };
+
+  // ---------- PLAN DE 0 A 5 KM (sesiones guiadas) ----------
+  function rep(n, arr) { var o = []; for (var i = 0; i < n; i++) o = o.concat(arr); return o; }
+  var C5 = [
+    [rep(8, [["t", 60], ["c", 90]]), rep(8, [["t", 60], ["c", 90]]), rep(8, [["t", 60], ["c", 90]])],
+    [rep(6, [["t", 90], ["c", 120]]), rep(6, [["t", 90], ["c", 120]]), rep(6, [["t", 90], ["c", 120]])],
+    [rep(2, [["t", 90], ["c", 90], ["t", 180], ["c", 180]]), rep(2, [["t", 90], ["c", 90], ["t", 180], ["c", 180]]), rep(2, [["t", 90], ["c", 90], ["t", 180], ["c", 180]])],
+    [[["t", 180], ["c", 90], ["t", 300], ["c", 150], ["t", 180], ["c", 90], ["t", 300]], [["t", 180], ["c", 90], ["t", 300], ["c", 150], ["t", 180], ["c", 90], ["t", 300]], [["t", 180], ["c", 90], ["t", 300], ["c", 150], ["t", 180], ["c", 90], ["t", 300]]],
+    [rep(3, [["t", 300], ["c", 180]]), [["t", 480], ["c", 300], ["t", 480]], [["t", 1200]]],
+    [[["t", 300], ["c", 180], ["t", 480], ["c", 180], ["t", 300]], [["t", 600], ["c", 180], ["t", 600]], [["t", 1320]]],
+    [[["t", 1500]], [["t", 1500]], [["t", 1500]]],
+    [[["t", 1680]], [["t", 1680]], [["t", 1800]]]
+  ];
+  function c5seq(w, s) { return [["c", 300]].concat(C5[w][s]).concat([["c", 300]]); }
+  function c5txt(w, s) { var a = C5[w][s], t = a.filter(function (x) { return x[0] === "t"; }), tot = a.reduce(function (z, x) { return z + x[1]; }, 0); if (t.length === 1) return Math.round(t[0][1] / 60) + " minutos trotando sin parar"; var pair = a.length > 1 && a.every(function (x, i) { return x[0] === a[i % 2][0] && x[1] === a[i % 2][1]; }); return pair ? (a.length / 2) + " × (" + mmss(a[0][1]) + " trotando + " + mmss(a[1][1]) + " caminando)" : t.length + " tramos trotando · " + Math.round(tot / 60) + " minutos en total"; }
+  function c5next(h) { for (var w = 0; w < 8; w++) for (var s = 0; s < 3; s++) if (!h.done[w + "-" + s]) return [w, s]; return null; }
+  function runTick() {
+    clearInterval(tick);
+    tick = setInterval(function () {
+      var R = F.run; if (!R || R.pause) return;
+      var el = document.getElementById("c5cd"); var left = (R.end - Date.now()) / 1000;
+      if (left <= 0) {
+        R.i++; if (R.i >= R.seq.length) { clearInterval(tick); tick = null; wakeOff(); var hc = H("correr", { done: {} }); hc.done[R.k] = K(0); commit("correr"); vib([300, 100, 300, 100, 600]); beep(1175, 600); F.v = "fin"; paint(); return; }
+        R.end = Date.now() + R.seq[R.i][1] * 1000; vib(R.seq[R.i][0] === "t" ? [400] : [150, 100, 150]); beep(R.seq[R.i][0] === "t" ? 988 : 660, 350); paint(); return;
+      }
+      if (el) el.textContent = mmss(left);
+      var tl = document.getElementById("c5tot"); if (tl) { var rest = left + R.seq.slice(R.i + 1).reduce(function (z, x) { return z + x[1]; }, 0); tl.textContent = mmss(rest) + " para terminar"; }
+    }, 400);
+  }
+  APPS.correr = {
+    view: function () {
+      var h = H("correr", { done: {} }), nx = c5next(h), nd = Object.keys(h.done).length;
+      if (F.v === "run" && F.run) {
+        var R = F.run, cur = R.seq[R.i], nxt = R.seq[R.i + 1], isT = cur[0] === "t", left = R.pause ? R.rem : (R.end - Date.now()) / 1000;
+        var tot = R.seq.reduce(function (z, x) { return z + x[1]; }, 0), done0 = R.seq.slice(0, R.i).reduce(function (z, x) { return z + x[1]; }, 0) + (cur[1] - left);
+        return '<div class="c5run ' + (isT ? "t" : "c") + '"><small>' + (R.i === 0 ? "Entrada en calor" : R.i === R.seq.length - 1 ? "Vuelta a la calma" : "Tramo " + R.i + " de " + (R.seq.length - 2)) + "</small><div class='c5big'>" + (isT ? "🏃 Trotá" : "🚶 Caminá") + "</div><div class='c5cd' id='c5cd'>" + mmss(left) + "</div>" +
+          '<div class="c5bar"><i style="width:' + Math.round(done0 * 100 / tot) + '%"></i></div><p id="c5tot" class="small">' + mmss(tot - done0) + " para terminar</p>" + (nxt ? "<p class='small'>Después: " + (nxt[0] === "t" ? "trotás " : "caminás ") + mmss(nxt[1]) + "</p>" : "") + "</div>" +
+          btn(R.pause ? "Seguir" : "Pausa", R.pause ? "res" : "pau") + btn("Terminar ahora", "stop", null, null, "ghost") + note(isT ? "Trote suave: tenés que poder hablar. Si no podés, bajá el ritmo." : "Caminá rápido y respirá. Tomá agua si hace falta.");
+      }
+      if (F.v === "fin") return card('<div style="text-align:center"><div style="font-size:52px">🎉</div><b style="font-size:20px">¡Sesión completa!</b><p>' + (nd >= 24 ? "Terminaste el plan: ya corrés 30 minutos seguidos." : "Llevás " + nd + " de 24 sesiones.") + "</p></div>" + btn("Listo", "back"));
+      var out = card("<b>Plan de 0 a 5 km</b><p class='small muted' style='margin:4px 0 8px'>8 semanas, 3 sesiones por semana, de 25 a 40 minutos. Arranca alternando caminar y trotar y termina con 30 minutos trotando. Dejá un día de descanso entre sesiones.</p><div class='c5bar'><i style='width:" + Math.round(nd * 100 / 24) + "%'></i></div><p class='small'>" + nd + " de 24 sesiones</p>");
+      if (nx) out += card("<span class='badge'>Semana " + (nx[0] + 1) + " · sesión " + (nx[1] + 1) + "</span><h3 style='margin:8px 0 4px'>" + esc(c5txt(nx[0], nx[1])) + "</h3><p class='small muted' style='margin:0'>Con 5 minutos de caminata antes y después. Te avisamos con vibración y sonido en cada cambio.</p>" + btn("Empezar sesión", "go") + btn("Ya la hice por mi cuenta", "mark", null, null, "ghost"), "dark");
+      else out += card("<b>🏆 ¡Plan completo!</b><p class='small'>Ya podés correr 5 km. Sostené 3 salidas por semana y probá sumar de a poco.</p>" + btn("Empezar de nuevo", "reset", null, null, "ghost"));
+      out += note("Si tenés algún problema de salud, consultá antes con un médico. Si algo duele o te falta el aire de más, pará. Repetir una semana está perfecto.");
+      return out;
+    },
+    act: function (a, x, y) {
+      var h = H("correr", { done: {} }), nx = c5next(h);
+      if (a === "go" && nx) { var seq = c5seq(nx[0], nx[1]); F = { v: "run", run: { k: nx[0] + "-" + nx[1], seq: seq, i: 0, end: Date.now() + seq[0][1] * 1000 } }; wakeOn(); beep(880, 200); runTick(); return; }
+      if (a === "pau" && F.run) { F.run.pause = true; F.run.rem = (F.run.end - Date.now()) / 1000; return; }
+      if (a === "res" && F.run) { F.run.pause = false; F.run.end = Date.now() + F.run.rem * 1000; runTick(); return; }
+      if (a === "stop") { if (!confirm("¿Terminar la sesión ahora? No se va a contar como hecha.")) return false; clearInterval(tick); tick = null; wakeOff(); F = {}; return; }
+      if (a === "mark" && nx) { h.done[nx[0] + "-" + nx[1]] = K(0); commit("correr"); F = { v: "fin" }; return; }
+      if (a === "back") { F = {}; return; }
+      if (a === "reset") { if (!confirm("¿Empezar el plan de nuevo?")) return false; h.done = {}; commit("correr"); }
+    },
+    done: function (h) { var D = h.done || {}; return Object.keys(D).some(function (k) { return D[k] === K(0); }); },
+    sum: function (h) { var n = Object.keys(h.done || {}).length; return n ? n + " de 24 sesiones" : ""; }
+  };
+
+  // ---------- LECTURA: mis libros ----------
+  APPS.libros = {
+    view: function () {
+      var h = H("libros", { b: [], log: {} }), B = h.b, L = h.log, cur = B.filter(function (x) { return !x.fin; })[0];
+      var wm = sumWeek(L, function (x) { return x.min || 0; }), sk = streakWhere(function (k) { return !!(L[k] && L[k].min); }), yr = String(new Date().getFullYear()), fin = B.filter(function (x) { return x.fin && x.fin.slice(0, 4) === yr; }).length;
+      var out = card("<b>Tu lectura</b>" + stats([[wm + " min", "esta semana"], [sk + (sk === 1 ? " día" : " días"), "seguidos"], [fin, fin === 1 ? "libro este año" : "libros este año"]]) + bars(lastN(7).map(function (k) { var m = L[k] ? L[k].min || 0 : 0; return { l: lbl(k), v: m, c: m ? "ok" : "" }; })));
+      if (cur) {
+        var pc = cur.p ? Math.min(100, Math.round((cur.at || 0) * 100 / cur.p)) : 0;
+        out += card("<span class='badge'>Leyendo</span><h3 style='margin:8px 0 2px'>" + esc(cur.t) + "</h3>" + (cur.a ? "<p class='small muted' style='margin:0'>" + esc(cur.a) + "</p>" : "") + "<div class='c5bar'><i style='width:" + pc + "%'></i></div><p class='small' style='margin:0 0 8px'>Página " + (cur.at || 0) + (cur.p ? " de " + cur.p + " · " + pc + "%" : "") + "</p>" +
+          "<div class='txrow2'>" + field("Minutos que leíste hoy", inp("min", "number", 'min="1" max="600" inputmode="numeric"')) + field("Página en la que quedaste", inp("pg", "number", 'min="0" max="5000" inputmode="numeric"')) + "</div>" + btn("Anotar la lectura de hoy", "log") + btn("Lo terminé", "fin", cur.id, null, "ghost"), "dark");
+      }
+      out += card("<b>" + (cur ? "Sumar otro libro" : "¿Qué estás leyendo?") + "</b>" + field("Título", inp("t", "text", 'maxlength="60"')) + "<div class='txrow2'>" + field("Autor (opcional)", inp("a", "text", 'maxlength="40"')) + field("Páginas", inp("p", "number", 'min="1" max="5000" inputmode="numeric"')) + "</div>" + btn("Agregar libro", "add", null, null, cur ? "ghost" : "sage"));
+      var done = B.filter(function (x) { return x.fin; }).slice(-8).reverse(), next = B.filter(function (x) { return !x.fin && x !== cur; });
+      if (next.length) out += card("<b>Para después</b>" + next.map(function (x) { return '<div class="txli"><span>' + esc(x.t) + (x.a ? " · " + esc(x.a) : "") + "</span>" + mini("Empezar", "first", x.id) + mini("✕", "del", x.id) + "</div>"; }).join(""));
+      if (done.length) out += card("<b>Terminados</b>" + done.map(function (x) { return '<div class="txli"><span>✅ ' + esc(x.t) + " · " + dm(x.fin) + "</span></div>"; }).join(""));
+      return out + note("Si a las 50 páginas no te engancha, cambialo sin culpa.");
+    },
+    act: function (a, x, y) {
+      if (setF(a, x, y)) return;
+      var h = H("libros", { b: [], log: {} }), cur = h.b.filter(function (z) { return !z.fin; })[0];
+      if (a === "add") { var t = (F.t || "").trim(); if (!t) return false; h.b.push({ id: uid(), t: t.slice(0, 60), a: (F.a || "").trim().slice(0, 40), p: Math.round(+F.p) || 0, at: 0 }); F.t = ""; F.a = ""; F.p = ""; commit("libros"); return; }
+      if (a === "log") { var m = Math.round(+F.min), pg = Math.round(+F.pg); if (!(m > 0) && !(pg > 0)) return false; var e = h.log[K(0)] = h.log[K(0)] || { min: 0 }; if (m > 0) e.min = (e.min || 0) + m; if (cur && pg > 0) cur.at = pg; F.min = ""; F.pg = ""; vib(50); commit("libros"); return; }
+      if (a === "fin") { var b = h.b.filter(function (z) { return z.id === x; })[0]; if (!b) return false; b.fin = K(0); if (b.p) b.at = b.p; vib([80, 60, 200]); beep(988, 300); commit("libros"); return; }
+      if (a === "first") { var i = h.b.findIndex(function (z) { return z.id === x; }); if (i < 0) return false; var bb = h.b.splice(i, 1)[0]; var j = h.b.findIndex(function (z) { return !z.fin; }); if (j < 0) h.b.push(bb); else h.b.splice(j, 0, bb); commit("libros"); return; }
+      if (a === "del") { h.b = h.b.filter(function (z) { return z.id !== x; }); commit("libros"); }
+    },
+    done: function (h) { var e = (h.log || {})[K(0)]; return !!(e && e.min) || (h.b || []).some(function (b) { return b.fin === K(0); }) || !!(h.at && dk(new Date(h.at)) === K(0) && (h.b || []).length); },
+    sum: function (h) { var L = h.log || {}, m = sumWeek(L, function (x) { return x.min || 0; }); return m ? m + " min de lectura esta semana" : (h.b || []).length ? "Leyendo: " + ((h.b || []).filter(function (b) { return !b.fin; })[0] || {}).t : ""; }
+  };
+
   // ---------- cuándo cuenta como "hecha hoy" y resumen de datos (herramientas que ya existían) ----------
   APPS.sueno.done = function (h) { return !!(h.log && h.log[K(0)]); };
   APPS.sueno.sum = function (h) { var L = h.log || {}, v = lastN(7).filter(function (k) { return L[k]; }).map(function (k) { return L[k].h; }); return v.length ? "Dormís " + hm(avg(v) * 60) + " en promedio (" + v.length + (v.length === 1 ? " noche" : " noches") + ")" : ""; };
@@ -752,6 +1183,16 @@
   window.FormaTools = {
     open: open,
     has: function (id) { return !!APPS[id]; },
+    // Botón "atrás" del celular: primero vuelve dentro de la herramienta; si hay algo corriendo, pregunta
+    back: function () {
+      var tx = document.getElementById("tx"); if (!cur || !tx) return false;
+      var bs = [].slice.call(tx.querySelectorAll("[data-tx]")).filter(function (x) { return x.offsetParent !== null; });
+      var v = bs.filter(function (x) { return /^\s*Volver/.test(x.textContent); })[0] || bs.filter(function (x) { return ["back", "list", "deck", "exit", "cancel"].indexOf(x.dataset.tx) >= 0; })[0];
+      var busy = !!(ses || F.rest || F.v === "run" || (F.v === "r" && F.sd && Object.keys(F.sd).length));
+      if (busy && !confirm("¿Salir? Se corta lo que estás haciendo.")) return true;
+      if (v) { v.click(); return true; }
+      return false;
+    },
     done: function (id) { var A = APPS[id], s = BR().S(), h = s.tl && s.tl[id]; if (!A || !h) return false; try { if (A.done) return !!A.done(h); } catch (e) { return false; } return !!(h.at && dk(new Date(h.at)) === K(0)); },
     sum: function (id) { var A = APPS[id], s = BR().S(), h = s.tl && s.tl[id]; if (!A || !h || !A.sum) return ""; try { return A.sum(h) || ""; } catch (e) { return ""; } },
     defs: [
@@ -774,7 +1215,14 @@
       { id: "ahorro", n: "Metas de ahorro", d: "Poné una meta, sumá aportes y mirá cuánto te falta.", plan: "plata", mins: 3, app: true },
       { id: "viaje", n: "Mi viaje", d: "Cuenta regresiva, presupuesto por rubro, reservas e itinerario día por día.", plan: "viajes", mins: 15, app: true },
       { id: "valija", n: "Valija", d: "Listas base para playa o frío, y tildás lo que ya guardaste.", plan: "viajes", mins: 10, app: true },
-      { id: "postul", n: "Mis postulaciones", d: "Seguí cada búsqueda: enviada, entrevista, prueba, oferta.", plan: "laburo", mins: 10, app: true }
+      { id: "postul", n: "Mis postulaciones", d: "Seguí cada búsqueda: enviada, entrevista, prueba, oferta.", plan: "laburo", mins: 10, app: true },
+      { id: "tests", n: "Tests físicos", d: "Medí tu velocidad, salto, fuerza y resistencia, y mirá cuánto mejorás cada 4 a 6 semanas.", plan: "deporte", mins: 20, app: true },
+      { id: "desafios", n: "Desafíos de práctica", d: "Ejercicios de tenis y fútbol con puntaje: anotá cada intento y superá tu récord.", plan: "deporte", mins: 15, app: true },
+      { id: "partido", n: "Plan de partido", d: "Rival, plan A y B, tus 3 claves y tu frase. Después, cómo te fue.", plan: "deporte", mins: 5, app: true },
+      { id: "pensar", n: "Registro de pensamientos", d: "Cuando algo te pone mal: qué pasó, qué pensaste y una forma más equilibrada de verlo.", plan: "calma", mins: 8, app: true },
+      { id: "fijos", n: "Gastos fijos y cuotas", d: "Todo lo que pagás cada mes, cuándo vence y cuánto te falta pagar.", plan: "plata", mins: 5, app: true },
+      { id: "libros", n: "Mis libros", d: "Lo que estás leyendo, en qué página vas, tus minutos por día y los libros que terminaste.", plan: "lectura", mins: 20, app: true },
+      { id: "correr", n: "Plan de 0 a 5 km", d: "8 semanas guiadas, con aviso en cada cambio de caminar a trotar.", plan: "movimiento", mins: 35, app: true }
     ]
   };
 })();

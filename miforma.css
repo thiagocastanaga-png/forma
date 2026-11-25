@@ -798,3 +798,25 @@ details.exactd summary{font-size:13px;opacity:.7;cursor:pointer;list-style:none;
 details.exactd summary::-webkit-details-marker{display:none}
 details.exactd summary::before{content:"＋ "}
 details.exactd[open] summary::before{content:"－ "}
+/* ===== v99: entrenamiento guiado, descanso, 0 a 5 km ===== */
+.txrest{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;justify-content:space-between;background:#C6F432;color:#111;border-radius:16px;padding:10px 14px;margin:0 0 10px;font-weight:700}
+.txrest b{font-size:24px;font-variant-numeric:tabular-nums}
+.txrest .txmini{background:rgba(0,0,0,.12);color:#111}
+.c5run{border-radius:24px;padding:22px 18px;text-align:center;margin:4px 0 6px;color:#111}
+.c5run.t{background:linear-gradient(160deg,#C6F432,#9cd12a)}.c5run.c{background:linear-gradient(160deg,#B9D8C4,#86A892)}
+.c5run small{font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
+.c5big{font-size:30px;font-weight:800;margin:8px 0 2px}
+.c5cd{font-size:64px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;margin:6px 0 12px}
+.c5bar{height:10px;border-radius:999px;background:rgba(0,0,0,.12);overflow:hidden;margin:6px 0}
+.c5bar i{display:block;height:100%;background:currentColor;border-radius:999px}
+.txc .c5bar{background:var(--chipbg)}.txc .c5bar i{background:#C6F432}
+.c5run p{margin:4px 0;font-weight:600}
+/* Sensación de app nativa */
+html.native body{overscroll-behavior-y:none}
+html.native button,html.native .tabs,html.native .chip,html.native .pnode{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button,a,.chip{-webkit-tap-highlight-color:transparent}
+.tlock{background:var(--surf);border:2px solid var(--line);border-bottom-width:5px;border-radius:20px;padding:16px;margin-bottom:12px}
+.tlock>b{display:block;margin-bottom:10px;font-size:16px}
+.tlchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tlchips span{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:6px 10px;border-radius:999px;background:var(--chipbg);color:var(--tx)}
+.tlchips i{font-style:normal}

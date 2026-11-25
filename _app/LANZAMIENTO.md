@@ -3,6 +3,7 @@
 La app nativa es la misma app web (`miforma`) dentro de Capacitor, más dos cosas nativas:
 - **Avisos del celular**: cada momento del día, el paso del objetivo, racha en peligro, cierre del día y vencimiento de Pro. Se programan en el propio celular (no hace falta servidor) para los próximos 3 días, y se vuelven a programar cada vez que se abre la app.
 - **Widget de Android** (`FormaWidgetProvider`): muestra el momento actual, lo que sigue, tu paso del día y tu racha. Se actualiza solo cuando cambia el momento del día.
+- **Sensación de app**: el botón "atrás" de Android cierra lo que está abierto, vuelve dentro de cada herramienta y recién en Hoy minimiza la app; vibración suave al tocar y al completar un paso; sin zoom ni selección de texto en botones.
 
 ## Compilar (en una compu con Node y Android Studio)
 1. `cd _app && npm install`

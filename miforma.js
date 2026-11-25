@@ -18,6 +18,15 @@
   try { var qp = new URLSearchParams(location.search); if (qp.get("prueba") === "1") { NUEVO = true; FLUJO = true; PRUEBA = true; PFREE = qp.get("free") === "1"; KEY = PFREE ? "forma_app_prueba_free" : "forma_app_prueba"; } } catch (e) {}
   try { var qn = new URLSearchParams(location.search); if (!PRUEBA && qn.get("nuevo") === "1" || qn.get("flujo") === "1") { NUEVO = true; FLUJO = qn.get("flujo") === "1"; KEY = "forma_app_nuevo"; if (sessionStorage.getItem("forma_nuevo") !== location.search) { localStorage.removeItem(KEY); sessionStorage.setItem("forma_nuevo", location.search); } } } catch (e) {}
   var NATIVE = false; try { NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) {}
+  // Sensación de app: vibración corta al tocar cosas importantes, sin zoom accidental en la app nativa
+  function hap(k) {
+    try {
+      var HP = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+      if (HP) { if (k === "ok") HP.notification({ type: "SUCCESS" }); else HP.impact({ style: k === "mid" ? "MEDIUM" : "LIGHT" }); }
+      else if (navigator.vibrate && matchMedia("(pointer:coarse)").matches) navigator.vibrate(k === "ok" ? [30, 40, 60] : k === "mid" ? 25 : 12);
+    } catch (e) {}
+  }
+  if (NATIVE) { try { document.documentElement.classList.add("native"); var vpm = document.querySelector('meta[name="viewport"]'); if (vpm) vpm.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"); } catch (e) {} }
   var FREE_HABITS = 0;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
@@ -44,7 +53,9 @@
     viajes: '<span class="emo">✈️</span>',
     deporte: '<span class="emo">🏆</span>',
     tenista: '<span class="emo">🎾</span>',
-    futbolista: '<span class="emo">⚽</span>'
+    futbolista: '<span class="emo">⚽</span>',
+    lectura: '<span class="emo">📖</span>',
+    idioma: '<span class="emo">🗣️</span>'
   };
   var AREAS = [
     ["cuerpo", "Cuerpo", "Energía, sueño, movimiento y comida"],
@@ -106,6 +117,8 @@
     { id: "plata", n: "Ordenar mi plata", c: "#C6F432", pro: "plan-plata", live: true, prog: "plata", inc: true, inc: true, grp: "Vida diaria", d: "Entender adónde se va tu plata, armar un presupuesto simple y llegar a fin de mes con menos estrés.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "movimiento", n: "Moverme más", c: "#FF8A4C", pro: "plan-movimiento", live: true, prog: "movimiento", inc: true, inc: true, grp: "Vida diaria", d: "Empezar a moverte en serio, de a poco y sin lesionarte, aunque hoy no hagas nada.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "comer", n: "Comer ordenado", c: "#FFC83D", pro: "plan-comer", live: false, inc: true, inc: true, grp: "Vida diaria", d: "Planificar tus comidas y compras para comer mejor sin dietas raras ni perder tiempo.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
+    { id: "lectura", n: "Leer más", c: "#FFC83D", pro: "plan-vida", live: true, prog: "lectura", inc: true, grp: "Vida diaria", price: "", d: "Volver a leer o leer más: un libro que te enganche, un momento fijo y sin celular.", free: ["El nivel 1 completo"], pros: ["Objetivo de 5 niveles, un paso por día", "Mis libros: páginas, minutos y libros terminados", "Incluido en Forma Pro"] },
+    { id: "idioma", n: "Aprender un idioma", c: "#5FC4B0", pro: "plan-vida", live: true, prog: "idioma", inc: true, grp: "Vida diaria", price: "", d: "15 minutos por día con una meta concreta: tarjetas, escuchar, hablar y escribir.", free: ["El nivel 1 completo"], pros: ["Objetivo de 5 niveles, un paso por día", "Tarjetas de vocabulario con repaso espaciado", "Incluido en Forma Pro"] },
     { id: "viajes", n: "Organizar un viaje", c: "#B9A7F0", pro: "plan-viajes", live: true, prog: "viajes", inc: true, grp: "Vida diaria", d: "Armá tu viaje paso a paso: destino, presupuesto, itinerario, reservas y valija. Con niveles, dentro de la app.", free: ["El paso 1 para probar"], pros: ["Objetivo de 5 niveles, un paso por día, dentro de la app", "Registro diario con gráfico", "5 niveles que vas desbloqueando", "Tu resultado final con datos reales", "Incluido en Forma Pro"] },
     { id: "tenis", n: "Tenis", c: "#C6F432", grp: "Deportes", pro: "t-full", live: true, price: "$23.900", was: "$31.900", promo: "Precio de lanzamiento",
       d: "Rutinas de preparación para jugadores que compiten.",
@@ -566,7 +579,7 @@
   }
   function proNudge() {
     if (proActive() || NATIVE) return "";
-    return '<button class="card pronudge" data-openpro><span>✨</span><span style="flex:1;min-width:0"><b>Forma Pro</b><small>Todos los niveles, más de 30 herramientas y tu semana día por día. Desde ' + ars(Math.round(PRICE.anio / 12)) + ' por mes.</small></span><span class="gnarrow">›</span></button>';
+    return '<button class="card pronudge" data-openpro><span>✨</span><span style="flex:1;min-width:0"><b>Forma Pro</b><small>Todos los niveles, más de 40 herramientas y tu semana día por día. Desde ' + ars(Math.round(PRICE.anio / 12)) + ' por mes.</small></span><span class="gnarrow">›</span></button>';
   }
   function vHoy() {
     if (!S.arm) return vArmar();
@@ -611,7 +624,7 @@
     if (hasProduct("forma-pro") && !S.demo) return '<div class="card dark" style="margin-bottom:14px"><b>Tenés Forma Pro</b><p class="small" style="margin:6px 0 0;opacity:.85">Todo desbloqueado: los planes, la semana completa y las herramientas.</p></div>';
     return '<button class="card dark" data-openpro style="width:100%;text-align:left;margin-bottom:14px;border:2px solid #C6F432"><span class="badge" style="background:#C6F432;color:#111">Todo incluido</span><div class="row between" style="margin-top:8px"><b style="font-size:20px">Forma Pro</b><span><b style="font-size:22px">$47.900</b><small style="opacity:.8"> / año</small></span></div><p class="small" style="margin:6px 0 0;opacity:.85">Todos los planes, tu semana completa y todas las herramientas, por 12 meses. Un solo pago.</p></button>';
   }
-  var PRO_LI = [["🗺️", "Los 10 objetivos completos", "Los 14 pasos y los 5 niveles de cada camino, con misiones y premios."], ["🧰", "Todas las herramientas", "Más de 30: rutinas, registros, foco, tarjetas, partidos, plata y más."], ["📅", "Tu semana día por día", "Un lunes distinto de un sábado, y días especiales cuando los necesites."], ["📈", "Mi cambio completo", "Tu antes y ahora, tus datos reales y el resumen de cada semana."]];
+  var PRO_LI = [["🗺️", "Los 12 objetivos completos", "Los 14 pasos y los 5 niveles de cada camino, con misiones y premios."], ["🧰", "Todas las herramientas", "Más de 40: rutinas guiadas, tests físicos, registros, foco, tarjetas, plata y más."], ["📅", "Tu semana día por día", "Un lunes distinto de un sábado, y días especiales cuando los necesites."], ["📈", "Mi cambio completo", "Tu antes y ahora, tus datos reales y el resumen de cada semana."]];
   var proSel = "forma-pro";
   function proPlansHtml() {
     var mo = Math.round(PRICE.anio / 12), save = Math.round((1 - PRICE.anio / (PRICE.mes * 12)) * 100);
@@ -768,7 +781,7 @@
     { q: "¿Cuántas horas por día usás el celular?", o: [["👌", "Menos de 2"], ["📱", "Entre 2 y 4"], ["📱", "Entre 4 y 6"], ["🔋", "Más de 6"]] },
     { q: "¿Cómo está tu tensión o ansiedad?", o: [["🧘", "Tranquilo/a"], ["😬", "Por momentos tenso/a"], ["😰", "Seguido tenso/a"]] },
     { q: "¿Hacés deporte?", o: [["🎾", "Juego al tenis y compito"], ["⚽", "Juego al fútbol"], ["🏋️", "Otro deporte o gimnasio"], ["🚶", "No, pero quiero moverme más"], ["🛋️", "No"]] },
-    { q: "¿Hay algo más que quieras ordenar?", o: [["💰", "Mi plata"], ["✈️", "Un viaje"], ["✋", "Nada más"]] }
+    { q: "¿Hay algo más que quieras sumar?", o: [["💰", "Ordenar mi plata"], ["✈️", "Organizar un viaje"], ["📖", "Leer más"], ["🗣️", "Aprender un idioma"], ["✋", "Nada más"]] }
   ];
   var QZ = null;
   function openGoalQuiz() { QZ = { i: 0, a: [] }; quizDraw(); }
@@ -796,7 +809,7 @@
     if (a[4] === 1) add("futbolista", 6, "Jugás al fútbol: tu camino de futbolista.");
     if (a[4] === 2) add("movimiento", 2, "Entrenás: sumá constancia y registro de lo que hacés.");
     if (a[4] === 3) add("movimiento", 4, "Querés moverte más, de a poco y sin lesionarte.");
-    if (a[5] === 0) add("plata", 3, "Querés ordenar tu plata."); if (a[5] === 1) add("viajes", 3, "Tenés un viaje para organizar.");
+    if (a[5] === 0) add("plata", 3, "Querés ordenar tu plata."); if (a[5] === 1) add("viajes", 3, "Tenés un viaje para organizar."); if (a[5] === 2) add("lectura", 3, "Querés volver a leer: un libro que te enganche y un momento fijo."); if (a[5] === 3) add("idioma", 3, "Querés aprender un idioma: 15 minutos por día con una meta concreta.");
     var ids = Object.keys(sc).filter(function (k) { return sc[k] > 0 && pgOf(k); }).sort(function (x, y) { return sc[y] - sc[x]; }).slice(0, 3);
     if (!ids.length) { ids = ["dormir", "celular"]; why.dormir = "Dormir bien mejora todo lo demás."; why.celular = "Recuperar tiempo del celular es el cambio más rápido de notar."; }
     S.test = { rec: ids.map(function (k) { return { id: k, why: why[k] }; }), at: today() }; save(); QZ = null;
@@ -947,6 +960,7 @@
       var tm = it && it.st && it.st.tm, run = tm && Date.now() < tm.end, fin = tm && !run;
       return '<div class="pgtimer"><b>' + esc(f.l) + "</b>" + (fin ? '<div class="pgt done">✓ Completado</div>' : run ? '<div class="pgt" id="pgtmr" data-end="' + tm.end + '">' + pgMmss(tm.end - Date.now()) + '</div><p class="small muted" style="margin:4px 0 0">Seguí con lo tuyo. Cuando llegue a cero, volvé y completá el paso.</p>' : '<button class="btn sage block" data-pgtm="' + Math.round((FAST ? 3 : f.s)) + '" style="margin-top:8px">Empezar (' + (f.s >= 60 ? Math.round(f.s / 60) + " min" : f.s + " s") + ")</button>") + "</div>";
     }
+    if (f.k === "tool") { var tdn = window.FormaTools && window.FormaTools.done(f.a), TTl = toolById(f.a); return '<div class="pgtimer"><b>' + (TTl ? temo(f.a) + " " : "") + esc(f.l) + "</b>" + (tdn ? '<div class="pgt done">✓ Usada hoy</div>' : f.d ? '<p class="small muted" style="margin:4px 0 0">' + esc(f.d) + "</p>" : "") + '<button class="btn ' + (tdn ? "ghost" : "sage") + ' block" data-pgtool="' + f.a + '" style="margin-top:8px">' + (tdn ? "Abrir de nuevo" : "Abrir") + "</button>" + (f.need ? "" : '<p class="small muted" style="margin:6px 0 0">Opcional.</p>') + "</div>"; }
     if (f.k === "act") { var dn = it && it.st && it.st.acts && it.st.acts[f.a]; return '<div class="pgtimer"><b>' + esc(f.l || "Actividad guiada") + "</b>" + (dn ? '<div class="pgt done">✓ Hecha completa</div>' : '<button class="btn sage block" data-pgact="' + f.a + '" style="margin-top:8px">Hacer ahora</button><p class="small muted" style="margin:6px 0 0">Cuenta cuando la terminás entera.</p>') + "</div>"; }
     return "";
   }
@@ -961,6 +975,7 @@
     if (f.k === "check") { var all = f.o.every(function (x, i) { return d[key + "_" + i] === 1; }); return all ? { ok: true, v: 1 } : bad("Marcá todo lo que hiciste. Si falta algo, hacelo primero y después completás el paso."); }
     if (f.k === "timer") return it.st && it.st.tm && Date.now() >= it.st.tm.end ? { ok: true, v: 1 } : bad("Falta terminar el tiempo: " + f.l + ".");
     if (f.k === "act") return it.st && it.st.acts && it.st.acts[f.a] ? { ok: true, v: 1 } : bad("Falta hacer la actividad guiada completa.");
+    if (f.k === "tool") return !f.need || (window.FormaTools && window.FormaTools.done(f.a)) ? { ok: true, v: 1 } : bad("Falta usar la herramienta: " + f.l + ". " + (f.d || ""));
     return { ok: true };
   }
   function pgAvg(a) { return a.reduce(function (s, x) { return s + x; }, 0) / (a.length || 1); }
@@ -1041,12 +1056,13 @@
   // ================= OBJETIVOS: camino estilo Duolingo =================
   var HOME = null, LSN = null;
   var TEMO = {
+    libros: "📚", acttenis: "🎾", actfutbol: "⚽", visualiza: "🎬", intervalos: "🫀", nodormir: "🌌", tests: "📏", desafios: "🎯", partido: "📋", pensar: "💭", fijos: "🧾", correr: "🏃",
     respirar: "🌬️", movimiento: "🤸", cierre: "🌙", dormir: "🛏️", descarga: "📝", antesabrir: "✋", pausacel: "📵", foco: "🎯", dosmin: "⏱️",
     calma: "🫁", grounding: "🖐️", estudio: "📖", repaso: "🧠", previa: "🔥", recupero: "🧘", fuerza: "💪", caminata: "🚶", atento: "🍽️", entrevista: "🎤",
     sueno: "😴", pantalla: "📱", matriz: "🗂️", enfoque: "⏳", animo: "🌤️", ritmos: "🎵", tarjetas: "🃏", examen: "📅", revision: "🗓️", rutinas: "🔁",
     entreno: "🏋️", partidos: "🏆", comidas: "🥗", menu: "🛒", mover: "👟", gastos: "💸", ahorro: "🐷", viaje: "✈️", valija: "🧳", postul: "💼"
   };
-  var GEMO = { dormir: "😴", celular: "📵", arrancar: "🚀", calma: "🧘", estudio: "📚", plata: "💰", movimiento: "🏃", comer: "🥗", viajes: "✈️", laburo: "💼", deporte: "🏆", tenista: "🎾", futbolista: "⚽", vida: "🌱" };
+  var GEMO = { dormir: "😴", celular: "📵", arrancar: "🚀", calma: "🧘", estudio: "📚", plata: "💰", movimiento: "🏃", comer: "🥗", viajes: "✈️", laburo: "💼", deporte: "🏆", tenista: "🎾", futbolista: "⚽", lectura: "📖", idioma: "🗣️", vida: "🌱" };
   function temo(id) { return TEMO[id] || "🧰"; }
   function gemo(id) { return GEMO[id] || "🎯"; }
   function goalOfPlan(pid) { return GOALS.filter(function (g) { return g.plan === pid; })[0]; }
@@ -1245,6 +1261,7 @@
   var CHEERS = ["El primer paso es el más difícil, y ya lo diste.", "Dos días: ya empieza a ser un patrón.", "No es lo que pensás hacer: es lo que ya hiciste.", "Cada paso es un cambio real en tu día.", "Lo estás haciendo costumbre. Así se cambia.", "Vas más lejos que la mayoría que empieza.", "Constancia le gana a motivación. Y la tenés.", "Tu yo de hace una semana estaría orgulloso."];
   function confettiHtml() { var E = ["🎉", "✨", "⭐", "🎊", "💫"], o = ""; for (var i = 0; i < 18; i++) o += '<i style="left:' + Math.round(Math.random() * 96) + "%;animation-delay:" + (Math.random() * 0.6).toFixed(2) + "s;animation-duration:" + (1.6 + Math.random() * 1.2).toFixed(2) + 's">' + E[i % E.length] + "</i>"; return '<div class="confe" aria-hidden="true">' + o + "</div>"; }
   function openCelebrate(id, n) {
+    hap("ok");
     var P = pgOf(id), nn = n + 1, li = lvOf(n), L = LVS[li], lvUp = nn > L.t, xp = 10 + (lvUp ? 20 : 0);
     var T = toolsOf(id).filter(function (x) { return toolOk(x) && !btsOfTool(x.id).length; })[0];
     sheet(confettiHtml() + '<div class="celeb"><span class="celemo">' + (nn >= 14 ? "🏆" : lvUp ? L.e : "🎉") + "</span><h2>" + (nn >= 14 ? "¡Terminaste el camino!" : lvUp ? "¡Nivel " + (li + 1) + " completado!" : "¡Paso completado!") + "</h2><p>" + esc(P.days[n].t) + "</p>" +
@@ -1465,6 +1482,8 @@
       } },
     { id: "tenista", n: "Tenista de alto rendimiento", d: "Entrenar y competir como un profesional", plan: "tenista" },
     { id: "futbolista", n: "Futbolista profesional", d: "Entrenar y rendir como un profesional", plan: "futbolista" },
+    { id: "lectura", n: "Leer más", d: "Volver a leer y sostenerlo", plan: "lectura", qs: [], build: function () { return []; } },
+    { id: "idioma", n: "Aprender un idioma", d: "Avanzar un poco todos los días", plan: "idioma", qs: [], build: function () { return []; } },
     { id: "movimiento", n: "Moverme más", d: "Empezar a entrenar o a moverte, de a poco", plan: "movimiento",
       qs: [
         { k: "e", q: "¿Cuánto te movés hoy?", o: ["Casi nada", "Camino algo", "Entreno 1 o 2 veces por semana", "Entreno 3 veces o más"] },
@@ -1569,6 +1588,8 @@
     plata: ["Plata en orden", "Saber en qué gastás"],
     tenista: ["Tenista de alto rendimiento", "Entrenar y competir como un profesional"],
     futbolista: ["Futbolista profesional", "Entrenar y rendir como un profesional"],
+    lectura: ["Leer más", "Volver a leer y sostenerlo"],
+    idioma: ["Aprender un idioma", "Avanzar un poco todos los días"],
     viaje: ["Organizar un viaje", "Armarlo paso a paso"],
     laburo: ["Buscar trabajo", "CV, entrevistas y búsqueda"]
   };
@@ -1807,6 +1828,54 @@
       { t: "Preparate", d: "Silenciá notificaciones, cerrá pestañas y llená tu vaso de agua.", s: 30 },
       { t: "25 minutos de foco", d: "Trabajá solo en tu tarea. Si te distraés, volvé sin culparte.", s: 1500 },
       { t: "Cerrá el bloque", d: "¿Qué avanzaste? Anotalo en una frase.", type: "input", ph: "Ej: armé el borrador" }] },
+    acttenis: { t: "Activación de tenis", note: "10 minutos antes de entrenar o jugar. Progresivo: de suave a intenso. Si algo duele, salteá ese movimiento.", steps: [
+      { t: "Trote suave", d: "Trotá suave alrededor de la cancha o en el lugar. Que suba la temperatura y la respiración, sin cansarte.", s: 120 },
+      { t: "Skipping y talones", d: "15 segundos de rodillas arriba y 15 de talones a la cola, alternando. Brazos acompañando.", s: 60 },
+      { t: "Movilidad de cadera", d: "Balanceos de pierna adelante y atrás y después a los costados, agarrado del poste o la red. Diez de cada uno por pierna.", s: 60 },
+      { t: "Hombros y tronco", d: "Círculos amplios de brazos hacia adelante y atrás, y giros de tronco con los brazos sueltos, como un drive y un revés suaves.", s: 60 },
+      { t: "Desplazamientos laterales", d: "Pasos laterales rápidos de un lado al otro de la línea de fondo, sin cruzar los pies. Bajo y con las rodillas flexionadas.", s: 45 },
+      { t: "Split step y arranque", d: "Pequeño salto en el lugar cayendo con los pies separados, y arranque explosivo de 3 pasos a un lado. Alterná lados.", s: 60 },
+      { t: "Aceleraciones", d: "3 aceleraciones cortas de 5 a 10 metros, cada una un poco más rápida. Volvé caminando.", s: 60 },
+      { t: "Sombra de golpes", d: "Sin pelota: 10 drives, 10 reveses y 5 saques a ritmo de partido, con el movimiento de pies completo.", s: 75 },
+      { t: "Tu foco de hoy", d: "Una sola cosa para hoy que dependa de vos, no del resultado.", type: "input", ph: "Hoy me enfoco en..." }] },
+    actfutbol: { t: "Activación de fútbol", note: "Inspirada en el programa de prevención FIFA 11+. 12 minutos antes de entrenar o jugar. Si algo duele, salteá ese ejercicio.", steps: [
+      { t: "Trote en línea", d: "Trote suave de ida y vuelta (unos 20 metros). Que suba la temperatura sin cansarte.", s: 90 },
+      { t: "Trote con aperturas", d: "Mientras trotás, levantá la rodilla y abrí la cadera hacia afuera; a la vuelta, hacia adentro.", s: 60 },
+      { t: "Trote con talones y laterales", d: "Ida con talones a la cola, vuelta con desplazamiento lateral. Rodillas apuntando a la punta de los pies.", s: 60 },
+      { t: "Plancha", d: "Antebrazos apoyados, cuerpo recto de cabeza a talones. Si podés, levantá una pierna unos segundos y cambiá.", s: 40 },
+      { t: "Plancha lateral", d: "Apoyado en un antebrazo, cadera arriba. 20 segundos por lado.", s: 45 },
+      { t: "Sentadillas", d: "Pies al ancho de los hombros, bajá controlado y subí rápido. Que las rodillas no se vayan hacia adentro.", s: 45 },
+      { t: "Saltos y caídas", d: "Saltos verticales cortos cayendo suave sobre la punta de los pies, con las rodillas alineadas.", s: 40 },
+      { t: "Equilibrio en un pie", d: "Parado en un pie con la rodilla apenas flexionada, 20 segundos por pierna. Si es fácil, pasate una pelota de mano a mano.", s: 45 },
+      { t: "Carreras a ritmo creciente", d: "3 pasadas de 20 a 30 metros al 60, 75 y 90 por ciento de tu velocidad. Volvé caminando.", s: 75 },
+      { t: "Cambios de dirección", d: "Carrera, frenada en dos pasos y cambio de dirección a 45 grados. Alterná izquierda y derecha.", s: 60 },
+      { t: "Tu foco de hoy", d: "Una sola acción en la que te vas a concentrar hoy.", type: "input", ph: "Hoy me enfoco en..." }] },
+    visualiza: { t: "Visualización guiada", note: "Sentado o acostado, en un lugar tranquilo. Cerrá los ojos cuando lo indique.", steps: [
+      { t: "Respirá y llegá", d: "Inhalá en 4 y soltá en 6. Soltá hombros y mandíbula.", s: 45, type: "breath" },
+      { t: "El lugar", d: "Imaginá el lugar donde vas a jugar con todo el detalle que puedas: el piso, la luz, los sonidos, el olor.", s: 45 },
+      { t: "Tu entrada en calor", d: "Vete haciendo tu activación: el cuerpo se suelta, te sentís liviano y rápido.", s: 45 },
+      { t: "El primer momento", d: "Imaginá tu primera acción del partido saliendo bien: el primer saque, el primer control, la primera jugada. Sentí cómo se mueve tu cuerpo.", s: 50 },
+      { t: "Algo sale mal", d: "Ahora imaginá un error. Mirá cómo hacés tu gesto, decís tu frase de reseteo y volvés al presente. La siguiente acción sale bien.", s: 50 },
+      { t: "El momento clave", d: "Un punto o una jugada decisiva. Respirás, hacés tu rutina y elegís con calma. Ves cómo lo resolvés.", s: 50 },
+      { t: "Cerrá", d: "Respirá profundo, abrí los ojos y quedate con una sensación del ejercicio.", s: 20 },
+      { t: "Lo que te llevás", d: "¿Qué imagen o sensación querés llevarte al partido?", type: "input", ph: "Me llevo..." }] },
+    intervalos: { t: "Intervalos 4×4", note: "Para días sin partido ni fuerza pesada. Fuerte es que te cueste hablar, no correr al máximo. Si te mareás o duele el pecho, pará.", steps: [
+      { t: "Entrada en calor", d: "Trote suave aumentando el ritmo de a poco, con algunos movimientos de cadera y brazos.", s: 480 },
+      { t: "Serie 1 · fuerte", d: "Corré a un ritmo que puedas sostener 4 minutos pero que te cueste hablar.", s: 240 },
+      { t: "Recuperación", d: "Trote muy suave o caminata rápida. Respirá.", s: 180 },
+      { t: "Serie 2 · fuerte", d: "Mismo ritmo que la primera. Mantené la técnica: brazos sueltos, pasos cortos y rápidos.", s: 240 },
+      { t: "Recuperación", d: "Trote muy suave. Tomá agua si podés.", s: 180 },
+      { t: "Serie 3 · fuerte", d: "La más difícil: mantené el ritmo, no lo subas.", s: 240 },
+      { t: "Recuperación", d: "Trote muy suave.", s: 180 },
+      { t: "Serie 4 · fuerte", d: "La última. Terminala al mismo ritmo que la primera.", s: 240 },
+      { t: "Vuelta a la calma", d: "Trote suave y después caminata hasta que la respiración se normalice.", s: 300 }] },
+    nodormir: { t: "Cuando no te podés dormir", note: "Para usar a la noche si pasaron unos 20 minutos y seguís despierto. Con luz tenue y sin celular después de esta guía.", steps: [
+      { t: "Salí de la cama", d: "Si pasaron unos 20 minutos, levantate y andá a otro lugar con luz tenue. La cama es para dormir: así tu cuerpo la vuelve a asociar con el sueño.", s: 30 },
+      { t: "Respirá lento", d: "Inhalá en 4 y soltá en 6. No intentes dormirte: solo respirá.", s: 120, type: "breath" },
+      { t: "Soltá el cuerpo", d: "Recorré el cuerpo de los pies a la cabeza y aflojá cada parte: pies, piernas, panza, hombros, mandíbula, frente.", s: 90 },
+      { t: "Vaciá la cabeza", d: "Si algo te da vueltas, anotalo en un papel en una frase y dejalo para mañana.", type: "input", ph: "Mañana me ocupo de..." },
+      { t: "Mezcla de palabras", d: "Elegí una palabra (por ejemplo «cama») y por cada letra imaginá cosas que empiecen con ella: casa, caballo, café… Distrae a la mente sin activarla.", s: 120 },
+      { t: "Volvé cuando tengas sueño", d: "Hacé algo aburrido con luz tenue (leer en papel, doblar ropa) y volvé a la cama solo cuando se te cierren los ojos. A la mañana, levantate a tu hora fija igual.", s: 30 }] },
     previa: { t: "Previa del partido", note: "Adaptalo a tu deporte. Si algo duele, salteá ese movimiento.", steps: [
       { t: "Activá el cuerpo", d: "Trote suave o skipping en el lugar. Que suba un poco la temperatura.", s: 90 },
       { t: "Movilidad dinámica", d: "Balanceos de pierna adelante-atrás y a los costados, círculos de cadera y de brazos.", s: 90 },
@@ -1909,17 +1978,24 @@
     { id: "fuerza", n: "Fuerza en casa", d: "Circuito guiado de 5 minutos, sin equipamiento.", act: "fuerza", plan: "movimiento", mins: 10 },
     { id: "caminata", n: "Caminata de 10 minutos", d: "Guiada, con cambio de ritmo.", act: "caminata", plan: "movimiento", mins: 10 },
     { id: "atento", n: "Comer con atención", d: "Una comida sin apuro: notás el hambre y cuándo te llenás.", act: "atento", plan: "vida", mins: 20 },
-    { id: "entrevista", n: "Simulacro de entrevista", d: "Las 4 preguntas que siempre aparecen, con tiempo para responder en voz alta.", act: "entrevista", plan: "laburo", mins: 10 }
+    { id: "entrevista", n: "Simulacro de entrevista", d: "Las 4 preguntas que siempre aparecen, con tiempo para responder en voz alta.", act: "entrevista", plan: "laburo", mins: 10 },
+    { id: "acttenis", n: "Activación de tenis", d: "10 minutos antes de entrenar o jugar: movilidad, desplazamientos, split step y sombra.", act: "acttenis", plan: "deporte", mins: 10 },
+    { id: "actfutbol", n: "Activación de fútbol", d: "12 minutos inspirados en el FIFA 11+ para rendir y prevenir lesiones.", act: "actfutbol", plan: "deporte", mins: 12 },
+    { id: "visualiza", n: "Visualización guiada", d: "5 minutos ensayando el partido en tu cabeza, incluso cuando algo sale mal.", act: "visualiza", plan: "deporte", mins: 6 },
+    { id: "intervalos", n: "Intervalos 4×4", d: "Resistencia para aguantar todo el partido: 4 series de 4 minutos fuerte.", act: "intervalos", plan: "deporte", mins: 35 },
+    { id: "nodormir", n: "Cuando no te podés dormir", d: "Qué hacer si pasan 20 minutos y seguís despierto.", act: "nodormir", plan: "dormir", mins: 10 }
   ];
   if (window.FormaTools && window.FormaTools.defs) TOOLS = TOOLS.concat(window.FormaTools.defs);
   window.FormaBridge = { S: function () { return S; }, save: function () { save(); }, sheet: function (h, f) { sheet(h, f); }, close: close, shape: function (id) { return '<span class="emo">' + (TEMO[id] || GEMO[id] || "🧰") + "</span>"; }, planName: function (id) { var p = planOf(id); return p ? p.n : ""; }, weekCount: function (o) { try { return weekCount(o || 0); } catch (e) { return null; } } };
   function toolById(id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }
   function toolByAct(a) { return TOOLS.filter(function (t) { return t.act === a; })[0]; }
   function planOwned(id) { var p = planOf(id); if (!p) return false; return p.prog ? pgOwns(id) : isPro(id); }
-  var FREE_TOOLS = { respirar: 1, foco: 1, dormir: 1, antesabrir: 1, calma: 1, estudio: 1, caminata: 1, gastos: 1, viaje: 1, postul: 1, previa: 1 };
+  var FREE_TOOLS = { respirar: 1, foco: 1, dormir: 1, antesabrir: 1, calma: 1, estudio: 1, caminata: 1, gastos: 1, viaje: 1, postul: 1, previa: 1, tests: 1, acttenis: 1, actfutbol: 1, libros: 1, tarjetas: 1 };
   function toolOk(T) { return !!(T.free || FREE_TOOLS[T.id] || proActive()); }
   var SPORT_BASE = { tenista: "deporte", futbolista: "deporte" };
-  function toolsOf(pid) { var q = SPORT_BASE[pid] || pid; return TOOLS.filter(function (t) { return t.plan === q; }); }
+  var SPORT_SKIP = { tenista: { actfutbol: 1 }, futbolista: { acttenis: 1 } };
+  var TOOL_EXTRA = { lectura: ["enfoque"], idioma: ["tarjetas", "enfoque"] };
+  function toolsOf(pid) { var q = SPORT_BASE[pid] || pid, sk = SPORT_SKIP[pid] || {}, ex = TOOL_EXTRA[pid] || []; return TOOLS.filter(function (t) { return (t.plan === q || ex.indexOf(t.id) >= 0) && !sk[t.id]; }); }
   function toolRow(T) {
     var ok = toolOk(T), pl = planOf(T.plan);
     return '<button class="prod" data-tl="' + T.id + '"><span class="shape">' + SHAPES[T.plan] + "</span><span style='flex:1;min-width:0'><b>" + esc(T.n) + "</b><small>" + esc(T.d) + '</small></span><span class="tag' + (ok ? " ok" : "") + '">' + (ok ? (T.free ? "Gratis" : "Tuya") : "Con Forma Pro") + "</span></button>";
@@ -1964,7 +2040,12 @@
     h += '<div class="sec" style="margin-top:18px">Todos los objetivos</div><div class="ogrid">' + GOALS.map(goalCardNew).join("") + "</div>";
     h += '<button class="orec" data-open="elegir"><span>🤔</span><span style="flex:1;min-width:0"><b>¿No sabés por dónde empezar?</b><small>Respondé unas preguntas y te recomendamos uno.</small></span><span>›</span></button>';
     var gen = toolsOf("vida");
-    if (gen.length) h += '<div class="sec" style="margin-top:22px">🧰 Herramientas para cualquier día</div>' + gen.map(toolCard).join("");
+    if (gen.length) {
+      // Sin Pro: primero las que podés usar; las de Pro van juntas en una sola tarjeta (no una pared de candados)
+      var gOk = gen.filter(toolOk), gLk = gen.filter(function (T) { return !toolOk(T); });
+      h += '<div class="sec" style="margin-top:22px">🧰 Herramientas para cualquier día</div>' + gOk.map(toolCard).join("");
+      if (gLk.length) h += '<div class="tlock"><b>✨ Con Forma Pro sumás ' + gLk.length + ' herramientas más</b><div class="tlchips">' + gLk.map(function (T) { return "<span><i>" + temo(T.id) + "</i>" + esc(T.n) + "</span>"; }).join("") + '</div><button class="btn block" data-openpro>Ver Forma Pro</button></div>';
+    }
     return h;
   }
   function openTools() {
@@ -1978,7 +2059,7 @@
     sheet('<div class="row"><span class="shape">' + SHAPES[T.plan] + '</span><div><span class="badge">Herramienta · ' + esc(pl.n) + '</span><h2 style="font-size:22px;margin-top:4px">' + esc(T.n) + '</h2></div></div><p style="margin:14px 0">' + esc(T.d) + "</p>" +
       '<div class="card"><b>Qué vas a hacer</b><ol class="small" style="margin:8px 0 0;padding-left:18px">' + A.steps.map(function (x) { return "<li>" + esc(x.t) + (x.s ? " <span class='muted'>(" + (x.s >= 60 ? Math.round(x.s / 60) + " min" : x.s + " s") + ")</span>" : "") + "</li>"; }).join("") + "</ol></div>" +
       (ok ? '<button class="btn sage block" data-act="' + T.act + '" style="margin-top:12px">Usar ahora</button>' + (isProU() ? '<button class="btn ghost block" data-btsadd="' + T.id + '" style="margin-top:8px">Sumar a mi día</button>' : '<p class="small muted" style="margin:10px 0 0">Agregarla a tu día es parte de Vida diaria Pro.</p>')
-        : '<div class="card dark" style="margin-top:12px"><b>' + 'Es parte de Forma Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro la usás cuando quieras y la sumás a tu día. También la podés conseguir con ' + (T.gate === "vida" ? "Vida diaria Pro" : "el plan " + esc(pl.n)) + '.</p><button class="btn sage" data-openpro>Ver Forma Pro</button> <button class="btn ghost" data-plan="' + (T.gate === "vida" ? "vida" : pl.id) + '">Ver el plan</button></div>') +
+        : '<div class="card dark" style="margin-top:12px"><b>✨ Es parte de Forma Pro</b><p class="small" style="margin:6px 0 10px;opacity:.85">Con Forma Pro usás todas las herramientas cuando quieras y las sumás a tu día.</p><button class="btn sage block" data-openpro>Ver Forma Pro</button></div>') +
       '<button class="btn ghost block" data-close style="margin-top:8px">Cerrar</button>');
   }
   function xtFree(b) { return b.kind === "free" || (b.kind === "rest" && b.label === "Ocio y descanso"); }
@@ -3049,6 +3130,21 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([L.join("\r\n")], { type: "text/calendar" })); a.download = "forma-recordatorios.ics"; a.click();
   }
   setInterval(checkReminders, 30000);
+  // Botón "atrás" de Android: cierra lo que está abierto, vuelve a Hoy y recién ahí minimiza
+  if (NATIVE) { try {
+    var APPP = window.Capacitor.Plugins.App;
+    if (APPP && APPP.addListener) APPP.addListener("backButton", function () {
+      var ov = $("#full") || $("#sheet");
+      if (ov) {
+        if (ov.querySelector("#tx") && window.FormaTools && window.FormaTools.back && window.FormaTools.back()) return;
+        var b = ov.querySelector("[data-actexit]") || ov.querySelector(".fullback") || ov.querySelector(".lsnx") || ov.querySelector("[data-close]");
+        if (b) b.click(); else { close(); render(); }
+        return;
+      }
+      if (tab !== "hoy") { tab = "hoy"; render(); window.scrollTo(0, 0); return; }
+      if (APPP.minimizeApp) APPP.minimizeApp(); else if (APPP.exitApp) APPP.exitApp();
+    });
+  } catch (e) {} }
   setInterval(function () {
     var ae = document.activeElement;
     if (tab !== "hoy" || $("#sheet") || $("#full") || !S.profile || (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName))) return;
@@ -3091,6 +3187,7 @@
     if (d.pglvup) { var lu = d.pglvup.split("|"); return openLevelUp(lu[0], +lu[1]); }
     if (d.pgchest) { var cit2 = pgItem(d.pgchest); if (cit2 && pgQuests(d.pgchest).every(function (q) { return q.ok; })) { cit2.bx = cit2.bx || {}; cit2.bx[today()] = 1; save(); openHome(d.pgchest, "camino"); } return; }
     if (d.pgci) { var ci = d.pgci.split("|"), cii = pgItem(ci[0]); if (!cii) return; cii.ci = cii.ci || {}; cii.ci[today()] = +ci[1]; save(); if (ci[2] !== undefined) { [].slice.call(t.parentNode.querySelectorAll("[data-pgci]")).forEach(function (b) { b.setAttribute("aria-pressed", b === t ? "true" : "false"); }); return; } openHome(ci[0], "cambio"); return; }
+    if (d.ack || d.bdt || d.ackb !== undefined || d.pgchest || d.pgchestlv || d.qz !== undefined || d.gpick || d.pplan || d.pgc || d.pgci) hap(d.pgchest || d.pgchestlv ? "mid" : "light");
     if (d.openpro !== undefined) return openPro(d.openpro);
     if (d.pplan) { proSel = d.pplan; [].slice.call(document.querySelectorAll("[data-pplan]")).forEach(function (b) { var on = b.dataset.pplan === proSel; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); }); var cb = $("#ckbtn"); if (cb) { if (cb.dataset.checkout) cb.dataset.checkout = proSel; if (cb.dataset.betabuy) cb.dataset.betabuy = proSel; } return; }
     if (d.goalpick !== undefined) return openGoalPick(false);
@@ -3176,6 +3273,7 @@
     if (d.pgk) { var kit = pgItem(S.prog && S.prog.cur); if (kit) { kit.dr = kit.dr || {}; kit.dr[d.pgk] = kit.dr[d.pgk] === 1 ? 0 : 1; t.setAttribute("aria-pressed", kit.dr[d.pgk] === 1 ? "true" : "false"); save(); } return; }
     if (d.pgtm) { var tid = S.prog && S.prog.cur, tit = pgItem(tid); if (tit) { tit.st = tit.st || {}; tit.st.tm = { end: Date.now() + (+d.pgtm) * 1000 }; save(); if (LSN) openLesson(tid); else openProgram(tid); } return; }
     if (d.pgact) return startAct(d.pgact);
+    if (d.pgtool) { if (window.FormaTools && window.FormaTools.has(d.pgtool)) return window.FormaTools.open(d.pgtool); return; }
     if (d.pgquit2) { S.prog.cur = null; save(); close(); render(); if (HOME) openHome(HOME.id, "camino"); return; }
     if (d.pgafter) { var sa = document.querySelector('#sheet .pgm[data-key=after] [aria-pressed=true]'); if (!sa) return; pgItem(d.pgafter).after = +sa.dataset.pgm; save(); render(); return openHome(d.pgafter, "cambio"); }
     if (d.pgquit) return openPgQuit(d.pgquit);

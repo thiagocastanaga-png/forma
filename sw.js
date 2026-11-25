@@ -1,5 +1,5 @@
-var C="forma-app-v7";
-var CORE=["miforma","miforma.html","miforma.css?v=51","config.js?v=9","frases.js?v=1","dia.js?v=15","programas.js?v=7","herramientas.js?v=5","miforma.js?v=98","icon-192.png","manifest.webmanifest"];
+var C="forma-app-v8";
+var CORE=["miforma","miforma.html","miforma.css?v=52","config.js?v=9","frases.js?v=1","dia.js?v=15","programas.js?v=8","herramientas.js?v=6","miforma.js?v=99","icon-192.png","manifest.webmanifest"];
 self.addEventListener("install",function(e){self.skipWaiting();e.waitUntil(caches.open(C).then(function(c){return Promise.all(CORE.map(function(u){return c.add(u).catch(function(){});}));}));});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==C;}).map(function(x){return caches.delete(x);}));}).then(function(){return self.clients.claim();}));});
 self.addEventListener("fetch",function(e){
